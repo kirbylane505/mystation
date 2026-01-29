@@ -1,15 +1,14 @@
 /**
- * MYSTATION - Donation Button & Modal
- * All donations go to Mike Page Foundation (501c3)
+ * MYSTATION - Premium Donation Button & Modal
+ * Navy blue theme - All donations to Mike Page Foundation
  */
 
 'use client';
 
 import { useState } from 'react';
-import { useDonationStore } from '@/store/playerStore';
-import { Heart, X, Check, Gift } from 'lucide-react';
+import { Heart, X, Check, Sparkles } from 'lucide-react';
 
-const PRESET_AMOUNTS = [1, 5, 10, 25, 50, 100];
+const PRESET_AMOUNTS = [5, 10, 25, 50, 100, 250];
 
 export default function DonationButton({ variant = 'default' }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -23,11 +22,7 @@ export default function DonationButton({ variant = 'default' }) {
     if (!amount || amount < 1) return;
 
     setIsProcessing(true);
-
-    // TODO: Integrate Stripe here
-    // For now, simulate processing
     await new Promise(resolve => setTimeout(resolve, 2000));
-
     setIsProcessing(false);
     setIsDone(true);
 
@@ -36,7 +31,7 @@ export default function DonationButton({ variant = 'default' }) {
       setIsDone(false);
       setSelectedAmount(null);
       setCustomAmount('');
-    }, 2000);
+    }, 2500);
   };
 
   const finalAmount = selectedAmount || parseFloat(customAmount) || 0;
@@ -47,17 +42,17 @@ export default function DonationButton({ variant = 'default' }) {
       {variant === 'hero' ? (
         <button
           onClick={() => setIsModalOpen(true)}
-          className="btn-gold donation-highlight flex items-center gap-2"
+          className="btn-secondary donation-highlight flex items-center gap-3"
         >
-          <Gift size={20} />
-          Support the Foundation
+          <Heart size={18} />
+          Support Foundation
         </button>
       ) : (
         <button
           onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-mystation-gold/20 text-mystation-gold rounded-full hover:bg-mystation-gold/30 transition"
+          className="flex items-center gap-2 px-5 py-2.5 bg-blue-500/10 text-blue-400 rounded-full hover:bg-blue-500/20 transition border border-blue-500/20"
         >
-          <Heart size={18} />
+          <Heart size={16} />
           Donate
         </button>
       )}
@@ -65,41 +60,42 @@ export default function DonationButton({ variant = 'default' }) {
       {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="w-full max-w-md glass rounded-2xl overflow-hidden">
+          <div className="w-full max-w-md glass rounded-3xl overflow-hidden border border-white/10">
             {/* Header */}
-            <div className="bg-gradient-to-r from-mystation-gold/20 to-transparent p-6 border-b border-white/10">
-              <div className="flex items-center justify-between">
+            <div className="relative p-8 pb-6">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-transparent" />
+              <div className="relative flex items-center justify-between">
                 <div>
-                  <h3 className="text-xl font-bold text-white">Support the Music</h3>
-                  <p className="text-white/60 text-sm mt-1">
+                  <h3 className="text-2xl font-bold text-white mb-1">Support the Music</h3>
+                  <p className="text-white/50 text-sm">
                     100% goes to Mike Page Foundation
                   </p>
                 </div>
                 <button
                   onClick={() => setIsModalOpen(false)}
-                  className="text-white/60 hover:text-white"
+                  className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 transition"
                 >
-                  <X size={24} />
+                  <X size={20} />
                 </button>
               </div>
             </div>
 
             {/* Content */}
-            <div className="p-6">
+            <div className="p-8 pt-2">
               {isDone ? (
-                <div className="text-center py-8">
-                  <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Check size={32} className="text-white" />
+                <div className="text-center py-12">
+                  <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-green-500/30">
+                    <Check size={36} className="text-white" />
                   </div>
-                  <h4 className="text-xl font-bold text-white mb-2">Thank You!</h4>
-                  <p className="text-white/60">
+                  <h4 className="text-2xl font-bold text-white mb-3">Thank You!</h4>
+                  <p className="text-white/50">
                     Your donation helps support youth music programs and community events.
                   </p>
                 </div>
               ) : (
                 <>
                   {/* Preset Amounts */}
-                  <div className="grid grid-cols-3 gap-3 mb-4">
+                  <div className="grid grid-cols-3 gap-3 mb-6">
                     {PRESET_AMOUNTS.map(amount => (
                       <button
                         key={amount}
@@ -107,10 +103,10 @@ export default function DonationButton({ variant = 'default' }) {
                           setSelectedAmount(amount);
                           setCustomAmount('');
                         }}
-                        className={`py-3 rounded-lg font-semibold transition ${
+                        className={`py-4 rounded-xl font-bold text-lg transition ${
                           selectedAmount === amount
-                            ? 'bg-mystation-gold text-mystation-dark'
-                            : 'bg-white/10 text-white hover:bg-white/20'
+                            ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/30'
+                            : 'bg-white/5 text-white/80 hover:bg-white/10 border border-white/10'
                         }`}
                       >
                         ${amount}
@@ -120,11 +116,11 @@ export default function DonationButton({ variant = 'default' }) {
 
                   {/* Custom Amount */}
                   <div className="mb-6">
-                    <label className="text-white/60 text-sm mb-2 block">
-                      Or enter custom amount
+                    <label className="text-white/40 text-sm mb-2 block uppercase tracking-wider">
+                      Custom Amount
                     </label>
                     <div className="relative">
-                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/60">$</span>
+                      <span className="absolute left-5 top-1/2 -translate-y-1/2 text-white/40 text-lg">$</span>
                       <input
                         type="number"
                         min="1"
@@ -134,21 +130,22 @@ export default function DonationButton({ variant = 'default' }) {
                           setCustomAmount(e.target.value);
                           setSelectedAmount(null);
                         }}
-                        className="w-full bg-white/10 border border-white/20 rounded-lg py-3 pl-8 pr-4 text-white placeholder:text-white/40 focus:outline-none focus:border-mystation-gold"
+                        className="w-full py-4 pl-10 pr-5 text-lg"
                       />
                     </div>
                   </div>
 
                   {/* Foundation Info */}
-                  <div className="bg-mystation-accent/50 rounded-lg p-4 mb-6">
-                    <div className="flex items-start gap-3">
-                      <div className="foundation-badge">501(c)(3)</div>
-                      <div>
-                        <p className="text-sm text-white/80">
+                  <div className="glass-light rounded-2xl p-5 mb-6">
+                    <div className="flex items-start gap-4">
+                      <div className="foundation-badge text-xs px-3 py-2">501(c)(3)</div>
+                      <div className="flex-1">
+                        <p className="text-sm text-white/70 leading-relaxed">
                           Mike Page Foundation uses donations for youth music programs,
                           scholarships, and Love on the Lawn events.
                         </p>
-                        <p className="text-xs text-mystation-gold mt-2">
+                        <p className="text-xs text-blue-400 mt-2 flex items-center gap-1">
+                          <Sparkles size={12} />
                           Your donation is tax-deductible
                         </p>
                       </div>
@@ -159,15 +156,15 @@ export default function DonationButton({ variant = 'default' }) {
                   <button
                     onClick={handleDonate}
                     disabled={!finalAmount || isProcessing}
-                    className={`w-full py-4 rounded-lg font-bold text-lg transition ${
+                    className={`w-full py-5 rounded-2xl font-bold text-lg transition ${
                       finalAmount && !isProcessing
-                        ? 'btn-gold'
-                        : 'bg-white/10 text-white/40 cursor-not-allowed'
+                        ? 'btn-primary'
+                        : 'bg-white/5 text-white/30 cursor-not-allowed'
                     }`}
                   >
                     {isProcessing ? (
-                      <span className="flex items-center justify-center gap-2">
-                        <span className="w-5 h-5 border-2 border-white/30 border-t-mystation-dark rounded-full animate-spin" />
+                      <span className="flex items-center justify-center gap-3">
+                        <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                         Processing...
                       </span>
                     ) : (

@@ -7,16 +7,23 @@ module.exports = {
     extend: {
       colors: {
         'mystation': {
-          gold: '#FFD700',
-          dark: '#0a0a0f',
-          darker: '#050508',
-          accent: '#1a1a2e',
-          purple: '#6366f1',
+          navy: '#0a1628',
+          navyLight: '#1a2d4a',
+          navyDark: '#050d18',
+          blue: '#3b82f6',
+          blueLight: '#60a5fa',
+          accent: '#1e40af',
+          black: '#030712',
+          white: '#f8fafc',
         }
       },
       fontFamily: {
         'display': ['Montserrat', 'sans-serif'],
         'body': ['Inter', 'sans-serif'],
+      },
+      backgroundImage: {
+        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+        'navy-gradient': 'linear-gradient(135deg, #0a1628 0%, #1a2d4a 50%, #0a1628 100%)',
       }
     },
   },
