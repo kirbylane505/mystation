@@ -7,7 +7,7 @@
 
 import { useState } from 'react';
 import TrackList from '@/components/TrackList';
-import { tracks, albums, playlists } from '@/data/tracks';
+import { tracks, albums, playlists, getOfficialTracks } from '@/data/tracks';
 import { Search, SlidersHorizontal, Grid, List } from 'lucide-react';
 
 export default function MusicPage() {
@@ -16,17 +16,20 @@ export default function MusicPage() {
   const [filterType, setFilterType] = useState('all');
   const [viewMode, setViewMode] = useState('list');
 
+  // Get only official tracks (exclude unreleased/unnamed)
+  const officialTracks = getOfficialTracks();
+
   // Get unique years
-  const years = [...new Set(tracks.map(t => t.year))].sort((a, b) => b - a);
+  const years = [...new Set(officialTracks.map(t => t.year))].sort((a, b) => b - a);
 
   // Filter tracks
-  const filteredTracks = tracks.filter(track => {
-    const matchesSearch = track.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  const filteredTracks = officialTracks.filter(track => {
+    const matchesSearch = track.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (track.featured && track.featured.toLowerCase().includes(searchQuery.toLowerCase()));
     const matchesYear = filterYear === 'all' || track.year === parseInt(filterYear);
     const matchesType = filterType === 'all' ||
       (filterType === 'singles' && track.album === 'Single') ||
-      (filterType === 'album' && track.album !== 'Single') ||
+      (filterType === 'album' && track.albumId) ||
       (filterType === 'instrumental' && track.isInstrumental) ||
       (filterType === 'exclusive' && track.isExclusive);
 
@@ -40,7 +43,7 @@ export default function MusicPage() {
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-white mb-2">Browse Music</h1>
           <p className="text-white/60">
-            {tracks.length} tracks • Free to stream • Support the Foundation
+            {officialTracks.length} tracks • Free to stream • Support the Foundation
           </p>
         </div>
 

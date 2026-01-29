@@ -8,7 +8,7 @@
 import Hero from '@/components/Hero';
 import TrackList from '@/components/TrackList';
 import DonationButton from '@/components/DonationButton';
-import { tracks, albums, playlists, artistInfo } from '@/data/tracks';
+import { tracks, albums, playlists, artistInfo, getOfficialTracks } from '@/data/tracks';
 import { usePlayerStore } from '@/store/playerStore';
 import { Play, Heart, ExternalLink, Music, Award, Users, Sparkles, Headphones } from 'lucide-react';
 import Link from 'next/link';
@@ -16,10 +16,13 @@ import Link from 'next/link';
 export default function HomePage() {
   const { setQueue } = usePlayerStore();
 
-  // New releases - tracks marked as isNew
-  const newReleases = tracks.filter(t => t.isNew).map(t => t.id).slice(0, 8);
-  // Featured - mix of best tracks
-  const featuredTracks = [1, 21, 35, 3, 7, 30];
+  // Get official tracks only
+  const officialTracks = getOfficialTracks();
+
+  // New releases - official tracks marked as isNew
+  const newReleases = officialTracks.filter(t => t.isNew).map(t => t.id).slice(0, 8);
+  // Featured - Cindy's Son highlights + singles
+  const featuredTracks = [1, 21, 22, 3, 7, 10];
 
   // Play an entire album
   const handlePlayAlbum = (album) => {
