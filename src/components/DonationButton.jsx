@@ -119,6 +119,13 @@ export default function DonationButton({ variant = 'default' }) {
                 </div>
               </div>
 
+              {/* Instructions */}
+              <div className="bg-white/5 rounded-xl p-4 mb-4 border border-white/10">
+                <p className="text-white/80 text-sm text-center">
+                  When Cash App opens, add note: <span className="text-green-400 font-bold">"MYSTATION"</span>
+                </p>
+              </div>
+
               {/* Donate Button */}
               <button
                 onClick={handleDonate}
