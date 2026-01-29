@@ -5,6 +5,7 @@
 import '@/styles/globals.css';
 import Navbar from '@/components/Navbar';
 import Player from '@/components/Player';
+import AudioPlayer from '@/components/AudioPlayer';
 
 export const metadata = {
   title: 'MyStation - Mike Page Foundation',
@@ -26,6 +27,7 @@ export default function RootLayout({ children }) {
           {children}
         </main>
         <Player />
+        <AudioPlayer />
       </body>
     </html>
   );

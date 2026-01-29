@@ -47,10 +47,7 @@ export default function Player() {
     const rect = bar.getBoundingClientRect();
     const percent = (e.clientX - rect.left) / rect.width;
     const newTime = percent * duration;
-    if (audioRef.current) {
-      audioRef.current.currentTime = newTime;
-      setProgress(newTime);
-    }
+    setProgress(newTime);
   };
 
   const handleVolumeChange = (e) => {
