@@ -1,0 +1,10 @@
+{
+  "name": "mystation",
+  "framework": "nextjs",
+  "buildCommand": "npm run build",
+  "installCommand": "npm install",
+  "outputDirectory": ".next",
+  "env": {
+    "NEXT_PUBLIC_BASE_URL": "https://mystation.vercel.app"
+  }
+}

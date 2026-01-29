@@ -1,0 +1,18 @@
+# Dependencies
+node_modules/
+
+# Next.js
+.next/
+out/
+
+# Env files
+.env*.local
+
+# Vercel
+.vercel
+
+# OS
+.DS_Store
+
+# Large audio (use CDN in production)
+public/audio/*.wav
