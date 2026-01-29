@@ -9,11 +9,25 @@ import Hero from '@/components/Hero';
 import TrackList from '@/components/TrackList';
 import DonationButton from '@/components/DonationButton';
 import { tracks, albums, playlists, artistInfo } from '@/data/tracks';
-import { Play, Heart, ExternalLink, Music, Award, Users, Sparkles } from 'lucide-react';
+import { usePlayerStore } from '@/store/playerStore';
+import { Play, Heart, ExternalLink, Music, Award, Users, Sparkles, Headphones } from 'lucide-react';
+import Link from 'next/link';
 
 export default function HomePage() {
-  const newReleases = tracks.filter(t => t.isNew).map(t => t.id);
-  const featuredTracks = [1, 6, 21, 25, 36, 37];
+  const { setQueue } = usePlayerStore();
+
+  // New releases - tracks marked as isNew
+  const newReleases = tracks.filter(t => t.isNew).map(t => t.id).slice(0, 8);
+  // Featured - mix of best tracks
+  const featuredTracks = [1, 21, 35, 3, 7, 30];
+
+  // Play an entire album
+  const handlePlayAlbum = (album) => {
+    if (album.trackIds && album.trackIds.length > 0) {
+      const albumTracks = album.trackIds.map(id => tracks.find(t => t.id === id)).filter(Boolean);
+      setQueue(albumTracks, 0);
+    }
+  };
 
   return (
     <div className="min-h-screen">
@@ -30,52 +44,115 @@ export default function HomePage() {
             <h2 className="text-3xl font-bold text-white mb-2">New Releases</h2>
             <p className="text-white/40">Fresh drops from Mike Page</p>
           </div>
-          <button className="text-blue-400 hover:text-blue-300 transition text-sm font-medium">
+          <Link href="/music" className="text-blue-400 hover:text-blue-300 transition text-sm font-medium">
             See All →
-          </button>
+          </Link>
         </div>
         <div className="glass rounded-2xl p-2">
-          <TrackList trackIds={newReleases} showNumber={false} />
+          <TrackList trackIds={newReleases.length > 0 ? newReleases : [21, 22, 23, 30, 31, 32, 34, 35]} showNumber={false} />
         </div>
       </section>
 
       {/* Albums Grid */}
       <section className="max-w-screen-xl mx-auto px-6 py-20">
-        <h2 className="text-3xl font-bold text-white mb-10">Albums</h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="flex items-center justify-between mb-10">
+          <div>
+            <h2 className="text-3xl font-bold text-white mb-2">Albums & Projects</h2>
+            <p className="text-white/40">Official releases on all streaming platforms</p>
+          </div>
+          <Link href="/music" className="text-blue-400 hover:text-blue-300 transition text-sm font-medium">
+            View All Music →
+          </Link>
+        </div>
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {albums.map(album => (
             <div
               key={album.id}
-              className="glass rounded-2xl p-6 hover:border-blue-500/30 transition cursor-pointer group"
+              className="glass rounded-2xl p-5 hover:border-blue-500/30 hover:scale-[1.02] transition-all duration-300 cursor-pointer group"
             >
-              <div className="aspect-square bg-gradient-to-br from-blue-600/20 to-blue-900/30 rounded-xl mb-6 flex items-center justify-center relative overflow-hidden border border-white/5">
-                <Music size={64} className="text-blue-400/40" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition flex items-end justify-center pb-6">
-                  <button className="w-14 h-14 bg-blue-500 rounded-full flex items-center justify-center shadow-lg shadow-blue-500/30 hover:scale-105 transition">
-                    <Play size={24} className="text-white ml-1" fill="white" />
-                  </button>
-                </div>
+              {/* Album Cover */}
+              <div className={`aspect-square ${album.coverImage ? '' : `bg-gradient-to-br ${album.coverGradient}`} rounded-xl mb-5 flex flex-col items-center justify-center relative overflow-hidden border border-white/10 shadow-xl`}>
+                {/* Real Album Cover Image */}
+                {album.coverImage && (
+                  <img
+                    src={album.coverImage}
+                    alt={album.title}
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                )}
+
+                {/* NEW Badge */}
+                {album.isNew && (
+                  <div className="absolute top-3 right-3 px-3 py-1 bg-blue-500 text-white text-xs font-bold rounded-full shadow-lg z-10">
+                    NEW
+                  </div>
+                )}
+                {album.comingSoon && (
+                  <div className="absolute top-3 right-3 px-3 py-1 bg-purple-500 text-white text-xs font-bold rounded-full shadow-lg z-10">
+                    SOON
+                  </div>
+                )}
+
+                {/* Album Art Content (fallback for no image) */}
+                {!album.coverImage && (
+                  <>
+                    <span className="text-6xl mb-3 drop-shadow-lg">{album.coverEmoji}</span>
+                    <p className="text-white/90 font-bold text-sm uppercase tracking-widest text-center px-4">{album.title}</p>
+                    <p className="text-white/60 text-xs mt-1">{album.artist}</p>
+                  </>
+                )}
+
+                {/* Play Overlay */}
+                {!album.comingSoon && (
+                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handlePlayAlbum(album); }}
+                      className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center shadow-2xl shadow-blue-500/50 hover:scale-110 transition-transform"
+                    >
+                      <Play size={28} className="text-white ml-1" fill="white" />
+                    </button>
+                  </div>
+                )}
               </div>
-              <h3 className="text-xl font-bold text-white mb-2">{album.title}</h3>
+
+              {/* Album Info */}
+              <h3 className="text-lg font-bold text-white mb-1">{album.title}</h3>
               <p className="text-white/40 text-sm mb-3">{album.year} • {album.trackCount} tracks</p>
-              <p className="text-white/30 text-sm leading-relaxed">{album.description}</p>
+
+              {/* Streaming Links */}
+              {(album.spotify || album.apple) && (
+                <div className="flex gap-2 mt-3">
+                  {album.spotify && (
+                    <a
+                      href={album.spotify}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="flex-1 py-2 px-3 bg-[#1DB954]/10 text-[#1DB954] text-xs font-medium rounded-lg hover:bg-[#1DB954]/20 transition text-center"
+                    >
+                      Spotify
+                    </a>
+                  )}
+                  {album.apple && (
+                    <a
+                      href={album.apple}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="flex-1 py-2 px-3 bg-[#FC3C44]/10 text-[#FC3C44] text-xs font-medium rounded-lg hover:bg-[#FC3C44]/20 transition text-center"
+                    >
+                      Apple
+                    </a>
+                  )}
+                </div>
+              )}
+
+              {album.comingSoon && (
+                <p className="text-purple-400 text-sm font-medium mt-3">Coming Soon</p>
+              )}
             </div>
           ))}
-
-          {/* Instrumental Album */}
-          <div className="glass rounded-2xl p-6 hover:border-blue-500/30 transition cursor-pointer group">
-            <div className="aspect-square bg-gradient-to-br from-indigo-600/20 to-purple-900/30 rounded-xl mb-6 flex items-center justify-center relative overflow-hidden border border-white/5">
-              <span className="text-6xl">🎹</span>
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition flex items-end justify-center pb-6">
-                <button className="w-14 h-14 bg-blue-500 rounded-full flex items-center justify-center shadow-lg shadow-blue-500/30 hover:scale-105 transition">
-                  <Play size={24} className="text-white ml-1" fill="white" />
-                </button>
-              </div>
-            </div>
-            <h3 className="text-xl font-bold text-white mb-2">iDMG Coke Wave Beats</h3>
-            <p className="text-white/40 text-sm mb-3">2026 • 13 instrumentals</p>
-            <p className="text-white/30 text-sm leading-relaxed">Premium beats for the culture</p>
-          </div>
         </div>
       </section>
 
@@ -110,7 +187,7 @@ export default function HomePage() {
               </p>
 
               <div className="space-y-4 mb-10">
-                {artistInfo.foundation.programs.map((program, i) => (
+                {['Youth Music Programs', 'Scholarships', 'Love on the Lawn Festival', 'Community Events'].map((program, i) => (
                   <div key={i} className="flex items-center gap-4">
                     <div className="w-2 h-2 bg-blue-400 rounded-full" />
                     <span className="text-white/70">{program}</span>
@@ -154,9 +231,14 @@ export default function HomePage() {
         <div className="max-w-screen-xl mx-auto px-6">
           <div className="grid md:grid-cols-4 gap-12">
             <div>
-              <h3 className="text-xl font-bold text-white mb-4">
-                MY<span className="gradient-text">STATION</span>
-              </h3>
+              <Link href="/" className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl flex items-center justify-center">
+                  <Headphones size={22} className="text-white" />
+                </div>
+                <span className="text-xl font-bold text-white">
+                  MY<span className="gradient-text">STATION</span>
+                </span>
+              </Link>
               <p className="text-white/40 text-sm leading-relaxed">
                 Free music streaming platform by Mike Page Foundation.
                 100% of donations support youth and community programs.
@@ -165,35 +247,35 @@ export default function HomePage() {
             <div>
               <h4 className="font-semibold text-white mb-5 text-sm uppercase tracking-wider">Listen</h4>
               <ul className="space-y-3 text-white/40 text-sm">
-                <li><a href="#" className="hover:text-blue-400 transition">Browse Music</a></li>
-                <li><a href="#" className="hover:text-blue-400 transition">Albums</a></li>
-                <li><a href="#" className="hover:text-blue-400 transition">Playlists</a></li>
-                <li><a href="#" className="hover:text-blue-400 transition">Live Streams</a></li>
+                <li><Link href="/music" className="hover:text-blue-400 transition">Browse Music</Link></li>
+                <li><Link href="/music" className="hover:text-blue-400 transition">Albums</Link></li>
+                <li><Link href="/name-this-song" className="hover:text-blue-400 transition">Name This Song</Link></li>
+                <li><Link href="/live" className="hover:text-blue-400 transition">Live Streams</Link></li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold text-white mb-5 text-sm uppercase tracking-wider">Foundation</h4>
               <ul className="space-y-3 text-white/40 text-sm">
-                <li><a href="#" className="hover:text-blue-400 transition">About Us</a></li>
-                <li><a href="#" className="hover:text-blue-400 transition">Programs</a></li>
-                <li><a href="#" className="hover:text-blue-400 transition">Love on the Lawn</a></li>
-                <li><a href="#" className="hover:text-blue-400 transition">Donate</a></li>
+                <li><Link href="/about" className="hover:text-blue-400 transition">About Us</Link></li>
+                <li><Link href="/about" className="hover:text-blue-400 transition">Programs</Link></li>
+                <li><a href="https://loveonlawn.com" target="_blank" rel="noopener noreferrer" className="hover:text-blue-400 transition flex items-center gap-2">Love on the Lawn <ExternalLink size={12} /></a></li>
+                <li><a href="https://cash.app/$RIDE4PAGEMUSIC847" target="_blank" rel="noopener noreferrer" className="hover:text-blue-400 transition flex items-center gap-2">Donate <ExternalLink size={12} /></a></li>
               </ul>
             </div>
             <div>
-              <h4 className="font-semibold text-white mb-5 text-sm uppercase tracking-wider">Connect</h4>
+              <h4 className="font-semibold text-white mb-5 text-sm uppercase tracking-wider">Stream Everywhere</h4>
               <ul className="space-y-3 text-white/40 text-sm">
-                <li><a href="https://instagram.com/mikepagelivin" className="hover:text-blue-400 transition flex items-center gap-2">
-                  Instagram <ExternalLink size={12} />
-                </a></li>
-                <li><a href="https://tiktok.com/@mikepageidmg" className="hover:text-blue-400 transition flex items-center gap-2">
-                  TikTok <ExternalLink size={12} />
-                </a></li>
-                <li><a href={artistInfo.socials.spotify} className="hover:text-blue-400 transition flex items-center gap-2">
+                <li><a href="https://open.spotify.com/artist/3JwFt4Qb3uAUzipnMyM6G6" target="_blank" rel="noopener noreferrer" className="hover:text-[#1DB954] transition flex items-center gap-2">
                   Spotify <ExternalLink size={12} />
                 </a></li>
-                <li><a href={artistInfo.socials.apple} className="hover:text-blue-400 transition flex items-center gap-2">
+                <li><a href="https://music.apple.com/us/artist/mike-page/1515325834" target="_blank" rel="noopener noreferrer" className="hover:text-[#FC3C44] transition flex items-center gap-2">
                   Apple Music <ExternalLink size={12} />
+                </a></li>
+                <li><a href="https://instagram.com/mikepagelivin" target="_blank" rel="noopener noreferrer" className="hover:text-pink-400 transition flex items-center gap-2">
+                  Instagram <ExternalLink size={12} />
+                </a></li>
+                <li><a href="https://tiktok.com/@mikepageidmg" target="_blank" rel="noopener noreferrer" className="hover:text-blue-400 transition flex items-center gap-2">
+                  TikTok <ExternalLink size={12} />
                 </a></li>
               </ul>
             </div>
@@ -201,7 +283,7 @@ export default function HomePage() {
 
           <div className="border-t border-white/5 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-white/30 text-sm">
-              © 2026 MyStation. A Mike Page Foundation Initiative.
+              © 2026 MyStation. A Mike Page Foundation 501(c)(3) Initiative.
             </p>
             <p className="text-white/30 text-sm">
               Made with 💙 for the culture
