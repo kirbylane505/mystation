@@ -10,7 +10,7 @@ import Link from 'next/link';
 import DonationButton from './DonationButton';
 import AuthModal from './AuthModal';
 import { useUserStore } from '@/store/playerStore';
-import { Menu, X, Search, User, Headphones, Gift, LogOut, Heart } from 'lucide-react';
+import { Menu, X, Search, User, Headphones, Gift, LogOut, Heart, Film } from 'lucide-react';
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -63,6 +63,10 @@ export default function Navbar() {
               </Link>
               <Link href="/music" className="text-white/70 hover:text-white transition font-medium">
                 Music
+              </Link>
+              <Link href="/videos" className="flex items-center gap-2 text-white/70 hover:text-white transition font-medium">
+                <Film size={16} />
+                Videos
               </Link>
               <Link href="/name-this-song" className="flex items-center gap-2 px-3 py-1.5 bg-purple-500/20 text-purple-300 rounded-full hover:bg-purple-500/30 transition font-medium border border-purple-500/30">
                 <Gift size={14} />
@@ -138,6 +142,10 @@ export default function Navbar() {
             <div className="px-6 py-6 space-y-4">
               <Link href="/" className="block text-white py-3 font-medium" onClick={() => setIsMenuOpen(false)}>Home</Link>
               <Link href="/music" className="block text-white py-3 font-medium" onClick={() => setIsMenuOpen(false)}>Music</Link>
+              <Link href="/videos" className="flex items-center gap-2 text-white py-3 font-medium" onClick={() => setIsMenuOpen(false)}>
+                <Film size={16} />
+                Videos
+              </Link>
               <Link href="/name-this-song" className="flex items-center gap-2 text-purple-300 py-3 font-medium" onClick={() => setIsMenuOpen(false)}>
                 <Gift size={16} />
                 Name This Song
