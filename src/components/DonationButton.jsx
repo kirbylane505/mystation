@@ -1,40 +1,31 @@
 /**
- * MYSTATION - Premium Donation Button & Modal
- * Navy blue theme - All donations to Mike Page Foundation
+ * MYSTATION - Cash App Donation Button
+ * Direct payments to $RIDE4PAGEMUSIC847
  */
 
 'use client';
 
 import { useState } from 'react';
-import { Heart, X, Check, Sparkles } from 'lucide-react';
+import { Heart, X, ExternalLink, DollarSign, Sparkles } from 'lucide-react';
+
+const CASHTAG = '$RIDE4PAGEMUSIC847';
+const CASHAPP_URL = 'https://cash.app/$RIDE4PAGEMUSIC847';
 
 const PRESET_AMOUNTS = [5, 10, 25, 50, 100, 250];
 
 export default function DonationButton({ variant = 'default' }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedAmount, setSelectedAmount] = useState(null);
-  const [customAmount, setCustomAmount] = useState('');
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [isDone, setIsDone] = useState(false);
+  const [selectedAmount, setSelectedAmount] = useState(25);
 
-  const handleDonate = async () => {
-    const amount = selectedAmount || parseFloat(customAmount);
-    if (!amount || amount < 1) return;
-
-    setIsProcessing(true);
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    setIsProcessing(false);
-    setIsDone(true);
-
-    setTimeout(() => {
-      setIsModalOpen(false);
-      setIsDone(false);
-      setSelectedAmount(null);
-      setCustomAmount('');
-    }, 2500);
+  const handleDonate = () => {
+    // Open Cash App with the selected amount
+    const url = `${CASHAPP_URL}/${selectedAmount}`;
+    window.open(url, '_blank');
   };
 
-  const finalAmount = selectedAmount || parseFloat(customAmount) || 0;
+  const handleOpenCashApp = () => {
+    window.open(CASHAPP_URL, '_blank');
+  };
 
   return (
     <>
@@ -63,7 +54,7 @@ export default function DonationButton({ variant = 'default' }) {
           <div className="w-full max-w-md glass rounded-3xl overflow-hidden border border-white/10">
             {/* Header */}
             <div className="relative p-8 pb-6">
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-br from-green-500/20 to-transparent" />
               <div className="relative flex items-center justify-between">
                 <div>
                   <h3 className="text-2xl font-bold text-white mb-1">Support the Music</h3>
@@ -82,97 +73,69 @@ export default function DonationButton({ variant = 'default' }) {
 
             {/* Content */}
             <div className="p-8 pt-2">
-              {isDone ? (
-                <div className="text-center py-12">
-                  <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-green-500/30">
-                    <Check size={36} className="text-white" />
-                  </div>
-                  <h4 className="text-2xl font-bold text-white mb-3">Thank You!</h4>
-                  <p className="text-white/50">
-                    Your donation helps support youth music programs and community events.
-                  </p>
+              {/* Cash App Badge */}
+              <div className="flex items-center justify-center gap-3 mb-6 p-4 bg-green-500/10 rounded-2xl border border-green-500/20">
+                <div className="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center">
+                  <DollarSign size={28} className="text-white" />
                 </div>
-              ) : (
-                <>
-                  {/* Preset Amounts */}
-                  <div className="grid grid-cols-3 gap-3 mb-6">
-                    {PRESET_AMOUNTS.map(amount => (
-                      <button
-                        key={amount}
-                        onClick={() => {
-                          setSelectedAmount(amount);
-                          setCustomAmount('');
-                        }}
-                        className={`py-4 rounded-xl font-bold text-lg transition ${
-                          selectedAmount === amount
-                            ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/30'
-                            : 'bg-white/5 text-white/80 hover:bg-white/10 border border-white/10'
-                        }`}
-                      >
-                        ${amount}
-                      </button>
-                    ))}
-                  </div>
+                <div>
+                  <p className="text-white font-bold text-lg">{CASHTAG}</p>
+                  <p className="text-green-400 text-sm">Cash App</p>
+                </div>
+              </div>
 
-                  {/* Custom Amount */}
-                  <div className="mb-6">
-                    <label className="text-white/40 text-sm mb-2 block uppercase tracking-wider">
-                      Custom Amount
-                    </label>
-                    <div className="relative">
-                      <span className="absolute left-5 top-1/2 -translate-y-1/2 text-white/40 text-lg">$</span>
-                      <input
-                        type="number"
-                        min="1"
-                        placeholder="0.00"
-                        value={customAmount}
-                        onChange={(e) => {
-                          setCustomAmount(e.target.value);
-                          setSelectedAmount(null);
-                        }}
-                        className="w-full py-4 pl-10 pr-5 text-lg"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Foundation Info */}
-                  <div className="glass-light rounded-2xl p-5 mb-6">
-                    <div className="flex items-start gap-4">
-                      <div className="foundation-badge text-xs px-3 py-2">501(c)(3)</div>
-                      <div className="flex-1">
-                        <p className="text-sm text-white/70 leading-relaxed">
-                          Mike Page Foundation uses donations for youth music programs,
-                          scholarships, and Love on the Lawn events.
-                        </p>
-                        <p className="text-xs text-blue-400 mt-2 flex items-center gap-1">
-                          <Sparkles size={12} />
-                          Your donation is tax-deductible
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Donate Button */}
+              {/* Preset Amounts */}
+              <p className="text-white/40 text-sm mb-3 uppercase tracking-wider">Select Amount</p>
+              <div className="grid grid-cols-3 gap-3 mb-6">
+                {PRESET_AMOUNTS.map(amount => (
                   <button
-                    onClick={handleDonate}
-                    disabled={!finalAmount || isProcessing}
-                    className={`w-full py-5 rounded-2xl font-bold text-lg transition ${
-                      finalAmount && !isProcessing
-                        ? 'btn-primary'
-                        : 'bg-white/5 text-white/30 cursor-not-allowed'
+                    key={amount}
+                    onClick={() => setSelectedAmount(amount)}
+                    className={`py-4 rounded-xl font-bold text-lg transition ${
+                      selectedAmount === amount
+                        ? 'bg-gradient-to-br from-green-500 to-green-600 text-white shadow-lg shadow-green-500/30'
+                        : 'bg-white/5 text-white/80 hover:bg-white/10 border border-white/10'
                     }`}
                   >
-                    {isProcessing ? (
-                      <span className="flex items-center justify-center gap-3">
-                        <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        Processing...
-                      </span>
-                    ) : (
-                      `Donate ${finalAmount ? `$${finalAmount}` : ''}`
-                    )}
+                    ${amount}
                   </button>
-                </>
-              )}
+                ))}
+              </div>
+
+              {/* Foundation Info */}
+              <div className="glass-light rounded-2xl p-5 mb-6">
+                <div className="flex items-start gap-4">
+                  <div className="foundation-badge text-xs px-3 py-2">501(c)(3)</div>
+                  <div className="flex-1">
+                    <p className="text-sm text-white/70 leading-relaxed">
+                      Mike Page Foundation uses donations for youth music programs,
+                      scholarships, and Love on the Lawn events.
+                    </p>
+                    <p className="text-xs text-green-400 mt-2 flex items-center gap-1">
+                      <Sparkles size={12} />
+                      Your donation supports the community
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Donate Button */}
+              <button
+                onClick={handleDonate}
+                className="w-full py-5 rounded-2xl font-bold text-lg transition bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg shadow-green-500/30 hover:shadow-green-500/50 flex items-center justify-center gap-3"
+              >
+                <DollarSign size={24} />
+                Send ${selectedAmount} via Cash App
+                <ExternalLink size={18} />
+              </button>
+
+              {/* Or open Cash App directly */}
+              <button
+                onClick={handleOpenCashApp}
+                className="w-full mt-3 py-3 rounded-xl text-white/60 hover:text-white transition text-sm"
+              >
+                Or open Cash App to enter custom amount →
+              </button>
             </div>
           </div>
         </div>
