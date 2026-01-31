@@ -119,6 +119,9 @@ export default function Navbar() {
               <Link href="/about" className="text-white/70 hover:text-white transition font-medium">
                 Foundation
               </Link>
+              <Link href="/artists" className="flex items-center gap-2 px-3 py-1.5 bg-green-500/20 text-green-300 rounded-full hover:bg-green-500/30 transition font-medium border border-green-500/30">
+                For Artists
+              </Link>
             </div>
 
             {/* Actions */}
@@ -251,6 +254,10 @@ export default function Navbar() {
                 )}
               </Link>
               <Link href="/about" className="block text-white py-3 font-medium" onClick={() => setIsMenuOpen(false)}>Foundation</Link>
+              <Link href="/artists" className="flex items-center gap-2 text-green-300 py-3 font-medium" onClick={() => setIsMenuOpen(false)}>
+                For Artists
+                <span className="text-xs bg-green-500/30 px-2 py-0.5 rounded-full">$4.99/mo</span>
+              </Link>
 
               <div className="pt-4 border-t border-white/10 space-y-3">
                 {isLoggedIn ? (
