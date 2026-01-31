@@ -74,13 +74,13 @@ export default function ShareTrack({ track }) {
 
   return (
     <>
-      {/* Share Button */}
+      {/* Share Button - Always Visible */}
       <button
         onClick={handleNativeShare}
-        className="p-2 text-white/40 hover:text-blue-400 hover:bg-blue-500/10 rounded-full transition"
+        className="p-2 bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 rounded-full transition border border-blue-500/30"
         title="Share track"
       >
-        <Share2 size={18} />
+        <Share2 size={16} />
       </button>
 
       {/* Share Modal */}
