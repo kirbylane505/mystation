@@ -11,21 +11,12 @@ import ClientProviders from '@/components/ClientProviders';
 
 export const metadata = {
   metadataBase: new URL('https://mystation.vercel.app'),
-  title: 'MyStation - Mike Page Foundation',
+  title: {
+    default: 'MyStation - Mike Page Foundation',
+    template: '%s | MyStation',
+  },
   description: 'Stream Mike Page music for free. All donations support youth music programs through the Mike Page Foundation.',
   keywords: 'Mike Page, IDMG, hip-hop, music streaming, donation, foundation',
-  openGraph: {
-    title: 'MyStation - Mike Page Foundation',
-    description: 'Free music streaming with 100% of donations going to youth programs.',
-    type: 'website',
-    images: ['/images/albums/cindys-son.jpg'],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'MyStation - Mike Page Foundation',
-    description: 'Free music streaming with 100% of donations going to youth programs.',
-    images: ['/images/albums/cindys-son.jpg'],
-  },
 };
 
 export default function RootLayout({ children }) {
