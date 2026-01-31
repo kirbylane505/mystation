@@ -5,6 +5,25 @@
 
 export const tracks = [
   // ========================================
+  // NEW SINGLES - 2026
+  // ========================================
+  {
+    id: 100,
+    title: "Favorite Person",
+    album: "Coming Soon",
+    year: 2026,
+    duration: "4:34",
+    trackNumber: 1,
+    albumId: 'singles-2026',
+    audioFile: '/audio/singles/Mike Page - Favorite Person_MASTERED.wav',
+    isFeatured: true,
+    featuredWeek: '2026-01-31',
+    bpm: 150,
+    key: 'C Minor',
+    hitScore: 95,
+    producer: 'The Cubist (SHOW_IDMG)'
+  },
+  // ========================================
   // CINDY'S SON (Extended Album) - 2022
   // ========================================
   {
@@ -313,20 +332,20 @@ export const tracks = [
 
 // Featured Song of the Week
 export const featuredSong = {
-  id: 1,
-  title: "Live Like A King",
+  id: 100,
+  title: "Favorite Person",
   artist: "Mike Page",
-  album: "Cindy's Son",
-  year: 2022,
-  duration: "4:21",
-  audioFile: '/audio/cindys-son/Mike Page - Live Like A King (Main)_MASTERED.wav',
-  coverGradient: "from-amber-500 via-orange-600 to-red-800",
-  weekOf: "January 29, 2026",
-  description: "This week's featured track from Cindy's Son - an anthem about rising up and living life on your own terms.",
+  album: "Coming Soon",
+  year: 2026,
+  duration: "4:34",
+  audioFile: '/audio/singles/Mike Page - Favorite Person_MASTERED.wav',
+  coverGradient: "from-pink-500 via-rose-600 to-red-800",
+  weekOf: "January 31, 2026",
+  description: "Brand new R&B heat from Mike Page. Produced by The Cubist (SHOW_IDMG). Coming soon to MyStation.",
   stats: {
-    bpm: 76,
-    key: "E Minor",
-    loudness: "-14.0 LUFS",
+    bpm: 150,
+    key: "C Minor",
+    loudness: "-8.0 LUFS",
     mastered: true
   }
 };
