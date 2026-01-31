@@ -6,12 +6,14 @@
 import { tracks, albums } from '@/data/tracks';
 import MusicPageClient from './MusicPageClient';
 
-// Force dynamic rendering for track-specific OG tags
+// Force dynamic rendering - no caching
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 // Dynamic metadata for link previews
 export async function generateMetadata({ searchParams }) {
-  const trackId = searchParams?.track;
+  const params = await searchParams;
+  const trackId = params?.track;
 
   if (trackId) {
     const track = tracks.find(t => t.id === parseInt(trackId));
@@ -64,8 +66,8 @@ export async function generateMetadata({ searchParams }) {
   };
 }
 
-export default function MusicPage({ searchParams }) {
-  const trackId = searchParams?.track;
+export default async function MusicPage({ searchParams }) {
+  const params = await searchParams;
+  const trackId = params?.track;
   return <MusicPageClient initialTrackId={trackId} />;
 }
-// Cache bust Sat Jan 31 02:51:00 EST 2026
