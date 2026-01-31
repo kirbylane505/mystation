@@ -10,13 +10,15 @@ import Link from 'next/link';
 import DonationButton from './DonationButton';
 import AuthModal from './AuthModal';
 import { useUserStore } from '@/store/playerStore';
-import { Menu, X, Search, User, Headphones, Gift, LogOut, Heart, Film } from 'lucide-react';
+import { Menu, X, Search, User, Headphones, Gift, LogOut, Heart, Film, Flame, Trophy } from 'lucide-react';
+import { useEngagementStore } from '@/store/engagementStore';
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState('signup');
   const { user, isLoggedIn, logout } = useUserStore();
+  const { currentStreak, earnedBadges } = useEngagementStore();
 
   // Check for saved user on mount
   useEffect(() => {
@@ -74,6 +76,13 @@ export default function Navbar() {
               </Link>
               <Link href="/live" className="text-white/70 hover:text-white transition font-medium">
                 Live
+              </Link>
+              <Link href="/fan-zone" className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-orange-500/20 to-pink-500/20 text-orange-300 rounded-full hover:from-orange-500/30 hover:to-pink-500/30 transition font-medium border border-orange-500/30">
+                <Flame size={14} className="text-orange-400" />
+                Fan Zone
+                {currentStreak > 0 && (
+                  <span className="bg-orange-500 text-white text-xs px-1.5 rounded-full font-bold">{currentStreak}</span>
+                )}
               </Link>
               <Link href="/about" className="text-white/70 hover:text-white transition font-medium">
                 Foundation
@@ -152,6 +161,13 @@ export default function Navbar() {
                 <span className="text-xs bg-purple-500/30 px-2 py-0.5 rounded-full">Earn Publishing</span>
               </Link>
               <Link href="/live" className="block text-white py-3 font-medium" onClick={() => setIsMenuOpen(false)}>Live</Link>
+              <Link href="/fan-zone" className="flex items-center gap-2 text-orange-300 py-3 font-medium" onClick={() => setIsMenuOpen(false)}>
+                <Flame size={16} className="text-orange-400" />
+                Fan Zone
+                {currentStreak > 0 && (
+                  <span className="bg-orange-500 text-white text-xs px-2 py-0.5 rounded-full font-bold">{currentStreak} day streak</span>
+                )}
+              </Link>
               <Link href="/about" className="block text-white py-3 font-medium" onClick={() => setIsMenuOpen(false)}>Foundation</Link>
 
               <div className="pt-4 border-t border-white/10 space-y-3">

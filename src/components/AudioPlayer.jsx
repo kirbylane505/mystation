@@ -1,15 +1,19 @@
 /**
  * MYSTATION - Audio Engine
  * Handles actual audio playback with HTML5 Audio
+ * Includes 3-song free limit with subscription wall
+ * Tracks engagement stats (streaks, badges, etc.)
  */
 
 'use client';
 
 import { useEffect, useRef, useCallback } from 'react';
-import { usePlayerStore } from '@/store/playerStore';
+import { usePlayerStore, useUserStore } from '@/store/playerStore';
+import { useEngagementStore } from '@/store/engagementStore';
 
 export default function AudioPlayer() {
   const audioRef = useRef(null);
+  const lastTrackIdRef = useRef(null);
   const {
     currentTrack,
     isPlaying,
@@ -20,14 +24,34 @@ export default function AudioPlayer() {
     setDuration,
     nextTrack,
     repeat,
+    playCount,
+    incrementPlayCount,
+    openSubscribeModal,
+    pause,
   } = usePlayerStore();
+
+  const { isSubscribed } = useUserStore();
 
   // Get audio URL directly from track
   const getAudioUrl = useCallback((track) => {
     if (!track) return null;
-    // Use the audioFile property from the track data
     return track.audioFile || null;
   }, []);
+
+  // Check subscription wall before playing
+  const checkCanPlay = useCallback((trackId) => {
+    // Subscribed users can always play
+    if (isSubscribed) return true;
+
+    // Get current play count from store
+    const { playCount, uniquePlaysThisSession } = usePlayerStore.getState();
+
+    // Already played this track? Allow replay
+    if (uniquePlaysThisSession.includes(trackId)) return true;
+
+    // Check if under limit (3 free unique plays)
+    return playCount < 3;
+  }, [isSubscribed]);
 
   // Initialize audio element
   useEffect(() => {
@@ -57,6 +81,26 @@ export default function AudioPlayer() {
   useEffect(() => {
     if (!currentTrack || !audioRef.current) return;
 
+    // Check if this is a new track
+    const isNewTrack = lastTrackIdRef.current !== currentTrack.id;
+
+    if (isNewTrack) {
+      // Check subscription wall for new tracks
+      if (!checkCanPlay(currentTrack.id)) {
+        // Hit the wall - show subscribe modal
+        pause();
+        openSubscribeModal(currentTrack);
+        return;
+      }
+
+      // Track this play (only counts unique plays)
+      incrementPlayCount(currentTrack.id);
+      lastTrackIdRef.current = currentTrack.id;
+
+      // Record play for engagement (streaks, badges, etc.)
+      useEngagementStore.getState().recordPlay(currentTrack.id, currentTrack.albumId);
+    }
+
     const audioUrl = getAudioUrl(currentTrack);
     if (audioUrl) {
       audioRef.current.src = audioUrl;
@@ -72,7 +116,7 @@ export default function AudioPlayer() {
         }
       }
     }
-  }, [currentTrack?.id, getAudioUrl]);
+  }, [currentTrack?.id, getAudioUrl, checkCanPlay, incrementPlayCount, openSubscribeModal, pause, isPlaying]);
 
   // Handle play/pause state changes
   useEffect(() => {

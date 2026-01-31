@@ -1,13 +1,16 @@
 /**
  * MYSTATION - Premium Track List
- * Navy blue theme
+ * Navy blue theme with sharing & reactions
  */
 
 'use client';
 
 import { usePlayerStore } from '@/store/playerStore';
-import { Play, Pause, Heart, MoreHorizontal, Clock, Music } from 'lucide-react';
+import { useEngagementStore } from '@/store/engagementStore';
+import { Play, Pause, Heart, MoreHorizontal, Clock, Music, ExternalLink } from 'lucide-react';
 import { tracks } from '@/data/tracks';
+import { ShareButton } from './ShareTrack';
+import SongReactions from './SongReactions';
 
 export default function TrackList({ trackIds, showAlbum = true, showNumber = true }) {
   const { currentTrack, isPlaying, setQueue, togglePlay } = usePlayerStore();
@@ -17,6 +20,12 @@ export default function TrackList({ trackIds, showAlbum = true, showNumber = tru
     : tracks;
 
   const handleTrackClick = (track, index) => {
+    // If stream only, open Spotify
+    if (track.streamOnly) {
+      window.open(track.spotify || track.apple, '_blank');
+      return;
+    }
+
     if (currentTrack?.id === track.id) {
       togglePlay();
     } else {
@@ -43,9 +52,10 @@ export default function TrackList({ trackIds, showAlbum = true, showNumber = tru
         return (
           <div
             key={track.id}
-            className={`track-item grid grid-cols-12 gap-4 items-center group ${
+            className={`track-item track-list-item grid grid-cols-12 gap-4 items-center group ${
               isCurrentTrack ? 'playing' : ''
             }`}
+            style={{ animationDelay: `${index * 0.05}s` }}
             onClick={() => handleTrackClick(track, index)}
           >
             {/* Number / Play indicator */}
@@ -53,8 +63,10 @@ export default function TrackList({ trackIds, showAlbum = true, showNumber = tru
               <div className="col-span-1 text-white/30 font-mono text-sm">
                 <span className="group-hover:hidden">
                   {isPlayingThis ? (
-                    <span className="text-blue-400 flex items-center">
-                      <span className="w-3 h-3 bg-blue-400 rounded-full animate-pulse" />
+                    <span className="visualizer-bars">
+                      <span className="visualizer-bar" style={{ animationDelay: '0s' }} />
+                      <span className="visualizer-bar" style={{ animationDelay: '0.2s' }} />
+                      <span className="visualizer-bar" style={{ animationDelay: '0.4s' }} />
                     </span>
                   ) : (
                     String(index + 1).padStart(2, '0')
@@ -74,7 +86,9 @@ export default function TrackList({ trackIds, showAlbum = true, showNumber = tru
             <div className={showNumber ? 'col-span-5' : 'col-span-6'}>
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-gradient-to-br from-blue-600/20 to-blue-900/30 rounded-lg flex items-center justify-center shrink-0 border border-white/5">
-                  {track.isNew ? (
+                  {track.streamOnly ? (
+                    <ExternalLink size={18} className="text-green-400" />
+                  ) : track.isNew ? (
                     <span className="text-[10px] font-bold bg-blue-500 text-white px-1.5 py-0.5 rounded">NEW</span>
                   ) : (
                     <Music size={18} className="text-blue-400/60" />
@@ -109,16 +123,18 @@ export default function TrackList({ trackIds, showAlbum = true, showNumber = tru
             </div>
 
             {/* Duration & Actions */}
-            <div className="col-span-1 flex items-center justify-end gap-4">
-              <button className="text-white/20 hover:text-blue-400 opacity-0 group-hover:opacity-100 transition">
-                <Heart size={16} />
-              </button>
+            <div className="col-span-1 flex items-center justify-end gap-3">
+              {/* Reactions */}
+              <div className="opacity-0 group-hover:opacity-100 transition" onClick={(e) => e.stopPropagation()}>
+                <SongReactions trackId={track.id} size="sm" />
+              </div>
+              {/* Share */}
+              <div className="opacity-0 group-hover:opacity-100 transition" onClick={(e) => e.stopPropagation()}>
+                <ShareButton track={track} audioUrl={track.audioFile} />
+              </div>
               <span className="text-white/30 text-sm font-mono">
                 {track.duration}
               </span>
-              <button className="text-white/20 hover:text-white opacity-0 group-hover:opacity-100 transition">
-                <MoreHorizontal size={16} />
-              </button>
             </div>
           </div>
         );

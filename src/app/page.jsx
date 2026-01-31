@@ -6,15 +6,20 @@
 'use client';
 
 import Hero from '@/components/Hero';
+import FeaturedSong from '@/components/FeaturedSong';
 import TrackList from '@/components/TrackList';
 import DonationButton from '@/components/DonationButton';
-import { tracks, albums, playlists, artistInfo, getOfficialTracks } from '@/data/tracks';
+import ActivityFeed from '@/components/ActivityFeed';
+import DailySpin from '@/components/DailySpin';
+import { tracks, albums, playlists, artistInfo, getOfficialTracks, featuredSong } from '@/data/tracks';
 import { usePlayerStore } from '@/store/playerStore';
-import { Play, Heart, ExternalLink, Music, Award, Users, Sparkles, Headphones } from 'lucide-react';
+import { useEngagementStore } from '@/store/engagementStore';
+import { Play, Heart, ExternalLink, Music, Award, Users, Sparkles, Headphones, Flame, Trophy, Crown } from 'lucide-react';
 import Link from 'next/link';
 
 export default function HomePage() {
   const { setQueue } = usePlayerStore();
+  const { currentStreak, earnedBadges, totalPlays } = useEngagementStore();
 
   // Get official tracks only
   const officialTracks = getOfficialTracks();
@@ -36,6 +41,9 @@ export default function HomePage() {
     <div className="min-h-screen">
       {/* Hero Section */}
       <Hero />
+
+      {/* Featured Song of the Week */}
+      {featuredSong && <FeaturedSong />}
 
       {/* Section Divider */}
       <div className="section-divider" />
@@ -72,7 +80,8 @@ export default function HomePage() {
           {albums.map(album => (
             <div
               key={album.id}
-              className="glass rounded-2xl p-5 hover:border-blue-500/30 hover:scale-[1.02] transition-all duration-300 cursor-pointer group"
+              className="album-3d glass rounded-2xl p-5 hover:border-blue-500/30 transition-all duration-300 cursor-pointer group animate-fade-in"
+              style={{ animationDelay: `${albums.indexOf(album) * 0.1}s` }}
             >
               {/* Album Cover */}
               <div className={`aspect-square ${album.coverImage ? '' : `bg-gradient-to-br ${album.coverGradient}`} rounded-xl mb-5 flex flex-col items-center justify-center relative overflow-hidden border border-white/10 shadow-xl`}>
@@ -164,6 +173,65 @@ export default function HomePage() {
         <h2 className="text-3xl font-bold text-white mb-10">Featured Tracks</h2>
         <div className="glass rounded-2xl p-2">
           <TrackList trackIds={featuredTracks} />
+        </div>
+      </section>
+
+      {/* Fan Zone Preview */}
+      <section className="relative py-20 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 via-pink-500/10 to-purple-500/10" />
+        <div className="bg-orb w-[300px] h-[300px] bg-orange-500 top-[-50px] left-[-50px]" />
+
+        <div className="relative max-w-screen-xl mx-auto px-6">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Left - Stats & CTA */}
+            <div>
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-pink-500 rounded-xl flex items-center justify-center">
+                  <Crown size={28} className="text-white" />
+                </div>
+                <div>
+                  <h2 className="text-3xl font-bold text-white">Fan Zone</h2>
+                  <p className="text-white/50">Earn rewards as you listen</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-6 mb-8">
+                <div className="flex items-center gap-2 px-4 py-3 glass rounded-xl">
+                  <Flame size={24} className="text-orange-400" />
+                  <div>
+                    <p className="text-2xl font-bold text-white">{currentStreak}</p>
+                    <p className="text-xs text-white/40">Day Streak</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 px-4 py-3 glass rounded-xl">
+                  <Trophy size={24} className="text-yellow-400" />
+                  <div>
+                    <p className="text-2xl font-bold text-white">{earnedBadges.length}</p>
+                    <p className="text-xs text-white/40">Badges</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 px-4 py-3 glass rounded-xl">
+                  <Music size={24} className="text-blue-400" />
+                  <div>
+                    <p className="text-2xl font-bold text-white">{totalPlays}</p>
+                    <p className="text-xs text-white/40">Plays</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <Link href="/fan-zone" className="btn-primary">
+                  Enter Fan Zone
+                </Link>
+                <DailySpin />
+              </div>
+            </div>
+
+            {/* Right - Activity Feed Preview */}
+            <div className="glass rounded-2xl p-4 max-h-[400px] overflow-hidden">
+              <ActivityFeed limit={5} showTrending={false} />
+            </div>
+          </div>
         </div>
       </section>
 

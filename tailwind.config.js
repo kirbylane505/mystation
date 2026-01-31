@@ -10,6 +10,7 @@ module.exports = {
           navy: '#0a1628',
           navyLight: '#1a2d4a',
           navyDark: '#050d18',
+          darker: '#020617',
           blue: '#3b82f6',
           blueLight: '#60a5fa',
           accent: '#1e40af',

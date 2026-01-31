@@ -1,9 +1,11 @@
 /**
  * MYSTATION - Audio Player State Management
  * Using Zustand for simple, powerful state
+ * Includes subscription & play tracking for engagement
  */
 
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
 export const usePlayerStore = create((set, get) => ({
   // Current track
@@ -20,11 +22,19 @@ export const usePlayerStore = create((set, get) => ({
   shuffle: false,
   repeat: 'off', // 'off', 'all', 'one'
 
+  // Engagement tracking
+  playCount: 0,
+  uniquePlaysThisSession: [],
+  lastPlayedTrack: null,
+  showSubscribeModal: false,
+  pendingTrack: null, // Track waiting to play after subscription
+
   // Actions
   setTrack: (track) => set({
     currentTrack: track,
     progress: 0,
-    isPlaying: true
+    isPlaying: true,
+    lastPlayedTrack: track
   }),
 
   togglePlay: () => set((state) => ({
@@ -46,12 +56,54 @@ export const usePlayerStore = create((set, get) => ({
     isMuted: !state.isMuted
   })),
 
+  // Play count management for subscription wall
+  incrementPlayCount: (trackId) => {
+    const { uniquePlaysThisSession } = get();
+    // Only count unique track plays
+    if (!uniquePlaysThisSession.includes(trackId)) {
+      set((state) => ({
+        playCount: state.playCount + 1,
+        uniquePlaysThisSession: [...state.uniquePlaysThisSession, trackId]
+      }));
+    }
+  },
+
+  // Check if can play (3 free plays allowed)
+  canPlay: () => {
+    const { playCount } = get();
+    return playCount < 3;
+  },
+
+  // Show subscribe modal
+  openSubscribeModal: (pendingTrack = null) => set({
+    showSubscribeModal: true,
+    pendingTrack
+  }),
+
+  closeSubscribeModal: () => set({
+    showSubscribeModal: false,
+    pendingTrack: null
+  }),
+
+  // Return to last played track
+  returnToLastPlayed: () => {
+    const { lastPlayedTrack } = get();
+    if (lastPlayedTrack) {
+      set({
+        currentTrack: lastPlayedTrack,
+        showSubscribeModal: false,
+        pendingTrack: null
+      });
+    }
+  },
+
   // Queue management
   setQueue: (tracks, startIndex = 0) => set({
     queue: tracks,
     queueIndex: startIndex,
     currentTrack: tracks[startIndex],
-    isPlaying: true
+    isPlaying: true,
+    lastPlayedTrack: tracks[startIndex]
   }),
 
   nextTrack: () => {
@@ -71,10 +123,12 @@ export const usePlayerStore = create((set, get) => ({
       nextIndex = queueIndex + 1;
     }
 
+    const nextTrack = queue[nextIndex];
     set({
       queueIndex: nextIndex,
-      currentTrack: queue[nextIndex],
-      progress: 0
+      currentTrack: nextTrack,
+      progress: 0,
+      lastPlayedTrack: nextTrack
     });
   },
 
@@ -89,10 +143,12 @@ export const usePlayerStore = create((set, get) => ({
     }
 
     const prevIndex = queueIndex > 0 ? queueIndex - 1 : queue.length - 1;
+    const prevTrack = queue[prevIndex];
     set({
       queueIndex: prevIndex,
-      currentTrack: queue[prevIndex],
-      progress: 0
+      currentTrack: prevTrack,
+      progress: 0,
+      lastPlayedTrack: prevTrack
     });
   },
 
@@ -124,28 +180,54 @@ export const useDonationStore = create((set) => ({
   })),
 }));
 
-// User state
-export const useUserStore = create((set) => ({
-  user: null,
-  isLoggedIn: false,
-  supporterTier: 'free', // 'free', 'supporter', 'vip', 'foundation'
-  favorites: [],
+// User state with persistence
+export const useUserStore = create(
+  persist(
+    (set, get) => ({
+      user: null,
+      isLoggedIn: false,
+      isSubscribed: false,
+      supporterTier: 'free', // 'free', 'supporter', 'vip', 'foundation'
+      favorites: [],
+      email: '',
 
-  setUser: (user) => set({
-    user,
-    isLoggedIn: !!user,
-    supporterTier: user?.tier || 'free'
-  }),
+      setUser: (user) => set({
+        user,
+        isLoggedIn: !!user,
+        isSubscribed: user?.isSubscribed || false,
+        supporterTier: user?.tier || 'free'
+      }),
 
-  logout: () => set({
-    user: null,
-    isLoggedIn: false,
-    supporterTier: 'free'
-  }),
+      subscribe: (email) => set({
+        isSubscribed: true,
+        isLoggedIn: true,
+        email,
+        supporterTier: 'supporter',
+        user: { email, isSubscribed: true, tier: 'supporter' }
+      }),
 
-  toggleFavorite: (trackId) => set((state) => ({
-    favorites: state.favorites.includes(trackId)
-      ? state.favorites.filter(id => id !== trackId)
-      : [...state.favorites, trackId]
-  })),
-}));
+      logout: () => set({
+        user: null,
+        isLoggedIn: false,
+        isSubscribed: false,
+        supporterTier: 'free',
+        email: ''
+      }),
+
+      toggleFavorite: (trackId) => set((state) => ({
+        favorites: state.favorites.includes(trackId)
+          ? state.favorites.filter(id => id !== trackId)
+          : [...state.favorites, trackId]
+      })),
+    }),
+    {
+      name: 'mystation-user',
+      partialize: (state) => ({
+        isSubscribed: state.isSubscribed,
+        email: state.email,
+        favorites: state.favorites,
+        supporterTier: state.supporterTier
+      })
+    }
+  )
+);

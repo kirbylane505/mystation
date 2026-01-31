@@ -1,68 +1,338 @@
 /**
- * MIKE PAGE - TRACK CATALOG
- * MyStation - Official Releases Only
- * Unreleased tracks go to "Name This Song"
+ * MIKE PAGE - OFFICIAL CATALOG ONLY
+ * MyStation - Albums & Singles with audio
  */
 
 export const tracks = [
   // ========================================
-  // CINDY'S SON ALBUM (2022) - 20 tracks
-  // Official track order from Apple Music/Spotify
+  // CINDY'S SON (Extended Album) - 2022
   // ========================================
-  { id: 1, title: "Rich Off Rags", album: "Cindy's Son", year: 2022, duration: "3:35", featured: null, audioFile: '/audio/01 IDMG Mike Page 372.mp3', albumId: 'cindys-son', trackNumber: 1 },
-  { id: 2, title: "Moved South", album: "Cindy's Son", year: 2022, duration: "3:22", featured: null, audioFile: '/audio/01 Mike Page Rolling.mp3', albumId: 'cindys-son', trackNumber: 2 },
-  { id: 3, title: "Pick It Up Bag It", album: "Cindy's Son", year: 2022, duration: "3:15", featured: "MM Tha Papi", audioFile: '/audio/01 Mike Page - idmg483 (X3.0) L.mp3', albumId: 'cindys-son', trackNumber: 3 },
-  { id: 4, title: "Meditation", album: "Cindy's Son", year: 2022, duration: "4:05", featured: null, audioFile: '/audio/IDMG 273.mp3', albumId: 'cindys-son', trackNumber: 4 },
-  { id: 5, title: "5 Mo", album: "Cindy's Son", year: 2022, duration: "3:45", featured: null, audioFile: '/audio/IDMG 342.mp3', albumId: 'cindys-son', trackNumber: 5 },
-  { id: 6, title: "Til We All Up", album: "Cindy's Son", year: 2022, duration: "3:18", featured: null, audioFile: '/audio/IDMG 394.mp3', albumId: 'cindys-son', trackNumber: 6 },
-  { id: 7, title: "Doing Me", album: "Cindy's Son", year: 2022, duration: "3:28", featured: "King Deazel", audioFile: '/audio/IDMG 338 Deazel Page.mp3', albumId: 'cindys-son', trackNumber: 7 },
-  { id: 8, title: "Aww Shit", album: "Cindy's Son", year: 2022, duration: "3:55", featured: null, audioFile: '/audio/IDMG 259 Mike Page.mp3', albumId: 'cindys-son', trackNumber: 8 },
-  { id: 9, title: "Up There", album: "Cindy's Son", year: 2022, duration: "3:32", featured: null, audioFile: '/audio/01 IDMG 240 very special Mike Page Hook.mp3', albumId: 'cindys-son', trackNumber: 9 },
-  { id: 10, title: "Vibe", album: "Cindy's Son", year: 2022, duration: "3:42", featured: "Vincent Berry", audioFile: '/audio/IDMG 414 VB Page.mp3', albumId: 'cindys-son', trackNumber: 10 },
-  { id: 11, title: "Ask Yourself", album: "Cindy's Son", year: 2022, duration: "3:35", featured: null, audioFile: '/audio/IDMG 305 VINYL.mp3', albumId: 'cindys-son', trackNumber: 11 },
-  { id: 12, title: "Stretch U Out", album: "Cindy's Son", year: 2022, duration: "4:05", featured: null, audioFile: '/audio/IDMG 337 VINYL Page.mp3', albumId: 'cindys-son', trackNumber: 12 },
-  { id: 13, title: "Damaged", album: "Cindy's Son", year: 2022, duration: "3:48", featured: null, audioFile: '/audio/01 iDMG 143 Mike Page x King Deaz.mp3', albumId: 'cindys-son', trackNumber: 13 },
-  { id: 14, title: "Ready For Me", album: "Cindy's Son", year: 2022, duration: "3:52", featured: null, audioFile: '/audio/01 Mike Page x King Deazel idmg478 (ruff02).mp3', albumId: 'cindys-son', trackNumber: 14 },
-  { id: 15, title: "What Do We Do", album: "Cindy's Son", year: 2022, duration: "3:28", featured: null, audioFile: '/audio/01 iDMG 788 MIKE PAGE x LYRIVELLI.mp3', albumId: 'cindys-son', trackNumber: 15 },
-  { id: 16, title: "I Remember That", album: "Cindy's Son", year: 2022, duration: "3:15", featured: null, audioFile: '/audio/IDMG Defoor 100 Shawn Hibbler - Mike Page (ruff01).mp3', albumId: 'cindys-son', trackNumber: 16 },
-  { id: 17, title: "Things We Been Through", album: "Cindy's Son", year: 2022, duration: "3:22", featured: null, audioFile: '/audio/Impossible Dreamz PAGE 701_5.mp3', albumId: 'cindys-son', trackNumber: 17 },
-  { id: 18, title: "Angel", album: "Cindy's Son", year: 2022, duration: "3:28", featured: null, audioFile: '/audio/01 IDMG Love Is Mike Page Hook.mp3', albumId: 'cindys-son', trackNumber: 18 },
-  { id: 19, title: "Stand Up", album: "Cindy's Son", year: 2022, duration: "4:12", featured: null, audioFile: '/audio/01 Mike Page -Stand  Up(X05)(M02).mp3', albumId: 'cindys-son', trackNumber: 19 },
-  { id: 20, title: "Supa Love Ya Momma", album: "Cindy's Son", year: 2022, duration: "3:18", featured: null, audioFile: '/audio/iDMG No Baggage Final1.mp3', albumId: 'cindys-son', trackNumber: 20 },
-
-  // ========================================
-  // OFFICIAL SINGLES (Released on streaming)
-  // ========================================
-  { id: 21, title: "Hammydowns", album: "Single", year: 2024, duration: "3:15", featured: null, audioFile: '/audio/Impossible Dreamz 2024 61 -Mike Page (X1.1).mp3', isNew: true, isOfficial: true },
-  { id: 22, title: "Caught That", album: "Single", year: 2024, duration: "3:35", featured: null, audioFile: '/audio/ART_MP_IDMG_WATER.mp3', isNew: true, isOfficial: true },
-  { id: 23, title: "Be Right There", album: "Single", year: 2024, duration: "3:42", featured: null, audioFile: '/audio/01 Mike Page Lizzo.mp3', isNew: true, isOfficial: true },
-  { id: 24, title: "To the Money", album: "Single", year: 2024, duration: "3:45", featured: null, audioFile: '/audio/Impossible Dreamz 2024 74_Mike Page_1.mp3', isOfficial: true },
-  { id: 25, title: "Obvious", album: "Single", year: 2023, duration: "3:38", featured: null, audioFile: '/audio/iDMG x gee_v107 - Mike Page _x1.1_.mp3', isOfficial: true },
-  { id: 26, title: "Mindset", album: "Single", year: 2023, duration: "3:22", featured: null, audioFile: '/audio/iDMG x v120 - Mike Page (X1.0) new bass01.mp3', isOfficial: true },
-  { id: 27, title: "They Know", album: "Single", year: 2023, duration: "3:35", featured: "Murrille", audioFile: '/audio/2023-09-14_Mike Page - They know x murrille (169)_2.mp3', isOfficial: true },
-  { id: 28, title: "From The Town", album: "Feature", year: 2023, duration: "3:18", featured: "Smoke Drewson", audioFile: '/audio/From The Town (feat. Mike Page) [u1qUeN3tabY].mp3', isOfficial: true },
-
-  // ========================================
-  // UNRELEASED / NAME THIS SONG
-  // These need official titles when released
-  // ========================================
-  { id: 101, title: null, album: "Unreleased", year: 2024, duration: "3:28", featured: null, audioFile: '/audio/2023-06-08_Impossible Dreamz Splice 124_2rough.mp3', needsName: true },
-  { id: 102, title: null, album: "Unreleased", year: 2024, duration: "3:42", featured: null, audioFile: '/audio/2023-06-07_Impossible Dreamz Splice 124_2rough.mp3', needsName: true },
-  { id: 103, title: null, album: "Unreleased", year: 2024, duration: "3:55", featured: null, audioFile: '/audio/01 (X4.3) iDMG 788 MIKE PAGE x LY.mp3', needsName: true },
-  { id: 104, title: null, album: "Unreleased", year: 2024, duration: "3:35", featured: null, audioFile: '/audio/01 Mike Page idmg482 ruff2.mp3', needsName: true },
-  { id: 105, title: null, album: "Unreleased", year: 2024, duration: "3:22", featured: null, audioFile: '/audio/01 iDMG No Weapon Final1.mp3', needsName: true },
-  { id: 106, title: null, album: "Unreleased", year: 2024, duration: "4:12", featured: null, audioFile: '/audio/Impossible Dreamz 2024 86 - Mike Page x King Deazel _1.mp3', needsName: true },
-  { id: 107, title: null, album: "Unreleased", year: 2024, duration: "3:55", featured: null, audioFile: '/audio/VB_iDMG 2024_62 - Ocean Level (ruff).mp3', needsName: true },
-  { id: 108, title: null, album: "Unreleased", year: 2024, duration: "3:28", featured: null, audioFile: '/audio/01 Impossible Dreamz 2024 21_Mike.mp3', needsName: true },
-  { id: 109, title: null, album: "Unreleased", year: 2024, duration: "3:28", featured: null, audioFile: '/audio/TRUCKER - MIX 6.mp3', needsName: true },
-  { id: 110, title: null, album: "Unreleased", year: 2024, duration: "2:30", featured: null, audioFile: '/audio/2024-02-13_LOTL video edit.mp3', needsName: true },
+  {
+    id: 1,
+    title: "Live Like A King",
+    album: "Cindy's Son",
+    year: 2022,
+    duration: "4:21",
+    trackNumber: 1,
+    albumId: 'cindys-son',
+    audioFile: '/audio/cindys-son/Mike Page - Live Like A King (Main)_MASTERED.wav',
+    isFeatured: true,
+    featuredWeek: '2026-01-29',
+    bpm: 76,
+    key: 'E Minor',
+    hitScore: 48
+  },
+  {
+    id: 2,
+    title: "Very Special",
+    album: "Cindy's Son",
+    year: 2022,
+    duration: "3:32",
+    trackNumber: 2,
+    albumId: 'cindys-son',
+    audioFile: '/audio/cindys-son/Mike Page - Very Special (Main)_MASTERED.wav',
+    bpm: 99,
+    key: 'G Minor',
+    hitScore: 85
+  },
+  {
+    id: 3,
+    title: "Doing Me",
+    album: "Cindy's Son",
+    year: 2022,
+    duration: "3:55",
+    trackNumber: 3,
+    albumId: 'cindys-son',
+    audioFile: '/audio/cindys-son/Mike Page - Doing Me (Main)_MASTERED.wav',
+    bpm: 140,
+    key: 'E Minor',
+    hitScore: 80
+  },
+  {
+    id: 4,
+    title: "IDMG 254 ft. Soldier",
+    album: "Cindy's Son",
+    year: 2022,
+    duration: "3:46",
+    trackNumber: 4,
+    albumId: 'cindys-son',
+    audioFile: '/audio/cindys-son/Mike Page - IDMG 254 ft. Soldier (Main)_MASTERED.wav',
+    featured: "Soldier",
+    bpm: 86,
+    key: 'A Minor',
+    hitScore: 80
+  },
+  {
+    id: 5,
+    title: "5 Mo",
+    album: "Cindy's Son",
+    year: 2022,
+    duration: "3:12",
+    trackNumber: 5,
+    albumId: 'cindys-son',
+    audioFile: '/audio/cindys-son/Mike Page - 5 Mo (Main)_MASTERED.wav',
+    bpm: 133,
+    key: 'E Minor',
+    hitScore: 75
+  },
+  {
+    id: 6,
+    title: "Moved South",
+    album: "Cindy's Son",
+    year: 2022,
+    duration: "3:28",
+    trackNumber: 6,
+    albumId: 'cindys-son',
+    audioFile: '/audio/cindys-son/Mike Page - Moved South (Main)_MASTERED.wav',
+    bpm: 129,
+    key: 'E Minor',
+    hitScore: 75
+  },
+  {
+    id: 7,
+    title: "Rich Off Rags",
+    album: "Cindy's Son",
+    year: 2022,
+    duration: "3:18",
+    trackNumber: 7,
+    albumId: 'cindys-son',
+    audioFile: '/audio/cindys-son/Mike Page - Rich Off Rags (Main)_MASTERED.wav',
+    bpm: 112,
+    key: 'G Minor',
+    hitScore: 75
+  },
+  {
+    id: 8,
+    title: "Stand Up",
+    album: "Cindy's Son",
+    year: 2022,
+    duration: "4:14",
+    trackNumber: 8,
+    albumId: 'cindys-son',
+    audioFile: '/audio/cindys-son/Mike Page - Stand Up (Main)_MASTERED.wav',
+    bpm: 112,
+    key: 'C Major',
+    hitScore: 75
+  },
+  {
+    id: 9,
+    title: "VIBE",
+    album: "Cindy's Son",
+    year: 2022,
+    duration: "3:32",
+    trackNumber: 9,
+    albumId: 'cindys-son',
+    audioFile: '/audio/cindys-son/Mike Page - VIBE (Main)_MASTERED.wav',
+    bpm: 117,
+    key: 'A Minor',
+    hitScore: 75
+  },
+  {
+    id: 10,
+    title: "Ask Yourself",
+    album: "Cindy's Son",
+    year: 2022,
+    duration: "3:01",
+    trackNumber: 10,
+    albumId: 'cindys-son',
+    audioFile: '/audio/cindys-son/Mike Page - Ask Yourself_MASTERED.wav',
+    bpm: 152,
+    key: 'D# Major',
+    hitScore: 70
+  },
+  {
+    id: 11,
+    title: "Meditation",
+    album: "Cindy's Son",
+    year: 2022,
+    duration: "5:21",
+    trackNumber: 11,
+    albumId: 'cindys-son',
+    audioFile: '/audio/cindys-son/Mike Page - Meditation (Main)_MASTERED.wav',
+    bpm: 129,
+    key: 'G Minor',
+    hitScore: 68
+  },
+  {
+    id: 12,
+    title: "Things We Been Through",
+    album: "Cindy's Son",
+    year: 2022,
+    duration: "3:38",
+    trackNumber: 12,
+    albumId: 'cindys-son',
+    audioFile: '/audio/cindys-son/Mike Page - Things We Been Through (Main)_MASTERED.wav',
+    bpm: 112,
+    key: 'B Minor',
+    hitScore: 65
+  },
+  {
+    id: 13,
+    title: "Stretch U Out",
+    album: "Cindy's Son",
+    year: 2022,
+    duration: "3:53",
+    trackNumber: 13,
+    albumId: 'cindys-son',
+    audioFile: '/audio/cindys-son/Mike Page - Stretch U Out (Main)_MASTERED.wav',
+    bpm: 99,
+    key: 'C# Minor',
+    hitScore: 65
+  },
+  {
+    id: 14,
+    title: "Damaged",
+    album: "Cindy's Son",
+    year: 2022,
+    duration: "4:58",
+    trackNumber: 14,
+    albumId: 'cindys-son',
+    audioFile: '/audio/cindys-son/Mike Page - Damaged (Main)_MASTERED.wav',
+    bpm: 86,
+    key: 'C# Minor',
+    hitScore: 65
+  },
+  {
+    id: 15,
+    title: "Ready For Me",
+    album: "Cindy's Son",
+    year: 2022,
+    duration: "5:36",
+    trackNumber: 15,
+    albumId: 'cindys-son',
+    audioFile: '/audio/cindys-son/Mike Page - Ready For Me (Main)_MASTERED.wav',
+    bpm: 140,
+    key: 'A# Minor',
+    hitScore: 65
+  },
+  {
+    id: 16,
+    title: "What Do We Do",
+    album: "Cindy's Son",
+    year: 2022,
+    duration: "3:29",
+    trackNumber: 16,
+    albumId: 'cindys-son',
+    audioFile: '/audio/cindys-son/Mike Page - What Do We Do..(Main)_MASTERED.wav',
+    bpm: 129,
+    key: 'D# Minor',
+    hitScore: 65
+  },
+  {
+    id: 17,
+    title: "Suppa Luv Ya Momma",
+    album: "Cindy's Son",
+    year: 2022,
+    duration: "5:18",
+    trackNumber: 17,
+    albumId: 'cindys-son',
+    audioFile: '/audio/cindys-son/Mike Page - Suppa Luv Ya Momma (Main)_MASTERED.wav',
+    bpm: 99,
+    key: 'B Minor',
+    hitScore: 65
+  },
+  {
+    id: 18,
+    title: "Aw Shit",
+    album: "Cindy's Son",
+    year: 2022,
+    duration: "2:52",
+    trackNumber: 18,
+    albumId: 'cindys-son',
+    audioFile: '/audio/cindys-son/Mike Page - Aw Shit (Main)_MASTERED.wav',
+    bpm: 123,
+    key: 'F# Minor',
+    hitScore: 60
+  },
+  {
+    id: 19,
+    title: "Pick It Up, Bag It",
+    album: "Cindy's Son",
+    year: 2022,
+    duration: "3:13",
+    trackNumber: 19,
+    albumId: 'cindys-son',
+    audioFile: '/audio/cindys-son/Mike Page - Pick It Up, Bag It (Main)_MASTERED.wav',
+    bpm: 120,
+    key: 'E Minor',
+    hitScore: 60
+  },
+  {
+    id: 20,
+    title: "Up There",
+    album: "Cindy's Son",
+    year: 2022,
+    duration: "3:54",
+    trackNumber: 20,
+    albumId: 'cindys-son',
+    audioFile: '/audio/cindys-son/Mike Page - Up There (Main)_MASTERED.wav',
+    bpm: 115,
+    key: 'F# Major',
+    hitScore: 60
+  },
+  {
+    id: 21,
+    title: "I Remember That",
+    album: "Cindy's Son",
+    year: 2022,
+    duration: "2:30",
+    trackNumber: 21,
+    albumId: 'cindys-son',
+    audioFile: '/audio/cindys-son/Mike Page - I Remember That (Main)_MASTERED.wav',
+    bpm: 144,
+    key: 'E Minor',
+    hitScore: 55
+  },
+  {
+    id: 22,
+    title: "Til We All Up",
+    album: "Cindy's Son",
+    year: 2022,
+    duration: "4:02",
+    trackNumber: 22,
+    albumId: 'cindys-son',
+    audioFile: '/audio/cindys-son/Mike Page - Til We All Up (Main)_MASTERED.wav',
+    bpm: 120,
+    key: 'F# Minor',
+    hitScore: 55
+  },
+  {
+    id: 23,
+    title: "Trap",
+    album: "Cindy's Son",
+    year: 2022,
+    duration: "3:02",
+    trackNumber: 23,
+    albumId: 'cindys-son',
+    audioFile: '/audio/cindys-son/Mike Page - Trap (Main)_MASTERED.wav',
+    bpm: 152,
+    key: 'F Major',
+    hitScore: 55
+  },
 ];
 
-// Get only official tracks (for main catalog)
-export const getOfficialTracks = () => tracks.filter(t => !t.needsName);
+// Featured Song of the Week
+export const featuredSong = {
+  id: 1,
+  title: "Live Like A King",
+  artist: "Mike Page",
+  album: "Cindy's Son",
+  year: 2022,
+  duration: "4:21",
+  audioFile: '/audio/cindys-son/Mike Page - Live Like A King (Main)_MASTERED.wav',
+  coverGradient: "from-amber-500 via-orange-600 to-red-800",
+  weekOf: "January 29, 2026",
+  description: "This week's featured track from Cindy's Son - an anthem about rising up and living life on your own terms.",
+  stats: {
+    bpm: 76,
+    key: "E Minor",
+    loudness: "-14.0 LUFS",
+    mastered: true
+  }
+};
 
-// Get unreleased tracks (for Name This Song)
-export const getUnreleasedTracks = () => tracks.filter(t => t.needsName);
+// Get all official tracks
+export const getOfficialTracks = () => tracks;
 
 // Get album tracks in order
 export const getAlbumTracks = (albumId) => {
@@ -75,55 +345,28 @@ export const albums = [
   {
     id: 'cindys-son',
     title: "Cindy's Son",
+    subtitle: "Extended Album",
     artist: "Mike Page",
     year: 2022,
-    trackCount: 20,
-    description: "Full-length debut album - 20 tracks dedicated to his mother",
-    coverImage: "/images/albums/cindys-son.jpg",
+    trackCount: 23,
     coverGradient: "from-amber-500 via-orange-600 to-red-800",
     coverEmoji: "👑",
-    spotify: "https://open.spotify.com/album/5TqckFWqgXIvPwidMGLcEI",
-    apple: "https://music.apple.com/us/album/cindys-son/1667390838",
-    amazon: "https://music.amazon.com/albums/B0BFWQJQ9M",
-    distrokid: true,
-    trackIds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-  },
-  {
-    id: 'singles',
-    title: "Singles",
-    artist: "Mike Page",
-    year: 2024,
-    trackCount: 8,
-    description: "Official singles - available on all platforms",
-    coverGradient: "from-blue-500 via-cyan-600 to-blue-900",
-    coverEmoji: "🎵",
-    spotify: "https://open.spotify.com/artist/3JwFt4Qb3uAUzipnMyM6G6",
+    coverImage: "/images/albums/cindys-son.jpg",
+    isNew: true,
+    trackIds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23],
+    spotify: "https://open.spotify.com/album/3JwFt4Qb3uAUzipnMyM6G6",
     apple: "https://music.apple.com/us/artist/mike-page/1515325834",
-    trackIds: [21, 22, 23, 24, 25, 26, 27, 28]
+    description: "The extended edition of Cindy's Son - a tribute to resilience, family, and the journey from Elgin to Atlanta."
   }
 ];
 
 export const playlists = [
   {
-    id: 'cindys-son-full',
-    title: "Cindy's Son (Full Album)",
-    description: "Complete 20-track album in order",
-    trackIds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
-    coverEmoji: "👑"
-  },
-  {
-    id: 'new-releases',
-    title: "Latest Singles",
-    description: "New official releases",
-    trackIds: [21, 22, 23, 24],
-    coverEmoji: "🔥"
-  },
-  {
-    id: 'features',
-    title: "Features & Collabs",
-    description: "Mike Page with other artists",
-    trackIds: [3, 7, 10, 27, 28],
-    coverEmoji: "🤝"
+    id: 'top-hits',
+    title: "Top Hits",
+    description: "Highest rated tracks from REmo analysis",
+    trackIds: [2, 3, 4, 5, 6, 7, 8, 9], // 75+ hit scores
+    coverGradient: "from-green-500 to-emerald-700"
   }
 ];
 
@@ -146,10 +389,7 @@ export const artistInfo = {
   streaming: {
     spotify: "https://open.spotify.com/artist/3JwFt4Qb3uAUzipnMyM6G6",
     appleMusic: "https://music.apple.com/us/artist/mike-page/1515325834",
-    amazonMusic: "https://music.amazon.com/artists/B08F4HKQ6B",
-    tidal: "https://tidal.com/browse/artist/mike-page",
-    deezer: "https://www.deezer.com/artist/mike-page",
-    youtube: "https://music.youtube.com/channel/mike-page"
+    amazonMusic: "https://music.amazon.com/artists/B08F4HKQ6B"
   },
   cashApp: "$RIDE4PAGEMUSIC847"
 };
