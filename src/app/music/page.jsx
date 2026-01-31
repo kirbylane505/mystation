@@ -6,6 +6,9 @@
 import { tracks, albums } from '@/data/tracks';
 import MusicPageClient from './MusicPageClient';
 
+// Force dynamic rendering for track-specific OG tags
+export const dynamic = 'force-dynamic';
+
 // Dynamic metadata for link previews
 export async function generateMetadata({ searchParams }) {
   const trackId = searchParams?.track;
