@@ -122,17 +122,15 @@ export default function TrackList({ trackIds, showAlbum = true, showNumber = tru
               )}
             </div>
 
-            {/* Duration & Actions */}
-            <div className="col-span-1 flex items-center justify-end gap-2">
-              {/* Reactions - always visible */}
-              <div onClick={(e) => e.stopPropagation()}>
+            {/* Duration & Actions - Share always visible */}
+            <div className="col-span-1 flex items-center justify-end gap-3">
+              <div onClick={(e) => e.stopPropagation()} className="flex items-center">
                 <SongReactions trackId={track.id} size="sm" />
               </div>
-              {/* Share - always visible */}
-              <div onClick={(e) => e.stopPropagation()}>
+              <div onClick={(e) => e.stopPropagation()} className="flex items-center">
                 <ShareButton track={track} />
               </div>
-              <span className="text-white/30 text-sm font-mono hidden md:inline">
+              <span className="text-white/30 text-sm font-mono hidden sm:inline">
                 {track.duration}
               </span>
             </div>
