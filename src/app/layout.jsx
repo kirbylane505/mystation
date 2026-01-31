@@ -17,6 +17,37 @@ export const metadata = {
   },
   description: 'Stream Mike Page music for free. All donations support youth music programs through the Mike Page Foundation.',
   keywords: 'Mike Page, IDMG, hip-hop, music streaming, donation, foundation',
+
+  // Open Graph - Shows when sharing on social media/iMessage
+  openGraph: {
+    title: 'FAVORITE PERSON - Mike Page | MyStation',
+    description: 'Stream "Favorite Person" by Mike Page FREE on MyStation. Prod. The Cubist (SHOW_IDMG).',
+    url: 'https://mystation.vercel.app',
+    siteName: 'MyStation',
+    images: [
+      {
+        url: '/images/og-favorite-person.png',
+        width: 1200,
+        height: 630,
+        alt: 'Favorite Person - Mike Page - Stream on MyStation',
+      },
+    ],
+    locale: 'en_US',
+    type: 'music.song',
+  },
+
+  // Twitter Card
+  twitter: {
+    card: 'summary_large_image',
+    title: 'FAVORITE PERSON - Mike Page',
+    description: 'Stream FREE on MyStation. Prod. The Cubist.',
+    images: ['/images/og-favorite-person.png'],
+  },
+
+  // Apple/iMessage specific
+  other: {
+    'apple-mobile-web-app-title': 'MyStation',
+  },
 };
 
 export default function RootLayout({ children }) {
