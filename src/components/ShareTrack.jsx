@@ -16,9 +16,9 @@ export default function ShareTrack({ track }) {
   const siteUrl = 'https://mystation.vercel.app';
   const trackUrl = `${siteUrl}/music?track=${track.id}`;
 
-  // Share message
+  // Share message - title prominent, encourages engagement back on site
   const shareTitle = `${track.title} - Mike Page`;
-  const shareText = `Check out "${track.title}" by Mike Page on MyStation! 🎵\n\nListen free & support the Mike Page Foundation.`;
+  const shareText = `🎵 "${track.title}" - Mike Page\n\nTap to listen & drop a 🔥 if it's fire!`;
 
   // Native Web Share API (works on mobile) - shares link only, no file downloads
   const handleNativeShare = async () => {
