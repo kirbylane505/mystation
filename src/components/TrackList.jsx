@@ -123,16 +123,16 @@ export default function TrackList({ trackIds, showAlbum = true, showNumber = tru
             </div>
 
             {/* Duration & Actions */}
-            <div className="col-span-1 flex items-center justify-end gap-3">
-              {/* Reactions */}
-              <div className="opacity-0 group-hover:opacity-100 transition" onClick={(e) => e.stopPropagation()}>
+            <div className="col-span-1 flex items-center justify-end gap-2">
+              {/* Reactions - always visible */}
+              <div onClick={(e) => e.stopPropagation()}>
                 <SongReactions trackId={track.id} size="sm" />
               </div>
-              {/* Share */}
-              <div className="opacity-0 group-hover:opacity-100 transition" onClick={(e) => e.stopPropagation()}>
+              {/* Share - always visible */}
+              <div onClick={(e) => e.stopPropagation()}>
                 <ShareButton track={track} />
               </div>
-              <span className="text-white/30 text-sm font-mono">
+              <span className="text-white/30 text-sm font-mono hidden md:inline">
                 {track.duration}
               </span>
             </div>
