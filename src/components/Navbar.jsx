@@ -5,20 +5,52 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import DonationButton from './DonationButton';
 import AuthModal from './AuthModal';
-import { useUserStore } from '@/store/playerStore';
-import { Menu, X, Search, User, Headphones, Gift, LogOut, Heart, Film, Flame, Trophy } from 'lucide-react';
+import { useUserStore, usePlayerStore } from '@/store/playerStore';
+import { Menu, X, Search, User, Headphones, Gift, LogOut, Heart, Film, Flame, Trophy, Music, Play } from 'lucide-react';
 import { useEngagementStore } from '@/store/engagementStore';
+import { tracks } from '@/data/tracks';
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState('signup');
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const searchRef = useRef(null);
   const { user, isLoggedIn, logout } = useUserStore();
   const { currentStreak, earnedBadges } = useEngagementStore();
+  const { setQueue } = usePlayerStore();
+
+  // Filter tracks based on search
+  const searchResults = searchQuery.length > 1
+    ? tracks.filter(t =>
+        t.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        t.album?.toLowerCase().includes(searchQuery.toLowerCase())
+      ).slice(0, 6)
+    : [];
+
+  // Play track from search
+  const playFromSearch = (track) => {
+    const idx = tracks.findIndex(t => t.id === track.id);
+    setQueue(tracks, idx >= 0 ? idx : 0);
+    setSearchOpen(false);
+    setSearchQuery('');
+  };
+
+  // Close search on click outside
+  useEffect(() => {
+    const handleClick = (e) => {
+      if (searchRef.current && !searchRef.current.contains(e.target)) {
+        setSearchOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
 
   // Check for saved user on mount
   useEffect(() => {
@@ -91,9 +123,59 @@ export default function Navbar() {
 
             {/* Actions */}
             <div className="hidden md:flex items-center gap-4">
-              <button className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 transition">
-                <Search size={18} />
-              </button>
+              {/* Search */}
+              <div className="relative" ref={searchRef}>
+                {searchOpen ? (
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      placeholder="Search songs..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      autoFocus
+                      className="w-64 px-4 py-2 bg-white/10 border border-white/20 rounded-full text-white placeholder-white/40 text-sm focus:outline-none focus:border-blue-500"
+                    />
+                    <button onClick={() => { setSearchOpen(false); setSearchQuery(''); }} className="text-white/60 hover:text-white">
+                      <X size={18} />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setSearchOpen(true)}
+                    className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 transition"
+                  >
+                    <Search size={18} />
+                  </button>
+                )}
+
+                {/* Search Results Dropdown */}
+                {searchOpen && searchResults.length > 0 && (
+                  <div className="absolute top-12 right-0 w-80 bg-mystation-navy/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50">
+                    {searchResults.map((track) => (
+                      <button
+                        key={track.id}
+                        onClick={() => playFromSearch(track)}
+                        className="w-full flex items-center gap-3 p-3 hover:bg-white/10 transition text-left"
+                      >
+                        <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center shrink-0">
+                          <Music size={16} className="text-blue-400" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-white font-medium text-sm truncate">{track.title}</p>
+                          <p className="text-white/50 text-xs truncate">{track.album}</p>
+                        </div>
+                        <Play size={16} className="text-white/40" />
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {searchOpen && searchQuery.length > 1 && searchResults.length === 0 && (
+                  <div className="absolute top-12 right-0 w-80 bg-mystation-navy/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl p-4 z-50">
+                    <p className="text-white/50 text-sm text-center">No songs found</p>
+                  </div>
+                )}
+              </div>
               <DonationButton />
 
               {isLoggedIn ? (

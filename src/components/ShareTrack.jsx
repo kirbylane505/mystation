@@ -6,51 +6,24 @@
 'use client';
 
 import { useState } from 'react';
-import { Share2, Mail, MessageCircle, Link2, Download, Check, X, Copy } from 'lucide-react';
+import { Share2, Mail, MessageCircle, Link2, Check, X } from 'lucide-react';
 
-export default function ShareTrack({ track, audioUrl }) {
+export default function ShareTrack({ track }) {
   const [showModal, setShowModal] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [sending, setSending] = useState(false);
 
-  // Full URL for the track
-  const siteUrl = typeof window !== 'undefined' ? window.location.origin : 'https://mystation.vercel.app';
+  // Always use production URL for sharing - never localhost
+  const siteUrl = 'https://mystation.vercel.app';
   const trackUrl = `${siteUrl}/music?track=${track.id}`;
-  const audioFileUrl = `${siteUrl}${audioUrl}`;
 
   // Share message
   const shareTitle = `${track.title} - Mike Page`;
   const shareText = `Check out "${track.title}" by Mike Page on MyStation! 🎵\n\nListen free & support the Mike Page Foundation.`;
 
-  // Native Web Share API (works on mobile)
+  // Native Web Share API (works on mobile) - shares link only, no file downloads
   const handleNativeShare = async () => {
-    // Check if native share is supported
     if (navigator.share) {
       try {
-        // Try sharing the audio file directly (works on some devices)
-        if (navigator.canShare && audioUrl) {
-          try {
-            const response = await fetch(audioFileUrl);
-            if (response.ok) {
-              const blob = await response.blob();
-              const file = new File([blob], `${track.title}.mp3`, { type: 'audio/mpeg' });
-
-              if (navigator.canShare({ files: [file] })) {
-                await navigator.share({
-                  title: shareTitle,
-                  text: shareText,
-                  files: [file]
-                });
-                return;
-              }
-            }
-          } catch (fetchErr) {
-            // Audio file fetch failed, continue to URL share
-            console.log('Audio fetch skipped, sharing URL instead');
-          }
-        }
-
-        // Fallback to sharing URL
         await navigator.share({
           title: shareTitle,
           text: shareText,
@@ -58,12 +31,10 @@ export default function ShareTrack({ track, audioUrl }) {
         });
       } catch (err) {
         if (err.name !== 'AbortError') {
-          // Share failed or was cancelled, show modal as fallback
           setShowModal(true);
         }
       }
     } else {
-      // No native share support, show modal
       setShowModal(true);
     }
   };
@@ -90,7 +61,7 @@ export default function ShareTrack({ track, audioUrl }) {
   // Send via Email
   const sendEmail = () => {
     const subject = encodeURIComponent(shareTitle);
-    const body = encodeURIComponent(`${shareText}\n\n🎧 Listen here: ${trackUrl}\n\n📥 Download: ${audioFileUrl}`);
+    const body = encodeURIComponent(`${shareText}\n\n🎧 Listen here: ${trackUrl}`);
     window.open(`mailto:?subject=${subject}&body=${body}`, '_blank');
   };
 
@@ -99,43 +70,6 @@ export default function ShareTrack({ track, audioUrl }) {
     const body = encodeURIComponent(`${shareText}\n\n🎧 ${trackUrl}`);
     // sms: works on iOS and Android
     window.open(`sms:?body=${body}`, '_blank');
-  };
-
-  // Download file
-  const downloadFile = async () => {
-    if (!audioUrl) {
-      alert('No audio file available for download');
-      return;
-    }
-
-    try {
-      // Get file extension from the audio URL
-      const ext = audioUrl.split('.').pop() || 'wav';
-
-      // Fetch the file first to ensure it's downloadable
-      const response = await fetch(audioFileUrl);
-      if (!response.ok) throw new Error('File not found');
-
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${track.title} - Mike Page.${ext}`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    } catch (err) {
-      // Fallback: try direct link download
-      const a = document.createElement('a');
-      a.href = audioFileUrl;
-      a.download = `${track.title} - Mike Page.wav`;
-      a.target = '_blank';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    }
   };
 
   return (
@@ -216,20 +150,6 @@ export default function ShareTrack({ track, audioUrl }) {
                   <p className="text-sm text-white/50">Share anywhere you want</p>
                 </div>
               </button>
-
-              {/* Download */}
-              <button
-                onClick={downloadFile}
-                className="w-full flex items-center gap-4 p-4 bg-orange-500/10 hover:bg-orange-500/20 rounded-xl border border-orange-500/30 transition"
-              >
-                <div className="w-12 h-12 bg-orange-500/20 rounded-full flex items-center justify-center">
-                  <Download size={24} className="text-orange-400" />
-                </div>
-                <div className="text-left">
-                  <p className="font-bold text-white">Download File</p>
-                  <p className="text-sm text-white/50">Save MP3/WAV to your device</p>
-                </div>
-              </button>
             </div>
 
             {/* Footer */}
@@ -246,6 +166,6 @@ export default function ShareTrack({ track, audioUrl }) {
 }
 
 // Compact inline share for track lists
-export function ShareButton({ track, audioUrl }) {
-  return <ShareTrack track={track} audioUrl={audioUrl} />;
+export function ShareButton({ track }) {
+  return <ShareTrack track={track} />;
 }

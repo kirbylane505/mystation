@@ -130,7 +130,7 @@ export default function TrackList({ trackIds, showAlbum = true, showNumber = tru
               </div>
               {/* Share */}
               <div className="opacity-0 group-hover:opacity-100 transition" onClick={(e) => e.stopPropagation()}>
-                <ShareButton track={track} audioUrl={track.audioFile} />
+                <ShareButton track={track} />
               </div>
               <span className="text-white/30 text-sm font-mono">
                 {track.duration}
