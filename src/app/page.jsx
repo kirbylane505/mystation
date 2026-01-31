@@ -356,9 +356,13 @@ export default function HomePage() {
             <p className="text-white/30 text-sm">
               © 2026 MyStation. A Mike Page Foundation 501(c)(3) Initiative.
             </p>
-            <p className="text-white/30 text-sm">
-              Made with 💙 for the culture
-            </p>
+            <div className="flex items-center gap-4">
+              <Link href="/privacy" className="text-white/30 text-sm hover:text-white/50 transition">Privacy</Link>
+              <Link href="/terms" className="text-white/30 text-sm hover:text-white/50 transition">Terms</Link>
+              <p className="text-white/30 text-sm">
+                Made with love for the culture
+              </p>
+            </div>
           </div>
         </div>
       </footer>

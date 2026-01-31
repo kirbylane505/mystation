@@ -5,31 +5,32 @@
 
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import {
   Play, Pause, Music, Send, Gift, Star,
   Award, CheckCircle, Info, Sparkles, Heart
 } from 'lucide-react';
 import { untitledTracks, publishingInfo } from '@/data/untitled-tracks';
+import { usePlayerStore } from '@/store/playerStore';
 
 export default function NameThisSongPage() {
-  const [currentTrack, setCurrentTrack] = useState(null);
-  const [isPlaying, setIsPlaying] = useState(false);
   const [submissions, setSubmissions] = useState({});
   const [submitted, setSubmitted] = useState({});
-  const audioRef = useRef(null);
+
+  // Use global player store - ensures only ONE song plays at a time
+  const { currentTrack, isPlaying, setTrack, pause, play } = usePlayerStore();
 
   const playTrack = (track) => {
+    // Check if this track is currently playing
     if (currentTrack?.id === track.id && isPlaying) {
-      audioRef.current?.pause();
-      setIsPlaying(false);
+      pause();
     } else {
-      if (audioRef.current) {
-        audioRef.current.src = track.audioFile;
-        audioRef.current.play();
-        setIsPlaying(true);
-        setCurrentTrack(track);
-      }
+      // Set track in global player - this automatically stops any other playing track
+      setTrack({
+        ...track,
+        title: track.workingTitle,
+        album: 'Untitled'
+      });
     }
   };
 
@@ -65,8 +66,7 @@ export default function NameThisSongPage() {
 
   return (
     <div className="min-h-screen bg-mystation-darker">
-      {/* Hidden Audio Element */}
-      <audio ref={audioRef} onEnded={() => setIsPlaying(false)} />
+      {/* Audio handled by global AudioPlayer - only ONE song plays at a time */}
 
       {/* Hero Section */}
       <section className="relative py-20 overflow-hidden">
