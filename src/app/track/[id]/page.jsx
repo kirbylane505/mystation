@@ -1,10 +1,10 @@
 /**
  * MYSTATION - Track Page with Dynamic OG Tags
- * Redirects to music player after setting proper OG metadata
+ * Shows OG metadata for link previews, then redirects to player
  */
 
 import { tracks, albums } from '@/data/tracks';
-import { redirect } from 'next/navigation';
+import TrackRedirect from './TrackRedirect';
 
 export const dynamic = 'force-dynamic';
 
@@ -43,5 +43,7 @@ export async function generateMetadata({ params }) {
 
 export default async function TrackPage({ params }) {
   const { id } = await params;
-  redirect(`/music?track=${id}`);
+  const track = tracks.find(t => t.id === parseInt(id));
+
+  return <TrackRedirect trackId={id} trackTitle={track?.title || 'Track'} />;
 }
