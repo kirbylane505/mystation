@@ -50,26 +50,31 @@ export default function DonationButton({ variant = 'default' }) {
 
       {/* Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="w-full max-w-md glass rounded-3xl overflow-hidden border border-white/10">
-            {/* Header */}
-            <div className="relative p-8 pb-6">
-              <div className="absolute inset-0 bg-gradient-to-br from-green-500/20 to-transparent" />
-              <div className="relative flex items-center justify-between">
-                <div>
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md"
+          onClick={() => setIsModalOpen(false)}
+        >
+          <div className="relative w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+            {/* Close button OUTSIDE card */}
+            <button
+              onClick={() => setIsModalOpen(false)}
+              className="absolute -top-14 right-0 flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-full transition z-30"
+            >
+              <X size={22} className="text-white" />
+              <span className="text-white font-medium">Close</span>
+            </button>
+
+            <div className="glass rounded-3xl overflow-hidden border border-white/10">
+              {/* Header */}
+              <div className="relative p-8 pb-6">
+                <div className="absolute inset-0 bg-gradient-to-br from-green-500/20 to-transparent" />
+                <div className="relative">
                   <h3 className="text-2xl font-bold text-white mb-1">Support the Music</h3>
                   <p className="text-white/50 text-sm">
                     100% goes to Mike Page Foundation
                   </p>
                 </div>
-                <button
-                  onClick={() => setIsModalOpen(false)}
-                  className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 transition"
-                >
-                  <X size={20} />
-                </button>
               </div>
-            </div>
 
             {/* Content */}
             <div className="p-8 pt-2">
@@ -143,6 +148,16 @@ export default function DonationButton({ variant = 'default' }) {
               >
                 Or open Cash App to enter custom amount →
               </button>
+
+              {/* Close button at bottom */}
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="w-full mt-4 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-medium transition flex items-center justify-center gap-2"
+              >
+                <X size={18} />
+                Close
+              </button>
+            </div>
             </div>
           </div>
         </div>
