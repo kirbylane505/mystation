@@ -56,7 +56,7 @@ export default function RootLayout({ children }) {
       <body className="min-h-screen bg-mystation-darker">
         <ClientProviders>
           <Navbar />
-          <main className="pt-16 pb-28">
+          <main className="pt-20 md:pt-24 pb-28">
             {children}
           </main>
           <Player />
