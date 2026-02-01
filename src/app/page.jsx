@@ -8,7 +8,6 @@
 import Hero from '@/components/Hero';
 import FeaturedSong from '@/components/FeaturedSong';
 import TrackList from '@/components/TrackList';
-import DonationButton from '@/components/DonationButton';
 import ActivityFeed from '@/components/ActivityFeed';
 import DailySpin from '@/components/DailySpin';
 import { tracks, albums, playlists, artistInfo, getOfficialTracks, featuredSong } from '@/data/tracks';
@@ -266,7 +265,6 @@ export default function HomePage() {
                 ))}
               </div>
 
-              <DonationButton variant="hero" />
             </div>
 
             <div className="grid grid-cols-2 gap-6">

@@ -5,7 +5,6 @@
 
 'use client';
 
-import DonationButton from '@/components/DonationButton';
 import { artistInfo } from '@/data/tracks';
 import { Heart, Music, Award, Users, MapPin, Calendar, ExternalLink, Check } from 'lucide-react';
 
@@ -32,8 +31,7 @@ export default function AboutPage() {
             100% of MyStation donations go directly to our programs.
           </p>
 
-          <DonationButton variant="hero" />
-        </div>
+                  </div>
       </div>
 
       {/* Mission */}
@@ -219,8 +217,7 @@ export default function AboutPage() {
           Stream for free. Donate what you can. Every contribution helps us
           build a stronger community through music.
         </p>
-        <DonationButton variant="hero" />
-      </section>
+              </section>
     </div>
   );
 }

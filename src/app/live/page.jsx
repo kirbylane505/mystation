@@ -6,7 +6,6 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import DonationButton from '@/components/DonationButton';
 import { Radio, Users, Heart, MessageCircle, Send, Bell, Calendar, Video, Upload, Camera, X, Play, StopCircle, Sparkles } from 'lucide-react';
 
 export default function LivePage() {
@@ -319,7 +318,6 @@ export default function LivePage() {
                 <p className="text-white/60 mb-4 text-sm">
                   Donations show on stream! 100% goes to Mike Page Foundation
                 </p>
-                <DonationButton variant="hero" />
               </div>
             </div>
 

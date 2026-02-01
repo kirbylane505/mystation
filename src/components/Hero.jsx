@@ -5,7 +5,6 @@
 
 'use client';
 
-import DonationButton from './DonationButton';
 import { Play, Users, Music, Heart, Sparkles } from 'lucide-react';
 import { tracks, getOfficialTracks } from '@/data/tracks';
 import { usePlayerStore } from '@/store/playerStore';
@@ -90,7 +89,6 @@ export default function Hero() {
                 <Play size={20} fill="white" />
                 Play Now
               </button>
-              <DonationButton variant="hero" />
             </div>
           </div>
 
