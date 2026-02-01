@@ -58,10 +58,10 @@ export default function DonationButton({ variant = 'default' }) {
           {/* EXIT BUTTON - BIG AND RED AT TOP */}
           <button
             onClick={() => setIsModalOpen(false)}
-            className="mb-6 flex items-center gap-3 px-8 py-4 bg-red-600 hover:bg-red-700 rounded-2xl transition shadow-lg shadow-red-600/50"
+            className="mb-6 flex items-center gap-3 px-10 py-5 bg-red-600 hover:bg-red-700 rounded-2xl transition shadow-2xl shadow-red-600/50 border-4 border-white"
           >
-            <X size={28} className="text-white" strokeWidth={3} />
-            <span className="text-white font-bold text-xl">EXIT</span>
+            <X size={32} className="text-white" strokeWidth={3} />
+            <span className="text-white font-black text-2xl uppercase tracking-wider">EXIT / GO BACK</span>
           </button>
 
           <div className="relative w-full max-w-md max-h-[70vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
