@@ -1,6 +1,7 @@
 /**
  * MYSTATION - Cash App Donation Button
  * Direct payments to $RIDE4PAGEMUSIC847
+ * Updated: 2026-01-31 7:27pm - Close button fix
  */
 
 'use client';
@@ -51,16 +52,16 @@ export default function DonationButton({ variant = 'default' }) {
       {/* Modal */}
       {isModalOpen && (
         <div
-          className="fixed inset-0 z-[100] flex flex-col items-center justify-center p-4 bg-black/95"
+          className="fixed inset-0 z-[9999] flex flex-col items-center justify-start pt-8 p-4 bg-black"
           onClick={() => setIsModalOpen(false)}
         >
-          {/* TOP CLOSE BUTTON - Always visible */}
+          {/* EXIT BUTTON - BIG AND RED AT TOP */}
           <button
             onClick={() => setIsModalOpen(false)}
-            className="mb-4 flex items-center gap-2 px-6 py-3 bg-red-500 hover:bg-red-600 rounded-full transition"
+            className="mb-6 flex items-center gap-3 px-8 py-4 bg-red-600 hover:bg-red-700 rounded-2xl transition shadow-lg shadow-red-600/50"
           >
-            <X size={24} className="text-white" />
-            <span className="text-white font-bold text-lg">CLOSE</span>
+            <X size={28} className="text-white" strokeWidth={3} />
+            <span className="text-white font-bold text-xl">EXIT</span>
           </button>
 
           <div className="relative w-full max-w-md max-h-[70vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
