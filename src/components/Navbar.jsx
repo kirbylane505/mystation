@@ -7,7 +7,6 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import DonationButton from './DonationButton';
 import AuthModal from './AuthModal';
 import { useUserStore, usePlayerStore } from '@/store/playerStore';
 import { Menu, X, Search, User, Headphones, Gift, LogOut, Heart, Film, Flame, Trophy, Music, Play } from 'lucide-react';
@@ -179,7 +178,6 @@ export default function Navbar() {
                   </div>
                 )}
               </div>
-              <DonationButton />
 
               {isLoggedIn ? (
                 /* Logged In State */
@@ -296,7 +294,6 @@ export default function Navbar() {
                     </button>
                   </>
                 )}
-                <DonationButton variant="hero" />
               </div>
             </div>
           </div>
