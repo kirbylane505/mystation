@@ -41,10 +41,10 @@ export default function DonationPopup() {
   if (!isVisible) return null;
 
   return (
-    <div className="fixed inset-0 z-[90] flex items-center justify-center p-4">
-      {/* Backdrop */}
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      {/* Backdrop - fully opaque to prevent bleed-through */}
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/90 backdrop-blur-md"
         onClick={handleClose}
       />
 

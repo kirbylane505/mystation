@@ -60,7 +60,7 @@ export default function DailySpin() {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-[100] flex items-center justify-center p-4">
           <div className="glass rounded-2xl max-w-lg w-full animate-scale-in overflow-hidden">
             {/* Header */}
             <div className="relative p-6 border-b border-white/10 bg-gradient-to-r from-purple-500/20 to-pink-500/20">
