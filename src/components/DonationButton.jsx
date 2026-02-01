@@ -51,25 +51,25 @@ export default function DonationButton({ variant = 'default' }) {
       {/* Modal */}
       {isModalOpen && (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md"
+          className="fixed inset-0 z-[100] flex flex-col items-center justify-center p-4 bg-black/95"
           onClick={() => setIsModalOpen(false)}
         >
-          <div className="relative w-full max-w-md" onClick={(e) => e.stopPropagation()}>
-            {/* Close button OUTSIDE card */}
-            <button
-              onClick={() => setIsModalOpen(false)}
-              className="absolute -top-14 right-0 flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-full transition z-30"
-            >
-              <X size={22} className="text-white" />
-              <span className="text-white font-medium">Close</span>
-            </button>
+          {/* TOP CLOSE BUTTON - Always visible */}
+          <button
+            onClick={() => setIsModalOpen(false)}
+            className="mb-4 flex items-center gap-2 px-6 py-3 bg-red-500 hover:bg-red-600 rounded-full transition"
+          >
+            <X size={24} className="text-white" />
+            <span className="text-white font-bold text-lg">CLOSE</span>
+          </button>
 
+          <div className="relative w-full max-w-md max-h-[70vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="glass rounded-3xl overflow-hidden border border-white/10">
               {/* Header */}
-              <div className="relative p-8 pb-6">
+              <div className="relative p-6 pb-4">
                 <div className="absolute inset-0 bg-gradient-to-br from-green-500/20 to-transparent" />
                 <div className="relative">
-                  <h3 className="text-2xl font-bold text-white mb-1">Support the Music</h3>
+                  <h3 className="text-xl font-bold text-white mb-1">Support the Music</h3>
                   <p className="text-white/50 text-sm">
                     100% goes to Mike Page Foundation
                   </p>
@@ -77,7 +77,7 @@ export default function DonationButton({ variant = 'default' }) {
               </div>
 
             {/* Content */}
-            <div className="p-8 pt-2">
+            <div className="p-6 pt-2">
               {/* Cash App Badge */}
               <div className="flex items-center justify-center gap-3 mb-6 p-4 bg-green-500/10 rounded-2xl border border-green-500/20">
                 <div className="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center">
