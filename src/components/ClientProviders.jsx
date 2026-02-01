@@ -1,17 +1,10 @@
 /**
- * MYSTATION - Client-side Providers & Modals
- * Wraps app with global client components
+ * MYSTATION - Client-side Providers
+ * Clean - no popups, no modals
  */
 
 'use client';
 
-import SubscribeModal from './SubscribeModal';
-
 export default function ClientProviders({ children }) {
-  return (
-    <>
-      {children}
-      <SubscribeModal />
-    </>
-  );
+  return <>{children}</>;
 }
