@@ -163,23 +163,6 @@ export const usePlayerStore = create((set, get) => ({
   }),
 }));
 
-// Donation state
-export const useDonationStore = create((set) => ({
-  donationAmount: null,
-  showDonationModal: false,
-  recentDonations: [],
-  totalRaised: 0,
-
-  setDonationAmount: (amount) => set({ donationAmount: amount }),
-  openDonationModal: () => set({ showDonationModal: true }),
-  closeDonationModal: () => set({ showDonationModal: false }),
-
-  addDonation: (donation) => set((state) => ({
-    recentDonations: [donation, ...state.recentDonations].slice(0, 10),
-    totalRaised: state.totalRaised + donation.amount
-  })),
-}));
-
 // User state with persistence
 export const useUserStore = create(
   persist(
