@@ -6,14 +6,12 @@
 'use client';
 
 import SubscribeModal from './SubscribeModal';
-import DonationPopup from './DonationPopup';
 
 export default function ClientProviders({ children }) {
   return (
     <>
       {children}
       <SubscribeModal />
-      <DonationPopup />
     </>
   );
 }
