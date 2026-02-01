@@ -50,6 +50,15 @@ export default function DonationPopup() {
 
       {/* Popup */}
       <div className="relative w-full max-w-md animate-fade-in">
+        {/* Close button - OUTSIDE the card for visibility */}
+        <button
+          onClick={handleClose}
+          className="absolute -top-12 right-0 p-3 bg-white/20 hover:bg-white/30 rounded-full transition z-30 flex items-center gap-2"
+        >
+          <X size={24} className="text-white" />
+          <span className="text-white font-medium pr-1">Close</span>
+        </button>
+
         <div className="glass rounded-3xl overflow-hidden border border-white/20 shadow-2xl">
           {/* Gradient header */}
           <div className="relative bg-gradient-to-br from-pink-500 via-red-500 to-orange-500 px-6 py-8 text-center overflow-hidden">
@@ -69,14 +78,6 @@ export default function DonationPopup() {
                 />
               ))}
             </div>
-
-            {/* Close button */}
-            <button
-              onClick={handleClose}
-              className="absolute top-6 right-4 p-3 bg-white/30 rounded-full hover:bg-white/40 transition z-20"
-            >
-              <X size={22} className="text-white" />
-            </button>
 
             {/* Icon */}
             <div className="relative w-16 h-16 mx-auto mb-4 bg-white/20 rounded-full flex items-center justify-center">
