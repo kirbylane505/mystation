@@ -73,9 +73,9 @@ export default function DonationPopup() {
             {/* Close button */}
             <button
               onClick={handleClose}
-              className="absolute top-3 right-3 p-2 bg-white/20 rounded-full hover:bg-white/30 transition"
+              className="absolute top-6 right-4 p-3 bg-white/30 rounded-full hover:bg-white/40 transition z-20"
             >
-              <X size={18} className="text-white" />
+              <X size={22} className="text-white" />
             </button>
 
             {/* Icon */}
