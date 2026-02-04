@@ -10,7 +10,6 @@ import { useEngagementStore } from '@/store/engagementStore';
 import { useLoyaltyStore } from '@/store/loyaltyStore';
 import StreakBadges from '@/components/StreakBadges';
 import ActivityFeed from '@/components/ActivityFeed';
-import Leaderboard from '@/components/Leaderboard';
 import UnlockProgress from '@/components/UnlockProgress';
 import DailySpin from '@/components/DailySpin';
 import LoyaltyProgress from '@/components/LoyaltyProgress';
@@ -109,9 +108,8 @@ export default function FanZonePage() {
 
       {/* Loyalty Progress */}
       <section className="max-w-screen-xl mx-auto px-6 pb-12">
-        <div className="grid lg:grid-cols-2 gap-8">
+        <div className="grid lg:grid-cols-1 gap-8">
           <LoyaltyProgress />
-          <Leaderboard limit={5} />
         </div>
       </section>
 
@@ -124,9 +122,9 @@ export default function FanZonePage() {
             <UnlockProgress />
           </div>
 
-          {/* Center Column - Full Leaderboard */}
+          {/* Center Column - Vault Preview */}
           <div>
-            <Leaderboard showFull={true} />
+            <VaultPreview />
           </div>
 
           {/* Right Column - Activity Feed */}
