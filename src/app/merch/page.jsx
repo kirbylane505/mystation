@@ -468,6 +468,71 @@ export default function MerchPage() {
         </div>
       </section>
 
+      {/* LOTL Kids Collection */}
+      <section className="py-16 relative overflow-hidden bg-gradient-to-r from-pink-900/30 via-purple-900/30 to-blue-900/30">
+        <div className="relative max-w-screen-xl mx-auto px-6">
+          <div className="text-center mb-10">
+            <span className="inline-block px-4 py-1 bg-pink-500/20 text-pink-400 text-sm font-bold rounded-full mb-4">NEW - KIDS COLLECTION</span>
+            <h2 className="text-3xl font-bold text-white mb-2">LOTL Kids Merch</h2>
+            <p className="text-white/60">Love on the Lawn Festival gear for the little ones. 100% supports youth music programs!</p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8 max-w-2xl mx-auto">
+            {/* Kids T-Shirt */}
+            <a
+              href="https://buy.stripe.com/28EcN6e0Wgoo9D50xs73G02"
+              className="group glass rounded-2xl overflow-hidden hover:border-pink-500/50 transition-all duration-300 block"
+            >
+              <div className="aspect-square relative overflow-hidden bg-gradient-to-br from-pink-500/20 to-purple-500/20 flex items-center justify-center">
+                <div className="text-center p-6">
+                  <div className="text-6xl mb-4">👕</div>
+                  <span className="text-white/60">Image Coming Soon</span>
+                </div>
+                <div className="absolute top-4 left-4 px-3 py-1 text-xs font-bold rounded-full bg-pink-500 text-white">
+                  KIDS
+                </div>
+              </div>
+              <div className="p-5">
+                <h3 className="text-lg font-bold text-white mb-1">LOTL Kids T-Shirt</h3>
+                <p className="text-white/40 text-sm mb-3">Love on the Lawn Festival kids tee. Soft cotton, perfect for little music lovers!</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-2xl font-black text-white">$15.99</span>
+                  <span className="px-4 py-2 bg-pink-500 text-white text-sm font-bold rounded-full group-hover:bg-pink-400 transition">
+                    Buy Now
+                  </span>
+                </div>
+              </div>
+            </a>
+
+            {/* Kids Sweater */}
+            <a
+              href="https://buy.stripe.com/6oUcN61ea7RS6qTcga73G03"
+              className="group glass rounded-2xl overflow-hidden hover:border-purple-500/50 transition-all duration-300 block"
+            >
+              <div className="aspect-square relative overflow-hidden bg-gradient-to-br from-purple-500/20 to-blue-500/20 flex items-center justify-center">
+                <div className="text-center p-6">
+                  <div className="text-6xl mb-4">🧥</div>
+                  <span className="text-white/60">Image Coming Soon</span>
+                </div>
+                <div className="absolute top-4 left-4 px-3 py-1 text-xs font-bold rounded-full bg-purple-500 text-white">
+                  KIDS
+                </div>
+              </div>
+              <div className="p-5">
+                <h3 className="text-lg font-bold text-white mb-1">LOTL Kids Sweater</h3>
+                <p className="text-white/40 text-sm mb-3">Cozy Love on the Lawn sweater for kids. Perfect for festival season!</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-2xl font-black text-white">$24.99</span>
+                  <span className="px-4 py-2 bg-purple-500 text-white text-sm font-bold rounded-full group-hover:bg-purple-400 transition">
+                    Buy Now
+                  </span>
+                </div>
+              </div>
+            </a>
+          </div>
+        </div>
+      </section>
+
       {/* Featured Items */}
       <section className="py-20 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-tr from-blue-900/20 via-transparent to-pink-900/20" />
