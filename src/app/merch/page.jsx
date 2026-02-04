@@ -100,8 +100,8 @@ export default function MerchPage() {
         if (data.success) {
           // Transform Printful products to our format
           const transformedProducts = data.products.map((p, index) => {
-            // ALWAYS use our branded local images - Printful returns blank mockups
-            const brandedImage = getBrandedImage(p.name);
+            // Use Printful's mockup images - they show actual products with our designs
+            const productImage = getBrandedImage(p.name, p.thumbnail_url);
 
             return {
               id: p.id,
@@ -109,8 +109,8 @@ export default function MerchPage() {
               description: getProductDescription(p.name),
               price: 0, // Will be set from variant
               category: getCategory(p.name),
-              image: brandedImage,
-              printfulImage: p.thumbnail_url, // Keep Printful image as backup
+              image: productImage,
+              printfulImage: p.thumbnail_url,
               variants: p.variants,
               synced: p.synced,
               featured: index < 6, // First 6 are featured
@@ -132,47 +132,21 @@ export default function MerchPage() {
     fetchProducts();
   }, []);
 
-  // Get branded image - ALWAYS use our designed mockups, not blank Printful images
-  function getBrandedImage(name) {
+  // Get product image - Use Printful mockups which show actual products with designs
+  function getBrandedImage(name, printfulUrl) {
+    // Printful provides actual product mockups with our designs printed on them
+    // These are better than our local logo-only images
+    if (printfulUrl) {
+      return printfulUrl;
+    }
+
+    // Fallback to local images only if Printful doesn't provide one
     const lower = name.toLowerCase();
 
-    // ALL CAPS/HATS - Use LOTL colorful cap style
-    if (lower.includes('cap') || lower.includes('hat') || lower.includes('structured')) {
-      return '/images/merch/lotl-cap-final.jpg';
-    }
-
-    // LOTL branded items
-    if (lower.includes('lotl') || lower.includes('love on the lawn')) {
-      if (lower.includes('hoodie')) return '/images/merch/lotl-black-hoodie.jpg';
-      if (lower.includes('legging')) return '/images/merch/lotl-leggings-final.jpg';
-      if (lower.includes('tee') || lower.includes('t-shirt')) return '/images/merch/idmg-black-tee-real.jpg';
-    }
-
-    // Hoodies
-    if (lower.includes('hoodie') && lower.includes('white')) return '/images/merch/idmg-white-hoodie.jpg';
+    if (lower.includes('cap') || lower.includes('hat')) return '/images/merch/lotl-cap-final.jpg';
     if (lower.includes('hoodie')) return '/images/merch/idmg-black-hoodie.jpg';
+    if (lower.includes('legging')) return '/images/merch/lotl-leggings-final.jpg';
 
-    // Crewnecks / Sweatshirts
-    if (lower.includes('crewneck') && lower.includes('white')) return '/images/merch/idmg-white-crewneck.jpg';
-    if (lower.includes('crewneck') || lower.includes('sweatshirt')) return '/images/merch/idmg-black-crewneck.jpg';
-
-    // T-shirts
-    if ((lower.includes('t-shirt') || lower.includes('tee')) && lower.includes('white')) return '/images/merch/idmg-white-tee.jpg';
-    if (lower.includes('t-shirt') || lower.includes('tee') || lower.includes('shirt')) return '/images/merch/idmg-black-tee-real.jpg';
-
-    // Baby tees
-    if (lower.includes('baby')) return '/images/merch/idmg-black-tee-real.jpg';
-
-    // Leggings / Pants
-    if (lower.includes('legging') || lower.includes('yoga') || lower.includes('pant')) return '/images/merch/idmg-leggings.jpg';
-
-    // Tracksuit / Joggers
-    if (lower.includes('tracksuit') || lower.includes('jogger') || lower.includes('sweatpant') || lower.includes('shorts')) return '/images/merch/idmg-tracksuit.jpg';
-
-    // Bags / Accessories
-    if (lower.includes('bag') || lower.includes('tote') || lower.includes('backpack')) return '/images/merch/idmg-black-tee-real.jpg';
-
-    // Default - IDMG branded tee (catches everything else)
     return '/images/merch/idmg-black-tee-real.jpg';
   }
 
