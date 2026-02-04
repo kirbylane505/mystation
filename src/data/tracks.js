@@ -365,6 +365,9 @@ export const tracks = [
   { id: 204, title: "Photo Shoot", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/Mike Page - Photo Shoot prod. JT GOLDXN (geemix1.0)L.wav', producer: "JT GOLDXN" },
   { id: 205, title: "Trap Get Ugly", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/Mike Page -TRAP (X6)L.wav', producer: "The Cubist" },
   { id: 206, title: "Walk In Dat Parti", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/idmg x st236 - Mike Page (ruff01) Walk In.wav', producer: "The Cubist" },
+  { id: 207, title: "It's My Bday Bitch", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/Mike Page x Krissie the Don x Chevy - Bday Bitch (x1.0).wav', featured: "Krissie the Don, Chevy", producer: "The Cubist" },
+  { id: 208, title: "Pick It Up, Bag It", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/Mike Page x Majik - Pick it up bagg it (geemix1.0).wav', featured: "Majik", producer: "The Cubist" },
+  { id: 209, title: "From The Town", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/From The Town (feat. Mike Page) [u1qUeN3tabY].mp3', producer: "The Cubist" },
 ];
 
 // Featured Song of the Week
@@ -427,7 +430,7 @@ export const albums = [
     coverGradient: "from-red-600 via-red-800 to-black",
     coverEmoji: "🔒",
     isNew: true,
-    trackIds: [201, 202, 203, 204, 205, 206],
+    trackIds: [201, 202, 203, 204, 205, 206, 207, 208, 209],
     description: "Exclusive tracks from Quick Reels. Family & friends access with code FAMILY2026."
   }
 ];

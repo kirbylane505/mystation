@@ -78,6 +78,19 @@ export const vaultReels = [
     dimensions: '1080x1920',
     vizStyle: 'bass-pulse', // Purple/gold waves
   },
+  {
+    id: 7,
+    title: "It's My Bday Bitch",
+    artist: 'Mike Page ft Krissie the Don & Chevy',
+    producer: 'The Cubist',
+    videoUrl: '/reels/BDAY_BITCH_FREQ_REEL.mp4',
+    addedAt: '2026-02-04',
+    status: 'active',
+    type: 'reel',
+    duration: 90,
+    dimensions: '1080x1920',
+    vizStyle: 'high-particles', // Pink/gold party vibes
+  },
 ];
 
 export default vaultReels;
