@@ -26,9 +26,9 @@ export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const searchRef = useRef(null);
-  const { user, isLoggedIn, logout } = useUserStore();
+  const { user, isLoggedIn, logout, isSubscribed } = useUserStore();
   const { currentStreak } = useEngagementStore();
-  const { setQueue } = usePlayerStore();
+  const { setQueue, openSubscribeModal } = usePlayerStore();
 
   // Nav items with icons
   const navItems = [
@@ -153,9 +153,9 @@ export default function Navbar() {
           })}
 
           {/* Subscribe Button - Always visible for non-subscribers */}
-          {!useUserStore.getState().isSubscribed && (
+          {!isSubscribed && (
             <button
-              onClick={() => usePlayerStore.getState().openSubscribeModal()}
+              onClick={() => openSubscribeModal()}
               className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full hover:shadow-lg hover:shadow-orange-500/30 transition text-white font-bold text-sm animate-pulse"
             >
               <Crown size={16} />
@@ -317,9 +317,9 @@ export default function Navbar() {
             })}
 
             {/* Subscribe Button - Mobile */}
-            {!useUserStore.getState().isSubscribed && (
+            {!isSubscribed && (
               <button
-                onClick={() => { usePlayerStore.getState().openSubscribeModal(); setMobileMenuOpen(false); }}
+                onClick={() => { openSubscribeModal(); setMobileMenuOpen(false); }}
                 className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-xl text-white font-bold mb-4"
               >
                 <Crown size={18} />
