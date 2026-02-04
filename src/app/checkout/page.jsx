@@ -130,21 +130,25 @@ export default function CheckoutPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          recipient: {
+          shipping: {
             name: `${formData.firstName} ${formData.lastName}`,
-            email: formData.email,
-            phone: formData.phone,
             address1: formData.address,
             address2: formData.apartment,
             city: formData.city,
-            state_code: formData.state,
+            state: formData.state,
             zip: formData.zip,
-            country_code: formData.country,
+            country: formData.country,
+          },
+          customer: {
+            email: formData.email,
+            phone: formData.phone,
           },
           items: items.map((item) => ({
-            sync_variant_id: item.printfulSyncVariantId,
+            variantId: item.printfulSyncVariantId,
             quantity: item.quantity,
+            price: item.price,
           })),
+          confirm: false, // Draft order - confirm after payment
         }),
       });
 
