@@ -39,7 +39,8 @@ export const tracks = [
     featuredWeek: '2026-01-29',
     bpm: 76,
     key: 'E Minor',
-    hitScore: 48
+    hitScore: 48,
+    producer: "The Cubist"
   },
   {
     id: 2,
@@ -52,7 +53,8 @@ export const tracks = [
     audioFile: '/audio/cindys-son/Mike Page - Very Special (Main)_MASTERED.wav',
     bpm: 99,
     key: 'G Minor',
-    hitScore: 85
+    hitScore: 85,
+    producer: "The Cubist"
   },
   {
     id: 3,
@@ -65,7 +67,8 @@ export const tracks = [
     audioFile: '/audio/cindys-son/Mike Page - Doing Me (Main)_MASTERED.wav',
     bpm: 140,
     key: 'E Minor',
-    hitScore: 80
+    hitScore: 80,
+    producer: "The Cubist"
   },
   {
     id: 4,
@@ -79,7 +82,8 @@ export const tracks = [
     featured: "Soldier",
     bpm: 86,
     key: 'A Minor',
-    hitScore: 80
+    hitScore: 80,
+    producer: "The Cubist"
   },
   {
     id: 5,
@@ -92,7 +96,8 @@ export const tracks = [
     audioFile: '/audio/cindys-son/Mike Page - 5 Mo (Main)_MASTERED.wav',
     bpm: 133,
     key: 'E Minor',
-    hitScore: 75
+    hitScore: 75,
+    producer: "The Cubist"
   },
   {
     id: 6,
@@ -105,7 +110,8 @@ export const tracks = [
     audioFile: '/audio/cindys-son/Mike Page - Moved South (Main)_MASTERED.wav',
     bpm: 129,
     key: 'E Minor',
-    hitScore: 75
+    hitScore: 75,
+    producer: "The Cubist"
   },
   {
     id: 7,
@@ -118,7 +124,8 @@ export const tracks = [
     audioFile: '/audio/cindys-son/Mike Page - Rich Off Rags (Main)_MASTERED.wav',
     bpm: 112,
     key: 'G Minor',
-    hitScore: 75
+    hitScore: 75,
+    producer: "The Cubist"
   },
   {
     id: 8,
@@ -131,7 +138,8 @@ export const tracks = [
     audioFile: '/audio/cindys-son/Mike Page - Stand Up (Main)_MASTERED.wav',
     bpm: 112,
     key: 'C Major',
-    hitScore: 75
+    hitScore: 75,
+    producer: "The Cubist"
   },
   {
     id: 9,
@@ -144,7 +152,8 @@ export const tracks = [
     audioFile: '/audio/cindys-son/Mike Page - VIBE (Main)_MASTERED.wav',
     bpm: 117,
     key: 'A Minor',
-    hitScore: 75
+    hitScore: 75,
+    producer: "The Cubist"
   },
   {
     id: 10,
@@ -157,7 +166,8 @@ export const tracks = [
     audioFile: '/audio/cindys-son/Mike Page - Ask Yourself_MASTERED.wav',
     bpm: 152,
     key: 'D# Major',
-    hitScore: 70
+    hitScore: 70,
+    producer: "The Cubist"
   },
   {
     id: 11,
@@ -170,7 +180,8 @@ export const tracks = [
     audioFile: '/audio/cindys-son/Mike Page - Meditation (Main)_MASTERED.wav',
     bpm: 129,
     key: 'G Minor',
-    hitScore: 68
+    hitScore: 68,
+    producer: "The Cubist"
   },
   {
     id: 12,
@@ -183,7 +194,8 @@ export const tracks = [
     audioFile: '/audio/cindys-son/Mike Page - Things We Been Through (Main)_MASTERED.wav',
     bpm: 112,
     key: 'B Minor',
-    hitScore: 65
+    hitScore: 65,
+    producer: "The Cubist"
   },
   {
     id: 13,
@@ -196,7 +208,8 @@ export const tracks = [
     audioFile: '/audio/cindys-son/Mike Page - Stretch U Out (Main)_MASTERED.wav',
     bpm: 99,
     key: 'C# Minor',
-    hitScore: 65
+    hitScore: 65,
+    producer: "The Cubist"
   },
   {
     id: 14,
@@ -209,7 +222,8 @@ export const tracks = [
     audioFile: '/audio/cindys-son/Mike Page - Damaged (Main)_MASTERED.wav',
     bpm: 86,
     key: 'C# Minor',
-    hitScore: 65
+    hitScore: 65,
+    producer: "The Cubist"
   },
   {
     id: 15,
@@ -222,7 +236,8 @@ export const tracks = [
     audioFile: '/audio/cindys-son/Mike Page - Ready For Me (Main)_MASTERED.wav',
     bpm: 140,
     key: 'A# Minor',
-    hitScore: 65
+    hitScore: 65,
+    producer: "The Cubist"
   },
   {
     id: 16,
@@ -235,7 +250,8 @@ export const tracks = [
     audioFile: '/audio/cindys-son/Mike Page - What Do We Do..(Main)_MASTERED.wav',
     bpm: 129,
     key: 'D# Minor',
-    hitScore: 65
+    hitScore: 65,
+    producer: "The Cubist"
   },
   {
     id: 17,
@@ -248,7 +264,8 @@ export const tracks = [
     audioFile: '/audio/cindys-son/Mike Page - Suppa Luv Ya Momma (Main)_MASTERED.wav',
     bpm: 99,
     key: 'B Minor',
-    hitScore: 65
+    hitScore: 65,
+    producer: "The Cubist"
   },
   {
     id: 18,
@@ -261,7 +278,8 @@ export const tracks = [
     audioFile: '/audio/cindys-son/Mike Page - Aw Shit (Main)_MASTERED.wav',
     bpm: 123,
     key: 'F# Minor',
-    hitScore: 60
+    hitScore: 60,
+    producer: "The Cubist"
   },
   {
     id: 19,
@@ -274,7 +292,8 @@ export const tracks = [
     audioFile: '/audio/cindys-son/Mike Page - Pick It Up, Bag It (Main)_MASTERED.wav',
     bpm: 120,
     key: 'E Minor',
-    hitScore: 60
+    hitScore: 60,
+    producer: "The Cubist"
   },
   {
     id: 20,
@@ -287,7 +306,8 @@ export const tracks = [
     audioFile: '/audio/cindys-son/Mike Page - Up There (Main)_MASTERED.wav',
     bpm: 115,
     key: 'F# Major',
-    hitScore: 60
+    hitScore: 60,
+    producer: "The Cubist"
   },
   {
     id: 21,
@@ -300,7 +320,8 @@ export const tracks = [
     audioFile: '/audio/cindys-son/Mike Page - I Remember That (Main)_MASTERED.wav',
     bpm: 144,
     key: 'E Minor',
-    hitScore: 55
+    hitScore: 55,
+    producer: "The Cubist"
   },
   {
     id: 22,
@@ -313,7 +334,8 @@ export const tracks = [
     audioFile: '/audio/cindys-son/Mike Page - Til We All Up (Main)_MASTERED.wav',
     bpm: 120,
     key: 'F# Minor',
-    hitScore: 55
+    hitScore: 55,
+    producer: "The Cubist"
   },
   {
     id: 23,
@@ -326,7 +348,8 @@ export const tracks = [
     audioFile: '/audio/cindys-son/Mike Page - Trap (Main)_MASTERED.wav',
     bpm: 152,
     key: 'F Major',
-    hitScore: 55
+    hitScore: 55,
+    producer: "The Cubist"
   },
   // ========================================
   // VAULT - UNNAMED TRACKS (Need Naming)
