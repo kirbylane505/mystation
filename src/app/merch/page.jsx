@@ -136,39 +136,43 @@ export default function MerchPage() {
   function getBrandedImage(name) {
     const lower = name.toLowerCase();
 
-    // LOTL branded items first
+    // ALL CAPS/HATS - Use LOTL colorful cap style
+    if (lower.includes('cap') || lower.includes('hat') || lower.includes('structured')) {
+      return '/images/merch/lotl-cap-final.jpg';
+    }
+
+    // LOTL branded items
     if (lower.includes('lotl') || lower.includes('love on the lawn')) {
       if (lower.includes('hoodie')) return '/images/merch/lotl-black-hoodie.jpg';
       if (lower.includes('legging')) return '/images/merch/lotl-leggings-final.jpg';
-      if (lower.includes('cap') || lower.includes('hat')) return '/images/merch/lotl-cap-final.jpg';
-      if (lower.includes('tee') || lower.includes('t-shirt')) return '/images/merch/lotl-black-hoodie.jpg';
+      if (lower.includes('tee') || lower.includes('t-shirt')) return '/images/merch/idmg-black-tee-real.jpg';
     }
 
     // Hoodies
     if (lower.includes('hoodie') && lower.includes('white')) return '/images/merch/idmg-white-hoodie.jpg';
     if (lower.includes('hoodie')) return '/images/merch/idmg-black-hoodie.jpg';
 
-    // Crewnecks
+    // Crewnecks / Sweatshirts
     if (lower.includes('crewneck') && lower.includes('white')) return '/images/merch/idmg-white-crewneck.jpg';
-    if (lower.includes('crewneck')) return '/images/merch/idmg-black-crewneck.jpg';
+    if (lower.includes('crewneck') || lower.includes('sweatshirt')) return '/images/merch/idmg-black-crewneck.jpg';
 
     // T-shirts
     if ((lower.includes('t-shirt') || lower.includes('tee')) && lower.includes('white')) return '/images/merch/idmg-white-tee.jpg';
-    if (lower.includes('t-shirt') || lower.includes('tee')) return '/images/merch/idmg-black-tee-real.jpg';
+    if (lower.includes('t-shirt') || lower.includes('tee') || lower.includes('shirt')) return '/images/merch/idmg-black-tee-real.jpg';
 
     // Baby tees
     if (lower.includes('baby')) return '/images/merch/idmg-black-tee-real.jpg';
 
-    // Leggings
-    if (lower.includes('legging')) return '/images/merch/idmg-leggings.jpg';
+    // Leggings / Pants
+    if (lower.includes('legging') || lower.includes('yoga') || lower.includes('pant')) return '/images/merch/idmg-leggings.jpg';
 
-    // Tracksuit
-    if (lower.includes('tracksuit') || lower.includes('jogger') || lower.includes('sweatpant')) return '/images/merch/idmg-tracksuit.jpg';
+    // Tracksuit / Joggers
+    if (lower.includes('tracksuit') || lower.includes('jogger') || lower.includes('sweatpant') || lower.includes('shorts')) return '/images/merch/idmg-tracksuit.jpg';
 
-    // Caps/Hats
-    if (lower.includes('cap') || lower.includes('hat')) return '/images/merch/lotl-cap-final.jpg';
+    // Bags / Accessories
+    if (lower.includes('bag') || lower.includes('tote') || lower.includes('backpack')) return '/images/merch/idmg-black-tee-real.jpg';
 
-    // Default - IDMG branded tee
+    // Default - IDMG branded tee (catches everything else)
     return '/images/merch/idmg-black-tee-real.jpg';
   }
 
