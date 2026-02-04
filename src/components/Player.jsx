@@ -184,7 +184,7 @@ export default function Player() {
       {/* Mobile Subscribe Banner */}
       {mounted && !isSubscribed && (
         <a
-          href="https://buy.stripe.com/4gM3cwcWS7RS5mP2FA73G00"
+          href="https://buy.stripe.com/6oUfZi2iea00g1ta8273G01"
           className="md:hidden fixed bottom-[72px] left-0 right-0 bg-gradient-to-r from-yellow-500/90 to-orange-500/90 backdrop-blur-xl z-40"
         >
           <div className="w-full flex items-center justify-center gap-2 py-2 text-white font-semibold text-sm">

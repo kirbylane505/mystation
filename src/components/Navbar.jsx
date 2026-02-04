@@ -155,7 +155,7 @@ export default function Navbar() {
           {/* Subscribe Button - Always visible for non-subscribers */}
           {!isSubscribed && (
             <a
-              href="https://buy.stripe.com/4gM3cwcWS7RS5mP2FA73G00"
+              href="https://buy.stripe.com/6oUfZi2iea00g1ta8273G01"
               className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full hover:shadow-lg hover:shadow-orange-500/30 transition text-white font-bold text-sm animate-pulse"
             >
               <Crown size={16} />
@@ -319,7 +319,7 @@ export default function Navbar() {
             {/* Subscribe Button - Mobile */}
             {!isSubscribed && (
               <a
-                href="https://buy.stripe.com/4gM3cwcWS7RS5mP2FA73G00"
+                href="https://buy.stripe.com/6oUfZi2iea00g1ta8273G01"
                 className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-xl text-white font-bold mb-4"
                 onClick={() => setMobileMenuOpen(false)}
               >

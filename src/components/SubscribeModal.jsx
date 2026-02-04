@@ -24,7 +24,7 @@ export default function SubscribeModal() {
 
     try {
       // Redirect to Stripe payment link - $4.99/month subscription
-      window.location.href = 'https://buy.stripe.com/4gM3cwcWS7RS5mP2FA73G00';
+      window.location.href = 'https://buy.stripe.com/6oUfZi2iea00g1ta8273G01';
     } catch (err) {
       console.error('Subscription error:', err);
       setLoading(false);
