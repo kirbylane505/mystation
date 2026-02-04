@@ -7,7 +7,9 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-export const usePlayerStore = create((set, get) => ({
+export const usePlayerStore = create(
+  persist(
+    (set, get) => ({
   // Current track
   currentTrack: null,
   isPlaying: false,
@@ -160,7 +162,22 @@ export const usePlayerStore = create((set, get) => ({
     const currentIndex = modes.indexOf(state.repeat);
     return { repeat: modes[(currentIndex + 1) % 3] };
   }),
-}));
+}),
+    {
+      name: 'mystation-player',
+      partialize: (state) => ({
+        currentTrack: state.currentTrack,
+        queue: state.queue,
+        queueIndex: state.queueIndex,
+        volume: state.volume,
+        isMuted: state.isMuted,
+        shuffle: state.shuffle,
+        repeat: state.repeat,
+        lastPlayedTrack: state.lastPlayedTrack,
+      })
+    }
+  )
+);
 
 // User state with persistence
 export const useUserStore = create(

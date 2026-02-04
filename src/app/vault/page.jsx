@@ -5,29 +5,27 @@
 
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Lock, Unlock, Play, Pause, Music, Upload, Trash2,
-  Send, Eye, EyeOff, Shield, Clock, Calendar,
-  SkipBack, SkipForward, Volume2, Download
+  Send, Eye, EyeOff, Shield, Clock, Calendar
 } from 'lucide-react';
 import { vaultTracks as defaultTracks } from '@/data/vaultTracks';
+import { usePlayerStore } from '@/store/playerStore';
 
 // Vault PIN - Change this to your secure PIN
-const VAULT_PIN = 'FAMILY2026'; // Family & Friends Access
+const VAULT_PIN = '0505'; // Owner Access
 
 export default function VaultPage() {
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [pinInput, setPinInput] = useState('');
   const [pinError, setPinError] = useState(false);
   const [vaultTracks, setVaultTracks] = useState([]);
-  const [currentTrack, setCurrentTrack] = useState(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [duration, setDuration] = useState(0);
   const [showUpload, setShowUpload] = useState(false);
   const [newTrack, setNewTrack] = useState({ title: '', artist: 'Mike Page', producer: '', notes: '' });
-  const audioRef = useRef(null);
+
+  // Use global player
+  const { currentTrack, isPlaying, setQueue, togglePlay } = usePlayerStore();
 
   // Load vault tracks - merge default tracks with localStorage
   useEffect(() => {
@@ -54,24 +52,6 @@ export default function VaultPage() {
     }
   }, [vaultTracks]);
 
-  // Audio player handlers
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.addEventListener('timeupdate', () => {
-        setProgress(audioRef.current.currentTime);
-        setDuration(audioRef.current.duration || 0);
-      });
-      audioRef.current.addEventListener('ended', () => {
-        setIsPlaying(false);
-        // Auto-play next track
-        const currentIndex = vaultTracks.findIndex(t => t.id === currentTrack?.id);
-        if (currentIndex < vaultTracks.length - 1) {
-          playTrack(vaultTracks[currentIndex + 1]);
-        }
-      });
-    }
-  }, [currentTrack, vaultTracks]);
-
   const handlePinSubmit = (e) => {
     e.preventDefault();
     if (pinInput === VAULT_PIN) {
@@ -83,24 +63,26 @@ export default function VaultPage() {
     }
   };
 
+  // Play track using global player
   const playTrack = (track) => {
-    setCurrentTrack(track);
-    setIsPlaying(true);
-    if (audioRef.current) {
-      audioRef.current.src = track.audioUrl;
-      audioRef.current.play();
-    }
-  };
-
-  const togglePlay = () => {
-    if (audioRef.current) {
-      if (isPlaying) {
-        audioRef.current.pause();
-      } else {
-        audioRef.current.play();
-      }
-      setIsPlaying(!isPlaying);
-    }
+    // Convert vault track format to global player format
+    const playerTrack = {
+      id: `vault-${track.id}`,
+      title: track.title,
+      album: 'Vault',
+      audioFile: track.audioUrl,
+      producer: track.producer,
+      featured: null,
+    };
+    const trackIndex = vaultTracks.findIndex(t => t.id === track.id);
+    const allPlayerTracks = vaultTracks.map(t => ({
+      id: `vault-${t.id}`,
+      title: t.title,
+      album: 'Vault',
+      audioFile: t.audioUrl,
+      producer: t.producer,
+    }));
+    setQueue(allPlayerTracks, trackIndex >= 0 ? trackIndex : 0);
   };
 
   const handleFileUpload = (e) => {
@@ -128,10 +110,6 @@ export default function VaultPage() {
   const deleteTrack = (trackId) => {
     if (confirm('Delete this track from the vault?')) {
       setVaultTracks(vaultTracks.filter(t => t.id !== trackId));
-      if (currentTrack?.id === trackId) {
-        setCurrentTrack(null);
-        setIsPlaying(false);
-      }
     }
   };
 
@@ -147,13 +125,6 @@ export default function VaultPage() {
     setVaultTracks(vaultTracks.map(t =>
       t.id === trackId ? { ...t, registered: true, registeredAt: new Date().toISOString() } : t
     ));
-  };
-
-  const formatTime = (seconds) => {
-    if (!seconds || isNaN(seconds)) return '0:00';
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   // Lock Screen
@@ -272,21 +243,23 @@ export default function VaultPage() {
             </div>
           ) : (
             <div className="divide-y divide-white/5">
-              {vaultTracks.map((track, index) => (
+              {vaultTracks.map((track, index) => {
+                const isCurrentTrack = currentTrack?.id === `vault-${track.id}`;
+                return (
                 <div
                   key={track.id}
-                  className={`flex items-center gap-4 p-4 hover:bg-white/5 transition cursor-pointer ${currentTrack?.id === track.id ? 'bg-red-500/10' : ''}`}
+                  className={`flex items-center gap-4 p-4 hover:bg-white/5 transition cursor-pointer ${isCurrentTrack ? 'bg-red-500/10' : ''}`}
                 >
                   {/* Play Button */}
                   <button
-                    onClick={() => playTrack(track)}
+                    onClick={() => isCurrentTrack && isPlaying ? togglePlay() : playTrack(track)}
                     className={`w-12 h-12 rounded-full flex items-center justify-center transition ${
-                      currentTrack?.id === track.id && isPlaying
+                      isCurrentTrack && isPlaying
                         ? 'bg-red-500 text-white'
                         : 'bg-white/10 text-white/60 hover:bg-red-500 hover:text-white'
                     }`}
                   >
-                    {currentTrack?.id === track.id && isPlaying ? <Pause size={20} /> : <Play size={20} className="ml-1" />}
+                    {isCurrentTrack && isPlaying ? <Pause size={20} /> : <Play size={20} className="ml-1" />}
                   </button>
 
                   {/* Track Info */}
@@ -338,67 +311,12 @@ export default function VaultPage() {
                     </button>
                   </div>
                 </div>
-              ))}
+              );
+              })}
             </div>
           )}
         </div>
 
-        {/* Now Playing Bar */}
-        {currentTrack && (
-          <div className="fixed bottom-0 left-0 right-0 bg-black/95 backdrop-blur-xl border-t border-red-500/20 p-4 z-50">
-            <div className="max-w-screen-xl mx-auto flex items-center gap-6">
-              {/* Track Info */}
-              <div className="flex items-center gap-4 w-64">
-                <div className="w-14 h-14 bg-gradient-to-br from-red-500 to-red-700 rounded-lg flex items-center justify-center">
-                  <Music size={24} className="text-white" />
-                </div>
-                <div className="min-w-0">
-                  <h4 className="text-white font-medium ">{currentTrack.title}</h4>
-                  <p className="text-white/40 text-sm ">{currentTrack.artist}</p>
-                </div>
-              </div>
-
-              {/* Controls */}
-              <div className="flex-1 flex flex-col items-center gap-2">
-                <div className="flex items-center gap-4">
-                  <button className="text-white/40 hover:text-white transition">
-                    <SkipBack size={20} />
-                  </button>
-                  <button
-                    onClick={togglePlay}
-                    className="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center hover:bg-red-600 transition"
-                  >
-                    {isPlaying ? <Pause size={24} className="text-white" /> : <Play size={24} className="text-white ml-1" />}
-                  </button>
-                  <button className="text-white/40 hover:text-white transition">
-                    <SkipForward size={20} />
-                  </button>
-                </div>
-
-                {/* Progress Bar */}
-                <div className="w-full max-w-xl flex items-center gap-3">
-                  <span className="text-white/40 text-xs w-10 text-right">{formatTime(progress)}</span>
-                  <div className="flex-1 h-1 bg-white/10 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-red-500 transition-all"
-                      style={{ width: `${duration ? (progress / duration) * 100 : 0}%` }}
-                    />
-                  </div>
-                  <span className="text-white/40 text-xs w-10">{formatTime(duration)}</span>
-                </div>
-              </div>
-
-              {/* Volume */}
-              <div className="flex items-center gap-2 w-32">
-                <Volume2 size={18} className="text-white/40" />
-                <div className="flex-1 h-1 bg-white/10 rounded-full">
-                  <div className="h-full w-3/4 bg-white/40 rounded-full" />
-                </div>
-              </div>
-            </div>
-            <audio ref={audioRef} />
-          </div>
-        )}
 
         {/* Upload Modal */}
         {showUpload && (
