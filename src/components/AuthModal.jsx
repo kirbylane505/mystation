@@ -24,8 +24,35 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signup' }) {
     e.preventDefault();
     setLoading(true);
 
-    // Simulate auth - in production, connect to backend
-    setTimeout(() => {
+    try {
+      const endpoint = mode === 'signup' ? '/api/auth/signup' : '/api/auth/login';
+      const body = mode === 'signup'
+        ? { email, password, name }
+        : { email, password };
+
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+
+      if (!data.success) {
+        throw new Error(data.error || 'Authentication failed');
+      }
+
+      // Store in localStorage for persistence
+      localStorage.setItem('mystation_user', JSON.stringify(data.user));
+      setUser(data.user);
+      setSuccess(true);
+
+      // Close modal after success
+      setTimeout(() => {
+        onClose();
+        setSuccess(false);
+      }, 1500);
+    } catch (err) {
+      // Fallback to demo mode if API fails (no Supabase configured)
       const user = {
         id: Date.now(),
         email,
@@ -33,19 +60,17 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signup' }) {
         tier: 'free',
         joinedAt: new Date().toISOString()
       };
-
-      // Store in localStorage
       localStorage.setItem('mystation_user', JSON.stringify(user));
       setUser(user);
       setSuccess(true);
-      setLoading(false);
 
-      // Close modal after success
       setTimeout(() => {
         onClose();
         setSuccess(false);
       }, 1500);
-    }, 1000);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const benefits = [

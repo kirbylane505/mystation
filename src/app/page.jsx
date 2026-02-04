@@ -10,6 +10,7 @@ import FeaturedSong from '@/components/FeaturedSong';
 import TrackList from '@/components/TrackList';
 import ActivityFeed from '@/components/ActivityFeed';
 import DailySpin from '@/components/DailySpin';
+import EmailCapture from '@/components/EmailCapture';
 import { tracks, albums, playlists, artistInfo, getOfficialTracks, featuredSong } from '@/data/tracks';
 import { usePlayerStore } from '@/store/playerStore';
 import { useEngagementStore } from '@/store/engagementStore';
@@ -292,6 +293,21 @@ export default function HomePage() {
         <h2 className="text-3xl font-bold text-white mb-10">Full Catalog</h2>
         <div className="glass rounded-2xl p-2">
           <TrackList />
+        </div>
+      </section>
+
+      {/* Email Capture Section */}
+      <section className="py-20 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-900/20 via-purple-900/20 to-pink-900/20" />
+        <div className="bg-orb w-[300px] h-[300px] bg-blue-500 top-[-50px] left-[20%] opacity-30" />
+        <div className="relative max-w-screen-md mx-auto px-6 text-center">
+          <h2 className="text-3xl md:text-4xl font-black text-white mb-4">
+            Never Miss a Drop
+          </h2>
+          <p className="text-white/50 mb-8 max-w-md mx-auto">
+            Get notified when new music drops. No spam, just fire.
+          </p>
+          <EmailCapture variant="minimal" className="max-w-md mx-auto" />
         </div>
       </section>
 

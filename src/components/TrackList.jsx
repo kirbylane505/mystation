@@ -56,13 +56,13 @@ export default function TrackList({ trackIds, showAlbum = true, showNumber = tru
             style={{ animationDelay: `${index * 0.05}s` }}
             onClick={() => handleTrackClick(track, index)}
           >
-            {/* Mobile Layout */}
-            <div className="flex md:hidden items-center gap-3 px-4 py-3">
+            {/* Mobile Layout - Full names, no truncation */}
+            <div className="flex md:hidden items-start gap-3 px-4 py-3">
               {/* Play indicator */}
               {showNumber && (
-                <div className="text-white/30 font-mono text-sm w-8 shrink-0">
+                <div className="text-white/30 font-mono text-sm w-6 shrink-0 pt-1">
                   {isPlayingThis ? (
-                    <Play size={16} className="text-blue-400" fill="currentColor" />
+                    <Play size={14} className="text-blue-400" fill="currentColor" />
                   ) : (
                     String(index + 1).padStart(2, '0')
                   )}
@@ -70,31 +70,34 @@ export default function TrackList({ trackIds, showAlbum = true, showNumber = tru
               )}
 
               {/* Album art */}
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-600/20 to-blue-900/30 rounded-lg flex items-center justify-center shrink-0 border border-white/5">
+              <div className="w-11 h-11 bg-gradient-to-br from-blue-600/20 to-blue-900/30 rounded-lg flex items-center justify-center shrink-0 border border-white/5">
                 {track.streamOnly ? (
-                  <ExternalLink size={18} className="text-green-400" />
+                  <ExternalLink size={16} className="text-green-400" />
                 ) : (
-                  <Music size={18} className="text-blue-400/60" />
+                  <Music size={16} className="text-blue-400/60" />
                 )}
               </div>
 
-              {/* Title & Artist - Full width on mobile */}
-              <div className="flex-1 min-w-0">
-                <p className={`font-medium ${isCurrentTrack ? 'text-blue-400' : 'text-white'}`}>
+              {/* Title & Artist - Full text, wraps naturally */}
+              <div className="flex-1">
+                <p className={`font-medium text-[15px] leading-tight ${isCurrentTrack ? 'text-blue-400' : 'text-white'}`}>
                   {track.title}
                 </p>
-                <p className="text-sm text-white/40">
-                  Mike Page • {track.album}
+                <p className="text-[13px] text-white/50 mt-0.5">
+                  Mike Page
+                </p>
+                <p className="text-[12px] text-white/30 mt-0.5">
+                  {track.album} • {track.year}
                 </p>
               </div>
 
-              {/* Actions */}
-              <div className="flex items-center gap-2 shrink-0">
+              {/* Actions - Smaller on mobile */}
+              <div className="flex items-center gap-1 shrink-0 pt-1">
                 <div onClick={(e) => e.stopPropagation()}>
-                  <SongReactions trackId={track.id} size="sm" />
+                  <SongReactions trackId={track.id} size="xs" />
                 </div>
                 <div onClick={(e) => e.stopPropagation()}>
-                  <ShareButton track={track} />
+                  <ShareButton track={track} size="sm" />
                 </div>
               </div>
             </div>
@@ -137,11 +140,11 @@ export default function TrackList({ trackIds, showAlbum = true, showNumber = tru
                       <Music size={18} className="text-blue-400/60" />
                     )}
                   </div>
-                  <div className="min-w-0">
-                    <p className={`font-medium truncate ${isCurrentTrack ? 'text-blue-400' : 'text-white'}`}>
+                  <div>
+                    <p className={`font-medium ${isCurrentTrack ? 'text-blue-400' : 'text-white'}`}>
                       {track.title}
                     </p>
-                    <p className="text-sm text-white/40 truncate">
+                    <p className="text-sm text-white/40">
                       Mike Page{track.featured && <span className="text-white/30"> • {track.featured}</span>}
                     </p>
                   </div>
@@ -150,7 +153,7 @@ export default function TrackList({ trackIds, showAlbum = true, showNumber = tru
 
               {/* Album */}
               {showAlbum && (
-                <div className="col-span-3 text-white/40 text-sm truncate">
+                <div className="col-span-3 text-white/40 text-sm">
                   {track.album}
                 </div>
               )}

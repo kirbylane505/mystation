@@ -68,10 +68,9 @@ export const usePlayerStore = create((set, get) => ({
     }
   },
 
-  // Check if can play (3 free plays allowed)
+  // Check if can play (UNLIMITED - owner editing mode)
   canPlay: () => {
-    const { playCount } = get();
-    return playCount < 3;
+    return true; // No restrictions
   },
 
   // Show subscribe modal

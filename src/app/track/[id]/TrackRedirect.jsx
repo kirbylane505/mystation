@@ -10,7 +10,7 @@ export default function TrackRedirect({ trackId, trackTitle }) {
   useEffect(() => {
     // Redirect to music page after a brief moment
     const timer = setTimeout(() => {
-      router.replace(`/music?track=${trackId}`);
+      router.replace(`/music?track=${trackId}&autoplay=true`);
     }, 100);
 
     return () => clearTimeout(timer);

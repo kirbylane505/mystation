@@ -9,10 +9,11 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import AuthModal from './AuthModal';
+import { CartButton } from './Cart';
 import { useUserStore, usePlayerStore } from '@/store/playerStore';
 import {
-  Home, Music, Radio, Flame, Heart, Users, ShoppingBag,
-  Search, User, LogOut, X, Play, Menu
+  Home, Music, Flame, Heart, Users, ShoppingBag,
+  Search, User, LogOut, X, Play, Menu, Lock, Mail, Calendar, Trophy
 } from 'lucide-react';
 import { useEngagementStore } from '@/store/engagementStore';
 import { tracks } from '@/data/tracks';
@@ -33,11 +34,15 @@ export default function Navbar() {
   const navItems = [
     { href: '/', icon: Home, label: 'Home' },
     { href: '/music', icon: Music, label: 'Music' },
-    { href: '/live', icon: Radio, label: 'Live' },
-    { href: '/fan-zone', icon: Flame, label: 'Fan Zone', badge: currentStreak > 0 ? currentStreak : null },
+    { href: '/make-a-hit', icon: Flame, label: 'Make A Hit', highlight: true },
+    { href: '/leaderboard', icon: Trophy, label: 'Leaderboard' },
+    { href: '/fan-zone', icon: Heart, label: 'Fan Zone', badge: currentStreak > 0 ? currentStreak : null },
     { href: '/about', icon: Heart, label: 'Foundation' },
     { href: '/artists', icon: Users, label: 'Artists' },
-    { href: 'https://mikepage.shop', icon: ShoppingBag, label: 'Merch', external: true },
+    { href: '/merch', icon: ShoppingBag, label: 'Merch' },
+    { href: '/lotl', icon: Calendar, label: 'LOTL' },
+    { href: '/contact', icon: Mail, label: 'Contact' },
+    { href: '/vault', icon: Lock, label: 'Vault', hidden: true },
   ];
 
   // Filter tracks based on search
@@ -99,7 +104,7 @@ export default function Navbar() {
           <div className="w-px h-8 bg-white/20 mx-2" />
 
           {/* Nav Items */}
-          {navItems.map((item) => {
+          {navItems.filter(item => !item.hidden).map((item) => {
             const isActive = pathname === item.href;
             const Icon = item.icon;
 
@@ -187,8 +192,8 @@ export default function Navbar() {
                           <Music size={16} className="text-blue-400" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-white font-medium text-sm truncate">{track.title}</p>
-                          <p className="text-white/50 text-xs truncate">{track.album}</p>
+                          <p className="text-white font-medium text-sm ">{track.title}</p>
+                          <p className="text-white/50 text-xs ">{track.album}</p>
                         </div>
                         <Play size={16} className="text-white/40" />
                       </button>
@@ -201,6 +206,9 @@ export default function Navbar() {
               </div>
             )}
           </div>
+
+          {/* Cart */}
+          <CartButton />
 
           {/* User */}
           {isLoggedIn ? (
@@ -258,7 +266,7 @@ export default function Navbar() {
         {/* Mobile Menu Dropdown */}
         {mobileMenuOpen && (
           <div className="absolute top-16 left-0 right-0 bg-mystation-navy/95 backdrop-blur-xl border-b border-white/10 p-4 space-y-2">
-            {navItems.map((item) => {
+            {navItems.filter(item => !item.hidden).map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;
 

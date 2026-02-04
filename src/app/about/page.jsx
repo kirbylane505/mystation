@@ -217,7 +217,25 @@ export default function AboutPage() {
           Stream for free. Donate what you can. Every contribution helps us
           build a stronger community through music.
         </p>
-              </section>
+        <div className="flex flex-wrap gap-4 justify-center">
+          <a
+            href="https://cash.app/$RIDE4PAGEMUSIC847"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-full hover:shadow-lg hover:shadow-green-500/30 transition flex items-center gap-2"
+          >
+            <Heart size={20} />
+            Donate via CashApp
+          </a>
+          <a
+            href="/merch"
+            className="px-8 py-4 bg-white/10 text-white font-bold rounded-full hover:bg-white/20 transition flex items-center gap-2"
+          >
+            <Music size={20} />
+            Shop Merch
+          </a>
+        </div>
+      </section>
     </div>
   );
 }

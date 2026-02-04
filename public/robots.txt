@@ -1,0 +1,3 @@
+# MyStation - Private
+User-agent: *
+Disallow: /

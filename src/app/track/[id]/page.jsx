@@ -25,12 +25,16 @@ export async function generateMetadata({ params }) {
     openGraph: {
       title: `🎵 ${track.title} - Mike Page`,
       description: `Tap to listen & drop a 🔥 if it's fire!`,
+      url: `https://mystation.vercel.app/track/${id}`,
+      siteName: 'MyStation',
       images: [{
         url: `https://mystation.vercel.app${imageUrl}`,
         width: 1200,
         height: 630,
+        alt: `${track.title} by Mike Page`,
       }],
       type: 'music.song',
+      locale: 'en_US',
     },
     twitter: {
       card: 'summary_large_image',

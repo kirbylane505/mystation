@@ -69,5 +69,6 @@ export async function generateMetadata({ searchParams }) {
 export default async function MusicPage({ searchParams }) {
   const params = await searchParams;
   const trackId = params?.track;
-  return <MusicPageClient initialTrackId={trackId} />;
+  const autoplay = params?.autoplay === 'true';
+  return <MusicPageClient initialTrackId={trackId} autoplay={autoplay} />;
 }

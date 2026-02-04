@@ -11,12 +11,12 @@ import { tracks, albums, playlists, getOfficialTracks } from '@/data/tracks';
 import { usePlayerStore } from '@/store/playerStore';
 import { Search, SlidersHorizontal, Grid, List } from 'lucide-react';
 
-export default function MusicPageClient({ initialTrackId }) {
+export default function MusicPageClient({ initialTrackId, autoplay = false }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterYear, setFilterYear] = useState('all');
   const [filterType, setFilterType] = useState('all');
   const [viewMode, setViewMode] = useState('list');
-  const { setQueue } = usePlayerStore();
+  const { setQueue, play } = usePlayerStore();
 
   // Auto-play track if coming from share link
   useEffect(() => {
@@ -24,9 +24,14 @@ export default function MusicPageClient({ initialTrackId }) {
       const trackIndex = tracks.findIndex(t => t.id === parseInt(initialTrackId));
       if (trackIndex >= 0) {
         setQueue(tracks, trackIndex);
+        // If autoplay is enabled, ensure playback starts
+        if (autoplay) {
+          // Small delay to ensure audio element is ready
+          setTimeout(() => play(), 100);
+        }
       }
     }
-  }, [initialTrackId, setQueue]);
+  }, [initialTrackId, autoplay, setQueue, play]);
 
   // Get only official tracks (exclude unreleased/unnamed)
   const officialTracks = getOfficialTracks();
@@ -129,8 +134,8 @@ export default function MusicPageClient({ initialTrackId }) {
                 <div className="w-full aspect-square bg-gradient-to-br from-blue-500/30 to-purple-500/30 rounded-lg mb-3 flex items-center justify-center">
                   <span className="text-3xl">🎧</span>
                 </div>
-                <h4 className="font-semibold text-white truncate">{playlist.title}</h4>
-                <p className="text-white/60 text-sm truncate">{playlist.description}</p>
+                <h4 className="font-semibold text-white">{playlist.title}</h4>
+                <p className="text-white/60 text-sm">{playlist.description}</p>
               </div>
             ))}
           </div>

@@ -196,8 +196,8 @@ export default function Player() {
 
           {/* Track Info */}
           <div className="flex-1 min-w-0">
-            <h4 className="font-medium text-white text-sm truncate">{currentTrack.title}</h4>
-            <p className="text-xs text-white/50 truncate">Mike Page</p>
+            <h4 className="font-medium text-white text-sm">{currentTrack.title}</h4>
+            <p className="text-xs text-white/50">Mike Page</p>
           </div>
 
           {/* Play/Pause */}
@@ -252,8 +252,8 @@ export default function Player() {
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <h4 className="font-semibold text-white truncate text-base">{currentTrack.title}</h4>
-              <p className="text-sm text-white/50 truncate">Mike Page {currentTrack.featured && `ft. ${currentTrack.featured}`}</p>
+              <h4 className="font-semibold text-white text-base">{currentTrack.title}</h4>
+              <p className="text-sm text-white/50">Mike Page {currentTrack.featured && `ft. ${currentTrack.featured}`}</p>
               {currentTrack.bpm && (
                 <div className="flex items-center gap-2 mt-1">
                   <span className="text-xs text-blue-400/60">{currentTrack.bpm} BPM</span>

@@ -1,25 +1,36 @@
 /**
  * MYSTATION - Fan Zone
- * Engagement hub: streaks, badges, leaderboard, rewards, activity
+ * Engagement hub: streaks, badges, leaderboard, vault, rewards, activity
  */
 
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useEngagementStore } from '@/store/engagementStore';
+import { useLoyaltyStore } from '@/store/loyaltyStore';
 import StreakBadges from '@/components/StreakBadges';
 import ActivityFeed from '@/components/ActivityFeed';
 import Leaderboard from '@/components/Leaderboard';
 import UnlockProgress from '@/components/UnlockProgress';
 import DailySpin from '@/components/DailySpin';
-import { Trophy, Flame, Gift, Zap, Crown } from 'lucide-react';
+import LoyaltyProgress from '@/components/LoyaltyProgress';
+import VaultPreview from '@/components/VaultPreview';
+import VaultRewards from '@/components/VaultRewards';
+import { Trophy, Flame, Gift, Zap, Crown, Lock } from 'lucide-react';
 
 export default function FanZonePage() {
-  const { visitPage, currentStreak, earnedBadges, totalPlays } = useEngagementStore();
+  const [mounted, setMounted] = useState(false);
+  const { visitPage, currentStreak: engStreak, earnedBadges, totalPlays: engPlays } = useEngagementStore();
+  const { currentStreak, totalPlays, currentTier, isTop100 } = useLoyaltyStore();
 
   useEffect(() => {
+    setMounted(true);
     visitPage('/fan-zone');
   }, [visitPage]);
+
+  // Use loyalty store values when mounted, fallback to engagement store
+  const displayStreak = mounted ? currentStreak : engStreak;
+  const displayPlays = mounted ? totalPlays : engPlays;
 
   return (
     <div className="min-h-screen">
@@ -47,7 +58,7 @@ export default function FanZonePage() {
                 <div className="flex items-center gap-2">
                   <Flame size={24} className="text-orange-400" />
                   <div>
-                    <p className="text-2xl font-bold text-white">{currentStreak}</p>
+                    <p className="text-2xl font-bold text-white">{displayStreak}</p>
                     <p className="text-xs text-white/40">Day Streak</p>
                   </div>
                 </div>
@@ -63,10 +74,19 @@ export default function FanZonePage() {
                 <div className="flex items-center gap-2">
                   <Zap size={24} className="text-blue-400" />
                   <div>
-                    <p className="text-2xl font-bold text-white">{totalPlays}</p>
+                    <p className="text-2xl font-bold text-white">{displayPlays}</p>
                     <p className="text-xs text-white/40">Plays</p>
                   </div>
                 </div>
+                {mounted && currentTier.name !== 'Newcomer' && (
+                  <>
+                    <div className="w-px h-10 bg-white/10" />
+                    <div className="flex items-center gap-2 px-3 py-1 bg-gradient-to-r from-yellow-500/20 to-amber-500/20 rounded-full border border-yellow-500/30">
+                      <Crown size={16} className="text-yellow-400" />
+                      <span className="text-yellow-400 font-semibold text-sm">{currentTier.name}</span>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 
@@ -79,6 +99,22 @@ export default function FanZonePage() {
         </div>
       </section>
 
+      {/* THE VAULT - Featured Section */}
+      <section className="max-w-screen-xl mx-auto px-6 py-12">
+        <div className="grid lg:grid-cols-2 gap-8">
+          <VaultPreview />
+          <VaultRewards />
+        </div>
+      </section>
+
+      {/* Loyalty Progress */}
+      <section className="max-w-screen-xl mx-auto px-6 pb-12">
+        <div className="grid lg:grid-cols-2 gap-8">
+          <LoyaltyProgress />
+          <Leaderboard limit={5} />
+        </div>
+      </section>
+
       {/* Main Content */}
       <section className="max-w-screen-xl mx-auto px-6 py-12">
         <div className="grid lg:grid-cols-3 gap-8">
@@ -88,9 +124,9 @@ export default function FanZonePage() {
             <UnlockProgress />
           </div>
 
-          {/* Center Column - Leaderboard */}
+          {/* Center Column - Full Leaderboard */}
           <div>
-            <Leaderboard />
+            <Leaderboard showFull={true} />
           </div>
 
           {/* Right Column - Activity Feed */}

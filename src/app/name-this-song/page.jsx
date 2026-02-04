@@ -175,7 +175,7 @@ export default function NameThisSongPage() {
 
                   <div className="flex-1 min-w-0">
                     <p className="text-xs text-purple-400 font-medium mb-1">Working Title</p>
-                    <h3 className="text-lg font-bold text-white truncate">{track.workingTitle}</h3>
+                    <h3 className="text-lg font-bold text-white">{track.workingTitle}</h3>
                     {track.featured && (
                       <p className="text-sm text-white/50">ft. {track.featured}</p>
                     )}

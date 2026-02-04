@@ -341,16 +341,65 @@ export const useEngagementStore = create(
   )
 );
 
-// Fake leaderboard data
+// Points system
+export const POINTS = {
+  play: 10,           // Per track played
+  dailyLogin: 25,     // Daily check-in
+  streak3: 50,        // 3-day streak bonus
+  streak7: 150,       // 7-day streak bonus
+  streak30: 500,      // 30-day streak bonus
+  reaction: 5,        // Per reaction
+  share: 25,          // Sharing a track
+  purchase: 100,      // Merch purchase
+  donation: 200,      // Per donation (any amount)
+  referral: 300,      // Per referral signup
+  badge: 75,          // Per badge earned
+  albumComplete: 250, // Completing full album
+};
+
+// Calculate total points from stats
+export const calculatePoints = (stats) => {
+  let total = 0;
+  total += (stats.totalPlays || 0) * POINTS.play;
+  total += (stats.totalReactions || 0) * POINTS.reaction;
+  total += (stats.earnedBadges?.length || 0) * POINTS.badge;
+  total += (stats.totalDonated > 0 ? 1 : 0) * POINTS.donation;
+  total += (stats.currentStreak >= 30 ? POINTS.streak30 : stats.currentStreak >= 7 ? POINTS.streak7 : stats.currentStreak >= 3 ? POINTS.streak3 : 0);
+  total += (stats.dailyLogins || 0) * POINTS.dailyLogin;
+  total += (stats.shares || 0) * POINTS.share;
+  total += (stats.purchases || 0) * POINTS.purchase;
+  total += (stats.referralCount || 0) * POINTS.referral;
+  return total;
+};
+
+// Fan ranks based on points
+export const FAN_RANKS = [
+  { name: 'New Fan', minPoints: 0, icon: '🌱', color: 'text-gray-400' },
+  { name: 'Rising Star', minPoints: 100, icon: '⭐', color: 'text-yellow-400' },
+  { name: 'Dedicated', minPoints: 500, icon: '🔥', color: 'text-orange-400' },
+  { name: 'Superfan', minPoints: 1500, icon: '💎', color: 'text-blue-400' },
+  { name: 'Legend', minPoints: 5000, icon: '👑', color: 'text-purple-400' },
+  { name: 'Hall of Fame', minPoints: 15000, icon: '🏆', color: 'text-yellow-500' },
+];
+
+export const getFanRank = (points) => {
+  let rank = FAN_RANKS[0];
+  for (const r of FAN_RANKS) {
+    if (points >= r.minPoints) rank = r;
+  }
+  return rank;
+};
+
+// Fake leaderboard data with points
 export const LEADERBOARD_DATA = [
-  { rank: 1, name: 'ATLFan247', plays: 1247, donated: 250, streak: 45, badges: 12 },
-  { rank: 2, name: 'ChiTownMike', plays: 983, donated: 150, streak: 32, badges: 10 },
-  { rank: 3, name: 'ElginOriginal', plays: 876, donated: 200, streak: 28, badges: 9 },
-  { rank: 4, name: 'FoundationFam', plays: 754, donated: 500, streak: 21, badges: 11 },
-  { rank: 5, name: 'IDMGSupporter', plays: 698, donated: 75, streak: 19, badges: 8 },
-  { rank: 6, name: 'MusicLover99', plays: 621, donated: 100, streak: 15, badges: 7 },
-  { rank: 7, name: 'RealOneATL', plays: 589, donated: 50, streak: 14, badges: 6 },
-  { rank: 8, name: 'DreamChaser', plays: 534, donated: 25, streak: 12, badges: 5 },
-  { rank: 9, name: 'PageFam', plays: 487, donated: 80, streak: 10, badges: 6 },
-  { rank: 10, name: 'NewFan2026', plays: 423, donated: 15, streak: 7, badges: 4 },
+  { rank: 1, name: 'ATLFan247', points: 18750, plays: 1247, donated: 250, streak: 45, badges: 12, city: 'Atlanta' },
+  { rank: 2, name: 'ChiTownMike', points: 14320, plays: 983, donated: 150, streak: 32, badges: 10, city: 'Chicago' },
+  { rank: 3, name: 'ElginOriginal', points: 12890, plays: 876, donated: 200, streak: 28, badges: 9, city: 'Elgin' },
+  { rank: 4, name: 'FoundationFam', points: 11540, plays: 754, donated: 500, streak: 21, badges: 11, city: 'Houston' },
+  { rank: 5, name: 'IDMGSupporter', points: 9870, plays: 698, donated: 75, streak: 19, badges: 8, city: 'Detroit' },
+  { rank: 6, name: 'MusicLover99', points: 8210, plays: 621, donated: 100, streak: 15, badges: 7, city: 'New York' },
+  { rank: 7, name: 'RealOneATL', points: 7340, plays: 589, donated: 50, streak: 14, badges: 6, city: 'Atlanta' },
+  { rank: 8, name: 'DreamChaser', points: 6120, plays: 534, donated: 25, streak: 12, badges: 5, city: 'Miami' },
+  { rank: 9, name: 'PageFam', points: 5430, plays: 487, donated: 80, streak: 10, badges: 6, city: 'Memphis' },
+  { rank: 10, name: 'NewFan2026', points: 4210, plays: 423, donated: 15, streak: 7, badges: 4, city: 'Dallas' },
 ];

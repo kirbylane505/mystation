@@ -145,9 +145,24 @@ export default function LOTLPage() {
 
   const tabs = [
     { id: 'overview', label: 'Overview', icon: Calendar },
+    { id: 'recaps', label: 'Past Events', icon: Play },
     { id: 'streams', label: 'Live Streams', icon: Video },
     { id: 'streamers', label: 'Streamer Program', icon: Camera },
     { id: 'leaderboard', label: 'Leaderboard', icon: Trophy },
+  ];
+
+  // Recap videos from past events
+  const recapVideos = [
+    {
+      id: 1,
+      title: 'LOTL 2025 Official Recap',
+      year: 2025,
+      duration: '4:32',
+      views: '12.5K',
+      videoUrl: '/videos/lotl-recap-2025.mp4',
+      thumbnail: '/videos/lotl-recap-2025-thumb.jpg',
+      description: 'Relive the magic of Love on the Lawn 2025 - featuring incredible performances, amazing fans, and unforgettable moments.'
+    }
   ];
 
   if (!mounted) return null;
@@ -330,6 +345,91 @@ export default function LOTLPage() {
                   </div>
                 ))}
               </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Recaps Tab - Past Events */}
+      {activeTab === 'recaps' && (
+        <section className="py-16">
+          <div className="max-w-screen-xl mx-auto px-6">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-black text-white mb-4">
+                Relive the <span className="text-green-400">Magic</span>
+              </h2>
+              <p className="text-white/60 max-w-2xl mx-auto">
+                Watch recap videos from past Love on the Lawn events. See what you're in for in 2026!
+              </p>
+            </div>
+
+            {/* Featured Recap */}
+            <div className="glass rounded-3xl overflow-hidden mb-12">
+              <div className="aspect-video relative bg-black">
+                <video
+                  controls
+                  poster={recapVideos[0].thumbnail}
+                  className="w-full h-full object-contain"
+                  preload="metadata"
+                >
+                  <source src={recapVideos[0].videoUrl} type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+              <div className="p-6">
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm font-bold">
+                    {recapVideos[0].year}
+                  </span>
+                  <span className="text-white/40 text-sm flex items-center gap-1">
+                    <Play size={14} /> {recapVideos[0].views} views
+                  </span>
+                  <span className="text-white/40 text-sm flex items-center gap-1">
+                    <Clock size={14} /> {recapVideos[0].duration}
+                  </span>
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-2">{recapVideos[0].title}</h3>
+                <p className="text-white/60">{recapVideos[0].description}</p>
+              </div>
+            </div>
+
+            {/* Past Event Highlights */}
+            <div className="glass rounded-3xl p-8">
+              <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-3">
+                <Star className="text-yellow-400" />
+                LOTL 2025 Highlights
+              </h3>
+              <div className="grid md:grid-cols-4 gap-6">
+                {[
+                  { icon: Users, value: '8,500+', label: 'Attendees' },
+                  { icon: Mic, value: '12', label: 'Artists' },
+                  { icon: Heart, value: '$35K', label: 'Raised for Youth' },
+                  { icon: Video, value: '50K+', label: 'Stream Views' },
+                ].map((stat, i) => {
+                  const Icon = stat.icon;
+                  return (
+                    <div key={i} className="text-center p-4 rounded-xl bg-white/5">
+                      <Icon size={28} className="text-green-400 mx-auto mb-2" />
+                      <p className="text-2xl font-black text-white">{stat.value}</p>
+                      <p className="text-white/50 text-sm">{stat.label}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* CTA */}
+            <div className="text-center mt-12">
+              <p className="text-white/60 mb-4">Ready to be part of the next one?</p>
+              <a
+                href="https://cash.app/$RIDE4PAGEMUSIC847?note=LOTL%20Ticket"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-primary bg-gradient-to-r from-green-500 to-emerald-600 inline-flex items-center gap-2"
+              >
+                <Ticket size={18} />
+                Get LOTL 2026 Tickets
+              </a>
             </div>
           </div>
         </section>

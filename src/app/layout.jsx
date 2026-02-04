@@ -7,7 +7,9 @@ import '@/styles/globals.css';
 import Navbar from '@/components/Navbar';
 import Player from '@/components/Player';
 import AudioPlayer from '@/components/AudioPlayer';
+import SubscribeModal from '@/components/SubscribeModal';
 import ClientProviders from '@/components/ClientProviders';
+import Cart from '@/components/Cart';
 
 export const metadata = {
   metadataBase: new URL('https://mystation.vercel.app'),
@@ -61,6 +63,8 @@ export default function RootLayout({ children }) {
           </main>
           <Player />
           <AudioPlayer />
+          <SubscribeModal />
+          <Cart />
         </ClientProviders>
       </body>
     </html>

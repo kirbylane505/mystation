@@ -136,7 +136,7 @@ export default function VideosPage() {
 
                 {/* Info */}
                 <div className="p-5">
-                  <h3 className="text-lg font-bold text-white mb-2 line-clamp-1">{video.title}</h3>
+                  <h3 className="text-lg font-bold text-white mb-2 ">{video.title}</h3>
                   <p className="text-white/40 text-sm line-clamp-2">{video.description}</p>
                   <div className="flex items-center gap-3 mt-4">
                     <span className="text-white/30 text-sm">{video.year}</span>
@@ -230,7 +230,7 @@ export default function VideosPage() {
 
                 {/* Info */}
                 <div className="p-4">
-                  <h3 className="text-sm font-bold text-white mb-1 line-clamp-1">{video.title}</h3>
+                  <h3 className="text-sm font-bold text-white mb-1 ">{video.title}</h3>
                   <p className="text-white/40 text-xs">{video.year}</p>
                 </div>
               </div>
