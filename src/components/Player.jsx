@@ -183,15 +183,15 @@ export default function Player() {
     <>
       {/* Mobile Subscribe Banner */}
       {mounted && !isSubscribed && (
-        <div className="md:hidden fixed bottom-[72px] left-0 right-0 bg-gradient-to-r from-yellow-500/90 to-orange-500/90 backdrop-blur-xl z-40">
-          <button
-            onClick={(e) => { e.stopPropagation(); openSubscribeModal(); }}
-            className="w-full flex items-center justify-center gap-2 py-2 text-white font-semibold text-sm"
-          >
+        <a
+          href="https://buy.stripe.com/4gM3cwcWS7RS5mP2FA73G00"
+          className="md:hidden fixed bottom-[72px] left-0 right-0 bg-gradient-to-r from-yellow-500/90 to-orange-500/90 backdrop-blur-xl z-40"
+        >
+          <div className="w-full flex items-center justify-center gap-2 py-2 text-white font-semibold text-sm">
             <Crown size={16} />
-            {freePlaysRemaining > 0 ? `${freePlaysRemaining} free left - ` : ''}Subscribe $4.99/mo for unlimited
-          </button>
-        </div>
+            {freePlaysRemaining > 0 ? `${freePlaysRemaining} free left - ` : ''}Subscribe $4.99/mo
+          </div>
+        </a>
       )}
 
       {/* Mobile Mini Player */}

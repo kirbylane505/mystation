@@ -23,13 +23,8 @@ export default function SubscribeModal() {
     setLoading(true);
 
     try {
-      // TODO: Integrate Stripe checkout for $4.99/month
-      // For now, redirect to Stripe payment link
-      window.open('https://buy.stripe.com/test_mystationsubscribe', '_blank');
-
-      // After payment completes, user will be subscribed
-      // For demo, we'll simulate success after redirect
-      setLoading(false);
+      // Redirect to Stripe payment link - $4.99/month subscription
+      window.location.href = 'https://buy.stripe.com/4gM3cwcWS7RS5mP2FA73G00';
     } catch (err) {
       console.error('Subscription error:', err);
       setLoading(false);

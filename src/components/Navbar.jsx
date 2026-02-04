@@ -154,13 +154,13 @@ export default function Navbar() {
 
           {/* Subscribe Button - Always visible for non-subscribers */}
           {!isSubscribed && (
-            <button
-              onClick={() => openSubscribeModal()}
+            <a
+              href="https://buy.stripe.com/4gM3cwcWS7RS5mP2FA73G00"
               className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full hover:shadow-lg hover:shadow-orange-500/30 transition text-white font-bold text-sm animate-pulse"
             >
               <Crown size={16} />
-              $4.99/mo
-            </button>
+              Subscribe
+            </a>
           )}
 
           {/* Divider */}
@@ -318,13 +318,14 @@ export default function Navbar() {
 
             {/* Subscribe Button - Mobile */}
             {!isSubscribed && (
-              <button
-                onClick={() => { openSubscribeModal(); setMobileMenuOpen(false); }}
+              <a
+                href="https://buy.stripe.com/4gM3cwcWS7RS5mP2FA73G00"
                 className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-xl text-white font-bold mb-4"
+                onClick={() => setMobileMenuOpen(false)}
               >
                 <Crown size={18} />
                 Subscribe - $4.99/month
-              </button>
+              </a>
             )}
 
             <div className="pt-4 border-t border-white/10">
