@@ -13,7 +13,7 @@ import { CartButton } from './Cart';
 import { useUserStore, usePlayerStore } from '@/store/playerStore';
 import {
   Home, Music, Flame, Heart, Users, ShoppingBag,
-  Search, User, LogOut, X, Play, Menu, Lock, Mail, Calendar, Trophy
+  Search, User, LogOut, X, Play, Menu, Lock, Mail, Calendar, Trophy, Crown
 } from 'lucide-react';
 import { useEngagementStore } from '@/store/engagementStore';
 import { tracks } from '@/data/tracks';
@@ -151,6 +151,17 @@ export default function Navbar() {
               </Link>
             );
           })}
+
+          {/* Subscribe Button - Always visible for non-subscribers */}
+          {!useUserStore.getState().isSubscribed && (
+            <button
+              onClick={() => usePlayerStore.getState().openSubscribeModal()}
+              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full hover:shadow-lg hover:shadow-orange-500/30 transition text-white font-bold text-sm animate-pulse"
+            >
+              <Crown size={16} />
+              $4.99/mo
+            </button>
+          )}
 
           {/* Divider */}
           <div className="w-px h-8 bg-white/20 mx-2" />
@@ -304,6 +315,17 @@ export default function Navbar() {
                 </Link>
               );
             })}
+
+            {/* Subscribe Button - Mobile */}
+            {!useUserStore.getState().isSubscribed && (
+              <button
+                onClick={() => { usePlayerStore.getState().openSubscribeModal(); setMobileMenuOpen(false); }}
+                className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-xl text-white font-bold mb-4"
+              >
+                <Crown size={18} />
+                Subscribe - $4.99/month
+              </button>
+            )}
 
             <div className="pt-4 border-t border-white/10">
               {isLoggedIn ? (

@@ -70,9 +70,16 @@ export const usePlayerStore = create(
     }
   },
 
-  // Check if can play (UNLIMITED - owner editing mode)
-  canPlay: () => {
-    return true; // No restrictions
+  // Check if can play (3 free songs, then subscription wall)
+  canPlay: (trackId) => {
+    const { isSubscribed } = useUserStore.getState();
+    if (isSubscribed) return true;
+
+    const { playCount, uniquePlaysThisSession } = get();
+    // Allow replay of already-played tracks
+    if (uniquePlaysThisSession.includes(trackId)) return true;
+    // Block after 3 unique plays
+    return playCount < 3;
   },
 
   // Show subscribe modal
@@ -174,6 +181,9 @@ export const usePlayerStore = create(
         shuffle: state.shuffle,
         repeat: state.repeat,
         lastPlayedTrack: state.lastPlayedTrack,
+        // Persist play tracking for subscription wall
+        playCount: state.playCount,
+        uniquePlaysThisSession: state.uniquePlaysThisSession,
       })
     }
   )

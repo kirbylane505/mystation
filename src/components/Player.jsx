@@ -10,7 +10,7 @@ import { usePlayerStore, useUserStore } from '@/store/playerStore';
 import {
   Play, Pause, SkipBack, SkipForward,
   Volume2, VolumeX, Shuffle, Repeat,
-  Heart, Share2, Music, Sparkles, ChevronUp, X
+  Heart, Share2, Music, Sparkles, ChevronUp, X, Crown
 } from 'lucide-react';
 
 export default function Player() {
@@ -181,6 +181,19 @@ export default function Player() {
   // MOBILE MINI PLAYER (shows on small screens)
   return (
     <>
+      {/* Mobile Subscribe Banner */}
+      {mounted && !isSubscribed && (
+        <div className="md:hidden fixed bottom-[72px] left-0 right-0 bg-gradient-to-r from-yellow-500/90 to-orange-500/90 backdrop-blur-xl z-40">
+          <button
+            onClick={(e) => { e.stopPropagation(); openSubscribeModal(); }}
+            className="w-full flex items-center justify-center gap-2 py-2 text-white font-semibold text-sm"
+          >
+            <Crown size={16} />
+            {freePlaysRemaining > 0 ? `${freePlaysRemaining} free left - ` : ''}Subscribe $4.99/mo for unlimited
+          </button>
+        </div>
+      )}
+
       {/* Mobile Mini Player */}
       <div
         className="md:hidden fixed bottom-0 left-0 right-0 bg-mystation-navy/95 backdrop-blur-xl border-t border-white/5 z-40"
