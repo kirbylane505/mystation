@@ -167,8 +167,21 @@ export default function MerchPage() {
     }
 
     // MPF Tee
-    if (lower.includes('mike page foundation') || lower.includes('mpf')) {
+    if ((lower.includes('mike page foundation') || lower.includes('mpf')) && !lower.includes('mug')) {
       return '/images/mockups/mpf-tee.jpg';
+    }
+
+    // LOTL Mugs
+    if ((lower.includes('lotl') || lower.includes('love on the lawn')) && lower.includes('mug')) {
+      if (lower.includes('white')) {
+        return '/images/mockups/lotl-mug-white.jpg';
+      }
+      return '/images/mockups/lotl-mug-black.jpg';
+    }
+
+    // LOTL Tote Bag
+    if ((lower.includes('lotl') || lower.includes('love on the lawn')) && lower.includes('tote')) {
+      return '/images/mockups/lotl-tote.jpg';
     }
 
     // Fallback to old local images for products without mockups
