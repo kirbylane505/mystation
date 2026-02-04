@@ -357,32 +357,11 @@ export const tracks = [
   // ========================================
   { id: 201, title: "Thanking God", album: "Vault", year: 2024, albumId: 'vault', audioFile: '/audio/01 (X4.3) iDMG 788 MIKE PAGE x LY.mp3', featured: "Lyrivelli", producer: "The Cubist" },
   { id: 202, title: "No Weapon", album: "Vault", year: 2024, albumId: 'vault', audioFile: '/audio/01 iDMG 143 Mike Page x King Deaz.mp3', featured: "King Deazel", producer: "The Cubist" },
-  // ========================================
-  // QUICK REELS - Named Vault Tracks (2026)
-  // ========================================
   { id: 203, title: "Soon As", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/01 Mike Page - Soon as (x1.4)L.wav', producer: "The Cubist" },
   { id: 204, title: "Photo Shoot", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/Mike Page - Photo Shoot prod. JT GOLDXN (geemix1.0)L.wav', producer: "JT GOLDXN" },
   { id: 205, title: "Walk In Dat Parti", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/idmg x st236 - Mike Page (ruff01) Walk In.wav', producer: "The Cubist" },
   { id: 206, title: "Trap Get Ugly", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/Mike Page -TRAP (X6)L.wav', producer: "The Cubist" },
-  { id: 207, title: "All 2 U", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/vault/all_2_u.mp3', producer: "The Cubist" },
-  { id: 208, title: "Bob Marley", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/vault/bob_marley.mp3', producer: "The Cubist" },
-  { id: 209, title: "Bottomline", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/vault/bottomline.mp3', producer: "The Cubist" },
-  { id: 210, title: "Do You Mind", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/vault/do_you_mind.mp3', producer: "The Cubist" },
-  { id: 211, title: "Don't Just Crash Out", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/vault/dont_crash_out.mp3', producer: "The Cubist" },
-  { id: 212, title: "Embellishments", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/vault/embellishments.mp3', producer: "The Cubist" },
-  { id: 213, title: "I Need Her", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/vault/i_need_her.mp3', producer: "The Cubist" },
-  { id: 214, title: "Meg", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/vault/meg.mp3', producer: "The Cubist" },
-  { id: 215, title: "Miss Novella", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/vault/miss_novella.mp3', producer: "The Cubist" },
-  { id: 216, title: "None Of Mine", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/vault/none_of_mine.mp3', producer: "The Cubist" },
-  { id: 217, title: "Obvious", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/vault/obvious.mp3', producer: "The Cubist" },
-  { id: 218, title: "Play Ya Part", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/vault/play_ya_part.mp3', producer: "The Cubist" },
-  { id: 219, title: "Remain 10 Toes", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/vault/remain_10_toes.mp3', producer: "The Cubist" },
-  { id: 220, title: "Said It I Mean It", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/vault/said_it_i_mean_it.mp3', producer: "The Cubist" },
-  { id: 221, title: "Top Suite", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/vault/top_suite.mp3', producer: "The Cubist" },
-  { id: 222, title: "Unconditionally", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/vault/unconditionally.mp3', producer: "The Cubist" },
-  { id: 223, title: "We Been Thru It All", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/vault/we_been_thru_it_all.mp3', producer: "The Cubist" },
-  { id: 224, title: "What Happens In Vegas", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/vault/what_happens_in_vegas.mp3', producer: "The Cubist" },
-  { id: 225, title: "You Niggaz Talk 2 Much", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/vault/you_talk_2_much.mp3', producer: "The Cubist" },
+  // MORE VAULT TRACKS - Play from MASTER_TRACKS_TO_NAME, name them, then add here
 ];
 
 // Featured Song of the Week
@@ -441,12 +420,12 @@ export const albums = [
     subtitle: "Named Exclusives",
     artist: "Mike Page",
     year: 2026,
-    trackCount: 25,
+    trackCount: 6,
     coverGradient: "from-red-600 via-red-800 to-black",
     coverEmoji: "🔒",
     isNew: true,
-    trackIds: [201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225],
-    description: "Exclusive tracks from Quick Reels. Family & friends access with code FAMILY2026."
+    trackIds: [201, 202, 203, 204, 205, 206],
+    description: "Exclusive tracks. Family & friends access with code FAMILY2026."
   }
 ];
 
