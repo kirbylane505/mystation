@@ -91,6 +91,45 @@ export const vaultReels = [
     dimensions: '1080x1920',
     vizStyle: 'high-particles', // Pink/gold party vibes
   },
+  {
+    id: 8,
+    title: '200 On The Dashboard',
+    artist: 'Mike Page ft King Deazel',
+    producer: 'The Cubist',
+    videoUrl: '/reels/200_DASHBOARD_FREQ_REEL.mp4',
+    addedAt: '2026-02-04',
+    status: 'active',
+    type: 'reel',
+    duration: 90,
+    dimensions: '1080x1920',
+    vizStyle: 'mid-spectrum', // Green/gold money vibes
+  },
+  {
+    id: 9,
+    title: 'Broken Glass',
+    artist: 'Mike Page',
+    producer: 'The Cubist',
+    videoUrl: '/reels/BROKEN_GLASS_FREQ_REEL.mp4',
+    addedAt: '2026-02-04',
+    status: 'active',
+    type: 'reel',
+    duration: 90,
+    dimensions: '1080x1920',
+    vizStyle: 'high-particles', // Sharp shattered glass vibes
+  },
+  {
+    id: 10,
+    title: 'Lizzo',
+    artist: 'Mike Page',
+    producer: 'The Art Teacher',
+    videoUrl: '/reels/LIZZO_FREQ_REEL.mp4',
+    addedAt: '2026-02-04',
+    status: 'active',
+    type: 'reel',
+    duration: 90,
+    dimensions: '1080x1920',
+    vizStyle: 'bass-pulse', // Pink/purple bounce vibes
+  },
 ];
 
 export default vaultReels;

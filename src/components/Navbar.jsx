@@ -13,7 +13,7 @@ import { CartButton } from './Cart';
 import { useUserStore, usePlayerStore } from '@/store/playerStore';
 import {
   Home, Music, Flame, Heart, Users, ShoppingBag,
-  Search, User, LogOut, X, Play, Menu, Lock, Mail, Calendar, Trophy, Crown
+  Search, User, LogOut, X, Play, Menu, Lock, Mail, Calendar, Crown
 } from 'lucide-react';
 import { useEngagementStore } from '@/store/engagementStore';
 import { useStationStore } from '@/store/stationStore';
@@ -37,7 +37,6 @@ export default function Navbar() {
     { href: '/', icon: Home, label: 'Home' },
     { href: '/music', icon: Music, label: 'Music' },
     { href: '/make-a-hit', icon: Flame, label: 'Make A Hit', highlight: true },
-    { href: '/leaderboard', icon: Trophy, label: 'Leaderboard' },
     { href: '/about', icon: Heart, label: 'Foundation' },
     { href: '/artists', icon: Users, label: 'Artists' },
     { href: '/merch', icon: ShoppingBag, label: 'Merch' },

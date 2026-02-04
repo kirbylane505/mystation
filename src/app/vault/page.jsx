@@ -10,8 +10,26 @@ import {
   Lock, Unlock, Play, Pause, Music, Upload, Trash2,
   Send, Eye, EyeOff, Shield, Clock, Calendar
 } from 'lucide-react';
-import { vaultTracks as defaultTracks } from '@/data/vaultTracks';
+import { vaultTracks as legacyVaultTracks } from '@/data/vaultTracks';
+import { tracks } from '@/data/tracks';
 import { usePlayerStore } from '@/store/playerStore';
+
+// Merge legacy vault + new tracks with albumId='vault'
+const getDefaultTracks = () => {
+  const newVaultTracks = tracks
+    .filter(t => t.albumId === 'vault')
+    .map(t => ({
+      id: t.id,
+      title: t.title + (t.featured ? ` ft. ${t.featured}` : ''),
+      artist: 'Mike Page',
+      producer: t.producer || 'The Cubist',
+      audioUrl: t.audioFile,
+      addedAt: '2026-02-04',
+      status: 'vault',
+      registered: false,
+    }));
+  return [...newVaultTracks, ...legacyVaultTracks];
+};
 
 // Vault PIN - Change this to your secure PIN
 const VAULT_PIN = '0505'; // Owner Access
@@ -29,6 +47,7 @@ export default function VaultPage() {
 
   // Load vault tracks - merge default tracks with localStorage
   useEffect(() => {
+    const defaultTracks = getDefaultTracks();
     const saved = localStorage.getItem('mystation_vault');
     if (saved) {
       const savedTracks = JSON.parse(saved);
