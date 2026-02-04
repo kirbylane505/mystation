@@ -16,6 +16,7 @@ import {
   Search, User, LogOut, X, Play, Menu, Lock, Mail, Calendar, Trophy, Crown
 } from 'lucide-react';
 import { useEngagementStore } from '@/store/engagementStore';
+import { useStationStore } from '@/store/stationStore';
 import { tracks } from '@/data/tracks';
 
 export default function Navbar() {
@@ -29,6 +30,7 @@ export default function Navbar() {
   const { user, isLoggedIn, logout, isSubscribed } = useUserStore();
   const { currentStreak } = useEngagementStore();
   const { setQueue, openSubscribeModal } = usePlayerStore();
+  const { isCreator, stationData } = useStationStore();
 
   // Nav items with icons
   const navItems = [
@@ -151,6 +153,25 @@ export default function Navbar() {
               </Link>
             );
           })}
+
+          {/* Create Station / Dashboard Button */}
+          {isCreator ? (
+            <Link
+              href="/station/dashboard"
+              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full hover:shadow-lg hover:shadow-purple-500/30 transition text-white font-bold text-sm"
+            >
+              <Crown size={16} />
+              My Station
+            </Link>
+          ) : (
+            <Link
+              href="/station/create"
+              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full hover:shadow-lg hover:shadow-blue-500/30 transition text-white font-bold text-sm"
+            >
+              <Crown size={16} />
+              Create Station
+            </Link>
+          )}
 
           {/* Subscribe Button - Always visible for non-subscribers */}
           {!isSubscribed && (
@@ -315,6 +336,27 @@ export default function Navbar() {
                 </Link>
               );
             })}
+
+            {/* Create Station / Dashboard Button - Mobile */}
+            {isCreator ? (
+              <Link
+                href="/station/dashboard"
+                className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl text-white font-bold mb-2"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <Crown size={18} />
+                My Station Dashboard
+              </Link>
+            ) : (
+              <Link
+                href="/station/create"
+                className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl text-white font-bold mb-2"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <Crown size={18} />
+                Create Your Station
+              </Link>
+            )}
 
             {/* Subscribe Button - Mobile */}
             {!isSubscribed && (
