@@ -2,13 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useStationStore } from '@/store/stationStore';
 import { useUserStore } from '@/store/playerStore';
 import { STATION_CATEGORIES } from '@/lib/stationCategories';
 import {
   ArrowRight, ArrowLeft, Check, Sparkles, Music, ShoppingBag,
   ListMusic, User, Link as LinkIcon, DollarSign, Palette,
-  Instagram, Twitter, Youtube, Globe, Crown
+  Instagram, Twitter, Youtube, Globe, Crown, Heart, Shield,
+  Upload, BarChart3, Users, Zap, CheckCircle
 } from 'lucide-react';
 
 export default function CreateStationPage() {
@@ -41,7 +43,6 @@ export default function CreateStationPage() {
 
   useEffect(() => {
     setMounted(true);
-    if (setupStep === 0) startSetup();
   }, []);
 
   // Pre-fill form with existing data
@@ -70,6 +71,19 @@ export default function CreateStationPage() {
     { num: 5, name: 'Launch', icon: Crown }
   ];
 
+  const features = [
+    { icon: Globe, title: "Your Own Station", desc: "yourname.mystation.app" },
+    { icon: ShoppingBag, title: "Sell Products", desc: "Digital, physical, services" },
+    { icon: ListMusic, title: "Create Playlists", desc: "Mix any music source" },
+    { icon: DollarSign, title: "Keep 100%", desc: "Direct to your account" },
+    { icon: Users, title: "Own Your Fans", desc: "No algorithm gatekeeping" },
+    { icon: BarChart3, title: "Full Analytics", desc: "See who's buying" }
+  ];
+
+  const handleStartSetup = () => {
+    startSetup();
+  };
+
   const handleCategorySelect = (category) => {
     setCategory(category);
   };
@@ -97,6 +111,106 @@ export default function CreateStationPage() {
     completeSetup();
     router.push(`/station/${stationData.username}`);
   };
+
+  // LANDING / HERO (Step 0)
+  const HeroSection = () => (
+    <div className="min-h-screen">
+      {/* Hero */}
+      <section className="relative py-20 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 via-transparent to-purple-600/20" />
+        <div className="absolute top-20 left-10 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-10 right-10 w-72 h-72 bg-purple-500/10 rounded-full blur-3xl" />
+
+        <div className="relative max-w-5xl mx-auto px-6 text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/20 rounded-full border border-blue-500/30 mb-6">
+            <Sparkles size={16} className="text-blue-400" />
+            <span className="text-blue-300 text-sm font-medium">For Creators</span>
+          </div>
+
+          <h1 className="text-5xl md:text-7xl font-black text-white mb-6 leading-tight">
+            Build Your Own<br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">Creator World</span>
+          </h1>
+
+          <p className="text-xl text-white/60 max-w-2xl mx-auto mb-4">
+            God gave you the gift, not to pay a machine.
+          </p>
+          <p className="text-lg text-white/50 max-w-2xl mx-auto mb-10">
+            Musicians, hair stylists, artists, coaches - anyone can build their station.
+            Sell products, create playlists, connect with fans. Keep 100% of what you earn.
+          </p>
+
+          <button
+            onClick={handleStartSetup}
+            className="px-10 py-5 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-bold text-xl rounded-2xl hover:shadow-lg hover:shadow-blue-500/30 transition flex items-center gap-3 mx-auto"
+          >
+            Create Your Station
+            <ArrowRight size={24} />
+          </button>
+
+          <p className="text-white/40 text-sm mt-4">Free to start • Subscription tiers available</p>
+        </div>
+      </section>
+
+      {/* Features Grid */}
+      <section className="max-w-6xl mx-auto px-6 py-16">
+        <h2 className="text-3xl font-bold text-white text-center mb-4">Everything You Need</h2>
+        <p className="text-white/50 text-center mb-12">Your station, your rules, your money</p>
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {features.map((feature, i) => (
+            <div key={i} className="bg-white/5 rounded-2xl p-6 border border-white/10 hover:border-blue-500/30 transition">
+              <div className="w-14 h-14 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-xl flex items-center justify-center mb-4 border border-blue-500/20">
+                <feature.icon size={28} className="text-blue-400" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-2">{feature.title}</h3>
+              <p className="text-white/50">{feature.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Station Categories Preview */}
+      <section className="max-w-6xl mx-auto px-6 py-16">
+        <h2 className="text-3xl font-bold text-white text-center mb-4">Pick Your Category</h2>
+        <p className="text-white/50 text-center mb-12">What kind of station are you creating?</p>
+
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-12">
+          {STATION_CATEGORIES.map((cat) => (
+            <button
+              key={cat.id}
+              onClick={() => { startSetup(); setTimeout(() => handleCategorySelect(cat), 100); }}
+              className="p-6 rounded-2xl border-2 border-white/10 bg-white/5 hover:border-blue-500/50 hover:bg-blue-500/10 transition-all duration-300 hover:scale-105"
+            >
+              <div className="text-4xl mb-3">{cat.icon}</div>
+              <h3 className="font-semibold text-white mb-1 text-sm">{cat.name}</h3>
+            </button>
+          ))}
+        </div>
+
+        <div className="text-center">
+          <button
+            onClick={handleStartSetup}
+            className="px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-bold rounded-xl hover:opacity-90 transition flex items-center gap-2 mx-auto"
+          >
+            Get Started <ArrowRight size={18} />
+          </button>
+        </div>
+      </section>
+
+      {/* Testimonial */}
+      <section className="max-w-4xl mx-auto px-6 py-16">
+        <div className="bg-white/5 rounded-3xl p-8 border border-white/10 text-center">
+          <Heart size={48} className="text-blue-400 mx-auto mb-4" />
+          <blockquote className="text-2xl text-white font-medium mb-6 leading-relaxed">
+            "Every creator deserves their own station. Build your world, connect with your fans, keep what you earn."
+          </blockquote>
+          <p className="text-blue-400 font-bold">— Mike Page</p>
+          <p className="text-white/40 text-sm">Founder, MyStation</p>
+        </div>
+      </section>
+    </div>
+  );
 
   // Step 1: Category Selection
   const CategoryStep = () => (
@@ -242,7 +356,7 @@ export default function CreateStationPage() {
       name: '',
       price: '',
       description: '',
-      type: 'digital' // digital, physical, service
+      type: 'digital'
     });
 
     const handleAddProduct = (e) => {
@@ -498,60 +612,65 @@ export default function CreateStationPage() {
 
   const renderStep = () => {
     switch (setupStep) {
+      case 0: return <HeroSection />;
       case 1: return <CategoryStep />;
       case 2: return <ProfileStep />;
       case 3: return <ProductsStep />;
       case 4: return <PlaylistsStep />;
       case 5: return <LaunchStep />;
-      default: return <CategoryStep />;
+      default: return <HeroSection />;
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-mystation-navy via-mystation-navyDark to-mystation-black py-12 px-4">
-      {/* Progress Steps */}
-      <div className="max-w-4xl mx-auto mb-12">
-        <div className="flex items-center justify-between">
-          {steps.map((step, i) => (
-            <div key={step.num} className="flex items-center">
-              <button
-                onClick={() => step.num < setupStep && goToStep(step.num)}
-                disabled={step.num > setupStep}
-                className={`flex flex-col items-center ${step.num <= setupStep ? 'cursor-pointer' : 'cursor-not-allowed'}`}
-              >
-                <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 transition ${
-                  step.num < setupStep
-                    ? 'bg-green-500 text-white'
-                    : step.num === setupStep
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-white/10 text-white/40'
-                }`}>
-                  {step.num < setupStep ? (
-                    <Check size={20} />
-                  ) : (
-                    <step.icon size={20} />
-                  )}
-                </div>
-                <span className={`text-xs ${step.num <= setupStep ? 'text-white' : 'text-white/40'}`}>
-                  {step.name}
-                </span>
-              </button>
-              {i < steps.length - 1 && (
-                <div className={`hidden sm:block w-16 md:w-24 h-0.5 mx-2 ${
-                  step.num < setupStep ? 'bg-green-500' : 'bg-white/10'
-                }`} />
-              )}
-            </div>
-          ))}
+    <div className="min-h-screen bg-gradient-to-b from-mystation-navy via-mystation-navyDark to-mystation-black">
+      {/* Progress Steps - only show after starting */}
+      {setupStep > 0 && (
+        <div className="max-w-4xl mx-auto pt-12 px-4 mb-8">
+          <div className="flex items-center justify-between">
+            {steps.map((step, i) => (
+              <div key={step.num} className="flex items-center">
+                <button
+                  onClick={() => step.num < setupStep && goToStep(step.num)}
+                  disabled={step.num > setupStep}
+                  className={`flex flex-col items-center ${step.num <= setupStep ? 'cursor-pointer' : 'cursor-not-allowed'}`}
+                >
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 transition ${
+                    step.num < setupStep
+                      ? 'bg-green-500 text-white'
+                      : step.num === setupStep
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-white/10 text-white/40'
+                  }`}>
+                    {step.num < setupStep ? (
+                      <Check size={20} />
+                    ) : (
+                      <step.icon size={20} />
+                    )}
+                  </div>
+                  <span className={`text-xs ${step.num <= setupStep ? 'text-white' : 'text-white/40'}`}>
+                    {step.name}
+                  </span>
+                </button>
+                {i < steps.length - 1 && (
+                  <div className={`hidden sm:block w-16 md:w-24 h-0.5 mx-2 ${
+                    step.num < setupStep ? 'bg-green-500' : 'bg-white/10'
+                  }`} />
+                )}
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Step Content */}
-      {renderStep()}
+      <div className={setupStep > 0 ? 'px-4 pb-12' : ''}>
+        {renderStep()}
+      </div>
 
-      {/* Back Button */}
+      {/* Back Button - only show after step 1 */}
       {setupStep > 1 && (
-        <div className="max-w-2xl mx-auto mt-8">
+        <div className="max-w-2xl mx-auto px-4 pb-8">
           <button
             onClick={() => goToStep(setupStep - 1)}
             className="text-white/50 hover:text-white flex items-center gap-2 transition"

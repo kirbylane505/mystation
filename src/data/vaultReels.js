@@ -65,6 +65,19 @@ export const vaultReels = [
     dimensions: '1080x1920',
     vizStyle: 'mid-spectrum', // Red/crimson waves
   },
+  {
+    id: 6,
+    title: 'VIBE',
+    artist: 'Mike Page ft Vincent Berry',
+    producer: 'The Cubist',
+    videoUrl: '/reels/VIBE_FREQ_REEL.mp4',
+    addedAt: '2026-02-04',
+    status: 'active',
+    type: 'reel',
+    duration: 90,
+    dimensions: '1080x1920',
+    vizStyle: 'bass-pulse', // Purple/gold waves
+  },
 ];
 
 export default vaultReels;
