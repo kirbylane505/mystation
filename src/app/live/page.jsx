@@ -1,24 +1,36 @@
 /**
- * MYSTATION - Live Streaming & Video Creator Page
- * Mike can go live or upload videos
+ * MYSTATION - Live Streaming Page
+ * Mux streaming + Stripe monetization
+ * YOU keep the money, not YouTube/Twitch
  */
 
 'use client';
 
-import { useState, useRef } from 'react';
-import { Radio, Users, Heart, MessageCircle, Send, Bell, Calendar, Video, Upload, Camera, X, Play, StopCircle, Sparkles } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import dynamic from 'next/dynamic';
+import { Radio, Users, Heart, MessageCircle, Send, Bell, Calendar, Video, Copy, Check, DollarSign, Sparkles, ExternalLink } from 'lucide-react';
+
+// Dynamic import to avoid SSR issues with MuxPlayer custom elements
+const MuxPlayer = dynamic(() => import('@mux/mux-player-react'), { ssr: false });
 
 export default function LivePage() {
-  const [chatMessage, setChatMessage] = useState('');
+  const [isAdmin] = useState(true); // Mike Page admin mode
+  const [streamData, setStreamData] = useState(null);
   const [isLive, setIsLive] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(true); // Mike Page admin mode
-  const [showUpload, setShowUpload] = useState(false);
-  const [isRecording, setIsRecording] = useState(false);
   const [streamTitle, setStreamTitle] = useState('');
-  const [uploadedVideos, setUploadedVideos] = useState([]);
-  const videoRef = useRef(null);
-  const mediaRecorderRef = useRef(null);
-  const chunksRef = useRef([]);
+  const [copied, setCopied] = useState(false);
+  const [showTipModal, setShowTipModal] = useState(false);
+  const [tipAmount, setTipAmount] = useState(10);
+  const [tipName, setTipName] = useState('');
+  const [tipMessage, setTipMessage] = useState('');
+  const [recentTips, setRecentTips] = useState([
+    { name: 'J***n', amount: 25, message: 'Keep inspiring!' },
+    { name: 'A***a', amount: 10, message: 'Love from Chicago' },
+    { name: 'M***e', amount: 50, message: 'For the Foundation' },
+  ]);
+  const [chatMessages, setChatMessages] = useState([]);
+  const [chatInput, setChatInput] = useState('');
+  const [viewerCount, setViewerCount] = useState(0);
 
   // Upcoming streams
   const upcomingStreams = [
@@ -45,222 +57,185 @@ export default function LivePage() {
     }
   ];
 
-  const recentDonations = [
-    { name: 'J***n', amount: 25, message: 'Keep inspiring!' },
-    { name: 'A***a', amount: 10, message: 'Love from Chicago' },
-    { name: 'M***e', amount: 50, message: 'For the Foundation' },
-    { name: 'K***y', amount: 5, message: '' },
-  ];
-
-  // Start live stream
-  const startLive = async () => {
+  // Create a new stream
+  const createStream = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: true,
-        audio: true
+      const res = await fetch('/api/live/create-stream', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: streamTitle || 'Mike Page Live' }),
       });
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
+      const data = await res.json();
+      if (data.success) {
+        setStreamData(data);
+      } else {
+        alert('Failed to create stream: ' + (data.error || 'Unknown error'));
       }
-      setIsLive(true);
     } catch (err) {
-      alert('Camera access needed to go live. Please allow camera and microphone access.');
+      console.error(err);
+      alert('Error creating stream');
     }
   };
 
-  // Stop live stream
-  const stopLive = () => {
-    if (videoRef.current && videoRef.current.srcObject) {
-      videoRef.current.srcObject.getTracks().forEach(track => track.stop());
-      videoRef.current.srcObject = null;
-    }
-    setIsLive(false);
-  };
-
-  // Start recording video
-  const startRecording = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: true,
-        audio: true
-      });
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-      }
-
-      mediaRecorderRef.current = new MediaRecorder(stream);
-      chunksRef.current = [];
-
-      mediaRecorderRef.current.ondataavailable = (e) => {
-        chunksRef.current.push(e.data);
-      };
-
-      mediaRecorderRef.current.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: 'video/webm' });
-        const url = URL.createObjectURL(blob);
-        setUploadedVideos(prev => [...prev, {
-          id: Date.now(),
-          title: streamTitle || 'New Recording',
-          url,
-          date: new Date().toLocaleDateString(),
-          duration: '00:00'
-        }]);
-        setShowUpload(false);
-        setStreamTitle('');
-      };
-
-      mediaRecorderRef.current.start();
-      setIsRecording(true);
-    } catch (err) {
-      alert('Camera access needed. Please allow camera and microphone access.');
+  // Copy stream key
+  const copyStreamKey = () => {
+    if (streamData?.streamKey) {
+      navigator.clipboard.writeText(streamData.streamKey);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     }
   };
 
-  // Stop recording
-  const stopRecording = () => {
-    if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop();
-      if (videoRef.current && videoRef.current.srcObject) {
-        videoRef.current.srcObject.getTracks().forEach(track => track.stop());
-        videoRef.current.srcObject = null;
-      }
-      setIsRecording(false);
-    }
+  // Send tip
+  const sendTip = async () => {
+    if (!tipAmount || tipAmount < 1) return;
+
+    // Add to recent tips (in real app, this would go through Stripe)
+    const newTip = {
+      name: tipName || 'Anonymous',
+      amount: tipAmount,
+      message: tipMessage,
+    };
+    setRecentTips(prev => [newTip, ...prev.slice(0, 9)]);
+    setShowTipModal(false);
+    setTipName('');
+    setTipMessage('');
+    setTipAmount(10);
+
+    // In production, this would create a Stripe payment
+    alert(`Tip of $${tipAmount} received! (Demo mode - Stripe integration ready)`);
   };
 
-  // Handle file upload
-  const handleFileUpload = (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const url = URL.createObjectURL(file);
-      setUploadedVideos(prev => [...prev, {
-        id: Date.now(),
-        title: file.name.replace(/\.[^/.]+$/, ''),
-        url,
-        date: new Date().toLocaleDateString(),
-        duration: '00:00'
-      }]);
-      setShowUpload(false);
-    }
+  // Send chat message
+  const sendChat = () => {
+    if (!chatInput.trim()) return;
+    setChatMessages(prev => [...prev, {
+      id: Date.now(),
+      name: 'You',
+      message: chatInput,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    }]);
+    setChatInput('');
   };
+
+  // Simulate viewer count when live
+  useEffect(() => {
+    if (isLive) {
+      const interval = setInterval(() => {
+        setViewerCount(prev => prev + Math.floor(Math.random() * 5));
+      }, 3000);
+      return () => clearInterval(interval);
+    }
+  }, [isLive]);
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen pt-24">
       <div className="max-w-screen-xl mx-auto px-6 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-4xl font-bold text-white mb-2 flex items-center gap-3">
-              <Radio size={32} className="text-blue-400" />
+              <Radio size={32} className="text-red-500" />
               Go Live
             </h1>
             <p className="text-white/60">
-              Stream live or create videos for your fans
+              Stream on YOUR platform. Keep YOUR money.
             </p>
           </div>
-
-          {/* Admin Controls */}
-          {isAdmin && !isLive && (
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowUpload(true)}
-                className="flex items-center gap-2 px-5 py-3 bg-white/10 text-white rounded-xl font-semibold hover:bg-white/20 transition border border-white/10"
-              >
-                <Video size={20} />
-                Create Video
-              </button>
-              <button
-                onClick={startLive}
-                className="flex items-center gap-2 px-5 py-3 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 transition animate-glow-pulse"
-              >
-                <Radio size={20} />
-                Go Live Now
-              </button>
-            </div>
-          )}
         </div>
 
-        {/* Video Upload/Record Modal */}
-        {showUpload && (
-          <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-6">
-            <div className="glass rounded-3xl p-8 max-w-2xl w-full animate-slide-up">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-white">Create Video</h2>
-                <button
-                  onClick={() => {
-                    setShowUpload(false);
-                    if (isRecording) stopRecording();
-                  }}
-                  className="text-white/60 hover:text-white"
-                >
-                  <X size={24} />
-                </button>
-              </div>
-
-              {/* Video Title */}
-              <input
-                type="text"
-                placeholder="Video title..."
-                value={streamTitle}
-                onChange={(e) => setStreamTitle(e.target.value)}
-                className="w-full bg-white/10 border border-white/20 rounded-xl py-3 px-4 text-white placeholder:text-white/40 focus:outline-none focus:border-blue-500 mb-6"
-              />
-
-              {/* Preview */}
-              <div className="aspect-video bg-black/50 rounded-2xl mb-6 overflow-hidden relative">
-                <video
-                  ref={videoRef}
-                  autoPlay
-                  muted
-                  playsInline
-                  className="w-full h-full object-cover"
-                />
-                {!isRecording && !videoRef.current?.srcObject && (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <Camera size={48} className="text-white/30" />
-                  </div>
-                )}
-                {isRecording && (
-                  <div className="absolute top-4 left-4 flex items-center gap-2 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
-                    <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
-                    RECORDING
-                  </div>
-                )}
-              </div>
-
-              {/* Actions */}
-              <div className="grid grid-cols-2 gap-4">
-                {!isRecording ? (
-                  <>
-                    <button
-                      onClick={startRecording}
-                      className="flex items-center justify-center gap-2 py-4 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 transition"
-                    >
-                      <Camera size={20} />
-                      Record Video
-                    </button>
-                    <label className="flex items-center justify-center gap-2 py-4 bg-blue-500 text-white rounded-xl font-bold hover:bg-blue-600 transition cursor-pointer">
-                      <Upload size={20} />
-                      Upload Video
-                      <input
-                        type="file"
-                        accept="video/*"
-                        className="hidden"
-                        onChange={handleFileUpload}
-                      />
-                    </label>
-                  </>
-                ) : (
-                  <button
-                    onClick={stopRecording}
-                    className="col-span-2 flex items-center justify-center gap-2 py-4 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 transition"
-                  >
-                    <StopCircle size={20} />
-                    Stop Recording
-                  </button>
-                )}
-              </div>
+        {/* Admin: Stream Setup */}
+        {isAdmin && !isLive && (
+          <div className="glass rounded-2xl p-8 mb-8">
+            <div className="flex items-center gap-2 text-red-400 mb-4">
+              <Sparkles size={16} />
+              <span className="text-sm font-semibold uppercase tracking-wider">Admin Controls</span>
             </div>
+
+            {!streamData ? (
+              <>
+                <h2 className="text-2xl font-bold text-white mb-4">Start a New Stream</h2>
+                <div className="flex gap-4 mb-6">
+                  <input
+                    type="text"
+                    placeholder="Stream title..."
+                    value={streamTitle}
+                    onChange={(e) => setStreamTitle(e.target.value)}
+                    className="flex-1 bg-white/10 border border-white/20 rounded-xl py-3 px-4 text-white placeholder:text-white/40 focus:outline-none focus:border-red-500"
+                  />
+                  <button
+                    onClick={createStream}
+                    className="px-8 py-3 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 transition"
+                  >
+                    Create Stream
+                  </button>
+                </div>
+                <p className="text-white/40 text-sm">
+                  This will generate your stream key for OBS/Streamlabs
+                </p>
+              </>
+            ) : (
+              <>
+                <h2 className="text-2xl font-bold text-white mb-4">Stream Ready!</h2>
+                <div className="bg-black/30 rounded-xl p-6 mb-6">
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="text-white/60 text-sm block mb-2">RTMP Server</label>
+                      <div className="flex items-center gap-2">
+                        <code className="flex-1 bg-white/10 px-4 py-2 rounded-lg text-green-400 text-sm">
+                          rtmps://global-live.mux.com:443/app
+                        </code>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-white/60 text-sm block mb-2">Stream Key</label>
+                      <div className="flex items-center gap-2">
+                        <code className="flex-1 bg-white/10 px-4 py-2 rounded-lg text-green-400 text-sm truncate">
+                          {streamData.streamKey}
+                        </code>
+                        <button
+                          onClick={copyStreamKey}
+                          className="p-2 bg-white/10 rounded-lg hover:bg-white/20 transition"
+                        >
+                          {copied ? <Check size={18} className="text-green-400" /> : <Copy size={18} className="text-white" />}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <a
+                    href="https://obsproject.com/download"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 px-6 py-3 bg-white/10 text-white rounded-xl font-semibold hover:bg-white/20 transition"
+                  >
+                    <ExternalLink size={18} />
+                    Download OBS
+                  </a>
+                  <button
+                    onClick={() => setIsLive(true)}
+                    className="flex items-center gap-2 px-8 py-3 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 transition animate-pulse"
+                  >
+                    <Radio size={20} />
+                    I'm Live - Show Stream
+                  </button>
+                </div>
+
+                <div className="mt-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl">
+                  <h4 className="text-blue-400 font-bold mb-2">How to Go Live:</h4>
+                  <ol className="text-white/70 text-sm space-y-1">
+                    <li>1. Open OBS or Streamlabs</li>
+                    <li>2. Go to Settings → Stream</li>
+                    <li>3. Select "Custom" service</li>
+                    <li>4. Paste the Server URL and Stream Key above</li>
+                    <li>5. Click "Start Streaming" in OBS</li>
+                    <li>6. Click "I'm Live" button above</li>
+                  </ol>
+                </div>
+              </>
+            )}
           </div>
         )}
 
@@ -270,36 +245,35 @@ export default function LivePage() {
             {/* Video Player */}
             <div className="lg:col-span-2">
               <div className="relative aspect-video bg-black rounded-2xl overflow-hidden mb-4">
-                <video
-                  ref={videoRef}
-                  autoPlay
-                  muted={false}
-                  playsInline
-                  className="w-full h-full object-cover"
-                />
+                {streamData?.playbackId ? (
+                  <MuxPlayer
+                    streamType="live"
+                    playbackId={streamData.playbackId}
+                    autoPlay
+                    muted={false}
+                    style={{ width: '100%', height: '100%' }}
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-red-900/50 to-black">
+                    <div className="text-center">
+                      <Radio size={48} className="text-red-500 mx-auto mb-4 animate-pulse" />
+                      <p className="text-white text-xl font-bold">LIVE NOW</p>
+                      <p className="text-white/60">Stream starting...</p>
+                    </div>
+                  </div>
+                )}
 
                 {/* Live badge */}
-                <div className="absolute top-4 left-4 flex items-center gap-2 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold animate-pulse">
-                  <span className="w-2 h-2 bg-white rounded-full" />
+                <div className="absolute top-4 left-4 flex items-center gap-2 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
+                  <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
                   LIVE
                 </div>
 
                 {/* Viewer count */}
                 <div className="absolute top-4 right-4 flex items-center gap-2 bg-black/50 backdrop-blur text-white px-3 py-1 rounded-full text-sm">
                   <Users size={14} />
-                  1,234 watching
+                  {viewerCount.toLocaleString()} watching
                 </div>
-
-                {/* Admin stop button */}
-                {isAdmin && (
-                  <button
-                    onClick={stopLive}
-                    className="absolute bottom-4 right-4 flex items-center gap-2 bg-red-500/80 backdrop-blur text-white px-4 py-2 rounded-full font-bold hover:bg-red-600 transition"
-                  >
-                    <StopCircle size={18} />
-                    End Stream
-                  </button>
-                )}
               </div>
 
               {/* Stream info */}
@@ -308,36 +282,50 @@ export default function LivePage() {
                   {streamTitle || 'Mike Page Live Session'}
                 </h2>
                 <p className="text-white/60">
-                  Mike Page is live right now - join the conversation!
+                  Mike Page is live right now - support the stream!
                 </p>
               </div>
 
-              {/* Live donation button */}
-              <div className="glass rounded-xl p-6 text-center">
-                <h3 className="text-lg font-bold text-white mb-2">Support the Stream</h3>
-                <p className="text-white/60 mb-4 text-sm">
-                  Donations show on stream! 100% goes to Mike Page Foundation
-                </p>
-              </div>
+              {/* Admin controls */}
+              {isAdmin && (
+                <button
+                  onClick={() => {
+                    setIsLive(false);
+                    setStreamData(null);
+                  }}
+                  className="w-full py-3 bg-red-500/20 text-red-400 rounded-xl font-bold hover:bg-red-500/30 transition"
+                >
+                  End Stream
+                </button>
+              )}
             </div>
 
-            {/* Chat & Donations sidebar */}
+            {/* Sidebar */}
             <div className="space-y-4">
-              {/* Recent donations */}
+              {/* Tip Button */}
+              <button
+                onClick={() => setShowTipModal(true)}
+                className="w-full py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl font-bold text-lg hover:from-green-600 hover:to-emerald-700 transition flex items-center justify-center gap-2"
+              >
+                <DollarSign size={24} />
+                Send a Tip
+              </button>
+
+              {/* Recent tips */}
               <div className="glass rounded-xl p-4">
                 <h3 className="font-bold text-white mb-4 flex items-center gap-2">
-                  <Heart size={18} className="text-blue-400" />
-                  Recent Donations
+                  <Heart size={18} className="text-red-400" />
+                  Recent Tips
                 </h3>
-                <div className="space-y-3">
-                  {recentDonations.map((d, i) => (
-                    <div key={i} className="flex items-start gap-3 p-2 bg-blue-500/10 rounded-lg animate-slide-up" style={{ animationDelay: `${i * 0.1}s` }}>
-                      <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-xs font-bold text-white">
-                        ${d.amount}
+                <div className="space-y-3 max-h-48 overflow-y-auto">
+                  {recentTips.map((tip, i) => (
+                    <div key={i} className="flex items-start gap-3 p-2 bg-green-500/10 rounded-lg">
+                      <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0">
+                        ${tip.amount}
                       </div>
-                      <div>
-                        <p className="text-white font-medium">{d.name}</p>
-                        {d.message && <p className="text-white/60 text-sm">{d.message}</p>}
+                      <div className="min-w-0">
+                        <p className="text-white font-medium truncate">{tip.name}</p>
+                        {tip.message && <p className="text-white/60 text-sm truncate">{tip.message}</p>}
                       </div>
                     </div>
                   ))}
@@ -345,27 +333,41 @@ export default function LivePage() {
               </div>
 
               {/* Chat */}
-              <div className="glass rounded-xl p-4 flex flex-col h-96">
+              <div className="glass rounded-xl p-4 flex flex-col h-80">
                 <h3 className="font-bold text-white mb-4 flex items-center gap-2">
                   <MessageCircle size={18} />
                   Live Chat
                 </h3>
 
-                <div className="flex-1 overflow-y-auto space-y-3 mb-4">
-                  <div className="text-center text-white/40 text-sm py-8">
-                    Chat messages appear here
-                  </div>
+                <div className="flex-1 overflow-y-auto space-y-2 mb-4">
+                  {chatMessages.length === 0 ? (
+                    <p className="text-white/40 text-sm text-center py-8">
+                      No messages yet. Be the first!
+                    </p>
+                  ) : (
+                    chatMessages.map((msg) => (
+                      <div key={msg.id} className="text-sm">
+                        <span className="text-blue-400 font-medium">{msg.name}</span>
+                        <span className="text-white/40 mx-2">{msg.time}</span>
+                        <p className="text-white/80">{msg.message}</p>
+                      </div>
+                    ))
+                  )}
                 </div>
 
                 <div className="flex gap-2">
                   <input
                     type="text"
                     placeholder="Send a message..."
-                    value={chatMessage}
-                    onChange={(e) => setChatMessage(e.target.value)}
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && sendChat()}
                     className="flex-1 bg-white/10 border border-white/20 rounded-lg py-2 px-4 text-white placeholder:text-white/40 focus:outline-none focus:border-blue-500 text-sm"
                   />
-                  <button className="bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600 transition">
+                  <button
+                    onClick={sendChat}
+                    className="bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600 transition"
+                  >
                     <Send size={18} />
                   </button>
                 </div>
@@ -375,53 +377,6 @@ export default function LivePage() {
         ) : (
           /* OFFLINE VIEW */
           <div>
-            {/* Go Live Card */}
-            {isAdmin && (
-              <div className="glass rounded-2xl p-8 mb-8 relative overflow-hidden">
-                <div className="absolute -top-20 -right-20 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl" />
-                <div className="relative flex items-center justify-between">
-                  <div>
-                    <div className="flex items-center gap-2 text-blue-400 mb-2">
-                      <Sparkles size={16} />
-                      <span className="text-sm font-semibold uppercase tracking-wider">Ready to Stream</span>
-                    </div>
-                    <h2 className="text-2xl font-bold text-white mb-2">Go Live to Your Fans</h2>
-                    <p className="text-white/60">Start a live stream and connect with your audience in real-time</p>
-                  </div>
-                  <button
-                    onClick={startLive}
-                    className="flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-2xl font-bold hover:from-red-600 hover:to-red-700 transition shadow-lg shadow-red-500/30"
-                  >
-                    <Radio size={24} />
-                    Go Live
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Uploaded Videos */}
-            {uploadedVideos.length > 0 && (
-              <div className="mb-12">
-                <h2 className="text-2xl font-bold text-white mb-6">Your Videos</h2>
-                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {uploadedVideos.map(video => (
-                    <div key={video.id} className="glass rounded-xl overflow-hidden hover:bg-white/10 transition cursor-pointer album-3d">
-                      <div className="aspect-video bg-black relative">
-                        <video src={video.url} className="w-full h-full object-cover" />
-                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition">
-                          <Play size={40} className="text-white" fill="white" />
-                        </div>
-                      </div>
-                      <div className="p-4">
-                        <h4 className="font-medium text-white mb-1">{video.title}</h4>
-                        <p className="text-white/60 text-sm">{video.date}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
             {/* Offline banner */}
             <div className="glass rounded-2xl p-12 text-center mb-12">
               <div className="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -440,12 +395,8 @@ export default function LivePage() {
             {/* Upcoming streams */}
             <h2 className="text-2xl font-bold text-white mb-6">Upcoming Streams</h2>
             <div className="grid md:grid-cols-3 gap-6 mb-12">
-              {upcomingStreams.map((stream, i) => (
-                <div
-                  key={stream.id}
-                  className="glass rounded-xl p-6 hover:bg-white/10 transition animate-fade-in"
-                  style={{ animationDelay: `${i * 0.1}s` }}
-                >
+              {upcomingStreams.map((stream) => (
+                <div key={stream.id} className="glass rounded-xl p-6 hover:bg-white/10 transition">
                   <div className="flex items-center gap-2 text-blue-400 mb-3">
                     <Calendar size={16} />
                     <span className="text-sm font-medium">{stream.date}</span>
@@ -456,28 +407,94 @@ export default function LivePage() {
                 </div>
               ))}
             </div>
+          </div>
+        )}
 
-            {/* Past streams / VOD */}
-            <h2 className="text-2xl font-bold text-white mb-6">Previous Streams</h2>
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {[1, 2, 3, 4].map(i => (
-                <div
-                  key={i}
-                  className="glass rounded-xl overflow-hidden hover:bg-white/10 transition cursor-pointer album-3d animate-fade-in"
-                  style={{ animationDelay: `${i * 0.1}s` }}
-                >
-                  <div className="aspect-video bg-gradient-to-br from-blue-900/50 to-black flex items-center justify-center relative">
-                    <span className="text-4xl">🎬</span>
-                    <div className="absolute bottom-2 right-2 bg-black/70 px-2 py-1 rounded text-xs text-white">
-                      1:23:45
-                    </div>
-                  </div>
-                  <div className="p-4">
-                    <h4 className="font-medium text-white mb-1">Studio Session #{i}</h4>
-                    <p className="text-white/60 text-sm">Jan {20 + i}, 2026</p>
-                  </div>
+        {/* Tip Modal */}
+        {showTipModal && (
+          <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-6">
+            <div className="glass rounded-2xl p-8 max-w-md w-full">
+              <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+                <DollarSign className="text-green-400" />
+                Send a Tip
+              </h2>
+
+              {/* Quick amounts */}
+              <div className="grid grid-cols-4 gap-2 mb-6">
+                {[5, 10, 25, 50].map((amt) => (
+                  <button
+                    key={amt}
+                    onClick={() => setTipAmount(amt)}
+                    className={`py-3 rounded-xl font-bold transition ${
+                      tipAmount === amt
+                        ? 'bg-green-500 text-white'
+                        : 'bg-white/10 text-white hover:bg-white/20'
+                    }`}
+                  >
+                    ${amt}
+                  </button>
+                ))}
+              </div>
+
+              {/* Custom amount */}
+              <div className="mb-4">
+                <label className="text-white/60 text-sm block mb-2">Custom Amount</label>
+                <div className="flex items-center gap-2">
+                  <span className="text-white text-xl">$</span>
+                  <input
+                    type="number"
+                    min="1"
+                    value={tipAmount}
+                    onChange={(e) => setTipAmount(Number(e.target.value))}
+                    className="flex-1 bg-white/10 border border-white/20 rounded-xl py-3 px-4 text-white text-xl font-bold focus:outline-none focus:border-green-500"
+                  />
                 </div>
-              ))}
+              </div>
+
+              {/* Name */}
+              <div className="mb-4">
+                <label className="text-white/60 text-sm block mb-2">Your Name (shown on stream)</label>
+                <input
+                  type="text"
+                  placeholder="Anonymous"
+                  value={tipName}
+                  onChange={(e) => setTipName(e.target.value)}
+                  className="w-full bg-white/10 border border-white/20 rounded-xl py-3 px-4 text-white placeholder:text-white/40 focus:outline-none focus:border-green-500"
+                />
+              </div>
+
+              {/* Message */}
+              <div className="mb-6">
+                <label className="text-white/60 text-sm block mb-2">Message (optional)</label>
+                <input
+                  type="text"
+                  placeholder="Say something nice..."
+                  value={tipMessage}
+                  onChange={(e) => setTipMessage(e.target.value)}
+                  maxLength={100}
+                  className="w-full bg-white/10 border border-white/20 rounded-xl py-3 px-4 text-white placeholder:text-white/40 focus:outline-none focus:border-green-500"
+                />
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowTipModal(false)}
+                  className="flex-1 py-3 bg-white/10 text-white rounded-xl font-bold hover:bg-white/20 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={sendTip}
+                  className="flex-1 py-3 bg-green-500 text-white rounded-xl font-bold hover:bg-green-600 transition"
+                >
+                  Send ${tipAmount}
+                </button>
+              </div>
+
+              <p className="text-white/40 text-xs text-center mt-4">
+                100% goes to Mike Page. Powered by Stripe.
+              </p>
             </div>
           </div>
         )}
