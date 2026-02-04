@@ -132,17 +132,46 @@ export default function MerchPage() {
     fetchProducts();
   }, []);
 
-  // Get product image - Use Printful mockups which show actual products with designs
+  // Get product image - Use local mockups generated from Printful Mockup Generator API
+  // These show actual products with our designs rendered on them
   function getBrandedImage(name, printfulUrl) {
-    // Printful provides actual product mockups with our designs printed on them
-    // These are better than our local logo-only images
-    if (printfulUrl) {
-      return printfulUrl;
-    }
-
-    // Fallback to local images only if Printful doesn't provide one
     const lower = name.toLowerCase();
 
+    // Use locally stored mockups (generated from Printful Mockup Generator API)
+    // These show the actual products with designs printed on them
+
+    // IDMG Hoodies
+    if (lower.includes('idmg') && lower.includes('hoodie') && lower.includes('black')) {
+      return '/images/mockups/idmg-hoodie-black.jpg';
+    }
+    if (lower.includes('idmg') && lower.includes('hoodie') && lower.includes('white')) {
+      return '/images/mockups/idmg-hoodie-white.jpg';
+    }
+
+    // LOTL Hoodie
+    if ((lower.includes('lotl') || lower.includes('love on the lawn')) && lower.includes('hoodie')) {
+      return '/images/mockups/lotl-hoodie-black.jpg';
+    }
+
+    // IDMG Tees
+    if (lower.includes('idmg') && (lower.includes('tee') || lower.includes('t-shirt')) && lower.includes('black')) {
+      return '/images/mockups/idmg-tee-black.jpg';
+    }
+    if (lower.includes('idmg') && (lower.includes('tee') || lower.includes('t-shirt')) && lower.includes('white')) {
+      return '/images/mockups/idmg-tee-white.jpg';
+    }
+
+    // LOTL Tees
+    if ((lower.includes('lotl') || lower.includes('love on the lawn')) && (lower.includes('tee') || lower.includes('t-shirt'))) {
+      return '/images/mockups/lotl-tee-black.jpg';
+    }
+
+    // MPF Tee
+    if (lower.includes('mike page foundation') || lower.includes('mpf')) {
+      return '/images/mockups/mpf-tee.jpg';
+    }
+
+    // Fallback to old local images for products without mockups
     if (lower.includes('cap') || lower.includes('hat')) return '/images/merch/lotl-cap-final.jpg';
     if (lower.includes('hoodie')) return '/images/merch/idmg-black-hoodie.jpg';
     if (lower.includes('legging')) return '/images/merch/lotl-leggings-final.jpg';
