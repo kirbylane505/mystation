@@ -36,7 +36,6 @@ export default function Navbar() {
     { href: '/music', icon: Music, label: 'Music' },
     { href: '/make-a-hit', icon: Flame, label: 'Make A Hit', highlight: true },
     { href: '/leaderboard', icon: Trophy, label: 'Leaderboard' },
-    { href: '/fan-zone', icon: Heart, label: 'Fan Zone', badge: currentStreak > 0 ? currentStreak : null },
     { href: '/about', icon: Heart, label: 'Foundation' },
     { href: '/artists', icon: Users, label: 'Artists' },
     { href: '/merch', icon: ShoppingBag, label: 'Merch' },

@@ -9,8 +9,23 @@ import { useState } from 'react';
 import Link from 'next/link';
 import {
   Music, DollarSign, Users, BarChart3, Upload, Globe,
-  CheckCircle, ArrowRight, Sparkles, Heart, Shield, Zap
+  CheckCircle, ArrowRight, Sparkles, Heart, Shield, Zap,
+  Play, ExternalLink
 } from 'lucide-react';
+
+// Featured artists on MyStation
+const FEATURED_ARTISTS = [
+  {
+    id: 'mike-page',
+    name: 'Mike Page',
+    slug: 'mike-page',
+    location: 'Atlanta, GA',
+    genres: ['Hip-Hop', 'R&B'],
+    isVerified: true,
+    profileImage: '/images/mike-page-profile.jpg',
+    followerCount: 15420,
+  },
+];
 
 export default function ArtistPortal() {
   const [email, setEmail] = useState('');

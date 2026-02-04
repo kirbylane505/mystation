@@ -8,18 +8,14 @@
 import Hero from '@/components/Hero';
 import FeaturedSong from '@/components/FeaturedSong';
 import TrackList from '@/components/TrackList';
-import ActivityFeed from '@/components/ActivityFeed';
-import DailySpin from '@/components/DailySpin';
 import EmailCapture from '@/components/EmailCapture';
-import { tracks, albums, playlists, artistInfo, getOfficialTracks, featuredSong } from '@/data/tracks';
+import { tracks, albums, getOfficialTracks, featuredSong } from '@/data/tracks';
 import { usePlayerStore } from '@/store/playerStore';
-import { useEngagementStore } from '@/store/engagementStore';
-import { Play, Heart, ExternalLink, Music, Award, Users, Sparkles, Headphones, Flame, Trophy, Crown } from 'lucide-react';
+import { Play, Heart, ExternalLink, Music, Award, Users, Sparkles, Headphones } from 'lucide-react';
 import Link from 'next/link';
 
 export default function HomePage() {
   const { setQueue } = usePlayerStore();
-  const { currentStreak, earnedBadges, totalPlays } = useEngagementStore();
 
   // Get official tracks only
   const officialTracks = getOfficialTracks();
@@ -173,65 +169,6 @@ export default function HomePage() {
         <h2 className="text-3xl font-bold text-white mb-10">Featured Tracks</h2>
         <div className="glass rounded-2xl p-2">
           <TrackList trackIds={featuredTracks} />
-        </div>
-      </section>
-
-      {/* Fan Zone Preview */}
-      <section className="relative py-20 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 via-pink-500/10 to-purple-500/10" />
-        <div className="bg-orb w-[300px] h-[300px] bg-orange-500 top-[-50px] left-[-50px]" />
-
-        <div className="relative max-w-screen-xl mx-auto px-6">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Left - Stats & CTA */}
-            <div>
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-pink-500 rounded-xl flex items-center justify-center">
-                  <Crown size={28} className="text-white" />
-                </div>
-                <div>
-                  <h2 className="text-3xl font-bold text-white">Fan Zone</h2>
-                  <p className="text-white/50">Earn rewards as you listen</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-6 mb-8">
-                <div className="flex items-center gap-2 px-4 py-3 glass rounded-xl">
-                  <Flame size={24} className="text-orange-400" />
-                  <div>
-                    <p className="text-2xl font-bold text-white">{currentStreak}</p>
-                    <p className="text-xs text-white/40">Day Streak</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 px-4 py-3 glass rounded-xl">
-                  <Trophy size={24} className="text-yellow-400" />
-                  <div>
-                    <p className="text-2xl font-bold text-white">{earnedBadges.length}</p>
-                    <p className="text-xs text-white/40">Badges</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 px-4 py-3 glass rounded-xl">
-                  <Music size={24} className="text-blue-400" />
-                  <div>
-                    <p className="text-2xl font-bold text-white">{totalPlays}</p>
-                    <p className="text-xs text-white/40">Plays</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4">
-                <Link href="/fan-zone" className="btn-primary">
-                  Enter Fan Zone
-                </Link>
-                <DailySpin />
-              </div>
-            </div>
-
-            {/* Right - Activity Feed Preview */}
-            <div className="glass rounded-2xl p-4 max-h-[400px] overflow-hidden">
-              <ActivityFeed limit={5} showTrending={false} />
-            </div>
-          </div>
         </div>
       </section>
 

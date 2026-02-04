@@ -10,8 +10,73 @@ import Link from 'next/link';
 import {
   Calendar, MapPin, Users, Video, Star, Crown, Zap,
   Play, Radio, Gift, Trophy, ChevronRight, ExternalLink,
-  Mic, Camera, Ticket, Heart, Clock, Flame
+  Mic, Camera, Ticket, Heart, Clock, Flame, ShoppingBag, Sparkles
 } from 'lucide-react';
+
+// MyStation Merch Promo Banner
+function MerchPromoBanner() {
+  return (
+    <Link href="/merch" className="block group">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 p-1">
+        <div className="relative bg-black/90 rounded-[22px] p-6 lg:p-8 overflow-hidden">
+          {/* Animated background */}
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-orange-500/20 animate-pulse" />
+          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-pink-500/30 to-transparent rounded-full blur-3xl" />
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-purple-500/30 to-transparent rounded-full blur-3xl" />
+
+          <div className="relative flex flex-col lg:flex-row items-center gap-6">
+            {/* Left: Text */}
+            <div className="flex-1 text-center lg:text-left">
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full mb-4">
+                <Sparkles size={14} className="text-yellow-400" />
+                <span className="text-white/80 text-xs font-bold uppercase tracking-wider">Official Merch</span>
+              </div>
+              <h3 className="text-2xl lg:text-3xl font-black text-white mb-2">
+                REP <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 bg-clip-text text-transparent">MYSTATION</span>
+              </h3>
+              <p className="text-white/60 text-sm lg:text-base mb-4">
+                Exclusive tees, hoodies & more. Rock the brand that rocks the culture.
+              </p>
+              <div className="inline-flex items-center gap-2 text-white font-bold group-hover:gap-3 transition-all">
+                <ShoppingBag size={18} className="text-pink-400" />
+                Shop Now
+                <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
+              </div>
+            </div>
+
+            {/* Right: Product images */}
+            <div className="flex items-center gap-4">
+              <div className="w-24 h-24 lg:w-32 lg:h-32 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 border border-white/10 overflow-hidden transform -rotate-6 group-hover:rotate-0 transition-transform shadow-xl">
+                <img
+                  src="/images/mockups/mpf-tee-black.jpg"
+                  alt="MPF Tee"
+                  className="w-full h-full object-cover"
+                  onError={(e) => { e.target.style.display = 'none'; }}
+                />
+              </div>
+              <div className="w-28 h-28 lg:w-36 lg:h-36 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 border border-white/10 overflow-hidden transform rotate-3 group-hover:rotate-0 transition-transform shadow-xl z-10">
+                <img
+                  src="/images/mockups/idmg-label-tee-white.jpg"
+                  alt="IDMG Tee"
+                  className="w-full h-full object-cover"
+                  onError={(e) => { e.target.style.display = 'none'; }}
+                />
+              </div>
+              <div className="hidden lg:block w-24 h-24 lg:w-32 lg:h-32 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 border border-white/10 overflow-hidden transform -rotate-3 group-hover:rotate-0 transition-transform shadow-xl">
+                <img
+                  src="/images/mockups/mpf-tee-white.jpg"
+                  alt="MPF Tee White"
+                  className="w-full h-full object-cover"
+                  onError={(e) => { e.target.style.display = 'none'; }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Link>
+  );
+}
 
 // Festival Date - Update this for each year
 const FESTIVAL_DATE = new Date('2026-09-05T14:00:00');
@@ -274,6 +339,11 @@ export default function LOTLPage() {
       {activeTab === 'overview' && (
         <section className="py-16">
           <div className="max-w-screen-xl mx-auto px-6">
+            {/* MyStation Merch Banner */}
+            <div className="mb-12">
+              <MerchPromoBanner />
+            </div>
+
             {/* Stats */}
             <div className="grid md:grid-cols-4 gap-6 mb-16">
               {[
@@ -779,6 +849,10 @@ export default function LOTLPage() {
                   <Ticket size={18} />
                   Get Tickets
                 </a>
+                <Link href="/merch" className="btn-primary bg-gradient-to-r from-purple-500 to-pink-500 flex items-center gap-2">
+                  <ShoppingBag size={18} />
+                  Shop Merch
+                </Link>
                 <Link href="/fan-zone" className="btn-secondary flex items-center gap-2">
                   <Heart size={18} />
                   Join Fan Zone

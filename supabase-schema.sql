@@ -242,6 +242,106 @@ CREATE INDEX IF NOT EXISTS idx_loyalty_plays ON public.user_loyalty(total_plays 
 CREATE INDEX IF NOT EXISTS idx_daily_plays_user ON public.daily_plays(user_id, play_date);
 
 -- ===========================================
+-- USER PLAYLISTS
+-- ===========================================
+CREATE TABLE IF NOT EXISTS public.playlists (
+  id SERIAL PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id),
+  name TEXT NOT NULL,
+  description TEXT,
+  cover_image TEXT,
+  is_public BOOLEAN DEFAULT TRUE,
+  track_ids INTEGER[] DEFAULT '{}',
+  play_count INTEGER DEFAULT 0,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_playlists_user ON public.playlists(user_id);
+
+-- ===========================================
+-- SONG COMMENTS
+-- ===========================================
+CREATE TABLE IF NOT EXISTS public.comments (
+  id SERIAL PRIMARY KEY,
+  track_id INTEGER NOT NULL,
+  user_id UUID REFERENCES auth.users(id),
+  username TEXT NOT NULL,
+  avatar_url TEXT,
+  content TEXT NOT NULL,
+  likes INTEGER DEFAULT 0,
+  parent_id INTEGER REFERENCES public.comments(id), -- for replies
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_comments_track ON public.comments(track_id);
+CREATE INDEX IF NOT EXISTS idx_comments_user ON public.comments(user_id);
+
+-- Comment likes tracking
+CREATE TABLE IF NOT EXISTS public.comment_likes (
+  id SERIAL PRIMARY KEY,
+  comment_id INTEGER REFERENCES public.comments(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES auth.users(id),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(comment_id, user_id)
+);
+
+-- ===========================================
+-- ARTIST PROFILES (Subscriber Artist Pages)
+-- ===========================================
+CREATE TABLE IF NOT EXISTS public.artist_profiles (
+  id UUID REFERENCES auth.users(id) PRIMARY KEY,
+  artist_name TEXT NOT NULL,
+  slug TEXT UNIQUE NOT NULL, -- URL-friendly name (e.g., mike-page)
+  bio TEXT,
+  profile_image TEXT,
+  cover_image TEXT,
+  location TEXT,
+  genres TEXT[] DEFAULT '{}',
+  social_links JSONB DEFAULT '{}', -- {instagram, twitter, spotify, etc}
+  streaming_links JSONB DEFAULT '{}', -- {spotify, apple, soundcloud}
+  is_verified BOOLEAN DEFAULT FALSE,
+  is_featured BOOLEAN DEFAULT FALSE,
+  follower_count INTEGER DEFAULT 0,
+  total_plays INTEGER DEFAULT 0,
+  subscription_tier TEXT DEFAULT 'free', -- free, pro, premium
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_artist_slug ON public.artist_profiles(slug);
+
+-- Artist tracks (for artists who upload their own music)
+CREATE TABLE IF NOT EXISTS public.artist_tracks (
+  id SERIAL PRIMARY KEY,
+  artist_id UUID REFERENCES public.artist_profiles(id),
+  title TEXT NOT NULL,
+  album TEXT,
+  producer TEXT,
+  featured TEXT, -- featured artists
+  duration INTEGER, -- seconds
+  audio_url TEXT NOT NULL,
+  cover_image TEXT,
+  bpm INTEGER,
+  key TEXT,
+  is_public BOOLEAN DEFAULT TRUE,
+  play_count INTEGER DEFAULT 0,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_artist_tracks ON public.artist_tracks(artist_id);
+
+-- Artist followers
+CREATE TABLE IF NOT EXISTS public.artist_followers (
+  id SERIAL PRIMARY KEY,
+  artist_id UUID REFERENCES public.artist_profiles(id) ON DELETE CASCADE,
+  follower_id UUID REFERENCES auth.users(id),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(artist_id, follower_id)
+);
+
+-- ===========================================
 -- ROW LEVEL SECURITY
 -- ===========================================
 
@@ -290,6 +390,40 @@ CREATE POLICY "System can insert loyalty" ON public.user_loyalty FOR INSERT WITH
 -- Daily plays: Users can read own
 CREATE POLICY "Users can read own daily plays" ON public.daily_plays FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "System can insert daily plays" ON public.daily_plays FOR INSERT WITH CHECK (true);
+
+-- Enable RLS for playlists
+ALTER TABLE public.playlists ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Public playlists viewable by all" ON public.playlists FOR SELECT USING (is_public = true OR auth.uid() = user_id);
+CREATE POLICY "Users can create playlists" ON public.playlists FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can update own playlists" ON public.playlists FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "Users can delete own playlists" ON public.playlists FOR DELETE USING (auth.uid() = user_id);
+
+-- Enable RLS for comments
+ALTER TABLE public.comments ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Comments viewable by all" ON public.comments FOR SELECT USING (true);
+CREATE POLICY "Users can create comments" ON public.comments FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can update own comments" ON public.comments FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "Users can delete own comments" ON public.comments FOR DELETE USING (auth.uid() = user_id);
+
+ALTER TABLE public.comment_likes ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Likes viewable by all" ON public.comment_likes FOR SELECT USING (true);
+CREATE POLICY "Users can like comments" ON public.comment_likes FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can unlike comments" ON public.comment_likes FOR DELETE USING (auth.uid() = user_id);
+
+-- Enable RLS for artist profiles
+ALTER TABLE public.artist_profiles ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Artist profiles viewable by all" ON public.artist_profiles FOR SELECT USING (true);
+CREATE POLICY "Artists can update own profile" ON public.artist_profiles FOR UPDATE USING (auth.uid() = id);
+CREATE POLICY "Users can create artist profile" ON public.artist_profiles FOR INSERT WITH CHECK (auth.uid() = id);
+
+ALTER TABLE public.artist_tracks ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Public artist tracks viewable" ON public.artist_tracks FOR SELECT USING (is_public = true);
+CREATE POLICY "Artists can manage own tracks" ON public.artist_tracks FOR ALL USING (auth.uid() = artist_id);
+
+ALTER TABLE public.artist_followers ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Followers viewable by all" ON public.artist_followers FOR SELECT USING (true);
+CREATE POLICY "Users can follow artists" ON public.artist_followers FOR INSERT WITH CHECK (auth.uid() = follower_id);
+CREATE POLICY "Users can unfollow artists" ON public.artist_followers FOR DELETE USING (auth.uid() = follower_id);
 
 -- ===========================================
 -- ADMIN ACCESS (for Mike)

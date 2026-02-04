@@ -116,6 +116,9 @@ export default function Player() {
         <div className="px-8 mb-6 text-center">
           <h2 className="text-2xl font-bold text-white mb-1">{currentTrack.title}</h2>
           <p className="text-white/50">Mike Page {currentTrack.featured && `ft. ${currentTrack.featured}`}</p>
+          {currentTrack.producer && (
+            <p className="text-purple-400 text-sm mt-1">Prod by {currentTrack.producer}</p>
+          )}
           {currentTrack.bpm && (
             <p className="text-blue-400/60 text-sm mt-2">{currentTrack.bpm} BPM • {currentTrack.key}</p>
           )}
@@ -254,6 +257,9 @@ export default function Player() {
             <div className="flex-1 min-w-0">
               <h4 className="font-semibold text-white text-base">{currentTrack.title}</h4>
               <p className="text-sm text-white/50">Mike Page {currentTrack.featured && `ft. ${currentTrack.featured}`}</p>
+              {currentTrack.producer && (
+                <p className="text-xs text-purple-400 mt-0.5">Prod by {currentTrack.producer}</p>
+              )}
               {currentTrack.bpm && (
                 <div className="flex items-center gap-2 mt-1">
                   <span className="text-xs text-blue-400/60">{currentTrack.bpm} BPM</span>

@@ -5,15 +5,18 @@
 
 'use client';
 
+import { useState } from 'react';
 import { usePlayerStore } from '@/store/playerStore';
 import { useEngagementStore } from '@/store/engagementStore';
-import { Play, Pause, Heart, MoreHorizontal, Clock, Music, ExternalLink } from 'lucide-react';
+import { Play, Pause, Heart, MoreHorizontal, Clock, Music, ExternalLink, MessageCircle } from 'lucide-react';
 import { tracks } from '@/data/tracks';
 import { ShareButton } from './ShareTrack';
 import SongReactions from './SongReactions';
+import CommentSection from './CommentSection';
 
-export default function TrackList({ trackIds, showAlbum = true, showNumber = true }) {
+export default function TrackList({ trackIds, showAlbum = true, showNumber = true, showComments = false }) {
   const { currentTrack, isPlaying, setQueue, togglePlay } = usePlayerStore();
+  const [commentTrack, setCommentTrack] = useState(null);
 
   const displayTracks = trackIds
     ? tracks.filter(t => trackIds.includes(t.id))
@@ -34,6 +37,7 @@ export default function TrackList({ trackIds, showAlbum = true, showNumber = tru
   };
 
   return (
+    <>
     <div className="w-full">
       {/* Header - Hidden on mobile */}
       <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-3 text-white/30 text-xs uppercase tracking-wider border-b border-white/5 mb-2">
@@ -84,8 +88,13 @@ export default function TrackList({ trackIds, showAlbum = true, showNumber = tru
                   {track.title}
                 </p>
                 <p className="text-[13px] text-white/50 mt-0.5">
-                  Mike Page
+                  Mike Page{track.featured && ` ft. ${track.featured}`}
                 </p>
+                {track.producer && (
+                  <p className="text-[11px] text-purple-400/80 mt-0.5">
+                    Prod by {track.producer}
+                  </p>
+                )}
                 <p className="text-[12px] text-white/30 mt-0.5">
                   {track.album} • {track.year}
                 </p>
@@ -96,6 +105,14 @@ export default function TrackList({ trackIds, showAlbum = true, showNumber = tru
                 <div onClick={(e) => e.stopPropagation()}>
                   <SongReactions trackId={track.id} size="xs" />
                 </div>
+                {showComments && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setCommentTrack(track); }}
+                    className="p-1.5 text-white/40 hover:text-blue-400 transition"
+                  >
+                    <MessageCircle size={16} />
+                  </button>
+                )}
                 <div onClick={(e) => e.stopPropagation()}>
                   <ShareButton track={track} size="sm" />
                 </div>
@@ -146,6 +163,7 @@ export default function TrackList({ trackIds, showAlbum = true, showNumber = tru
                     </p>
                     <p className="text-sm text-white/40">
                       Mike Page{track.featured && <span className="text-white/30"> • {track.featured}</span>}
+                      {track.producer && <span className="text-purple-400/70"> • Prod by {track.producer}</span>}
                     </p>
                   </div>
                 </div>
@@ -173,6 +191,15 @@ export default function TrackList({ trackIds, showAlbum = true, showNumber = tru
                 <div onClick={(e) => e.stopPropagation()} className="flex items-center">
                   <SongReactions trackId={track.id} size="sm" />
                 </div>
+                {showComments && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setCommentTrack(track); }}
+                    className="p-1.5 text-white/40 hover:text-blue-400 transition"
+                    title="Comments"
+                  >
+                    <MessageCircle size={16} />
+                  </button>
+                )}
                 <div onClick={(e) => e.stopPropagation()} className="flex items-center">
                   <ShareButton track={track} />
                 </div>
@@ -185,5 +212,15 @@ export default function TrackList({ trackIds, showAlbum = true, showNumber = tru
         );
       })}
     </div>
+
+    {/* Comment Section Modal */}
+    {commentTrack && (
+      <CommentSection
+        trackId={commentTrack.id}
+        trackTitle={commentTrack.title}
+        onClose={() => setCommentTrack(null)}
+      />
+    )}
+    </>
   );
 }

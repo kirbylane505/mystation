@@ -153,7 +153,15 @@ export default function MerchPage() {
       return '/images/mockups/lotl-hoodie-black.jpg';
     }
 
-    // IDMG Tees
+    // IDMG The Label Tees (specific match first)
+    if (lower.includes('idmg') && lower.includes('label')) {
+      if (lower.includes('white')) {
+        return '/images/mockups/idmg-label-tee-white.jpg';
+      }
+      return '/images/mockups/idmg-label-tee-black.jpg';
+    }
+
+    // IDMG Tees (circle logo)
     if (lower.includes('idmg') && (lower.includes('tee') || lower.includes('t-shirt')) && lower.includes('black')) {
       return '/images/mockups/idmg-tee-black.jpg';
     }
