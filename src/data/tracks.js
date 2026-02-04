@@ -373,6 +373,8 @@ export const tracks = [
   { id: 212, title: "Broken Glass", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/IDMG Defoor 100 Shawn Hibbler - Mike Page (ruff01).mp3', producer: "The Cubist" },
   { id: 213, title: "Rollin'", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/01 Mike Page Rolling.mp3', producer: "The Cubist" },
   { id: 214, title: "Lizzo", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/01 Mike Page Lizzo.mp3', producer: "The Art Teacher" },
+  { id: 215, title: "Stand Up (RIP Jakhi)", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/01 Mike Page -Stand  Up(X05)(M02).mp3', producer: "The Cubist" },
+  { id: 216, title: "Roulette", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/01 Mike Page - idmg483 (X3.0) L.mp3', producer: "The Cubist" },
 ];
 
 // Featured Song of the Week
@@ -435,7 +437,7 @@ export const albums = [
     coverGradient: "from-red-600 via-red-800 to-black",
     coverEmoji: "🔒",
     isNew: true,
-    trackIds: [201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214],
+    trackIds: [201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216],
     description: "Exclusive tracks from Quick Reels. Family & friends access with code FAMILY2026."
   }
 ];
