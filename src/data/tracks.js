@@ -433,7 +433,7 @@ export const albums = [
     subtitle: "Quick Reels Collection",
     artist: "Mike Page",
     year: 2026,
-    trackCount: 6,
+    trackCount: 26,
     coverGradient: "from-red-600 via-red-800 to-black",
     coverEmoji: "🔒",
     isNew: true,
