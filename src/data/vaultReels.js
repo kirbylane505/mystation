@@ -81,7 +81,7 @@ export const vaultReels = [
   {
     id: 7,
     title: "It's My Bday Bitch",
-    artist: 'Mike Page ft Krissie the Don & Chevy',
+    artist: 'Mike Page ft Krissie the Don',
     producer: 'The Cubist',
     videoUrl: '/reels/BDAY_BITCH_FREQ_REEL.mp4',
     addedAt: '2026-02-04',
