@@ -70,7 +70,7 @@ export const usePlayerStore = create(
     }
   },
 
-  // Check if can play (3 free songs, then subscription wall)
+  // Check if can play (4 free songs, then subscription wall)
   canPlay: (trackId) => {
     const { isSubscribed } = useUserStore.getState();
     if (isSubscribed) return true;
@@ -78,8 +78,8 @@ export const usePlayerStore = create(
     const { playCount, uniquePlaysThisSession } = get();
     // Allow replay of already-played tracks
     if (uniquePlaysThisSession.includes(trackId)) return true;
-    // Block after 3 unique plays
-    return playCount < 3;
+    // Block after 4 unique plays
+    return playCount < 4;
   },
 
   // Show subscribe modal

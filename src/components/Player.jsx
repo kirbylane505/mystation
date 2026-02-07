@@ -54,6 +54,10 @@ export default function Player() {
 
   const { isSubscribed } = useUserStore();
 
+  // 4 free songs, then subscription wall
+  const freePlaysRemaining = Math.max(0, 4 - playCount);
+  const showFreePlaysBadge = mounted && !isSubscribed && freePlaysRemaining > 0;
+
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -113,10 +117,6 @@ export default function Player() {
     }
     setShowShareMenu(false);
   };
-
-  // Calculate remaining free plays
-  const freePlaysRemaining = Math.max(0, 3 - playCount);
-  const showFreePlaysBadge = mounted && !isSubscribed && freePlaysRemaining > 0;
 
   if (!currentTrack) {
     return (
@@ -290,14 +290,14 @@ export default function Player() {
   return (
     <>
       {/* Mobile Subscribe Banner */}
-      {mounted && !isSubscribed && (
+      {mounted && !isSubscribed && freePlaysRemaining === 0 && (
         <a
           href="https://buy.stripe.com/eVq5kEcWS8VW8z10xs73G04"
           className="md:hidden fixed bottom-[72px] left-0 right-0 bg-gradient-to-r from-yellow-500/90 to-orange-500/90 backdrop-blur-xl z-40"
         >
           <div className="w-full flex items-center justify-center gap-2 py-2 text-white font-semibold text-sm">
             <Crown size={16} />
-            {freePlaysRemaining > 0 ? `${freePlaysRemaining} free left - ` : ''}Subscribe $4.99/mo
+            Subscribe $4.99/mo for Unlimited
           </div>
         </a>
       )}
@@ -355,14 +355,7 @@ export default function Player() {
           <div className="absolute -top-10 left-1/2 -translate-x-1/2 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full shadow-lg flex items-center gap-2 animate-bounce">
             <Sparkles size={14} className="text-yellow-300" />
             <span className="text-white text-sm font-medium">{freePlaysRemaining} free {freePlaysRemaining === 1 ? 'song' : 'songs'} left</span>
-            <button onClick={() => openSubscribeModal()} className="ml-2 px-2 py-0.5 bg-white/20 hover:bg-white/30 rounded text-xs text-white font-semibold transition">Unlock All</button>
-          </div>
-        )}
-
-        {mounted && isSubscribed && (
-          <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-3 py-1 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full shadow-lg flex items-center gap-2">
-            <Sparkles size={12} className="text-white" />
-            <span className="text-white text-xs font-medium">Unlimited Access</span>
+            <a href="https://buy.stripe.com/eVq5kEcWS8VW8z10xs73G04" className="ml-2 px-2 py-0.5 bg-white/20 hover:bg-white/30 rounded text-xs text-white font-semibold transition">Unlock All</a>
           </div>
         )}
 

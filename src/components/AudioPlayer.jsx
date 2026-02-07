@@ -91,8 +91,10 @@ export default function AudioPlayer() {
     return track.audioFile || null;
   }, []);
 
-  // All tracks free to play — no subscription wall
-  const checkCanPlay = useCallback(() => true, []);
+  // 4 free songs, then subscription wall
+  const checkCanPlay = useCallback((trackId) => {
+    return usePlayerStore.getState().canPlay(trackId);
+  }, []);
 
   // Event handlers
   const handleTimeUpdate = useCallback(() => {

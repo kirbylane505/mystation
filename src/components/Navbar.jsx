@@ -172,11 +172,11 @@ export default function Navbar() {
             </Link>
           )}
 
-          {/* Subscribe Button - Always visible for non-subscribers */}
+          {/* Subscribe Button */}
           {!isSubscribed && (
             <a
               href="https://buy.stripe.com/eVq5kEcWS8VW8z10xs73G04"
-              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full hover:shadow-lg hover:shadow-orange-500/30 transition text-white font-bold text-sm animate-pulse"
+              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full hover:shadow-lg hover:shadow-orange-500/30 transition text-white font-bold text-sm"
             >
               <Crown size={16} />
               Subscribe
