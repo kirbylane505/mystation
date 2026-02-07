@@ -76,7 +76,7 @@ export default function Player() {
 
   // Share to social media
   const shareTrack = (platform) => {
-    const trackUrl = `https://mystation.vercel.app/music?track=${currentTrack.id}&autoplay=1`;
+    const trackUrl = `https://mystationlive.com/song/${currentTrack.id}`;
     const text = `🎵 Listen to "${currentTrack.title}" by Mike Page on MyStation! ${currentTrack.featured ? `ft. ${currentTrack.featured}` : ''} #MikePage #MyStation #IDMG`;
 
     const shareUrls = {

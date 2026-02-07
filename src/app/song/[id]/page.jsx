@@ -1,0 +1,69 @@
+/**
+ * MYSTATION - Song Landing Page
+ * Dynamic OG tags per song for rich iMessage/social previews
+ * Auto-plays the track when opened
+ */
+
+import { tracks } from '@/data/tracks';
+import SongClient from './SongClient';
+
+// Dynamic OG metadata per song
+export async function generateMetadata({ params }) {
+  const { id } = params;
+  const track = tracks.find(t => String(t.id) === String(id));
+
+  if (!track) {
+    return { title: 'Song Not Found | MyStation' };
+  }
+
+  const title = `${track.title}${track.featured ? ` ft. ${track.featured}` : ''} - Mike Page`;
+  const description = `Stream "${track.title}" by Mike Page${track.featured ? ` ft. ${track.featured}` : ''}${track.producer ? ` | Prod. ${track.producer}` : ''} | ${track.album} (${track.year}) | Free on MyStation`;
+  const url = `https://mystationlive.com/song/${track.id}`;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      url,
+      siteName: 'MyStation',
+      type: 'music.song',
+      images: [
+        {
+          url: '/images/og-favorite-person.png',
+          width: 1200,
+          height: 630,
+          alt: title,
+        },
+      ],
+      audio: track.audioFile ? `https://mystationlive.com${track.audioFile}` : undefined,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: ['/images/og-favorite-person.png'],
+    },
+  };
+}
+
+// Generate static params for all tracks
+export async function generateStaticParams() {
+  return tracks.map(t => ({ id: String(t.id) }));
+}
+
+export default function SongPage({ params }) {
+  const { id } = params;
+  const track = tracks.find(t => String(t.id) === String(id));
+
+  if (!track) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-white/50 text-lg">Song not found</p>
+      </div>
+    );
+  }
+
+  return <SongClient track={track} allTracks={tracks} />;
+}

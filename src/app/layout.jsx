@@ -14,7 +14,7 @@ import InstallPWA from '@/components/InstallPWA';
 import Script from 'next/script';
 
 export const metadata = {
-  metadataBase: new URL('https://mystation.vercel.app'),
+  metadataBase: new URL('https://mystationlive.com'),
   title: {
     default: 'MyStation - Mike Page Foundation',
     template: '%s | MyStation',
@@ -26,7 +26,7 @@ export const metadata = {
   openGraph: {
     title: 'FAVORITE PERSON - Mike Page | MyStation',
     description: 'Stream "Favorite Person" by Mike Page FREE on MyStation. Prod. The Cubist (SHOW_IDMG).',
-    url: 'https://mystation.vercel.app',
+    url: 'https://mystationlive.com',
     siteName: 'MyStation',
     images: [
       {
@@ -75,7 +75,7 @@ export default function RootLayout({ children }) {
           </main>
           <Player />
           <AudioPlayer />
-          <SubscribeModal />
+          {/* <SubscribeModal /> */}
           <Cart />
           <InstallPWA />
         </ClientProviders>

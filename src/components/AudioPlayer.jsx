@@ -91,13 +91,8 @@ export default function AudioPlayer() {
     return track.audioFile || null;
   }, []);
 
-  // Check subscription wall before playing
-  const checkCanPlay = useCallback((trackId) => {
-    if (isSubscribed) return true;
-    const { playCount, uniquePlaysThisSession } = usePlayerStore.getState();
-    if (uniquePlaysThisSession.includes(trackId)) return true;
-    return playCount < 3;
-  }, [isSubscribed]);
+  // All tracks free to play — no subscription wall
+  const checkCanPlay = useCallback(() => true, []);
 
   // Event handlers
   const handleTimeUpdate = useCallback(() => {
@@ -164,6 +159,9 @@ export default function AudioPlayer() {
     audio.addEventListener('ended', handleEnded);
   }, [handleEnded]);
 
+  // Track loading flag to prevent race conditions
+  const isLoadingRef = useRef(false);
+
   // Load new track when currentTrack changes
   useEffect(() => {
     const audio = getGlobalAudio();
@@ -188,34 +186,37 @@ export default function AudioPlayer() {
       }
 
       const audioUrl = getAudioUrl(currentTrack);
-      if (audioUrl && audio.src !== audioUrl) {
-        audio.src = audioUrl;
-        audio.load();
+      if (audioUrl) {
+        // Compare properly - audio.src is absolute, audioUrl is relative
+        const currentSrc = audio.src ? new URL(audio.src, window.location.origin).pathname : '';
+        if (currentSrc !== audioUrl) {
+          isLoadingRef.current = true;
+          audio.src = audioUrl;
+          audio.load();
 
-        if (isPlaying) {
-          const playPromise = audio.play();
-          if (playPromise) {
-            playPromise.catch(err => {
-              console.log('Playback prevented:', err);
-            });
-          }
+          // Wait for canplay before attempting playback
+          const onCanPlay = () => {
+            audio.removeEventListener('canplay', onCanPlay);
+            isLoadingRef.current = false;
+            if (usePlayerStore.getState().isPlaying) {
+              audio.play().catch(() => {});
+            }
+          };
+          audio.addEventListener('canplay', onCanPlay);
         }
       }
     }
-  }, [currentTrack?.id, getAudioUrl, checkCanPlay, incrementPlayCount, openSubscribeModal, pause, isPlaying]);
+  }, [currentTrack?.id, getAudioUrl, checkCanPlay, incrementPlayCount, openSubscribeModal, pause]);
 
   // Handle play/pause state changes
   useEffect(() => {
     const audio = getGlobalAudio();
     if (!audio || !currentTrack) return;
+    // Skip if we're loading a new track - the canplay handler will start playback
+    if (isLoadingRef.current) return;
 
     if (isPlaying) {
-      const playPromise = audio.play();
-      if (playPromise) {
-        playPromise.catch(err => {
-          console.log('Playback prevented:', err);
-        });
-      }
+      audio.play().catch(() => {});
     } else {
       audio.pause();
     }

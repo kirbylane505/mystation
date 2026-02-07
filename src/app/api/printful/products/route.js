@@ -1,5 +1,7 @@
 import { printful } from '@/lib/printful';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/printful/products
  * Fetch all synced products from Printful store

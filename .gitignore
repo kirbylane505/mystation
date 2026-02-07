@@ -14,5 +14,5 @@ out/
 # OS
 .DS_Store
 
-# Large audio (use CDN in production)
-public/audio/*.wav
+# Large audio - WAV masters stay local only
+public/audio/**/*.wav
