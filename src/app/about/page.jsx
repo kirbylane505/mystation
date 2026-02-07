@@ -26,9 +26,13 @@ export default function AboutPage() {
             Mike Page <span className="text-mystation-gold">Foundation</span>
           </h1>
 
+          <p className="text-xl text-white/60 max-w-3xl mx-auto mb-4">
+            A Proud Partner of MyStation
+          </p>
+
           <p className="text-xl text-white/70 max-w-2xl mx-auto mb-8">
-            Empowering youth through music, scholarships, and community events.
-            100% of MyStation donations go directly to our programs.
+            Building community. Giving back. Uniting people through music.
+            <span className="block mt-2 text-mystation-gold font-semibold">100% dedicated to changing the world, one community at a time.</span>
           </p>
 
                   </div>
@@ -45,8 +49,9 @@ export default function AboutPage() {
               education, and opportunity.
             </p>
             <p className="text-white/70 text-lg">
-              Through donations from MyStation streams and direct contributions, we fund youth
-              music programs, provide scholarships, and host community events that bring people together.
+              When you support MyStation, you help the Mike Page Foundation fund youth music programs,
+              provide scholarships, and host community events that bring people together.
+              We're not just making music—we're building a movement.
             </p>
           </div>
 
@@ -182,27 +187,27 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Transparency */}
+      {/* Impact */}
       <section className="bg-mystation-accent/30 py-16">
         <div className="max-w-screen-xl mx-auto px-6 text-center">
-          <h2 className="text-3xl font-bold text-white mb-6">100% Transparent</h2>
+          <h2 className="text-3xl font-bold text-white mb-6">Our Impact</h2>
           <p className="text-white/70 text-lg max-w-2xl mx-auto mb-12">
-            As a 501(c)(3) nonprofit, we maintain full transparency. Every dollar is accounted for
-            and goes directly to our programs. No overhead, no hidden fees.
+            As a 501(c)(3) nonprofit, we're 100% committed to changing the world one community at a time.
+            Every stream, every donation, every purchase helps us build something bigger than music.
           </p>
 
           <div className="grid md:grid-cols-3 gap-8">
             <div className="glass rounded-2xl p-6">
-              <h4 className="text-4xl font-bold text-mystation-gold mb-2">100%</h4>
-              <p className="text-white/60">Net donations to programs</p>
+              <h4 className="text-4xl font-bold text-mystation-gold mb-2">Community</h4>
+              <p className="text-white/60">Building stronger neighborhoods</p>
             </div>
             <div className="glass rounded-2xl p-6">
-              <h4 className="text-4xl font-bold text-mystation-gold mb-2">Tax-Free</h4>
-              <p className="text-white/60">All donations are deductible</p>
+              <h4 className="text-4xl font-bold text-mystation-gold mb-2">Unity</h4>
+              <p className="text-white/60">Bringing people together through music</p>
             </div>
             <div className="glass rounded-2xl p-6">
-              <h4 className="text-4xl font-bold text-mystation-gold mb-2">Annual</h4>
-              <p className="text-white/60">Public reports published</p>
+              <h4 className="text-4xl font-bold text-mystation-gold mb-2">Future</h4>
+              <p className="text-white/60">Investing in the next generation</p>
             </div>
           </div>
         </div>
