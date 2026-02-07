@@ -5,17 +5,20 @@
 
 'use client';
 
+import { useState } from 'react';
 import Hero from '@/components/Hero';
 import FeaturedSong from '@/components/FeaturedSong';
 import TrackList from '@/components/TrackList';
 import EmailCapture from '@/components/EmailCapture';
 import { tracks, albums, getOfficialTracks, featuredSong } from '@/data/tracks';
 import { usePlayerStore } from '@/store/playerStore';
-import { Play, Heart, ExternalLink, Music, Award, Users, Sparkles, Headphones } from 'lucide-react';
+import { Play, Pause, Heart, ExternalLink, Music, Award, Users, Sparkles, Headphones, ChevronLeft, Shuffle } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function HomePage() {
-  const { setQueue } = usePlayerStore();
+  const { setQueue, currentTrack, isPlaying } = usePlayerStore();
+  const [activeAlbum, setActiveAlbum] = useState(null);
 
   // Get official tracks only
   const officialTracks = getOfficialTracks();
@@ -25,11 +28,26 @@ export default function HomePage() {
   // Featured - Cindy's Son highlights + singles
   const featuredTracks = [1, 21, 22, 3, 7, 10];
 
-  // Play an entire album
-  const handlePlayAlbum = (album) => {
-    if (album.trackIds && album.trackIds.length > 0) {
-      const albumTracks = album.trackIds.map(id => tracks.find(t => t.id === id)).filter(Boolean);
+  // Get track objects for an album
+  const getAlbumTracks = (album) => {
+    if (!album?.trackIds) return [];
+    return album.trackIds.map(id => tracks.find(t => t.id === id)).filter(Boolean);
+  };
+
+  // Open album detail view and start playing
+  const handleOpenAlbum = (album) => {
+    setActiveAlbum(album);
+    const albumTracks = getAlbumTracks(album);
+    if (albumTracks.length > 0) {
       setQueue(albumTracks, 0);
+    }
+  };
+
+  // Play a specific track within the album view
+  const handlePlayAlbumTrack = (album, index) => {
+    const albumTracks = getAlbumTracks(album);
+    if (albumTracks.length > 0) {
+      setQueue(albumTracks, index);
     }
   };
 
@@ -78,6 +96,7 @@ export default function HomePage() {
               key={album.id}
               className="album-3d glass rounded-2xl p-5 hover:border-blue-500/30 transition-all duration-300 cursor-pointer group animate-fade-in"
               style={{ animationDelay: `${albums.indexOf(album) * 0.1}s` }}
+              onClick={() => !album.comingSoon && handleOpenAlbum(album)}
             >
               {/* Album Cover */}
               <div className={`aspect-square ${album.coverImage ? '' : `bg-gradient-to-br ${album.coverGradient}`} rounded-xl mb-5 flex flex-col items-center justify-center relative overflow-hidden border border-white/10 shadow-xl`}>
@@ -115,7 +134,7 @@ export default function HomePage() {
                 {!album.comingSoon && (
                   <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
                     <button
-                      onClick={(e) => { e.stopPropagation(); handlePlayAlbum(album); }}
+                      onClick={(e) => { e.stopPropagation(); handleOpenAlbum(album); }}
                       className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center shadow-2xl shadow-blue-500/50 hover:scale-110 transition-transform"
                     >
                       <Play size={28} className="text-white ml-1" fill="white" />
@@ -248,6 +267,103 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Album Detail View */}
+      {activeAlbum && (
+        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm overflow-y-auto">
+          <div className="min-h-screen p-4 md:p-8 pb-36">
+            <div className="max-w-screen-lg mx-auto">
+              {/* Back Button */}
+              <button
+                onClick={() => setActiveAlbum(null)}
+                className="flex items-center gap-2 text-white/60 hover:text-white mb-6 transition"
+              >
+                <ChevronLeft size={24} />
+                <span>Back</span>
+              </button>
+
+              {/* Album Header */}
+              <div className="flex flex-col md:flex-row gap-6 mb-8">
+                <div className="w-48 h-48 flex-shrink-0 rounded-2xl overflow-hidden relative border border-white/10 shadow-2xl">
+                  {activeAlbum.coverImage ? (
+                    <Image src={activeAlbum.coverImage} alt={activeAlbum.title} fill className="object-cover" />
+                  ) : (
+                    <div className={`w-full h-full bg-gradient-to-br ${activeAlbum.coverGradient} flex items-center justify-center`}>
+                      <span className="text-7xl">{activeAlbum.coverEmoji || '🎧'}</span>
+                    </div>
+                  )}
+                </div>
+                <div className="flex flex-col justify-end">
+                  <p className="text-white/60 text-sm mb-1">ALBUM</p>
+                  <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">{activeAlbum.title}</h1>
+                  <p className="text-white/60 mb-2">Mike Page • {activeAlbum.year}</p>
+                  <p className="text-white/40 text-sm">{getAlbumTracks(activeAlbum).length} tracks</p>
+                </div>
+              </div>
+
+              {/* Play All / Shuffle */}
+              <div className="flex gap-4 mb-8">
+                <button
+                  onClick={() => handlePlayAlbumTrack(activeAlbum, 0)}
+                  className="flex items-center gap-3 px-8 py-4 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-full transition"
+                >
+                  <Play size={24} fill="white" />
+                  Play All
+                </button>
+                <button
+                  onClick={() => {
+                    const albumTracks = getAlbumTracks(activeAlbum);
+                    const shuffled = [...albumTracks].sort(() => Math.random() - 0.5);
+                    setQueue(shuffled, 0);
+                  }}
+                  className="flex items-center gap-3 px-6 py-4 bg-white/10 hover:bg-white/20 text-white font-bold rounded-full transition"
+                >
+                  <Shuffle size={20} />
+                  Shuffle
+                </button>
+              </div>
+
+              {/* Track List */}
+              <div className="glass rounded-2xl overflow-hidden">
+                {getAlbumTracks(activeAlbum).map((track, index) => {
+                  const isCurrentTrack = currentTrack?.id === track.id;
+                  return (
+                    <button
+                      key={track.id}
+                      onClick={() => handlePlayAlbumTrack(activeAlbum, index)}
+                      className={`w-full flex items-center gap-4 p-4 hover:bg-white/10 transition text-left border-b border-white/5 last:border-0 ${
+                        isCurrentTrack ? 'bg-blue-500/20' : ''
+                      }`}
+                    >
+                      <div className="w-8 text-center">
+                        {isCurrentTrack && isPlaying ? (
+                          <div className="flex items-center justify-center gap-0.5">
+                            <span className="w-1 h-4 bg-blue-400 rounded-full animate-pulse" />
+                            <span className="w-1 h-3 bg-blue-400 rounded-full animate-pulse" style={{ animationDelay: '75ms' }} />
+                            <span className="w-1 h-5 bg-blue-400 rounded-full animate-pulse" style={{ animationDelay: '150ms' }} />
+                          </div>
+                        ) : (
+                          <span className="text-white/40">{index + 1}</span>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className={`font-medium truncate ${isCurrentTrack ? 'text-blue-400' : 'text-white'}`}>
+                          {track.title}
+                        </p>
+                        <p className="text-white/50 text-sm truncate">
+                          Mike Page{track.featured ? ` ft. ${track.featured}` : ''}
+                          {track.producer ? ` • Prod. ${track.producer}` : ''}
+                        </p>
+                      </div>
+                      <span className="text-white/40 text-sm">{track.duration || ''}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Footer */}
       <footer className="border-t border-white/5 py-16 bg-mystation-black/50">
         <div className="max-w-screen-xl mx-auto px-6">
@@ -263,7 +379,7 @@ export default function HomePage() {
               </Link>
               <p className="text-white/40 text-sm leading-relaxed">
                 Free music streaming platform by Mike Page Foundation.
-                100% of donations support youth and community programs.
+                Revenue helps build youth and community programs worldwide.
               </p>
             </div>
             <div>
