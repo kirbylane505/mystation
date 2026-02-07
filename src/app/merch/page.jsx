@@ -8,14 +8,17 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShoppingBag, Heart, Truck, Shield, Package, X, Loader2, ChevronLeft, ChevronRight, Check } from 'lucide-react';
+import { ShoppingBag, Heart, Truck, Shield, Package, X, Loader2, ChevronLeft, ChevronRight, Check, Ticket, Sparkles } from 'lucide-react';
 import { useCartStore } from '@/stores/cartStore';
 
-// Product Image component with fallback
-function ProductImage({ src, alt, className = '' }) {
-  const [error, setError] = useState(false);
+// Product Image component with chained fallbacks
+function ProductImage({ src, fallbackSrc, alt, className = '' }) {
+  const [useFallback, setUseFallback] = useState(false);
+  const [allFailed, setAllFailed] = useState(false);
 
-  if (error || !src) {
+  const currentSrc = useFallback ? fallbackSrc : src;
+
+  if (allFailed || (!src && !fallbackSrc)) {
     return (
       <div className={`absolute inset-0 bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center ${className}`}>
         <div className="text-center p-4">
@@ -28,10 +31,16 @@ function ProductImage({ src, alt, className = '' }) {
 
   return (
     <img
-      src={src}
+      src={currentSrc}
       alt={alt}
       className={`absolute inset-0 w-full h-full object-cover ${className}`}
-      onError={() => setError(true)}
+      onError={() => {
+        if (!useFallback && fallbackSrc) {
+          setUseFallback(true);
+        } else {
+          setAllFailed(true);
+        }
+      }}
     />
   );
 }
@@ -175,8 +184,10 @@ export default function MerchPage() {
       return '/images/mockups/lotl-tee-black.jpg';
     }
 
-    // MPF Tee
-    if ((lower.includes('mike page foundation') || lower.includes('mpf')) && !lower.includes('mug')) {
+    // MPF Tees - color-specific
+    if ((lower.includes('mike page foundation') || lower.includes('mpf')) && !lower.includes('mug') && !lower.includes('sweater')) {
+      if (lower.includes('white')) return '/images/mockups/mpf-tee-white.jpg';
+      if (lower.includes('red')) return '/images/mockups/mpf-tee-red.jpg';
       return '/images/mockups/mpf-tee.jpg';
     }
 
@@ -195,7 +206,8 @@ export default function MerchPage() {
     if (lower.includes('hoodie')) return '/images/merch/idmg-black-hoodie.jpg';
     if (lower.includes('legging')) return '/images/merch/lotl-leggings-final.jpg';
 
-    return '/images/merch/idmg-black-tee-real.jpg';
+    // Use Printful thumbnail as final fallback - shows real product with real design
+    return printfulUrl || '/images/merch/idmg-black-tee-real.jpg';
   }
 
   // Get product description based on name
@@ -205,13 +217,16 @@ export default function MerchPage() {
     if (lower.includes('t-shirt') || lower.includes('tee')) return 'Classic premium cotton tee. Essential streetwear.';
     if (lower.includes('legging')) return 'All-over print athletic leggings. Festival ready.';
     if (lower.includes('baby')) return 'Soft cotton baby tee. Rep the movement early.';
+    if (lower.includes('mug')) return 'Ceramic mug. Start every morning repping the movement.';
+    if (lower.includes('tote')) return 'Premium canvas tote bag. Carry the mission everywhere.';
+    if (lower.includes('cap') || lower.includes('hat')) return 'Structured snapback cap. Crown yourself.';
     return 'Premium quality merchandise from IDMG.';
   }
 
   // Get category based on product name
   function getCategory(name) {
     const lower = name.toLowerCase();
-    if (lower.includes('cap') || lower.includes('hat')) return 'accessories';
+    if (lower.includes('cap') || lower.includes('hat') || lower.includes('mug') || lower.includes('tote')) return 'accessories';
     return 'apparel';
   }
 
@@ -360,6 +375,7 @@ export default function MerchPage() {
                       >
                         <ProductImage
                           src={product.image}
+                          fallbackSrc={product.printfulImage}
                           alt={product.name}
                         />
                         {/* Product Name Overlay */}
@@ -462,6 +478,42 @@ export default function MerchPage() {
                 <span className="text-sm">{item.label}</span>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* LOTL 2026 Ticket Promo Banner */}
+      <section className="py-6">
+        <div className="max-w-screen-xl mx-auto px-6">
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-green-600 via-emerald-500 to-green-600 p-[2px]">
+            <div className="relative bg-gradient-to-r from-green-900/95 via-emerald-800/95 to-green-900/95 rounded-2xl px-6 py-5 md:px-10 md:py-6">
+              <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%2334d399%22%20fill-opacity%3D%220.06%22%3E%3Cpath%20d%3D%22M36%2034v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6%2034v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6%204V0H4v4H0v2h4v4h2V6h4V4H6z%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E')] opacity-50" />
+              <div className="relative flex flex-col md:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="flex-shrink-0 w-14 h-14 bg-green-500/20 rounded-xl flex items-center justify-center border border-green-400/30">
+                    <Ticket size={28} className="text-green-300" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <Sparkles size={16} className="text-yellow-400" />
+                      <span className="text-yellow-400 text-sm font-bold uppercase tracking-wider">Love on the Lawn 2026 Promo</span>
+                    </div>
+                    <h3 className="text-xl md:text-2xl font-black text-white">
+                      Spend $26+ on merch → Get <span className="text-green-300">25% OFF</span> your LOTL tickets!
+                    </h3>
+                    <p className="text-green-200/70 text-sm mt-1">
+                      Discount code will appear on your receipt after checkout. Valid for Love on the Lawn 2026.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex-shrink-0">
+                  <Link href="#shop" className="inline-flex items-center gap-2 px-6 py-3 bg-green-500 hover:bg-green-400 text-black font-bold rounded-full transition-all hover:scale-105 shadow-lg shadow-green-500/30">
+                    <ShoppingBag size={18} />
+                    Shop & Save
+                  </Link>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -622,7 +674,7 @@ export default function MerchPage() {
                 >
                   {/* Product Image */}
                   <div className="aspect-square relative overflow-hidden">
-                    <ProductImage src={item.image} alt={item.name} />
+                    <ProductImage src={item.image} fallbackSrc={item.printfulImage} alt={item.name} />
                     {item.badge && (
                       <div className={`absolute top-4 left-4 px-3 py-1 text-xs font-bold rounded-full z-10 ${
                         item.badge === 'NEW' ? 'bg-blue-500 text-white' :
@@ -697,7 +749,7 @@ export default function MerchPage() {
                 >
                   {/* Product Image */}
                   <div className="aspect-square relative overflow-hidden">
-                    <ProductImage src={item.image} alt={item.name} />
+                    <ProductImage src={item.image} fallbackSrc={item.printfulImage} alt={item.name} />
                     {item.badge && (
                       <div className={`absolute top-4 left-4 px-3 py-1 text-xs font-bold rounded-full z-10 ${
                         item.badge === 'NEW' ? 'bg-blue-500 text-white' :
@@ -789,6 +841,7 @@ export default function MerchPage() {
               <div className="aspect-square relative bg-white">
                 <ProductImage
                   src={getVariantImage(selectedVariant, selectedItem.image)}
+                  fallbackSrc={selectedItem.printfulImage}
                   alt={selectedItem.name}
                 />
                 {selectedItem.badge && (
