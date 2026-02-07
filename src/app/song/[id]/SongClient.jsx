@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Play, Pause, Music, Share2, Heart, ExternalLink, Disc3 } from 'lucide-react';
+import Image from 'next/image';
+import { Play, Pause, Music, Share2, Heart, Disc3 } from 'lucide-react';
 import { usePlayerStore } from '@/store/playerStore';
 
-export default function SongClient({ track, allTracks }) {
+export default function SongClient({ track, allTracks, albumArt }) {
   const { currentTrack, isPlaying, setTrack, setQueue, togglePlay } = usePlayerStore();
   const [shared, setShared] = useState(false);
   const isThisTrack = currentTrack?.id === track.id;
@@ -48,15 +49,26 @@ export default function SongClient({ track, allTracks }) {
       <div className="relative max-w-2xl mx-auto px-6 py-12 flex flex-col items-center text-center">
         {/* Album Art */}
         <div className="relative mb-8">
-          <div className={`w-72 h-72 md:w-80 md:h-80 rounded-3xl bg-gradient-to-br from-blue-600/40 to-purple-900/60 border border-white/10 shadow-2xl flex items-center justify-center overflow-hidden ${isThisPlaying ? 'shadow-blue-500/30' : ''}`}>
-            <div className="text-center">
-              {isThisPlaying ? (
-                <Disc3 size={80} className="text-blue-400 mx-auto mb-3 animate-spin" style={{ animationDuration: '3s' }} />
-              ) : (
-                <Music size={80} className="text-blue-400/60 mx-auto mb-3" />
-              )}
-              <p className="text-white/30 text-sm font-medium">{track.album}</p>
-            </div>
+          <div className={`w-72 h-72 md:w-80 md:h-80 rounded-3xl bg-gradient-to-br from-blue-600/40 to-purple-900/60 border border-white/10 shadow-2xl flex items-center justify-center overflow-hidden relative ${isThisPlaying ? 'shadow-blue-500/30' : ''}`}>
+            {albumArt ? (
+              <Image src={albumArt} alt={track.album || track.title} fill className="object-cover" />
+            ) : (
+              <div className="text-center">
+                {isThisPlaying ? (
+                  <Disc3 size={80} className="text-blue-400 mx-auto mb-3 animate-spin" style={{ animationDuration: '3s' }} />
+                ) : (
+                  <Music size={80} className="text-blue-400/60 mx-auto mb-3" />
+                )}
+                <p className="text-white/30 text-sm font-medium">{track.album}</p>
+              </div>
+            )}
+            {albumArt && isThisPlaying && (
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1 bg-black/50 px-3 py-1.5 rounded-full">
+                <span className="w-2 h-6 bg-white rounded-full animate-pulse" />
+                <span className="w-2 h-8 bg-white rounded-full animate-pulse" style={{ animationDelay: '150ms' }} />
+                <span className="w-2 h-5 bg-white rounded-full animate-pulse" style={{ animationDelay: '300ms' }} />
+              </div>
+            )}
           </div>
           {track.bpm && (
             <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-blue-500/20 border border-blue-500/30 rounded-full backdrop-blur-sm">

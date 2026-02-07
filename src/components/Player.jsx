@@ -13,6 +13,16 @@ import {
   Heart, Share2, Music, Sparkles, ChevronUp, X, Crown, AlarmClock
 } from 'lucide-react';
 import AlarmClockModal from './AlarmClock';
+import { albums } from '@/data/tracks';
+import Image from 'next/image';
+
+// Get album cover art for a track
+function getAlbumArt(track) {
+  if (!track) return null;
+  if (track.coverArt) return track.coverArt;
+  const album = albums.find(a => a.id === track.albumId);
+  return album?.coverImage || null;
+}
 
 export default function Player() {
   const audioRef = useRef(null);
@@ -133,10 +143,14 @@ export default function Player() {
 
         {/* Album Art */}
         <div className="flex-1 flex items-center justify-center p-8">
-          <div className="w-72 h-72 md:w-80 md:h-80 bg-gradient-to-br from-blue-600/30 to-blue-900/50 rounded-2xl flex items-center justify-center border border-white/10 shadow-2xl">
-            <Music size={80} className="text-blue-400" />
+          <div className="w-72 h-72 md:w-80 md:h-80 bg-gradient-to-br from-blue-600/30 to-blue-900/50 rounded-2xl flex items-center justify-center border border-white/10 shadow-2xl relative overflow-hidden">
+            {getAlbumArt(currentTrack) ? (
+              <Image src={getAlbumArt(currentTrack)} alt={currentTrack.album || currentTrack.title} fill className="object-cover" />
+            ) : (
+              <Music size={80} className="text-blue-400" />
+            )}
             {isPlaying && (
-              <div className="absolute bottom-8 flex gap-1">
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1 bg-black/40 px-3 py-1.5 rounded-full">
                 <span className="w-2 h-6 bg-blue-400 rounded-full animate-pulse" />
                 <span className="w-2 h-8 bg-blue-400 rounded-full animate-pulse" style={{ animationDelay: '150ms' }} />
                 <span className="w-2 h-5 bg-blue-400 rounded-full animate-pulse" style={{ animationDelay: '300ms' }} />
@@ -300,8 +314,12 @@ export default function Player() {
 
         <div className="flex items-center gap-3 p-3">
           {/* Album Art */}
-          <div className="w-12 h-12 bg-gradient-to-br from-blue-600/30 to-blue-900/50 rounded-lg flex items-center justify-center border border-white/10 shrink-0">
-            <Music size={18} className="text-blue-400" />
+          <div className="w-12 h-12 bg-gradient-to-br from-blue-600/30 to-blue-900/50 rounded-lg flex items-center justify-center border border-white/10 shrink-0 relative overflow-hidden">
+            {getAlbumArt(currentTrack) ? (
+              <Image src={getAlbumArt(currentTrack)} alt={currentTrack.album || ''} fill className="object-cover" />
+            ) : (
+              <Music size={18} className="text-blue-400" />
+            )}
           </div>
 
           {/* Track Info */}
@@ -352,7 +370,11 @@ export default function Player() {
           {/* Track Info */}
           <div className="flex items-center gap-4 w-80">
             <div className="w-16 h-16 bg-gradient-to-br from-blue-600/30 to-blue-900/50 rounded-xl flex items-center justify-center border border-white/10 relative overflow-hidden">
-              <Music size={24} className="text-blue-400" />
+              {getAlbumArt(currentTrack) ? (
+                <Image src={getAlbumArt(currentTrack)} alt={currentTrack.album || ''} fill className="object-cover" />
+              ) : (
+                <Music size={24} className="text-blue-400" />
+              )}
               {isPlaying && (
                 <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-0.5">
                   <span className="w-1 h-3 bg-blue-400 rounded-full animate-pulse" style={{ animationDelay: '0ms' }} />

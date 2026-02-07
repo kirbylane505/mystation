@@ -4,7 +4,7 @@
  * Auto-plays the track when opened
  */
 
-import { tracks } from '@/data/tracks';
+import { tracks, albums } from '@/data/tracks';
 import SongClient from './SongClient';
 
 // Dynamic OG metadata per song
@@ -16,6 +16,8 @@ export async function generateMetadata({ params }) {
     return { title: 'Song Not Found | MyStation' };
   }
 
+  const album = albums.find(a => a.id === track.albumId);
+  const ogImage = album?.coverImage || '/images/og-favorite-person.png';
   const title = `${track.title}${track.featured ? ` ft. ${track.featured}` : ''} - Mike Page`;
   const description = `Stream "${track.title}" by Mike Page${track.featured ? ` ft. ${track.featured}` : ''}${track.producer ? ` | Prod. ${track.producer}` : ''} | ${track.album} (${track.year}) | Free on MyStation`;
   const url = `https://mystationlive.com/song/${track.id}`;
@@ -31,7 +33,7 @@ export async function generateMetadata({ params }) {
       type: 'music.song',
       images: [
         {
-          url: '/images/og-favorite-person.png',
+          url: ogImage,
           width: 1200,
           height: 630,
           alt: title,
@@ -43,7 +45,7 @@ export async function generateMetadata({ params }) {
       card: 'summary_large_image',
       title,
       description,
-      images: ['/images/og-favorite-person.png'],
+      images: [ogImage],
     },
   };
 }
@@ -56,6 +58,8 @@ export async function generateStaticParams() {
 export default function SongPage({ params }) {
   const { id } = params;
   const track = tracks.find(t => String(t.id) === String(id));
+  const album = albums.find(a => a.id === track?.albumId);
+  const albumArt = album?.coverImage || null;
 
   if (!track) {
     return (
@@ -65,5 +69,5 @@ export default function SongPage({ params }) {
     );
   }
 
-  return <SongClient track={track} allTracks={tracks} />;
+  return <SongClient track={track} allTracks={tracks} albumArt={albumArt} />;
 }

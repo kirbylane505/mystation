@@ -290,7 +290,14 @@ export default function MusicPageClient({ initialTrackId, autoplay = false }) {
             className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-sm transition"
           >
             <Disc size={16} />
-            Cindy's Son Album
+            Cindy's Son
+          </button>
+          <button
+            onClick={() => { setFilterAlbum("Shezzy Knew It"); setSortBy('default'); }}
+            className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-sm transition"
+          >
+            <Disc size={16} />
+            Shezzy Knew It
           </button>
         </div>
 
