@@ -179,12 +179,9 @@ export default function MerchPage() {
       return '/images/mockups/mpf-tee.jpg';
     }
 
-    // LOTL Mugs
+    // LOTL Mugs - use Printful's front-facing product image (local mockups show handle side)
     if ((lower.includes('lotl') || lower.includes('love on the lawn')) && lower.includes('mug')) {
-      if (lower.includes('white')) {
-        return '/images/mockups/lotl-mug-white.jpg';
-      }
-      return '/images/mockups/lotl-mug-black.jpg';
+      return printfulUrl || '/images/mockups/lotl-mug-black.jpg';
     }
 
     // LOTL Tote Bag
