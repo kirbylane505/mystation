@@ -483,11 +483,8 @@ export default function MerchPage() {
               href="https://buy.stripe.com/28EcN6e0Wgoo9D50xs73G02"
               className="group glass rounded-2xl overflow-hidden hover:border-pink-500/50 transition-all duration-300 block"
             >
-              <div className="aspect-square relative overflow-hidden bg-gradient-to-br from-pink-500/20 to-purple-500/20 flex items-center justify-center">
-                <div className="text-center p-6">
-                  <div className="text-6xl mb-4">👕</div>
-                  <span className="text-white/60">Image Coming Soon</span>
-                </div>
+              <div className="aspect-square relative overflow-hidden bg-gradient-to-br from-pink-500/20 to-purple-500/20">
+                <img src="https://images.pexels.com/photos/13189387/pexels-photo-13189387.jpeg?w=800&h=800&fit=crop" alt="Cute kid in t-shirt" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 <div className="absolute top-4 left-4 px-3 py-1 text-xs font-bold rounded-full bg-pink-500 text-white">
                   KIDS
                 </div>
@@ -509,11 +506,8 @@ export default function MerchPage() {
               href="https://buy.stripe.com/6oUcN61ea7RS6qTcga73G03"
               className="group glass rounded-2xl overflow-hidden hover:border-purple-500/50 transition-all duration-300 block"
             >
-              <div className="aspect-square relative overflow-hidden bg-gradient-to-br from-purple-500/20 to-blue-500/20 flex items-center justify-center">
-                <div className="text-center p-6">
-                  <div className="text-6xl mb-4">🧥</div>
-                  <span className="text-white/60">Image Coming Soon</span>
-                </div>
+              <div className="aspect-square relative overflow-hidden bg-gradient-to-br from-purple-500/20 to-blue-500/20">
+                <img src="https://images.unsplash.com/photo-1651444932109-a7a0f74b5dec?w=800&h=800&fit=crop" alt="Baby in cozy hoodie" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 <div className="absolute top-4 left-4 px-3 py-1 text-xs font-bold rounded-full bg-purple-500 text-white">
                   KIDS
                 </div>

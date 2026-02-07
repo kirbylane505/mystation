@@ -21,23 +21,9 @@ export default function ShareTrack({ track }) {
   const shareTitle = `${track.title} - Mike Page`;
   const shareText = `🎵 "${track.title}" - Mike Page\n\nTap to listen & drop a 🔥 if it's fire!`;
 
-  // Native Web Share API (works on mobile) - shares link only, no file downloads
-  const handleNativeShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: shareTitle,
-          text: shareText,
-          url: trackUrl
-        });
-      } catch (err) {
-        if (err.name !== 'AbortError') {
-          setShowModal(true);
-        }
-      }
-    } else {
-      setShowModal(true);
-    }
+  // Open share modal - always show our custom modal with SMS/Email/Copy options
+  const handleShare = () => {
+    setShowModal(true);
   };
 
   // Copy link to clipboard
@@ -77,7 +63,7 @@ export default function ShareTrack({ track }) {
     <>
       {/* Share Button - Always Visible */}
       <button
-        onClick={handleNativeShare}
+        onClick={handleShare}
         className="p-2 bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 rounded-full transition border border-blue-500/30"
         title="Share track"
       >
