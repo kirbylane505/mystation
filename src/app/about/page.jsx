@@ -187,31 +187,6 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Impact */}
-      <section className="bg-mystation-accent/30 py-16">
-        <div className="max-w-screen-xl mx-auto px-6 text-center">
-          <h2 className="text-3xl font-bold text-white mb-6">Our Impact</h2>
-          <p className="text-white/70 text-lg max-w-2xl mx-auto mb-12">
-            As a 501(c)(3) nonprofit, we're 100% committed to changing the world one community at a time.
-            Every stream, every donation, every purchase helps us build something bigger than music.
-          </p>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="glass rounded-2xl p-6">
-              <h4 className="text-4xl font-bold text-mystation-gold mb-2">Community</h4>
-              <p className="text-white/60">Building stronger neighborhoods</p>
-            </div>
-            <div className="glass rounded-2xl p-6">
-              <h4 className="text-4xl font-bold text-mystation-gold mb-2">Unity</h4>
-              <p className="text-white/60">Bringing people together through music</p>
-            </div>
-            <div className="glass rounded-2xl p-6">
-              <h4 className="text-4xl font-bold text-mystation-gold mb-2">Future</h4>
-              <p className="text-white/60">Investing in the next generation</p>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* CTA */}
       <section className="max-w-screen-xl mx-auto px-6 py-20 text-center">
