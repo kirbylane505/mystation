@@ -201,7 +201,8 @@ export default function MerchPage() {
         const res = await fetch('/api/printful/products');
         const data = await res.json();
         if (data.success) {
-          const transformedProducts = data.products.map((p) => ({
+          const filteredPrintful = data.products.filter((p) => !p.name.toLowerCase().includes('mug'));
+          const transformedProducts = filteredPrintful.map((p) => ({
             id: p.id,
             name: p.name,
             description: getProductDescription(p.name),
@@ -233,7 +234,7 @@ export default function MerchPage() {
     if ((lower.includes('lotl') || lower.includes('love on the lawn')) && lower.includes('hoodie')) return '/images/mockups/lotl-hoodie-black.jpg';
     if (lower.includes('idmg') && lower.includes('label')) {
       if (lower.includes('white')) return '/images/mockups/idmg-label-tee-white.jpg';
-      return '/images/mockups/idmg-label-tee-black.jpg';
+      return '/images/mockups/idmg-tee-black.jpg';
     }
     if (lower.includes('idmg') && (lower.includes('tee') || lower.includes('t-shirt')) && lower.includes('black')) return '/images/mockups/idmg-tee-black.jpg';
     if (lower.includes('idmg') && (lower.includes('tee') || lower.includes('t-shirt')) && lower.includes('white')) return '/images/mockups/idmg-tee-white.jpg';
