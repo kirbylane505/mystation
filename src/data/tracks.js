@@ -451,6 +451,14 @@ export const getAlbumTracks = (albumId) => {
     .sort((a, b) => (a.trackNumber || 0) - (b.trackNumber || 0));
 };
 
+// Auto-calculate vault tracks
+const vaultTracks = tracks.filter(t => t.albumId === 'vault');
+const vaultTrackIds = vaultTracks.map(t => t.id);
+
+// Auto-calculate Cindy's Son tracks
+const cindysSonTracks = tracks.filter(t => t.albumId === 'cindys-son');
+const cindysSonTrackIds = cindysSonTracks.map(t => t.id);
+
 export const albums = [
   {
     id: 'cindys-son',
@@ -458,12 +466,12 @@ export const albums = [
     subtitle: "Extended Album",
     artist: "Mike Page",
     year: 2022,
-    trackCount: 23,
+    trackCount: cindysSonTrackIds.length,
     coverGradient: "from-amber-500 via-orange-600 to-red-800",
     coverEmoji: "👑",
     coverImage: "/images/albums/cindys-son.jpg",
     isNew: true,
-    trackIds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23],
+    trackIds: cindysSonTrackIds,
     spotify: "https://open.spotify.com/album/3JwFt4Qb3uAUzipnMyM6G6",
     apple: "https://music.apple.com/us/artist/mike-page/1515325834",
     description: "The extended edition of Cindy's Son - a tribute to resilience, family, and the journey from Elgin to Atlanta."
@@ -474,11 +482,11 @@ export const albums = [
     subtitle: "Quick Reels Collection",
     artist: "Mike Page",
     year: 2026,
-    trackCount: 26,
+    trackCount: vaultTrackIds.length,
     coverGradient: "from-red-600 via-red-800 to-black",
     coverEmoji: "🔒",
     isNew: true,
-    trackIds: [201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216],
+    trackIds: vaultTrackIds,
     description: "Exclusive tracks from Quick Reels. Family & friends access with code FAMILY2026."
   }
 ];
