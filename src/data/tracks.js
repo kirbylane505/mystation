@@ -457,6 +457,9 @@ export const featuredSong = {
 // Get all official tracks (excludes unnamed/needsNaming tracks from public view)
 export const getOfficialTracks = () => tracks.filter(t => !t.needsNaming);
 
+// Get non-vault tracks for public catalog (Vault is exclusive)
+export const getNonVaultTracks = () => tracks.filter(t => t.albumId !== 'vault' && !t.needsNaming);
+
 // Get all tracks including vault (for vault page only)
 export const getAllTracks = () => tracks;
 
@@ -511,15 +514,16 @@ export const albums = [
   {
     id: 'vault',
     title: "The Vault",
-    subtitle: "Quick Reels Collection",
+    subtitle: "Exclusive Collection",
     artist: "Mike Page",
     year: 2026,
     trackCount: vaultTrackIds.length,
     coverGradient: "from-red-600 via-red-800 to-black",
     coverEmoji: "🔒",
     isNew: true,
+    isExclusive: true,
     trackIds: vaultTrackIds,
-    description: "Exclusive tracks from Quick Reels. Family & friends access with code FAMILY2026."
+    description: "Exclusive for die-hard fans. Stream 26 days straight or spend $100+ to unlock The Vault."
   }
 ];
 

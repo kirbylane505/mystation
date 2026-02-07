@@ -9,7 +9,7 @@ import { useState } from 'react';
 import Hero from '@/components/Hero';
 import TrackList from '@/components/TrackList';
 import EmailCapture from '@/components/EmailCapture';
-import { tracks, albums, getOfficialTracks } from '@/data/tracks';
+import { tracks, albums, getOfficialTracks, getNonVaultTracks } from '@/data/tracks';
 import { usePlayerStore } from '@/store/playerStore';
 import { Play, Pause, Heart, ExternalLink, Music, Award, Users, Sparkles, Headphones, ChevronLeft, Shuffle } from 'lucide-react';
 import Link from 'next/link';
@@ -114,6 +114,11 @@ export default function HomePage() {
                 {album.comingSoon && (
                   <div className="absolute top-3 right-3 px-3 py-1 bg-purple-500 text-white text-xs font-bold rounded-full shadow-lg z-10">
                     SOON
+                  </div>
+                )}
+                {album.isExclusive && (
+                  <div className="absolute top-3 left-3 px-3 py-1 bg-red-600 text-white text-xs font-bold rounded-full shadow-lg z-10">
+                    EXCLUSIVE
                   </div>
                 )}
 
@@ -240,11 +245,11 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* All Tracks */}
+      {/* All Tracks (excludes Vault - those are exclusive) */}
       <section className="max-w-screen-xl mx-auto px-6 py-20">
         <h2 className="text-3xl font-bold text-white mb-10">Full Catalog</h2>
         <div className="glass rounded-2xl p-2">
-          <TrackList />
+          <TrackList trackIds={getNonVaultTracks().map(t => t.id)} />
         </div>
       </section>
 
