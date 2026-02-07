@@ -10,13 +10,16 @@ import { usePlayerStore, useUserStore } from '@/store/playerStore';
 import {
   Play, Pause, SkipBack, SkipForward,
   Volume2, VolumeX, Shuffle, Repeat,
-  Heart, Share2, Music, Sparkles, ChevronUp, X, Crown
+  Heart, Share2, Music, Sparkles, ChevronUp, X, Crown, AlarmClock
 } from 'lucide-react';
+import AlarmClockModal from './AlarmClock';
 
 export default function Player() {
   const audioRef = useRef(null);
   const [mounted, setMounted] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [showShareMenu, setShowShareMenu] = useState(false);
+  const [showAlarmModal, setShowAlarmModal] = useState(false);
   const {
     currentTrack,
     isPlaying,
@@ -69,6 +72,36 @@ export default function Player() {
 
   const handleVolumeChange = (e) => {
     setVolume(parseFloat(e.target.value));
+  };
+
+  // Share to social media
+  const shareTrack = (platform) => {
+    const trackUrl = `https://mystation.vercel.app/music?track=${currentTrack.id}&autoplay=1`;
+    const text = `🎵 Listen to "${currentTrack.title}" by Mike Page on MyStation! ${currentTrack.featured ? `ft. ${currentTrack.featured}` : ''} #MikePage #MyStation #IDMG`;
+
+    const shareUrls = {
+      twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(trackUrl)}`,
+      facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(trackUrl)}&quote=${encodeURIComponent(text)}`,
+      tiktok: `https://www.tiktok.com/share?url=${encodeURIComponent(trackUrl)}&text=${encodeURIComponent(text)}`,
+      snapchat: `https://www.snapchat.com/share?url=${encodeURIComponent(trackUrl)}`,
+      instagram: `https://www.instagram.com/`, // Instagram doesn't have direct share URL, opens app
+      whatsapp: `https://wa.me/?text=${encodeURIComponent(text + ' ' + trackUrl)}`,
+      copy: trackUrl
+    };
+
+    if (platform === 'copy') {
+      navigator.clipboard.writeText(trackUrl);
+      alert('Link copied! Share it anywhere.');
+    } else if (platform === 'native' && navigator.share) {
+      navigator.share({
+        title: `${currentTrack.title} - Mike Page`,
+        text: text,
+        url: trackUrl,
+      });
+    } else {
+      window.open(shareUrls[platform], '_blank', 'width=600,height=400');
+    }
+    setShowShareMenu(false);
   };
 
   // Calculate remaining free plays
@@ -158,22 +191,83 @@ export default function Player() {
             </button>
           </div>
 
-          {/* Volume */}
-          <div className="flex items-center gap-4 justify-center">
-            <button onClick={toggleMute} className="text-white/40">
-              {isMuted || volume === 0 ? <VolumeX size={20} /> : <Volume2 size={20} />}
+          {/* Volume - Easy to Use */}
+          <div className="flex items-center justify-center gap-3 px-4">
+            <button
+              onClick={() => setVolume(Math.max(0, volume - 0.2))}
+              className="w-14 h-14 rounded-full bg-white/10 flex items-center justify-center text-white text-2xl font-bold active:bg-white/20 transition-colors"
+            >
+              −
             </button>
-            <input
-              type="range"
-              min="0"
-              max="1"
-              step="0.01"
-              value={isMuted ? 0 : volume}
-              onChange={handleVolumeChange}
-              className="w-32"
-            />
+
+            <button
+              onClick={toggleMute}
+              className="flex flex-col items-center gap-1 px-4"
+            >
+              {isMuted || volume === 0 ? (
+                <VolumeX size={28} className="text-red-400" />
+              ) : (
+                <Volume2 size={28} className="text-blue-400" />
+              )}
+              <span className="text-white font-bold text-lg">{Math.round((isMuted ? 0 : volume) * 100)}%</span>
+            </button>
+
+            <button
+              onClick={() => setVolume(Math.min(1, volume + 0.2))}
+              className="w-14 h-14 rounded-full bg-white/10 flex items-center justify-center text-white text-2xl font-bold active:bg-white/20 transition-colors"
+            >
+              +
+            </button>
           </div>
+
+          {/* Volume Bar Visual */}
+          <div className="flex justify-center gap-1 mt-3 px-8">
+            {[1, 2, 3, 4, 5].map((level) => (
+              <button
+                key={level}
+                onClick={() => setVolume(level * 0.2)}
+                className={`h-8 flex-1 rounded-full transition-all ${
+                  (isMuted ? 0 : volume) >= level * 0.2
+                    ? 'bg-gradient-to-t from-blue-500 to-cyan-400'
+                    : 'bg-white/10'
+                }`}
+              />
+            ))}
+          </div>
+
+          {/* Share Button - Mobile */}
+          <div className="mt-8 flex justify-center">
+            <button
+              onClick={() => shareTrack('native')}
+              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full text-white font-semibold"
+            >
+              <Share2 size={20} />
+              Share This Track
+            </button>
+          </div>
+
+          {/* Social Share Grid */}
+          <div className="mt-4 flex justify-center gap-3 flex-wrap px-4">
+            <button onClick={() => shareTrack('tiktok')} className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center text-xl hover:bg-white/20">🎵</button>
+            <button onClick={() => shareTrack('snapchat')} className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center text-xl hover:bg-white/20">👻</button>
+            <button onClick={() => shareTrack('instagram')} className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center text-xl hover:bg-white/20">📸</button>
+            <button onClick={() => shareTrack('twitter')} className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center text-xl hover:bg-white/20">🐦</button>
+            <button onClick={() => shareTrack('whatsapp')} className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center text-xl hover:bg-white/20">💬</button>
+            <button onClick={() => shareTrack('copy')} className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center text-xl hover:bg-white/20">🔗</button>
+          </div>
+
+          {/* Wake Up Alarm Button */}
+          <button
+            onClick={() => setShowAlarmModal(true)}
+            className="mt-6 mx-auto flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/30 rounded-full text-yellow-400 hover:bg-yellow-500/30 transition-colors"
+          >
+            <AlarmClock size={20} />
+            <span className="font-medium">Wake Up to This Song</span>
+          </button>
         </div>
+
+        {/* Alarm Modal */}
+        <AlarmClockModal isOpen={showAlarmModal} onClose={() => setShowAlarmModal(false)} />
       </div>
     );
   }
@@ -184,7 +278,7 @@ export default function Player() {
       {/* Mobile Subscribe Banner */}
       {mounted && !isSubscribed && (
         <a
-          href="https://buy.stripe.com/6oUfZi2iea00g1ta8273G01"
+          href="https://buy.stripe.com/eVq5kEcWS8VW8z10xs73G04"
           className="md:hidden fixed bottom-[72px] left-0 right-0 bg-gradient-to-r from-yellow-500/90 to-orange-500/90 backdrop-blur-xl z-40"
         >
           <div className="w-full flex items-center justify-center gap-2 py-2 text-white font-semibold text-sm">
@@ -308,17 +402,97 @@ export default function Player() {
           </div>
 
           {/* Volume & Actions */}
-          <div className="flex items-center gap-4 w-80 justify-end">
-            <button onClick={toggleMute} className="text-white/40 hover:text-white transition">
-              {isMuted || volume === 0 ? <VolumeX size={20} /> : <Volume2 size={20} />}
+          <div className="flex items-center gap-3 w-80 justify-end relative">
+            {/* Volume Down */}
+            <button
+              onClick={() => setVolume(Math.max(0, volume - 0.1))}
+              className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white font-bold transition-colors"
+            >
+              −
             </button>
-            <div className="w-28">
-              <input type="range" min="0" max="1" step="0.01" value={isMuted ? 0 : volume} onChange={handleVolumeChange} className="w-full" />
+
+            {/* Mute Button with Level */}
+            <button onClick={toggleMute} className="flex items-center gap-2 text-white/60 hover:text-white transition">
+              {isMuted || volume === 0 ? <VolumeX size={20} className="text-red-400" /> : <Volume2 size={20} className="text-blue-400" />}
+              <span className="text-xs font-bold w-8">{Math.round((isMuted ? 0 : volume) * 100)}%</span>
+            </button>
+
+            {/* Volume Up */}
+            <button
+              onClick={() => setVolume(Math.min(1, volume + 0.1))}
+              className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white font-bold transition-colors"
+            >
+              +
+            </button>
+
+            {/* Visual Volume Bars */}
+            <div className="flex items-end gap-0.5 h-5">
+              {[1, 2, 3, 4, 5].map((level) => (
+                <button
+                  key={level}
+                  onClick={() => setVolume(level * 0.2)}
+                  className={`w-2 rounded-sm transition-all hover:opacity-80 ${
+                    (isMuted ? 0 : volume) >= level * 0.2
+                      ? 'bg-gradient-to-t from-blue-500 to-cyan-400'
+                      : 'bg-white/20'
+                  }`}
+                  style={{ height: `${level * 4}px` }}
+                />
+              ))}
             </div>
-            <button className="text-white/40 hover:text-white transition ml-2"><Share2 size={18} /></button>
+            <button
+              onClick={() => setShowShareMenu(!showShareMenu)}
+              className="text-white/40 hover:text-white transition ml-2"
+              title="Share"
+            >
+              <Share2 size={18} />
+            </button>
+            <button
+              onClick={() => setShowAlarmModal(true)}
+              className="text-white/40 hover:text-yellow-400 transition"
+              title="Set Alarm"
+            >
+              <AlarmClock size={18} />
+            </button>
+
+            {/* Share Menu */}
+            {showShareMenu && (
+              <div className="absolute bottom-full right-0 mb-2 w-48 bg-mystation-navy border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50">
+                <div className="p-2 border-b border-white/10">
+                  <p className="text-white/60 text-xs px-2">Share this track</p>
+                </div>
+                <button onClick={() => shareTrack('native')} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/10 text-white text-sm">
+                  <span>📱</span> Share...
+                </button>
+                <button onClick={() => shareTrack('tiktok')} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/10 text-white text-sm">
+                  <span>🎵</span> TikTok
+                </button>
+                <button onClick={() => shareTrack('snapchat')} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/10 text-white text-sm">
+                  <span>👻</span> Snapchat
+                </button>
+                <button onClick={() => shareTrack('instagram')} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/10 text-white text-sm">
+                  <span>📸</span> Instagram
+                </button>
+                <button onClick={() => shareTrack('twitter')} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/10 text-white text-sm">
+                  <span>🐦</span> Twitter/X
+                </button>
+                <button onClick={() => shareTrack('facebook')} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/10 text-white text-sm">
+                  <span>📘</span> Facebook
+                </button>
+                <button onClick={() => shareTrack('whatsapp')} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/10 text-white text-sm">
+                  <span>💬</span> WhatsApp
+                </button>
+                <button onClick={() => shareTrack('copy')} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/10 text-white text-sm border-t border-white/10">
+                  <span>🔗</span> Copy Link
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
+
+      {/* Alarm Clock Modal */}
+      <AlarmClockModal isOpen={showAlarmModal} onClose={() => setShowAlarmModal(false)} />
     </>
   );
 }

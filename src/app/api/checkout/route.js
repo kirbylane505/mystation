@@ -48,9 +48,18 @@ export async function POST(request) {
       quantity: item.quantity,
     }));
 
+    // Build Printful items metadata for webhook
+    const printfulItems = items
+      .filter(item => item.printfulSyncVariantId)
+      .map(item => ({
+        sync_variant_id: item.printfulSyncVariantId,
+        quantity: item.quantity,
+        name: item.name,
+      }));
+
     // Create Stripe Checkout session
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
+      payment_method_types: ['card', 'klarna', 'afterpay_clearpay'],
       line_items: lineItems,
       mode: 'payment',
       customer_email: email || undefined,
@@ -79,6 +88,11 @@ export async function POST(request) {
           },
         },
       ],
+      // Store Printful item data for webhook to create order
+      metadata: {
+        printful_items: JSON.stringify(printfulItems),
+        source: 'mystation',
+      },
       success_url: 'https://mystation.vercel.app/checkout/success?session_id={CHECKOUT_SESSION_ID}',
       cancel_url: 'https://mystation.vercel.app/checkout',
     });

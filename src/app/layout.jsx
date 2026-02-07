@@ -10,6 +10,8 @@ import AudioPlayer from '@/components/AudioPlayer';
 import SubscribeModal from '@/components/SubscribeModal';
 import ClientProviders from '@/components/ClientProviders';
 import Cart from '@/components/Cart';
+import InstallPWA from '@/components/InstallPWA';
+import Script from 'next/script';
 
 export const metadata = {
   metadataBase: new URL('https://mystation.vercel.app'),
@@ -49,12 +51,22 @@ export const metadata = {
   // Apple/iMessage specific
   other: {
     'apple-mobile-web-app-title': 'MyStation',
+    'apple-mobile-web-app-capable': 'yes',
+    'apple-mobile-web-app-status-bar-style': 'black-translucent',
+    'mobile-web-app-capable': 'yes',
   },
+
+  // PWA Manifest
+  manifest: '/manifest.json',
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
+      <head>
+        <link rel="apple-touch-icon" href="/images/mpf-logo.png" />
+        <meta name="theme-color" content="#6366f1" />
+      </head>
       <body className="min-h-screen bg-mystation-darker">
         <ClientProviders>
           <Navbar />
@@ -65,7 +77,19 @@ export default function RootLayout({ children }) {
           <AudioPlayer />
           <SubscribeModal />
           <Cart />
+          <InstallPWA />
         </ClientProviders>
+        <Script id="register-sw" strategy="afterInteractive">
+          {`
+            if ('serviceWorker' in navigator) {
+              window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                  .then((reg) => console.log('SW registered:', reg.scope))
+                  .catch((err) => console.log('SW failed:', err));
+              });
+            }
+          `}
+        </Script>
       </body>
     </html>
   );

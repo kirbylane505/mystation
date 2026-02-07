@@ -84,18 +84,18 @@ export default function TrackList({ trackIds, showAlbum = true, showNumber = tru
 
               {/* Title & Artist - Full text, wraps naturally */}
               <div className="flex-1">
-                <p className={`font-medium text-[15px] leading-tight ${isCurrentTrack ? 'text-blue-400' : 'text-white'}`}>
+                <p className={`font-bold text-[15px] leading-tight ${isCurrentTrack ? 'text-blue-400' : 'text-white'}`}>
                   {track.title}
                 </p>
-                <p className="text-[13px] text-white/50 mt-0.5">
+                <p className="text-[13px] text-white/80 mt-0.5">
                   Mike Page{track.featured && ` ft. ${track.featured}`}
                 </p>
                 {track.producer && (
-                  <p className="text-[11px] text-purple-400/80 mt-0.5">
+                  <p className="text-[11px] text-purple-400 mt-0.5">
                     Prod by {track.producer}
                   </p>
                 )}
-                <p className="text-[12px] text-white/30 mt-0.5">
+                <p className="text-[12px] text-white/60 mt-0.5">
                   {track.album} • {track.year}
                 </p>
               </div>
@@ -158,12 +158,12 @@ export default function TrackList({ trackIds, showAlbum = true, showNumber = tru
                     )}
                   </div>
                   <div>
-                    <p className={`font-medium ${isCurrentTrack ? 'text-blue-400' : 'text-white'}`}>
+                    <p className={`font-bold ${isCurrentTrack ? 'text-blue-400' : 'text-white'}`}>
                       {track.title}
                     </p>
-                    <p className="text-sm text-white/40">
-                      Mike Page{track.featured && <span className="text-white/30"> • {track.featured}</span>}
-                      {track.producer && <span className="text-purple-400/70"> • Prod by {track.producer}</span>}
+                    <p className="text-sm text-white/70">
+                      Mike Page{track.featured && <span className="text-white/60"> • {track.featured}</span>}
+                      {track.producer && <span className="text-purple-400"> • Prod by {track.producer}</span>}
                     </p>
                   </div>
                 </div>

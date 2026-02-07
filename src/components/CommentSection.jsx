@@ -1,14 +1,14 @@
 /**
  * MYSTATION - Comment Section
- * YouTube-style comments on songs
+ * Clean, modern comments on songs
  */
 
 'use client';
 
 import { useState, useEffect } from 'react';
-import { MessageCircle, ThumbsUp, Reply, Send, User, MoreHorizontal, Trash2, Flag, X } from 'lucide-react';
+import { MessageCircle, ThumbsUp, Send, User, X, Heart } from 'lucide-react';
 
-// Demo comments (will be Supabase later)
+// Demo comments
 const DEMO_COMMENTS = {
   1: [
     { id: 1, username: 'ATLFan847', content: 'This track is FIRE! Been playing on repeat all week 🔥', likes: 24, createdAt: '2026-01-28', avatar: '🎧' },
@@ -27,12 +27,10 @@ const DEMO_COMMENTS = {
 export default function CommentSection({ trackId, trackTitle, onClose }) {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const [username, setUsername] = useState('');
   const [showNamePrompt, setShowNamePrompt] = useState(false);
   const [likedComments, setLikedComments] = useState([]);
 
-  // Load comments
   useEffect(() => {
     const saved = localStorage.getItem(`mystation-comments-${trackId}`);
     const savedLikes = localStorage.getItem('mystation-liked-comments');
@@ -44,13 +42,8 @@ export default function CommentSection({ trackId, trackTitle, onClose }) {
       setComments(DEMO_COMMENTS[trackId] || []);
     }
 
-    if (savedLikes) {
-      setLikedComments(JSON.parse(savedLikes));
-    }
-
-    if (savedUsername) {
-      setUsername(savedUsername);
-    }
+    if (savedLikes) setLikedComments(JSON.parse(savedLikes));
+    if (savedUsername) setUsername(savedUsername);
   }, [trackId]);
 
   const handleSubmit = () => {
@@ -104,124 +97,260 @@ export default function CommentSection({ trackId, trackTitle, onClose }) {
 
     if (diffDays === 0) return 'Today';
     if (diffDays === 1) return 'Yesterday';
-    if (diffDays < 7) return `${diffDays} days ago`;
-    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
     return date.toLocaleDateString();
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm">
-      <div className="w-full max-w-2xl bg-mystation-navy border border-white/10 rounded-t-3xl sm:rounded-2xl shadow-2xl max-h-[85vh] flex flex-col">
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 9999,
+        display: 'flex',
+        alignItems: 'flex-end',
+        justifyContent: 'center',
+        backgroundColor: 'rgba(0,0,0,0.85)',
+        backdropFilter: 'blur(8px)'
+      }}
+      onClick={onClose}
+    >
+      <div
+        style={{
+          width: '100%',
+          maxWidth: '600px',
+          maxHeight: '80vh',
+          backgroundColor: '#0f172a',
+          borderTopLeftRadius: '24px',
+          borderTopRightRadius: '24px',
+          border: '1px solid rgba(255,255,255,0.1)',
+          borderBottom: 'none',
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden'
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-white/10">
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '16px 20px',
+          borderBottom: '1px solid rgba(255,255,255,0.1)',
+          backgroundColor: '#1e293b'
+        }}>
           <div>
-            <h2 className="text-lg font-bold text-white flex items-center gap-2">
-              <MessageCircle size={20} className="text-blue-400" />
+            <h2 style={{
+              fontSize: '18px',
+              fontWeight: 'bold',
+              color: 'white',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              margin: 0
+            }}>
+              <MessageCircle size={20} style={{ color: '#3b82f6' }} />
               Comments
             </h2>
-            <p className="text-white/50 text-sm">{trackTitle}</p>
+            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', margin: '4px 0 0 0' }}>
+              {trackTitle}
+            </p>
           </div>
           <button
             onClick={onClose}
-            className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition"
+            style={{
+              width: '36px',
+              height: '36px',
+              borderRadius: '50%',
+              backgroundColor: 'rgba(255,255,255,0.1)',
+              border: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              color: 'white'
+            }}
           >
-            <X size={20} className="text-white" />
+            <X size={18} />
           </button>
         </div>
 
         {/* Comments List */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div style={{
+          flex: 1,
+          overflowY: 'auto',
+          padding: '16px 20px'
+        }}>
           {comments.length === 0 ? (
-            <div className="text-center py-12">
-              <MessageCircle size={48} className="text-white/20 mx-auto mb-4" />
-              <p className="text-white/40">No comments yet</p>
-              <p className="text-white/30 text-sm">Be the first to share your thoughts!</p>
+            <div style={{ textAlign: 'center', padding: '40px 0' }}>
+              <MessageCircle size={48} style={{ color: 'rgba(255,255,255,0.2)', marginBottom: '16px' }} />
+              <p style={{ color: 'rgba(255,255,255,0.4)', margin: 0 }}>No comments yet</p>
+              <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '14px', margin: '8px 0 0 0' }}>
+                Be the first to share your thoughts!
+              </p>
             </div>
           ) : (
-            comments.map(comment => (
-              <div key={comment.id} className="flex gap-3">
-                {/* Avatar */}
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500/30 to-purple-500/30 flex items-center justify-center text-lg shrink-0">
-                  {comment.avatar}
-                </div>
-
-                {/* Content */}
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-medium text-white text-sm">{comment.username}</span>
-                    <span className="text-white/30 text-xs">{formatDate(comment.createdAt)}</span>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {comments.map(comment => (
+                <div key={comment.id} style={{ display: 'flex', gap: '12px' }}>
+                  {/* Avatar */}
+                  <div style={{
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '50%',
+                    background: 'linear-gradient(135deg, rgba(59,130,246,0.3), rgba(147,51,234,0.3))',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '18px',
+                    flexShrink: 0
+                  }}>
+                    {comment.avatar}
                   </div>
-                  <p className="text-white/80 text-sm leading-relaxed">{comment.content}</p>
 
-                  {/* Actions */}
-                  <div className="flex items-center gap-4 mt-2">
+                  {/* Content */}
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                      <span style={{ fontWeight: '600', color: 'white', fontSize: '14px' }}>
+                        {comment.username}
+                      </span>
+                      <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '12px' }}>
+                        {formatDate(comment.createdAt)}
+                      </span>
+                    </div>
+                    <p style={{
+                      color: 'rgba(255,255,255,0.8)',
+                      fontSize: '14px',
+                      lineHeight: '1.5',
+                      margin: 0
+                    }}>
+                      {comment.content}
+                    </p>
+
+                    {/* Like Button */}
                     <button
                       onClick={() => handleLike(comment.id)}
-                      className={`flex items-center gap-1 text-xs transition ${
-                        likedComments.includes(comment.id)
-                          ? 'text-blue-400'
-                          : 'text-white/40 hover:text-white'
-                      }`}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        marginTop: '8px',
+                        padding: '4px 8px',
+                        borderRadius: '12px',
+                        border: 'none',
+                        backgroundColor: likedComments.includes(comment.id) ? 'rgba(239,68,68,0.2)' : 'transparent',
+                        color: likedComments.includes(comment.id) ? '#ef4444' : 'rgba(255,255,255,0.4)',
+                        fontSize: '13px',
+                        cursor: 'pointer'
+                      }}
                     >
-                      <ThumbsUp size={14} />
+                      <Heart size={14} fill={likedComments.includes(comment.id) ? '#ef4444' : 'none'} />
                       {comment.likes}
-                    </button>
-                    <button className="flex items-center gap-1 text-xs text-white/40 hover:text-white transition">
-                      <Reply size={14} />
-                      Reply
                     </button>
                   </div>
                 </div>
-              </div>
-            ))
+              ))}
+            </div>
           )}
         </div>
 
         {/* Comment Input */}
-        <div className="p-4 border-t border-white/10 bg-white/5">
+        <div style={{
+          padding: '16px 20px',
+          borderTop: '1px solid rgba(255,255,255,0.1)',
+          backgroundColor: '#1e293b'
+        }}>
           {showNamePrompt ? (
-            <div className="space-y-3">
-              <p className="text-white/60 text-sm">Enter your display name to comment:</p>
-              <div className="flex gap-2">
+            <div>
+              <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px', marginBottom: '12px' }}>
+                Enter your name to comment:
+              </p>
+              <div style={{ display: 'flex', gap: '8px' }}>
                 <input
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="Your name"
-                  className="flex-1 bg-white/10 border border-white/20 rounded-lg py-2 px-4 text-white text-sm placeholder:text-white/40 focus:outline-none focus:border-blue-500"
                   autoFocus
+                  style={{
+                    flex: 1,
+                    backgroundColor: 'rgba(255,255,255,0.1)',
+                    border: '1px solid rgba(255,255,255,0.2)',
+                    borderRadius: '12px',
+                    padding: '12px 16px',
+                    color: 'white',
+                    fontSize: '14px',
+                    outline: 'none'
+                  }}
                 />
                 <button
                   onClick={handleSetUsername}
                   disabled={!username.trim()}
-                  className="px-4 py-2 bg-blue-500 hover:bg-blue-600 disabled:opacity-50 text-white font-medium rounded-lg transition"
+                  style={{
+                    padding: '12px 20px',
+                    backgroundColor: username.trim() ? '#3b82f6' : 'rgba(255,255,255,0.1)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '12px',
+                    fontWeight: '600',
+                    cursor: username.trim() ? 'pointer' : 'not-allowed',
+                    opacity: username.trim() ? 1 : 0.5
+                  }}
                 >
                   Save
                 </button>
               </div>
             </div>
           ) : (
-            <div className="flex gap-3">
-              <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center shrink-0">
-                <User size={18} className="text-blue-400" />
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+              <div style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '50%',
+                backgroundColor: 'rgba(59,130,246,0.2)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0
+              }}>
+                <User size={18} style={{ color: '#3b82f6' }} />
               </div>
-              <div className="flex-1 flex gap-2">
-                <input
-                  type="text"
-                  value={newComment}
-                  onChange={(e) => setNewComment(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
-                  placeholder="Add a comment..."
-                  className="flex-1 bg-white/10 border border-white/20 rounded-xl py-2 px-4 text-white text-sm placeholder:text-white/40 focus:outline-none focus:border-blue-500"
-                />
-                <button
-                  onClick={handleSubmit}
-                  disabled={!newComment.trim()}
-                  className="w-10 h-10 bg-blue-500 hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl flex items-center justify-center transition"
-                >
-                  <Send size={18} className="text-white" />
-                </button>
-              </div>
+              <input
+                type="text"
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
+                placeholder="Add a comment..."
+                style={{
+                  flex: 1,
+                  backgroundColor: 'rgba(255,255,255,0.1)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: '24px',
+                  padding: '12px 20px',
+                  color: 'white',
+                  fontSize: '14px',
+                  outline: 'none'
+                }}
+              />
+              <button
+                onClick={handleSubmit}
+                disabled={!newComment.trim()}
+                style={{
+                  width: '44px',
+                  height: '44px',
+                  borderRadius: '50%',
+                  backgroundColor: newComment.trim() ? '#3b82f6' : 'rgba(255,255,255,0.1)',
+                  border: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: newComment.trim() ? 'pointer' : 'not-allowed',
+                  color: 'white'
+                }}
+              >
+                <Send size={18} />
+              </button>
             </div>
           )}
         </div>

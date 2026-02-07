@@ -2,6 +2,7 @@
  * MYSTATION - Audio Engine
  * Handles actual audio playback with HTML5 Audio
  * PERSISTS across page navigation - audio keeps playing!
+ * BACKGROUND PLAYBACK - music continues when browsing other apps/sites
  */
 
 'use client';
@@ -13,6 +14,7 @@ import { useEngagementStore } from '@/store/engagementStore';
 // Global audio element - persists across page navigation
 let globalAudio = null;
 let isAudioInitialized = false;
+let mediaSessionInitialized = false;
 
 function getGlobalAudio() {
   if (typeof window === 'undefined') return null;
@@ -22,6 +24,44 @@ function getGlobalAudio() {
     globalAudio.preload = 'metadata';
   }
   return globalAudio;
+}
+
+// Setup Media Session API for background playback controls
+function setupMediaSession(track, handlers) {
+  if (typeof navigator === 'undefined' || !('mediaSession' in navigator)) return;
+
+  const { play, pause, nextTrack, previousTrack } = handlers;
+
+  // Set metadata for lock screen / notification
+  navigator.mediaSession.metadata = new MediaMetadata({
+    title: track.title,
+    artist: track.featured ? `Mike Page ft. ${track.featured}` : 'Mike Page',
+    album: track.album || 'MyStation',
+    artwork: [
+      { src: track.coverArt || '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
+      { src: track.coverArt || '/icons/icon-512x512.png', sizes: '512x512', type: 'image/png' },
+    ]
+  });
+
+  // Set up action handlers for system controls
+  navigator.mediaSession.setActionHandler('play', play);
+  navigator.mediaSession.setActionHandler('pause', pause);
+  navigator.mediaSession.setActionHandler('nexttrack', nextTrack);
+  navigator.mediaSession.setActionHandler('previoustrack', previousTrack);
+  navigator.mediaSession.setActionHandler('seekbackward', (details) => {
+    const audio = getGlobalAudio();
+    if (audio) {
+      audio.currentTime = Math.max(0, audio.currentTime - (details.seekOffset || 10));
+    }
+  });
+  navigator.mediaSession.setActionHandler('seekforward', (details) => {
+    const audio = getGlobalAudio();
+    if (audio) {
+      audio.currentTime = Math.min(audio.duration, audio.currentTime + (details.seekOffset || 10));
+    }
+  });
+
+  mediaSessionInitialized = true;
 }
 
 export default function AudioPlayer() {
@@ -35,10 +75,12 @@ export default function AudioPlayer() {
     setProgress,
     setDuration,
     nextTrack,
+    prevTrack,
     repeat,
     incrementPlayCount,
     openSubscribeModal,
     pause,
+    play,
   } = usePlayerStore();
 
   const { isSubscribed } = useUserStore();
@@ -97,9 +139,18 @@ export default function AudioPlayer() {
     audio.addEventListener('error', handleError);
     isAudioInitialized = true;
 
-    // DON'T cleanup - we want audio to persist!
+    // Stop music when app/tab is closed
+    const handleBeforeUnload = () => {
+      if (audio) {
+        audio.pause();
+        audio.src = '';
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
     return () => {
-      // Only cleanup listeners, never pause the audio
+      window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, [handleTimeUpdate, handleLoadedMetadata, handleEnded, handleError]);
 
@@ -185,6 +236,41 @@ export default function AudioPlayer() {
       audio.currentTime = progress;
     }
   }, [progress]);
+
+  // Setup Media Session for background playback (lock screen, other apps)
+  useEffect(() => {
+    if (!currentTrack) return;
+
+    setupMediaSession(currentTrack, {
+      play,
+      pause,
+      nextTrack,
+      previousTrack: prevTrack,
+    });
+
+    // Update playback state for system UI
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
+    }
+  }, [currentTrack, isPlaying, play, pause, nextTrack, prevTrack]);
+
+  // Update position state for seek bar on lock screen
+  useEffect(() => {
+    if (!currentTrack || typeof navigator === 'undefined' || !('mediaSession' in navigator)) return;
+
+    const audio = getGlobalAudio();
+    if (audio && audio.duration && navigator.mediaSession.setPositionState) {
+      try {
+        navigator.mediaSession.setPositionState({
+          duration: audio.duration,
+          playbackRate: audio.playbackRate,
+          position: audio.currentTime,
+        });
+      } catch (e) {
+        // Some browsers don't support this
+      }
+    }
+  }, [progress, currentTrack]);
 
   return null;
 }

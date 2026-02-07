@@ -13,7 +13,7 @@ import { usePlayerStore } from '@/store/playerStore';
 import {
   Search, SlidersHorizontal, Grid, List, Plus,
   ArrowUpDown, Music, Clock, Calendar, Disc,
-  TrendingUp, Shuffle
+  TrendingUp, Shuffle, Play, ChevronLeft, Pause
 } from 'lucide-react';
 
 export default function MusicPageClient({ initialTrackId, autoplay = false }) {
@@ -24,7 +24,8 @@ export default function MusicPageClient({ initialTrackId, autoplay = false }) {
   const [viewMode, setViewMode] = useState('list');
   const [showPlaylistModal, setShowPlaylistModal] = useState(false);
   const [userPlaylists, setUserPlaylists] = useState([]);
-  const { setQueue, play } = usePlayerStore();
+  const [activePlaylist, setActivePlaylist] = useState(null); // Currently viewing playlist
+  const { setQueue, play, currentTrack, isPlaying } = usePlayerStore();
 
   // Auto-play track if coming from share link
   useEffect(() => {
@@ -54,8 +55,11 @@ export default function MusicPageClient({ initialTrackId, autoplay = false }) {
   const years = [...new Set(officialTracks.map(t => t.year))].sort((a, b) => b - a);
   const albumList = [...new Set(officialTracks.map(t => t.album).filter(Boolean))];
 
-  // Filter tracks
+  // Filter tracks - EXCLUDE VAULT tracks (those are only on /vault page)
   let filteredTracks = officialTracks.filter(track => {
+    // Hide Vault tracks from main music page
+    if (track.album === 'Vault' || track.albumId === 'vault') return false;
+
     const matchesSearch = track.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (track.featured && track.featured.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (track.producer && track.producer.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -98,6 +102,35 @@ export default function MusicPageClient({ initialTrackId, autoplay = false }) {
     setUserPlaylists(newPlaylists);
     localStorage.setItem('mystation-playlists', JSON.stringify(newPlaylists));
     setShowPlaylistModal(false);
+  };
+
+  // Open playlist detail view
+  const handleOpenPlaylist = (playlist) => {
+    setActivePlaylist(playlist);
+  };
+
+  // Play all tracks in playlist
+  const handlePlayAllPlaylist = (playlist, startIndex = 0) => {
+    const playlistTrackIds = playlist.trackIds || [];
+    if (playlistTrackIds.length === 0) return;
+
+    // Get actual track objects from IDs
+    const playlistTracks = playlistTrackIds
+      .map(id => tracks.find(t => t.id === id))
+      .filter(Boolean);
+
+    if (playlistTracks.length > 0) {
+      setQueue(playlistTracks, startIndex);
+      play();
+    }
+  };
+
+  // Get tracks for active playlist
+  const getPlaylistTracks = (playlist) => {
+    if (!playlist) return [];
+    return (playlist.trackIds || [])
+      .map(id => tracks.find(t => t.id === id))
+      .filter(Boolean);
   };
 
   const allPlaylists = [...playlists, ...userPlaylists];
@@ -205,36 +238,34 @@ export default function MusicPageClient({ initialTrackId, autoplay = false }) {
             </button>
           </div>
           <div className="flex gap-4 overflow-x-auto pb-4">
-            {/* Create New Playlist Card */}
-            <button
-              onClick={() => setShowPlaylistModal(true)}
-              className="flex-shrink-0 w-48 glass rounded-xl p-4 hover:bg-white/10 transition cursor-pointer border-2 border-dashed border-white/20 hover:border-blue-500/50"
-            >
-              <div className="w-full aspect-square bg-white/5 rounded-lg mb-3 flex items-center justify-center">
-                <Plus size={40} className="text-white/40" />
-              </div>
-              <h4 className="font-semibold text-white/60">New Playlist</h4>
-              <p className="text-white/40 text-sm">Create your own</p>
-            </button>
-
             {/* Existing Playlists */}
             {allPlaylists.map(playlist => (
-              <div
+              <button
                 key={playlist.id}
-                className="flex-shrink-0 w-48 glass rounded-xl p-4 hover:bg-white/10 transition cursor-pointer group"
+                onClick={() => handleOpenPlaylist(playlist)}
+                className="flex-shrink-0 w-48 glass rounded-xl p-4 hover:bg-white/10 transition cursor-pointer group text-left"
               >
                 <div className={`w-full aspect-square bg-gradient-to-br ${playlist.coverGradient || 'from-blue-500/30 to-purple-500/30'} rounded-lg mb-3 flex items-center justify-center relative overflow-hidden`}>
                   <span className="text-4xl">{playlist.emoji || '🎧'}</span>
                   <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
-                    <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
-                      <Music size={20} className="text-white" />
+                    <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
+                      <Play size={20} className="text-white ml-1" fill="white" />
                     </div>
                   </div>
                 </div>
                 <h4 className="font-semibold text-white">{playlist.title || playlist.name}</h4>
                 <p className="text-white/60 text-sm">{playlist.trackIds?.length || 0} tracks</p>
-              </div>
+              </button>
             ))}
+
+            {/* Show message if no playlists */}
+            {allPlaylists.length === 0 && (
+              <div className="flex-shrink-0 w-48 glass rounded-xl p-4 border-2 border-dashed border-white/20 flex flex-col items-center justify-center text-center">
+                <Music size={32} className="text-white/30 mb-2" />
+                <p className="text-white/50 text-sm">No playlists yet</p>
+                <p className="text-white/30 text-xs">Click "Create Playlist" to start</p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -316,6 +347,116 @@ export default function MusicPageClient({ initialTrackId, autoplay = false }) {
           onCreate={handleCreatePlaylist}
           availableTracks={officialTracks}
         />
+      )}
+
+      {/* Playlist Detail View */}
+      {activePlaylist && (
+        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm overflow-y-auto">
+          <div className="min-h-screen p-4 md:p-8">
+            {/* Header */}
+            <div className="max-w-screen-lg mx-auto">
+              <button
+                onClick={() => setActivePlaylist(null)}
+                className="flex items-center gap-2 text-white/60 hover:text-white mb-6 transition"
+              >
+                <ChevronLeft size={24} />
+                <span>Back to Music</span>
+              </button>
+
+              {/* Playlist Info */}
+              <div className="flex flex-col md:flex-row gap-6 mb-8">
+                <div className={`w-48 h-48 flex-shrink-0 bg-gradient-to-br ${activePlaylist.coverGradient || 'from-blue-500/30 to-purple-500/30'} rounded-2xl flex items-center justify-center`}>
+                  <span className="text-7xl">{activePlaylist.emoji || '🎧'}</span>
+                </div>
+                <div className="flex flex-col justify-end">
+                  <p className="text-white/60 text-sm mb-1">PLAYLIST</p>
+                  <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">
+                    {activePlaylist.title || activePlaylist.name}
+                  </h1>
+                  {activePlaylist.description && (
+                    <p className="text-white/60 mb-4">{activePlaylist.description}</p>
+                  )}
+                  <p className="text-white/60 text-sm">
+                    {getPlaylistTracks(activePlaylist).length} tracks
+                  </p>
+                </div>
+              </div>
+
+              {/* Play All Button */}
+              <div className="flex gap-4 mb-8">
+                <button
+                  onClick={() => handlePlayAllPlaylist(activePlaylist)}
+                  className="flex items-center gap-3 px-8 py-4 bg-green-500 hover:bg-green-600 text-white font-bold rounded-full transition"
+                >
+                  <Play size={24} fill="white" />
+                  Play All
+                </button>
+                <button
+                  onClick={() => {
+                    const shuffled = { ...activePlaylist, trackIds: [...(activePlaylist.trackIds || [])].sort(() => Math.random() - 0.5) };
+                    handlePlayAllPlaylist(shuffled);
+                  }}
+                  className="flex items-center gap-3 px-6 py-4 bg-white/10 hover:bg-white/20 text-white font-bold rounded-full transition"
+                >
+                  <Shuffle size={20} />
+                  Shuffle
+                </button>
+              </div>
+
+              {/* Track List */}
+              <div className="glass rounded-2xl overflow-hidden">
+                {getPlaylistTracks(activePlaylist).map((track, index) => {
+                  const isCurrentTrack = currentTrack?.id === track.id;
+                  return (
+                    <button
+                      key={track.id}
+                      onClick={() => handlePlayAllPlaylist(activePlaylist, index)}
+                      className={`w-full flex items-center gap-4 p-4 hover:bg-white/10 transition text-left border-b border-white/5 last:border-0 ${
+                        isCurrentTrack ? 'bg-blue-500/20' : ''
+                      }`}
+                    >
+                      {/* Track Number or Playing Indicator */}
+                      <div className="w-8 text-center">
+                        {isCurrentTrack && isPlaying ? (
+                          <div className="flex items-center justify-center gap-0.5">
+                            <span className="w-1 h-4 bg-green-400 rounded-full animate-pulse" />
+                            <span className="w-1 h-3 bg-green-400 rounded-full animate-pulse delay-75" />
+                            <span className="w-1 h-5 bg-green-400 rounded-full animate-pulse delay-150" />
+                          </div>
+                        ) : (
+                          <span className="text-white/40">{index + 1}</span>
+                        )}
+                      </div>
+
+                      {/* Track Info */}
+                      <div className="flex-1 min-w-0">
+                        <p className={`font-medium truncate ${isCurrentTrack ? 'text-green-400' : 'text-white'}`}>
+                          {track.title}
+                        </p>
+                        <p className="text-white/50 text-sm truncate">
+                          Mike Page {track.featured && `ft. ${track.featured}`}
+                          {track.producer && ` • Prod. ${track.producer}`}
+                        </p>
+                      </div>
+
+                      {/* Duration placeholder */}
+                      <span className="text-white/40 text-sm">
+                        {track.duration || '3:30'}
+                      </span>
+                    </button>
+                  );
+                })}
+
+                {getPlaylistTracks(activePlaylist).length === 0 && (
+                  <div className="p-8 text-center">
+                    <Music size={48} className="text-white/20 mx-auto mb-4" />
+                    <p className="text-white/60">This playlist is empty</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

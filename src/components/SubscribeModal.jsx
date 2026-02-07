@@ -23,8 +23,14 @@ export default function SubscribeModal() {
     setLoading(true);
 
     try {
+      // Save pending track to localStorage so we can play it after subscription
+      if (pendingTrack) {
+        localStorage.setItem('mystation-pending-track', JSON.stringify(pendingTrack));
+      }
+
       // Redirect to Stripe payment link - $4.99/month subscription
-      window.location.href = 'https://buy.stripe.com/6oUfZi2iea00g1ta8273G01';
+      // Success URL configured in Stripe Dashboard: https://mystation.vercel.app/subscribe/success
+      window.location.href = 'https://buy.stripe.com/eVq5kEcWS8VW8z10xs73G04';
     } catch (err) {
       console.error('Subscription error:', err);
       setLoading(false);
@@ -166,14 +172,8 @@ export default function SubscribeModal() {
               </div>
             )}
 
-            {/* Skip / Demo options */}
-            <div className="px-8 pb-8 flex flex-col items-center gap-3">
-              <button
-                onClick={handleDemoSubscribe}
-                className="text-blue-400 text-sm hover:text-blue-300 transition underline"
-              >
-                Demo: Unlock Free (dev only)
-              </button>
+            {/* Skip option */}
+            <div className="px-8 pb-8 flex flex-col items-center">
               <button
                 onClick={handleSkip}
                 className="text-white/40 text-sm hover:text-white/60 transition"

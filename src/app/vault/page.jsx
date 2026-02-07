@@ -164,6 +164,19 @@ export default function VaultPage() {
             <p className="text-white/50">Owner Access Only</p>
           </div>
 
+          {/* What is The Vault? */}
+          <div className="bg-white/5 border border-white/10 rounded-xl p-4 mb-6">
+            <h3 className="text-white font-bold mb-2 flex items-center gap-2">
+              <Shield size={16} className="text-red-400" />
+              What is The Vault?
+            </h3>
+            <p className="text-white/60 text-sm leading-relaxed">
+              The Vault holds <span className="text-red-400 font-semibold">unreleased music</span> that's not ready for the world yet.
+              These tracks are works-in-progress, demos, or exclusives waiting for the right moment to drop.
+              Only Mike Page has access to preview and manage these tracks.
+            </p>
+          </div>
+
           <form onSubmit={handlePinSubmit}>
             <div className="mb-6">
               <label className="text-white/60 text-sm mb-2 block">Enter PIN</label>

@@ -15,6 +15,7 @@ import DailySpin from '@/components/DailySpin';
 import LoyaltyProgress from '@/components/LoyaltyProgress';
 import VaultPreview from '@/components/VaultPreview';
 import VaultRewards from '@/components/VaultRewards';
+import FanWall from '@/components/FanWall';
 import { Trophy, Flame, Gift, Zap, Crown, Lock } from 'lucide-react';
 
 export default function FanZonePage() {
@@ -96,6 +97,11 @@ export default function FanZonePage() {
             </div>
           </div>
         </div>
+      </section>
+
+      {/* FAN WALL - Community Posts (Subscriber Feature) */}
+      <section className="max-w-screen-xl mx-auto px-6 py-12">
+        <FanWall />
       </section>
 
       {/* THE VAULT - Featured Section */}
