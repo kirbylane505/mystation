@@ -432,6 +432,27 @@ export const tracks = [
   { id: 250, title: "I Need Her", album: "Vault", year: 2024, albumId: 'vault', audioFile: '/audio/Mike Page - I Need Her_MASTERED.mp3', producer: "Jack Thomas & The Cubist", genre: "Hip Hop" },
   { id: 251, title: "Club Clothes (Remake)", album: "Vault", year: 2024, albumId: 'vault', audioFile: '/audio/Mike Page - Club Clothes (Remake)_MASTERED.mp3', producer: "The Cubist", genre: "Hip Hop" },
   { id: 252, title: "We've Been Thru It", album: "Vault", year: 2024, albumId: 'vault', audioFile: '/audio/Mike Page - We Been Thru It_MASTERED.mp3', producer: "The Cubist", genre: "Hip Hop" },
+  // ========================================
+  // VAULT - MASTER TRACKS (Need naming)
+  // ========================================
+  { id: 260, title: "IDMG 478 (ft. King Deazel)", album: "Vault", year: 2024, albumId: 'vault', audioFile: '/audio/01 Mike Page x King Deazel idmg478 (ruff02).mp3', featured: "King Deazel", producer: "IDMG", needsNaming: true },
+  { id: 261, title: "Splice 124 Acapella A", album: "Vault", year: 2023, albumId: 'vault', audioFile: '/audio/2023-06-07_Impossible Dreamz Splice 124_2rough_acap.mp3', producer: "The Cubist", needsNaming: true },
+  { id: 262, title: "Splice 124 Acapella B", album: "Vault", year: 2023, albumId: 'vault', audioFile: '/audio/2023-06-08_Impossible Dreamz Splice 124_2rough_acap.mp3', producer: "The Cubist", needsNaming: true },
+  { id: 263, title: "They Know (ft. Murrille)", album: "Vault", year: 2023, albumId: 'vault', audioFile: '/audio/2023-09-14_Mike Page - They know x murrille (169)_2.mp3', featured: "Murrille", producer: "IDMG", needsNaming: true },
+  { id: 264, title: "Water", album: "Vault", year: 2024, albumId: 'vault', audioFile: '/audio/ART_MP_IDMG_WATER.mp3', producer: "The Art Teacher", needsNaming: true },
+  { id: 265, title: "IDMG 259", album: "Vault", year: 2024, albumId: 'vault', audioFile: '/audio/IDMG 259 Mike Page.mp3', producer: "IDMG", needsNaming: true },
+  { id: 266, title: "IDMG 273", album: "Vault", year: 2024, albumId: 'vault', audioFile: '/audio/IDMG 273.mp3', producer: "IDMG", needsNaming: true },
+  { id: 267, title: "IDMG 305 Vinyl", album: "Vault", year: 2024, albumId: 'vault', audioFile: '/audio/IDMG 305 VINYL.mp3', producer: "IDMG", needsNaming: true },
+  { id: 268, title: "IDMG 342", album: "Vault", year: 2024, albumId: 'vault', audioFile: '/audio/IDMG 342.mp3', producer: "IDMG", needsNaming: true },
+  { id: 269, title: "IDMG 394", album: "Vault", year: 2024, albumId: 'vault', audioFile: '/audio/IDMG 394.mp3', producer: "IDMG", needsNaming: true },
+  { id: 270, title: "IDMG 414 (ft. VB)", album: "Vault", year: 2024, albumId: 'vault', audioFile: '/audio/IDMG 414 VB Page.mp3', featured: "Vincent Berry", producer: "IDMG", needsNaming: true },
+  { id: 271, title: "IDMG 2024-61", album: "Vault", year: 2024, albumId: 'vault', audioFile: '/audio/Impossible Dreamz 2024 61 -Mike Page (X1.1).mp3', producer: "The Cubist", needsNaming: true },
+  { id: 272, title: "IDMG 2024-74", album: "Vault", year: 2024, albumId: 'vault', audioFile: '/audio/Impossible Dreamz 2024 74_Mike Page_1.mp3', producer: "The Cubist", needsNaming: true },
+  { id: 273, title: "PAGE 701", album: "Vault", year: 2024, albumId: 'vault', audioFile: '/audio/Impossible Dreamz PAGE 701_5.mp3', producer: "The Cubist", needsNaming: true },
+  { id: 274, title: "Live Like A King (Master)", album: "Vault", year: 2022, albumId: 'vault', audioFile: '/audio/Live_Like_A_King_MASTERED.mp3', producer: "The Cubist", needsNaming: true },
+  { id: 275, title: "No Baggage", album: "Vault", year: 2024, albumId: 'vault', audioFile: '/audio/iDMG No Baggage Final1.mp3', producer: "IDMG", needsNaming: true },
+  { id: 276, title: "IDMG v107 (Gee Mix)", album: "Vault", year: 2024, albumId: 'vault', audioFile: '/audio/iDMG x gee_v107 - Mike Page _x1.1_.mp3', producer: "IDMG", needsNaming: true },
+  { id: 277, title: "IDMG v120", album: "Vault", year: 2024, albumId: 'vault', audioFile: '/audio/iDMG x v120 - Mike Page (X1.0) new bass01.mp3', producer: "IDMG", needsNaming: true },
 ];
 
 // Featured Song of the Week
