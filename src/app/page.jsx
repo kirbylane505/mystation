@@ -7,10 +7,9 @@
 
 import { useState } from 'react';
 import Hero from '@/components/Hero';
-import FeaturedSong from '@/components/FeaturedSong';
 import TrackList from '@/components/TrackList';
 import EmailCapture from '@/components/EmailCapture';
-import { tracks, albums, getOfficialTracks, featuredSong } from '@/data/tracks';
+import { tracks, albums, getOfficialTracks } from '@/data/tracks';
 import { usePlayerStore } from '@/store/playerStore';
 import { Play, Pause, Heart, ExternalLink, Music, Award, Users, Sparkles, Headphones, ChevronLeft, Shuffle } from 'lucide-react';
 import Link from 'next/link';
@@ -55,9 +54,6 @@ export default function HomePage() {
     <div className="min-h-screen">
       {/* Hero Section */}
       <Hero />
-
-      {/* Featured Song of the Week */}
-      {featuredSong && <FeaturedSong />}
 
       {/* Section Divider */}
       <div className="section-divider" />
