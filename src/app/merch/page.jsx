@@ -477,14 +477,14 @@ export default function MerchPage() {
             <p className="text-white/60">Love on the Lawn Festival gear for the little ones. 100% supports youth music programs!</p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8 max-w-2xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
             {/* Kids T-Shirt */}
             <a
               href="https://buy.stripe.com/28EcN6e0Wgoo9D50xs73G02"
               className="group glass rounded-2xl overflow-hidden hover:border-pink-500/50 transition-all duration-300 block"
             >
               <div className="aspect-square relative overflow-hidden bg-gradient-to-br from-pink-500/20 to-purple-500/20">
-                <img src="https://images.pexels.com/photos/13189387/pexels-photo-13189387.jpeg?w=800&h=800&fit=crop" alt="Cute kid in t-shirt" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                <img src="/images/merch/lotl-kids-tshirt.jpg" alt="Baby in LOTL t-shirt" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 <div className="absolute top-4 left-4 px-3 py-1 text-xs font-bold rounded-full bg-pink-500 text-white">
                   KIDS
                 </div>
@@ -507,7 +507,7 @@ export default function MerchPage() {
               className="group glass rounded-2xl overflow-hidden hover:border-purple-500/50 transition-all duration-300 block"
             >
               <div className="aspect-square relative overflow-hidden bg-gradient-to-br from-purple-500/20 to-blue-500/20">
-                <img src="https://images.unsplash.com/photo-1651444932109-a7a0f74b5dec?w=800&h=800&fit=crop" alt="Baby in cozy hoodie" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                <img src="/images/merch/lotl-kids-sweater.jpg" alt="Toddler in Love on the Lawn tee" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 <div className="absolute top-4 left-4 px-3 py-1 text-xs font-bold rounded-full bg-purple-500 text-white">
                   KIDS
                 </div>
@@ -518,6 +518,29 @@ export default function MerchPage() {
                 <div className="flex items-center justify-between">
                   <span className="text-2xl font-black text-white">$24.99</span>
                   <span className="px-4 py-2 bg-purple-500 text-white text-sm font-bold rounded-full group-hover:bg-purple-400 transition">
+                    Buy Now
+                  </span>
+                </div>
+              </div>
+            </a>
+
+            {/* Kids T-Shirt V2 */}
+            <a
+              href="https://buy.stripe.com/28EcN6e0Wgoo9D50xs73G02"
+              className="group glass rounded-2xl overflow-hidden hover:border-green-500/50 transition-all duration-300 block"
+            >
+              <div className="aspect-square relative overflow-hidden bg-gradient-to-br from-green-500/20 to-blue-500/20">
+                <img src="/images/merch/lotl-kids-tshirt2.jpg" alt="Baby in LOTL tee on grass" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                <div className="absolute top-4 left-4 px-3 py-1 text-xs font-bold rounded-full bg-green-500 text-white">
+                  KIDS
+                </div>
+              </div>
+              <div className="p-5">
+                <h3 className="text-lg font-bold text-white mb-1">LOTL Kids Tee V2</h3>
+                <p className="text-white/40 text-sm mb-3">Love on the Lawn classic tee for the little ones. Green grass, big smiles!</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-2xl font-black text-white">$15.99</span>
+                  <span className="px-4 py-2 bg-green-500 text-white text-sm font-bold rounded-full group-hover:bg-green-400 transition">
                     Buy Now
                   </span>
                 </div>
