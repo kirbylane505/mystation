@@ -1,6 +1,7 @@
 /**
  * MYSTATION - About / Foundation Page
- * Full foundation info and donation focus
+ * Mike Page Foundation - Proud Partner of MyStation
+ * Updated: Feb 6, 2026
  */
 
 'use client';
