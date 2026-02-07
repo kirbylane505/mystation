@@ -158,7 +158,8 @@ export default function MerchPage() {
       if (lower.includes('white')) {
         return '/images/mockups/idmg-label-tee-white.jpg';
       }
-      return '/images/mockups/idmg-label-tee-black.jpg';
+      // Black label tee uses Printful image (local mockup corrupted)
+      return printfulUrl || '/images/mockups/idmg-label-tee-black.jpg';
     }
 
     // IDMG Tees (circle logo)
@@ -477,7 +478,9 @@ export default function MerchPage() {
           <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
             {/* Kids T-Shirt */}
             <a
-              href="https://buy.stripe.com/28EcN6e0Wgoo9D50xs73G02"
+              href="https://buy.stripe.com/6oU9AU7Cy1tudTldke73G05"
+              target="_blank"
+              rel="noopener noreferrer"
               className="group glass rounded-2xl overflow-hidden hover:border-pink-500/50 transition-all duration-300 block"
             >
               <div className="aspect-square relative overflow-hidden bg-gradient-to-br from-pink-500/20 to-purple-500/20">
@@ -500,7 +503,9 @@ export default function MerchPage() {
 
             {/* Kids Sweater */}
             <a
-              href="https://buy.stripe.com/6oUcN61ea7RS6qTcga73G03"
+              href="https://buy.stripe.com/cNieVe6yu3BC3eHbc673G06"
+              target="_blank"
+              rel="noopener noreferrer"
               className="group glass rounded-2xl overflow-hidden hover:border-purple-500/50 transition-all duration-300 block"
             >
               <div className="aspect-square relative overflow-hidden bg-gradient-to-br from-purple-500/20 to-blue-500/20">
@@ -523,7 +528,9 @@ export default function MerchPage() {
 
             {/* Kids T-Shirt V2 */}
             <a
-              href="https://buy.stripe.com/28EcN6e0Wgoo9D50xs73G02"
+              href="https://buy.stripe.com/aFa8wQe0W1tucPh3JE73G07"
+              target="_blank"
+              rel="noopener noreferrer"
               className="group glass rounded-2xl overflow-hidden hover:border-green-500/50 transition-all duration-300 block"
             >
               <div className="aspect-square relative overflow-hidden bg-gradient-to-br from-green-500/20 to-blue-500/20">
