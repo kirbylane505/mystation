@@ -475,7 +475,7 @@ export default function MerchPage() {
             <p className="text-white/60">Love on the Lawn Festival gear for the little ones. 100% supports youth music programs!</p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-4 gap-8 max-w-5xl mx-auto">
             {/* Kids T-Shirt */}
             <a
               href="https://buy.stripe.com/6oU9AU7Cy1tudTldke73G05"
@@ -545,6 +545,31 @@ export default function MerchPage() {
                 <div className="flex items-center justify-between">
                   <span className="text-2xl font-black text-white">$15.99</span>
                   <span className="px-4 py-2 bg-green-500 text-white text-sm font-bold rounded-full group-hover:bg-green-400 transition">
+                    Buy Now
+                  </span>
+                </div>
+              </div>
+            </a>
+
+            {/* MPF Kids Sweater */}
+            <a
+              href="https://buy.stripe.com/28E00kg94fkk2aDcga73G08"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group glass rounded-2xl overflow-hidden hover:border-red-500/50 transition-all duration-300 block"
+            >
+              <div className="aspect-square relative overflow-hidden bg-gradient-to-br from-red-500/20 to-pink-500/20">
+                <img src="/images/merch/mpf-kids-sweater.jpg" alt="Baby in Mike Page Foundation sweater" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                <div className="absolute top-4 left-4 px-3 py-1 text-xs font-bold rounded-full bg-red-500 text-white">
+                  KIDS
+                </div>
+              </div>
+              <div className="p-5">
+                <h3 className="text-lg font-bold text-white mb-1">MPF Kids Sweater</h3>
+                <p className="text-white/40 text-sm mb-3">Mike Page Foundation kids sweater. Cozy and soft, perfect for little ones!</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-2xl font-black text-white">$19.99</span>
+                  <span className="px-4 py-2 bg-red-500 text-white text-sm font-bold rounded-full group-hover:bg-red-400 transition">
                     Buy Now
                   </span>
                 </div>
