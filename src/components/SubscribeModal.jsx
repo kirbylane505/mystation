@@ -113,7 +113,7 @@ export default function SubscribeModal() {
                 </div>
 
                 <p className="text-white/70 text-sm mb-4">
-                  Cancel anytime. 100% goes to the Mike Page Foundation.
+                  Cancel anytime. Your support helps build youth and community programs worldwide.
                 </p>
 
                 <button

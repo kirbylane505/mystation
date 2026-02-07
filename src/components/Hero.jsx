@@ -60,8 +60,8 @@ export default function Hero() {
             </h1>
 
             <p className="hero-subtitle text-xl text-white/60 mb-10 max-w-lg leading-relaxed">
-              Stream Mike Page's entire catalog <span className="text-white font-semibold">completely free</span>.
-              Every donation supports youth music programs through the Foundation.
+              Stream Mike Page's entire catalog <span className="text-white font-semibold">completely free</span>. Every
+              stream helps build youth and community programs worldwide.
             </p>
 
             {/* Stats */}
@@ -71,8 +71,8 @@ export default function Hero() {
                 <p className="text-white/40 text-sm uppercase tracking-wider">Tracks</p>
               </div>
               <div className="animate-slide-up delay-200">
-                <p className="text-4xl font-bold text-white mb-1">100%</p>
-                <p className="text-white/40 text-sm uppercase tracking-wider">To Foundation</p>
+                <p className="text-4xl font-bold text-white mb-1">Giving</p>
+                <p className="text-white/40 text-sm uppercase tracking-wider">Back</p>
               </div>
               <div className="animate-slide-up delay-300">
                 <p className="text-4xl font-bold text-white mb-1">Free</p>
