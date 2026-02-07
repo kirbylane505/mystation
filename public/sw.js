@@ -3,7 +3,7 @@
  * Enables offline support and PWA functionality
  */
 
-const CACHE_NAME = 'mystation-v1';
+const CACHE_NAME = 'mystation-v2';
 const OFFLINE_URL = '/offline.html';
 
 // Assets to cache immediately
