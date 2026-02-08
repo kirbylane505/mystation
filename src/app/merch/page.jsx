@@ -144,7 +144,15 @@ export default function MerchPage() {
 
         // === PRINTFUL PRODUCTS ===
         if (printfulData.success) {
-          const filtered = printfulData.products.filter((p) => !p.name.toLowerCase().includes('mug'));
+          // Hide mugs + 6 sportswear items replaced by Printify products
+          const HIDDEN_PRINTFUL = ['bomber jacket', 'athletic short', 'windbreaker', 'track pants', 'track jacket'];
+          const filtered = printfulData.products.filter((p) => {
+            const lower = p.name.toLowerCase();
+            if (lower.includes('mug')) return false;
+            if (HIDDEN_PRINTFUL.some(ex => lower.includes(ex))) return false;
+            if (lower.includes('joggers') && !lower.includes('wide-leg') && !lower.includes('jogger short')) return false;
+            return true;
+          });
 
           const withPrices = await Promise.all(
             filtered.map(async (p) => {
