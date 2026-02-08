@@ -113,6 +113,66 @@ const KIDS_ITEMS = [
   },
 ];
 
+function ProductCard({ item, idx, shopVisible, onQuickView }) {
+  return (
+    <div
+      className={`group glass rounded-2xl overflow-hidden hover:border-blue-500/30 transition-all duration-500 cursor-pointer merch-card ${shopVisible ? 'visible' : ''}`}
+      style={{ animationDelay: shopVisible ? `${idx * 0.06}s` : '0s' }}
+      onClick={() => onQuickView(item)}
+    >
+      <div className="aspect-square relative overflow-hidden">
+        <ProductImage src={item.image} fallbackSrc={item.printfulImage} alt={item.name} className="transition-transform duration-700 group-hover:scale-110" />
+        {item.badge && (
+          <div className={`absolute top-4 left-4 px-3 py-1 text-xs font-bold rounded-full z-10 ${
+            item.badge === 'LOTL' ? 'bg-purple-500 text-white' :
+            item.badge === 'MPF' ? 'bg-red-500 text-white' :
+            item.badge === 'NEW' ? 'bg-green-500 text-white' :
+            'bg-blue-500 text-white'
+          }`}>{item.badge}</div>
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-end justify-center pb-6">
+          <span className="px-6 py-3 bg-white text-black font-bold rounded-full transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">Select Size & Buy</span>
+        </div>
+        <div className="merch-card-glow absolute inset-0 opacity-0 transition-opacity duration-500 pointer-events-none rounded-2xl" style={{ boxShadow: 'inset 0 0 30px rgba(59,130,246,0.15)' }} />
+      </div>
+      <div className="p-4">
+        <h3 className="text-base font-bold text-white mb-1 group-hover:text-blue-300 transition-colors duration-300">{item.name}</h3>
+        <p className="text-white/40 text-xs mb-2">{item.description}</p>
+        <div className="flex items-center justify-between">
+          <span className="text-lg font-black text-white">
+            {item.startingPrice ? `$${item.startingPrice.toFixed(2)}` : '---'}
+          </span>
+          <span className="px-3 py-1 bg-blue-500 text-white text-xs font-bold rounded-full group-hover:bg-blue-400 transition-colors duration-300">
+            {item.synced > 1 ? `${item.synced} sizes` : 'Buy Now'}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function KidsCard({ item, idx, shopVisible }) {
+  return (
+    <div className={`group glass rounded-2xl overflow-hidden hover:border-pink-500/30 transition-all duration-500 merch-card ${shopVisible ? 'visible' : ''}`}
+      style={{ animationDelay: shopVisible ? `${idx * 0.08}s` : '0s' }}>
+      <a href={item.link} target="_blank" rel="noopener noreferrer" className="block">
+        <div className="aspect-square relative overflow-hidden bg-white">
+          <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+          <div className="absolute top-4 left-4 px-3 py-1 text-xs font-bold rounded-full z-10 bg-pink-500 text-white">{item.badge || 'KIDS'}</div>
+        </div>
+        <div className="p-4">
+          <h3 className="text-base font-bold text-white mb-1 group-hover:text-pink-300 transition-colors duration-300">{item.name}</h3>
+          <p className="text-white/40 text-xs mb-2">{item.description}</p>
+          <div className="flex items-center justify-between">
+            <span className="text-lg font-black text-white">{item.price}</span>
+            <span className="px-3 py-1 bg-pink-500 text-white text-xs font-bold rounded-full group-hover:bg-pink-400 transition-colors duration-300">Buy Now</span>
+          </div>
+        </div>
+      </a>
+    </div>
+  );
+}
+
 export default function MerchPage() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -408,17 +468,58 @@ export default function MerchPage() {
     setTimeout(() => setAddedToCart(false), 2000);
   };
 
-  // Only Printful products + Kids Stripe items
-  const allItems = [...KIDS_ITEMS, ...products];
+  // Separate adult products from kids
+  const adultProducts = products.filter(p => !p.name?.toLowerCase().includes('kid'));
+  const allAdultItems = adultProducts;
+
+  // Organize into sections
+  const getSection = (name) => {
+    const n = (name || '').toLowerCase();
+    if (n.includes('hoodie') || n.includes('zip')) return 'hoodies';
+    if (n.includes('tee') || n.includes('t-shirt')) return 'tees';
+    if (n.includes('tank') || n.includes('crop')) return 'tops';
+    if (n.includes('legging') || n.includes('jogger') || n.includes('short') || n.includes('bra')) return 'activewear';
+    if (n.includes('hat') || n.includes('bucket') || n.includes('cap') || n.includes('headband')) return 'headwear';
+    if (n.includes('bag') || n.includes('backpack') || n.includes('tote') || n.includes('fanny') || n.includes('drawstring')) return 'bags';
+    if (n.includes('sock') || n.includes('bottle') || n.includes('towel') || n.includes('mat')) return 'essentials';
+    return 'other';
+  };
+
+  const sectionOrder = [
+    { id: 'hoodies', label: 'Hoodies & Outerwear', icon: '🧥' },
+    { id: 'tees', label: 'T-Shirts', icon: '👕' },
+    { id: 'tops', label: 'Tanks & Crop Tops', icon: '👚' },
+    { id: 'activewear', label: 'Activewear', icon: '🏃' },
+    { id: 'headwear', label: 'Hats & Headwear', icon: '🎩' },
+    { id: 'bags', label: 'Bags & Accessories', icon: '🎒' },
+    { id: 'essentials', label: 'Essentials', icon: '🧦' },
+    { id: 'other', label: 'More', icon: '✨' },
+  ];
+
+  const sectionedProducts = {};
+  allAdultItems.forEach(item => {
+    const sec = getSection(item.name);
+    if (!sectionedProducts[sec]) sectionedProducts[sec] = [];
+    sectionedProducts[sec].push(item);
+  });
+
   const filteredItems = activeCategory === 'all'
-    ? allItems
-    : allItems.filter(item => item.category === activeCategory);
+    ? allAdultItems
+    : activeCategory === 'kids'
+    ? KIDS_ITEMS
+    : allAdultItems.filter(item => {
+        if (activeCategory === 'apparel') return ['hoodies', 'tees', 'tops'].includes(getSection(item.name));
+        if (activeCategory === 'activewear') return ['activewear'].includes(getSection(item.name));
+        if (activeCategory === 'accessories') return ['headwear', 'bags', 'essentials', 'other'].includes(getSection(item.name));
+        return true;
+      });
 
   const categories = [
     { id: 'all', label: 'All Items' },
     { id: 'apparel', label: 'Apparel' },
+    { id: 'activewear', label: 'Activewear' },
     { id: 'accessories', label: 'Accessories' },
-    { id: 'kids', label: 'Kids' },
+    { id: 'kids', label: 'Kids & Toddler' },
   ];
 
   const [heroRef, heroVisible] = useInView();
@@ -693,83 +794,63 @@ export default function MerchPage() {
             </div>
           )}
 
-          {/* Products Grid — Kids inserted in the middle */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {/* Products Grid — Organized by Section */}
+          {loading ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {[...Array(8)].map((_, i) => <ProductSkeleton key={`skel-${i}`} />)}
+            </div>
+          ) : activeCategory === 'kids' ? (
+            /* Kids-only view */
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {KIDS_ITEMS.map((item, idx) => (
+                <KidsCard key={item.id} item={item} idx={idx} shopVisible={shopVisible} />
+              ))}
+            </div>
+          ) : activeCategory === 'all' ? (
+            /* All Items — organized sections + kids at bottom */
+            <>
+              {sectionOrder.map(sec => {
+                const items = sectionedProducts[sec.id];
+                if (!items || items.length === 0) return null;
+                return (
+                  <div key={sec.id} className="mb-12">
+                    <div className="flex items-center gap-3 mb-6">
+                      <span className="text-2xl">{sec.icon}</span>
+                      <h3 className="text-xl font-black text-white">{sec.label}</h3>
+                      <span className="text-white/30 text-sm">({items.length})</span>
+                      <div className="flex-1 h-px bg-white/10 ml-4" />
+                    </div>
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                      {items.map((item, idx) => (
+                        <ProductCard key={item.id} item={item} idx={idx} shopVisible={shopVisible} onQuickView={handleQuickView} />
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
 
-            {loading ? (
-              [...Array(8)].map((_, i) => <ProductSkeleton key={`skel-${i}`} />)
-            ) : (
-              (() => {
-                const shopItems = filteredItems.filter(i => i.isPrintful || i.isPrintify);
-                const kids = filteredItems.filter(i => !i.isPrintful && !i.isPrintify);
-                // Insert kids in the middle of shop items
-                const midpoint = Math.ceil(shopItems.length / 2);
-                const merged = [...shopItems.slice(0, midpoint), ...kids, ...shopItems.slice(midpoint)];
-                return merged.map((item, idx) => {
-                  if (item.isPrintful || item.isPrintify) {
-                    return (
-                      <div
-                        key={item.id}
-                        className={`group glass rounded-2xl overflow-hidden hover:border-blue-500/30 transition-all duration-500 cursor-pointer merch-card ${shopVisible ? 'visible' : ''}`}
-                        style={{ animationDelay: shopVisible ? `${idx * 0.08}s` : '0s' }}
-                        onClick={() => handleQuickView(item)}
-                      >
-                        <div className="aspect-square relative overflow-hidden">
-                          <ProductImage src={item.image} fallbackSrc={item.printfulImage} alt={item.name} className="transition-transform duration-700 group-hover:scale-110" />
-                          {item.badge && (
-                            <div className={`absolute top-4 left-4 px-3 py-1 text-xs font-bold rounded-full z-10 ${
-                              item.badge === 'LOTL' ? 'bg-purple-500 text-white' :
-                              item.badge === 'MPF' ? 'bg-red-500 text-white' :
-                              item.badge === 'NEW' ? 'bg-green-500 text-white' :
-                              'bg-blue-500 text-white'
-                            }`} style={{ animation: shopVisible ? `merch-badge-pop 0.4s ease-out ${0.3 + idx * 0.08}s both` : 'none' }}>{item.badge}</div>
-                          )}
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-end justify-center pb-6">
-                            <span className="px-6 py-3 bg-white text-black font-bold rounded-full transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">Select Size & Buy</span>
-                          </div>
-                          <div className="merch-card-glow absolute inset-0 opacity-0 transition-opacity duration-500 pointer-events-none rounded-2xl" style={{ boxShadow: 'inset 0 0 30px rgba(59,130,246,0.15)' }} />
-                        </div>
-                        <div className="p-4">
-                          <h3 className="text-base font-bold text-white mb-1 group-hover:text-blue-300 transition-colors duration-300">{item.name}</h3>
-                          <p className="text-white/40 text-xs mb-2">{item.description}</p>
-                          <div className="flex items-center justify-between">
-                            <span className="text-lg font-black text-white">
-                              {item.startingPrice ? `$${item.startingPrice.toFixed(2)}` : '---'}
-                            </span>
-                            <span className="px-3 py-1 bg-blue-500 text-white text-xs font-bold rounded-full group-hover:bg-blue-400 transition-colors duration-300">
-                              {item.synced > 1 ? `${item.synced} sizes` : 'Buy Now'}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  } else {
-                    return (
-                      <div key={item.id} className={`group glass rounded-2xl overflow-hidden hover:border-pink-500/30 transition-all duration-500 merch-card ${shopVisible ? 'visible' : ''}`}
-                        style={{ animationDelay: shopVisible ? `${idx * 0.08}s` : '0s' }}>
-                        <a href={item.link} target="_blank" rel="noopener noreferrer" className="block">
-                          <div className="aspect-square relative overflow-hidden bg-white">
-                            <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                            {item.badge && (
-                              <div className="absolute top-4 left-4 px-3 py-1 text-xs font-bold rounded-full z-10 bg-pink-500 text-white" style={{ animation: shopVisible ? `merch-badge-pop 0.4s ease-out ${0.3 + idx * 0.08}s both` : 'none' }}>{item.badge}</div>
-                            )}
-                          </div>
-                          <div className="p-4">
-                            <h3 className="text-base font-bold text-white mb-1 group-hover:text-pink-300 transition-colors duration-300">{item.name}</h3>
-                            <p className="text-white/40 text-xs mb-2">{item.description}</p>
-                            <div className="flex items-center justify-between">
-                              <span className="text-lg font-black text-white">{item.price}</span>
-                              <span className="px-3 py-1 bg-pink-500 text-white text-xs font-bold rounded-full group-hover:bg-pink-400 transition-colors duration-300">Buy Now</span>
-                            </div>
-                          </div>
-                        </a>
-                      </div>
-                    );
-                  }
-                });
-              })()
-            )}
-          </div>
+              {/* ===== KIDS & TODDLER SECTION ===== */}
+              <div className="mb-12 mt-16">
+                <div className="text-center mb-8">
+                  <span className="inline-block px-4 py-1.5 bg-pink-500/10 border border-pink-500/30 rounded-full text-pink-400 text-sm font-bold mb-3">FOR THE LITTLE ONES</span>
+                  <h3 className="text-3xl font-black text-white mb-2">Kids & Toddler</h3>
+                  <p className="text-white/50 text-sm">Festival-ready gear for the youngest fans</p>
+                </div>
+                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {KIDS_ITEMS.map((item, idx) => (
+                    <KidsCard key={item.id} item={item} idx={idx} shopVisible={shopVisible} />
+                  ))}
+                </div>
+              </div>
+            </>
+          ) : (
+            /* Filtered category view */
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {filteredItems.map((item, idx) => (
+                <ProductCard key={item.id} item={item} idx={idx} shopVisible={shopVisible} onQuickView={handleQuickView} />
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

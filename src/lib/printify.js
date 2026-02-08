@@ -106,12 +106,12 @@ class PrintifyClient {
   async getStoreProducts() {
     let all = [], page = 1;
     while (true) {
-      const response = await this.request(`/shops/${this.shopId}/products.json?page=${page}&limit=100`);
+      const response = await this.request(`/shops/${this.shopId}/products.json?page=${page}&limit=50`);
       const products = response?.data || response || [];
-      if (!products.length) break;
+      if (!Array.isArray(products) || !products.length) break;
       all = all.concat(products);
-      // If fewer than 100 returned, we've hit the last page
-      if (products.length < 100) break;
+      // If fewer than 50 returned, we've hit the last page
+      if (products.length < 50) break;
       page++;
     }
     return all;
