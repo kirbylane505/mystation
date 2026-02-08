@@ -18,10 +18,14 @@ export default function Cart() {
     updateQuantity,
     getSubtotal,
     getItemCount,
+    getDiscount,
+    getDiscountedTotal,
   } = useCartStore();
 
   const subtotal = getSubtotal();
   const itemCount = getItemCount();
+  const discount = getDiscount();
+  const discountedTotal = getDiscountedTotal();
 
   if (!isOpen) return null;
 
@@ -141,12 +145,39 @@ export default function Cart() {
         {items.length > 0 && (
           <div className="p-6 border-t border-white/10 bg-gray-900/80 backdrop-blur">
             {/* Subtotal */}
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex justify-between items-center mb-2">
               <span className="text-white/60">Subtotal</span>
-              <span className="text-2xl font-bold text-white">
+              <span className={`font-bold text-white ${discount.percent > 0 ? 'text-lg line-through text-white/40' : 'text-2xl'}`}>
                 ${subtotal.toFixed(2)}
               </span>
             </div>
+
+            {/* Bundle Discount */}
+            {discount.percent > 0 && (
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-green-400 font-medium text-sm">{discount.label}</span>
+                <span className="text-green-400 font-bold">-${(subtotal - discountedTotal).toFixed(2)}</span>
+              </div>
+            )}
+
+            {discount.percent > 0 && (
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-white font-bold">Total</span>
+                <span className="text-2xl font-bold text-white">${discountedTotal.toFixed(2)}</span>
+              </div>
+            )}
+
+            {/* Upsell nudge */}
+            {itemCount === 1 && (
+              <div className="mb-3 px-3 py-2 bg-green-500/10 border border-green-500/20 rounded-lg text-center">
+                <p className="text-green-400 text-sm font-medium">Add 1 more item for 10% OFF your order!</p>
+              </div>
+            )}
+            {itemCount >= 2 && itemCount < 5 && (
+              <div className="mb-3 px-3 py-2 bg-green-500/10 border border-green-500/20 rounded-lg text-center">
+                <p className="text-green-400 text-sm font-medium">Add {5 - itemCount} more for 15% OFF!</p>
+              </div>
+            )}
 
             <p className="text-white/40 text-sm mb-4">
               Shipping & taxes calculated at checkout

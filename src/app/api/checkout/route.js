@@ -34,16 +34,23 @@ export async function POST(request) {
       apiVersion: '2023-10-16',
     });
 
-    // Build line items for Stripe
+    // Calculate bundle discount based on total item count
+    const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
+    let discountPercent = 0;
+    if (totalQuantity >= 5) discountPercent = 15;
+    else if (totalQuantity >= 2) discountPercent = 10;
+    const discountMultiplier = 1 - discountPercent / 100;
+
+    // Build line items for Stripe (with bundle discount applied)
     const lineItems = items.map((item) => ({
       price_data: {
         currency: 'usd',
         product_data: {
-          name: item.name,
+          name: item.name + (discountPercent > 0 ? ` (${discountPercent}% bundle deal)` : ''),
           description: item.variantName || undefined,
           images: item.image && item.image.startsWith('http') ? [item.image] : undefined,
         },
-        unit_amount: Math.round(item.price * 100), // Convert to cents
+        unit_amount: Math.round(item.price * 100 * discountMultiplier), // Apply discount
       },
       quantity: item.quantity,
     }));

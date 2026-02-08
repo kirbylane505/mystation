@@ -538,6 +538,116 @@ export default function MerchPage() {
         </div>
       </section>
 
+      {/* ============ BUNDLE DEALS ============ */}
+      <section className="py-12 relative overflow-hidden">
+        <div className="max-w-screen-xl mx-auto px-6">
+          <div className="text-center mb-8">
+            <span className="inline-block px-4 py-1.5 bg-green-500/10 border border-green-500/30 rounded-full text-green-400 text-sm font-bold mb-3">BUNDLE & SAVE</span>
+            <h2 className="text-3xl font-black text-white mb-2">Deal Packs</h2>
+            <p className="text-white/50">Buy more, save more. Auto-discount at checkout.</p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 mb-6">
+            {/* Deal 1: 2 Tanks */}
+            <div className="glass rounded-2xl p-6 border border-green-500/20 hover:border-green-500/40 transition-all duration-300 hover:-translate-y-1">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-2xl">👕</span>
+                <span className="px-2 py-0.5 bg-green-500/20 text-green-400 text-xs font-bold rounded-full">SAVE $4</span>
+              </div>
+              <h3 className="text-lg font-black text-white mb-1">2 Tanks</h3>
+              <p className="text-white/40 text-sm mb-3">Any 2 tank tops — mix IDMG, LOTL, or MPF</p>
+              <div className="flex items-baseline gap-2">
+                <span className="text-2xl font-black text-green-400">$35.98</span>
+                <span className="text-white/30 line-through text-sm">$39.98</span>
+              </div>
+              <p className="text-white/30 text-xs mt-1">$19.99 each × 2 with 10% off</p>
+            </div>
+
+            {/* Deal 2: 2 Crop Tops */}
+            <div className="glass rounded-2xl p-6 border border-green-500/20 hover:border-green-500/40 transition-all duration-300 hover:-translate-y-1">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-2xl">👚</span>
+                <span className="px-2 py-0.5 bg-green-500/20 text-green-400 text-xs font-bold rounded-full">SAVE $4</span>
+              </div>
+              <h3 className="text-lg font-black text-white mb-1">2 Crop Tops</h3>
+              <p className="text-white/40 text-sm mb-3">Any 2 crop tops — IDMG or LOTL Festival</p>
+              <div className="flex items-baseline gap-2">
+                <span className="text-2xl font-black text-green-400">$35.98</span>
+                <span className="text-white/30 line-through text-sm">$39.98</span>
+              </div>
+              <p className="text-white/30 text-xs mt-1">$19.99 each × 2 with 10% off</p>
+            </div>
+
+            {/* Deal 3: Sock + Tote Duo */}
+            <div className="glass rounded-2xl p-6 border border-green-500/20 hover:border-green-500/40 transition-all duration-300 hover:-translate-y-1">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-2xl">🧦</span>
+                <span className="px-2 py-0.5 bg-green-500/20 text-green-400 text-xs font-bold rounded-full">SAVE $3</span>
+              </div>
+              <h3 className="text-lg font-black text-white mb-1">Socks + Tote</h3>
+              <p className="text-white/40 text-sm mb-3">Crew socks + tote bag combo</p>
+              <div className="flex items-baseline gap-2">
+                <span className="text-2xl font-black text-green-400">$26.98</span>
+                <span className="text-white/30 line-through text-sm">$29.98</span>
+              </div>
+              <p className="text-white/30 text-xs mt-1">$14.99 each × 2 with 10% off</p>
+            </div>
+
+            {/* Deal 4: Festival Pack */}
+            <div className="glass rounded-2xl p-6 border border-purple-500/20 hover:border-purple-500/40 transition-all duration-300 hover:-translate-y-1">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-2xl">🎪</span>
+                <span className="px-2 py-0.5 bg-purple-500/20 text-purple-400 text-xs font-bold rounded-full">FESTIVAL PACK</span>
+              </div>
+              <h3 className="text-lg font-black text-white mb-1">Festival Essentials</h3>
+              <p className="text-white/40 text-sm mb-3">Bucket hat + fanny pack + socks + tote + water bottle</p>
+              <div className="flex items-baseline gap-2">
+                <span className="text-2xl font-black text-purple-400">$85.69</span>
+                <span className="text-white/30 line-through text-sm">$100.81</span>
+              </div>
+              <p className="text-white/30 text-xs mt-1">5 items = 15% off everything</p>
+            </div>
+
+            {/* Deal 5: Full Fit */}
+            <div className="glass rounded-2xl p-6 border border-pink-500/20 hover:border-pink-500/40 transition-all duration-300 hover:-translate-y-1">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-2xl">🔥</span>
+                <span className="px-2 py-0.5 bg-pink-500/20 text-pink-400 text-xs font-bold rounded-full">FULL FIT</span>
+              </div>
+              <h3 className="text-lg font-black text-white mb-1">Full Fit Pack</h3>
+              <p className="text-white/40 text-sm mb-3">Tank + shorts + sports bra + socks + hat</p>
+              <div className="flex items-baseline gap-2">
+                <span className="text-2xl font-black text-pink-400">$103.53</span>
+                <span className="text-white/30 line-through text-sm">$121.80</span>
+              </div>
+              <p className="text-white/30 text-xs mt-1">5 items = 15% off everything</p>
+            </div>
+
+            {/* Deal 6: Mix & Match */}
+            <div className="glass rounded-2xl p-6 border border-blue-500/20 hover:border-blue-500/40 transition-all duration-300 hover:-translate-y-1">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-2xl">💎</span>
+                <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 text-xs font-bold rounded-full">MIX & MATCH</span>
+              </div>
+              <h3 className="text-lg font-black text-white mb-1">Any 5+ Items</h3>
+              <p className="text-white/40 text-sm mb-3">Pick any 5 or more items from the whole store</p>
+              <div className="flex items-baseline gap-2">
+                <span className="text-2xl font-black text-blue-400">15% OFF</span>
+              </div>
+              <p className="text-white/30 text-xs mt-1">Auto-applied at checkout — no code needed</p>
+            </div>
+          </div>
+
+          <div className="text-center">
+            <div className="inline-flex items-center gap-6 px-6 py-3 bg-white/5 rounded-full">
+              <span className="text-white/40 text-sm">2+ items = <span className="text-green-400 font-bold">10% OFF</span></span>
+              <span className="text-white/20">|</span>
+              <span className="text-white/40 text-sm">5+ items = <span className="text-green-400 font-bold">15% OFF</span></span>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ============ SHOP ============ */}
       <section ref={shopRef} id="shop" className="py-16 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-purple-900/30 via-blue-900/20 to-mystation-black" />

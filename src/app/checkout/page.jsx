@@ -23,12 +23,14 @@ import Link from 'next/link';
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { items, getSubtotal, removeItem, updateQuantity, clearCart } = useCartStore();
+  const { items, getSubtotal, getDiscount, getDiscountedTotal, removeItem, updateQuantity, clearCart } = useCartStore();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [email, setEmail] = useState('');
 
   const subtotal = getSubtotal();
+  const discount = getDiscount();
+  const discountedTotal = getDiscountedTotal();
 
   // Redirect if cart is empty
   useEffect(() => {
@@ -224,13 +226,19 @@ export default function CheckoutPage() {
                   <span>Subtotal</span>
                   <span>${subtotal.toFixed(2)}</span>
                 </div>
+                {discount.percent > 0 && (
+                  <div className="flex justify-between text-green-400 text-sm font-medium">
+                    <span>{discount.label}</span>
+                    <span>-${(subtotal - discountedTotal).toFixed(2)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-white/60 text-sm">
                   <span>Shipping</span>
                   <span>Calculated at checkout</span>
                 </div>
                 <div className="flex justify-between text-white font-bold text-lg pt-3 border-t border-white/10">
                   <span>Total</span>
-                  <span>${subtotal.toFixed(2)}+</span>
+                  <span>${(discount.percent > 0 ? discountedTotal : subtotal).toFixed(2)}+</span>
                 </div>
               </div>
 

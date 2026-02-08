@@ -110,6 +110,20 @@ export const useCartStore = create(
         return get().items.reduce((count, item) => count + item.quantity, 0);
       },
 
+      // Bundle discount tiers
+      getDiscount: () => {
+        const itemCount = get().getItemCount();
+        if (itemCount >= 5) return { percent: 15, label: '15% OFF — 5+ items' };
+        if (itemCount >= 2) return { percent: 10, label: '10% OFF — 2+ items' };
+        return { percent: 0, label: null };
+      },
+
+      getDiscountedTotal: () => {
+        const subtotal = get().getSubtotal();
+        const { percent } = get().getDiscount();
+        return subtotal * (1 - percent / 100);
+      },
+
       // Filter helpers by provider
       getPrintfulItems: () => {
         return get().items.filter((item) => item.provider === 'printful' || !item.provider);
