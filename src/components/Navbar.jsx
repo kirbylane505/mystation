@@ -38,7 +38,6 @@ export default function Navbar() {
     { href: '/music', icon: Music, label: 'Music' },
     { href: '/make-a-hit', icon: Flame, label: 'Make A Hit', highlight: true },
     { href: '/about', icon: Heart, label: 'Foundation' },
-    { href: '/artists', icon: Users, label: 'Artists' },
     { href: '/merch', icon: ShoppingBag, label: 'Merch' },
     { href: '/lotl', icon: Calendar, label: 'LOTL' },
     { href: '/contact', icon: Mail, label: 'Contact' },
