@@ -16,9 +16,7 @@ export default function ShareButtons({
   const [showDropdown, setShowDropdown] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const shareUrl = typeof window !== 'undefined'
-    ? `${window.location.origin}/track/${track?.id || ''}`
-    : '';
+  const shareUrl = `https://mystationlive.com/song/${track?.id || ''}`;
 
   const shareText = track
     ? `🔥 Check out "${track.title}" by ${track.artist} on MyStation`

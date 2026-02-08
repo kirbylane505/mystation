@@ -22,7 +22,7 @@ export default function PrivacyPolicy() {
               <p>
                 MyStation ("we," "our," or "us") is operated by Impossible Dreamz Music Group (IDMG).
                 This Privacy Policy explains how we collect, use, and protect your information when
-                you use our music streaming platform at mystation.vercel.app.
+                you use our music streaming platform at mystationlive.com.
               </p>
             </section>
 

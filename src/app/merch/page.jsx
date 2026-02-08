@@ -1,15 +1,31 @@
 /**
  * MYSTATION - Merch Page
- * IDMG The Label + Mike Page Foundation — One Stop Shop
+ * ONLY items Printful can make + Kids with Stripe links
  */
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ShoppingBag, Heart, Truck, Shield, Package, X, Loader2, Check, Ticket, Sparkles } from 'lucide-react';
 import { useCartStore } from '@/stores/cartStore';
+
+// Scroll-triggered animation hook
+function useInView(options = {}) {
+  const ref = useRef(null);
+  const [isVisible, setIsVisible] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) { setIsVisible(true); observer.unobserve(el); }
+    }, { threshold: 0.1, ...options });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+  return [ref, isVisible];
+}
 
 function ProductImage({ src, fallbackSrc, alt, className = '' }) {
   const [useFallback, setUseFallback] = useState(false);
@@ -53,92 +69,7 @@ function ProductSkeleton() {
   );
 }
 
-// Hardcoded catalog items (new product photos)
-const CATALOG_ITEMS = [
-  {
-    id: 'cat-shortset',
-    name: 'IDMG Short Set Collection',
-    description: 'Crewneck + shorts. 9 colorways.',
-    image: '/images/merch/catalog/idmg-shortset-9colors.png',
-    category: 'apparel',
-    colors: 'White / Black / Yellow / Red / Navy / Grey / Olive / Blue / Cream',
-    badge: 'NEW',
-  },
-  {
-    id: 'cat-shortset-model',
-    name: 'IDMG Short Set - Modeled',
-    description: 'White, Black & Red lifestyle shots.',
-    image: '/images/merch/catalog/idmg-shortset-3panel.png',
-    category: 'apparel',
-    badge: 'NEW',
-  },
-  {
-    id: 'cat-tracksuit',
-    name: 'IDMG Tracksuit Collection',
-    description: 'Hoodie + jogger set. Premium fleece.',
-    image: '/images/merch/catalog/idmg-tracksuit-4colors.png',
-    category: 'apparel',
-    colors: 'White / Red / Gold / Navy',
-    badge: 'NEW',
-  },
-  {
-    id: 'cat-onesie-adult',
-    name: 'IDMG Onesie Collection',
-    description: 'Full-body zip hoodie onesie. Cozy luxury.',
-    image: '/images/merch/catalog/idmg-onesie-4colors.png',
-    category: 'apparel',
-    colors: 'White / Red / Gold / Navy',
-    badge: 'NEW',
-  },
-  {
-    id: 'cat-shortset-solo',
-    name: 'IDMG Short Set - White',
-    description: 'Clean white crewneck + shorts set.',
-    image: '/images/merch/catalog/idmg-shortset-white-solo.png',
-    category: 'apparel',
-  },
-  {
-    id: 'cat-shortset-couple',
-    name: 'IDMG His & Hers Set',
-    description: 'Matching white short sets. His & Hers.',
-    image: '/images/merch/catalog/idmg-shortset-couple.png',
-    category: 'apparel',
-  },
-  {
-    id: 'cat-mpf-hoodies',
-    name: 'MPF Hoodies - Black & White',
-    description: 'Heavyweight hoodie with heart logo.',
-    image: '/images/merch/catalog/mpf-hoodies-bw.png',
-    category: 'apparel',
-    badge: 'MPF',
-  },
-  {
-    id: 'cat-mpf-crewneck',
-    name: 'MPF Crewneck',
-    description: 'Classic crewneck. Heart logo center chest.',
-    image: '/images/merch/catalog/mpf-crewneck-black.png',
-    category: 'apparel',
-    badge: 'MPF',
-  },
-  {
-    id: 'cat-mpf-essentials',
-    name: 'MPF Essentials Trio',
-    description: 'Black tee, white tee & crewneck bundle.',
-    image: '/images/merch/catalog/mpf-collection-trio.png',
-    category: 'apparel',
-    badge: 'MPF',
-  },
-  {
-    id: 'cat-kids-onesie',
-    name: 'IDMG Kids Onesie',
-    description: 'Zip-up hooded onesie for little ones.',
-    image: '/images/merch/catalog/idmg-kids-onesie-black.png',
-    category: 'kids',
-    badge: 'KIDS',
-  },
-];
-
-// Kids items with Stripe checkout links
+// Kids items with direct Stripe checkout links
 const KIDS_ITEMS = [
   {
     id: 'kids-lotl-tee',
@@ -201,20 +132,54 @@ export default function MerchPage() {
         const res = await fetch('/api/printful/products');
         const data = await res.json();
         if (data.success) {
-          const filteredPrintful = data.products.filter((p) => !p.name.toLowerCase().includes('mug'));
-          const transformedProducts = filteredPrintful.map((p) => ({
-            id: p.id,
-            name: p.name,
-            description: getProductDescription(p.name),
-            category: getCategory(p.name),
-            image: getBrandedImage(p.name, p.thumbnail_url),
-            printfulImage: p.thumbnail_url,
-            variants: p.variants,
-            synced: p.synced,
-            badge: getBadge(p.name),
-            isPrintful: true,
-          }));
-          setProducts(transformedProducts);
+          // Filter out mugs
+          const filtered = data.products.filter((p) => !p.name.toLowerCase().includes('mug'));
+
+          // Fetch starting prices for all products in parallel
+          const withPrices = await Promise.all(
+            filtered.map(async (p) => {
+              let startingPrice = null;
+              let previewImage = null;
+              try {
+                const detailRes = await fetch(`/api/printful/products/${p.id}`);
+                const detailData = await detailRes.json();
+                if (detailData.success && detailData.product?.sync_variants) {
+                  const variants = detailData.product.sync_variants;
+                  const prices = variants
+                    .map((v) => parseFloat(v.retail_price))
+                    .filter((pr) => pr > 0);
+                  if (prices.length > 0) startingPrice = Math.min(...prices);
+                  // Extract first variant preview image (actual product mockup from Printful)
+                  const firstVariant = variants[0];
+                  const previewFile = firstVariant?.files?.find(f => f.type === 'preview');
+                  previewImage = previewFile?.preview_url || null;
+                }
+              } catch {}
+              return {
+                id: p.id,
+                name: p.name,
+                description: getProductDescription(p.name),
+                category: getCategory(p.name),
+                image: getBrandedImage(p.name, p.thumbnail_url, previewImage),
+                printfulImage: previewImage || p.thumbnail_url,
+                variants: p.variants,
+                synced: p.synced,
+                badge: getBadge(p.name),
+                startingPrice,
+                isPrintful: true,
+              };
+            })
+          );
+
+          // Deduplicate by name (keep the one with more variants)
+          const seen = new Map();
+          for (const p of withPrices) {
+            const key = p.name.toLowerCase();
+            if (!seen.has(key) || p.synced > seen.get(key).synced) {
+              seen.set(key, p);
+            }
+          }
+          setProducts(Array.from(seen.values()));
         } else {
           setError(data.error);
         }
@@ -227,32 +192,57 @@ export default function MerchPage() {
     fetchProducts();
   }, []);
 
-  function getBrandedImage(name, printfulUrl) {
+  function getBrandedImage(name, printfulUrl, previewUrl) {
     const lower = name.toLowerCase();
-    if (lower.includes('idmg') && lower.includes('hoodie') && lower.includes('black')) return '/images/mockups/idmg-hoodie-black.jpg';
-    if (lower.includes('idmg') && lower.includes('hoodie') && lower.includes('white')) return '/images/mockups/idmg-hoodie-white.jpg';
+
+    // IDMG Hoodies (non-zip) — we have custom photos
+    if (lower.includes('idmg') && lower.includes('hoodie') && !lower.includes('zip') && lower.includes('black')) return '/images/mockups/idmg-hoodie-black.jpg';
+    if (lower.includes('idmg') && lower.includes('hoodie') && !lower.includes('zip') && lower.includes('white')) return '/images/mockups/idmg-hoodie-white.jpg';
+    // LOTL Hoodie
     if ((lower.includes('lotl') || lower.includes('love on the lawn')) && lower.includes('hoodie')) return '/images/mockups/lotl-hoodie-black.jpg';
-    if (lower.includes('idmg') && lower.includes('label')) {
-      if (lower.includes('white')) return '/images/mockups/idmg-label-tee-white.jpg';
-      return '/images/mockups/idmg-tee-black.jpg';
+
+    // IDMG The Label TEES ONLY — custom branded mockups
+    if (lower.includes('idmg') && lower.includes('label') && (lower.includes('tee') || lower.includes('t-shirt'))) {
+      return lower.includes('white') ? '/images/mockups/idmg-label-tee-white.jpg' : '/images/mockups/idmg-tee-black.jpg';
     }
+
+    // IDMG The Label non-tee products (shorts, joggers, bomber, windbreaker, track, zip hoodie)
+    // → Use Printful's actual product mockup preview
+    if (lower.includes('idmg') && lower.includes('label') && previewUrl) return previewUrl;
+
+    // IDMG Classic Tees
     if (lower.includes('idmg') && (lower.includes('tee') || lower.includes('t-shirt')) && lower.includes('black')) return '/images/mockups/idmg-tee-black.jpg';
     if (lower.includes('idmg') && (lower.includes('tee') || lower.includes('t-shirt')) && lower.includes('white')) return '/images/mockups/idmg-tee-white.jpg';
+    // LOTL Tees
     if ((lower.includes('lotl') || lower.includes('love on the lawn')) && (lower.includes('tee') || lower.includes('t-shirt'))) return '/images/mockups/lotl-tee-black.jpg';
-    if ((lower.includes('mike page foundation') || lower.includes('mpf')) && !lower.includes('mug') && !lower.includes('sweater')) return '/images/merch/catalog/mpf-collection-trio.png';
-    if ((lower.includes('lotl') || lower.includes('love on the lawn')) && lower.includes('mug')) return printfulUrl || '/images/mockups/lotl-mug-black.jpg';
+    // MPF products
+    if ((lower.includes('mike page foundation') || lower.includes('mpf')) && !lower.includes('sweater')) return '/images/merch/catalog/mpf-collection-trio.png';
+    // LOTL Tote
     if ((lower.includes('lotl') || lower.includes('love on the lawn')) && lower.includes('tote')) return '/images/mockups/lotl-tote.jpg';
+    // Caps/Hats
     if (lower.includes('cap') || lower.includes('hat')) return '/images/merch/lotl-cap-final.jpg';
+    // Generic hoodie fallback
     if (lower.includes('hoodie')) return '/images/merch/idmg-black-hoodie.jpg';
+    // Leggings
     if (lower.includes('legging')) return '/images/merch/lotl-leggings-final.jpg';
-    return printfulUrl || '/images/merch/idmg-black-tee-real.jpg';
+
+    // Fallback — prefer Printful preview, then thumbnail, then generic
+    return previewUrl || printfulUrl || '/images/merch/idmg-black-tee-real.jpg';
   }
 
   function getProductDescription(name) {
     const lower = name.toLowerCase();
+    if (lower.includes('bomber')) return 'Premium bomber jacket. Street-ready outerwear.';
+    if (lower.includes('windbreaker')) return 'Lightweight windbreaker. All-weather ready.';
+    if (lower.includes('track jacket')) return 'Classic track jacket. Athletic fit.';
+    if (lower.includes('track pants')) return 'Tapered track pants. Athletic fit.';
+    if (lower.includes('jogger')) return 'Premium joggers. Relaxed comfortable fit.';
+    if (lower.includes('fleece short')) return 'Soft fleece shorts. Casual comfort.';
+    if (lower.includes('mesh short')) return 'Breathable mesh shorts. Athletic ready.';
+    if (lower.includes('athletic short')) return 'Performance athletic shorts.';
+    if (lower.includes('zip hoodie')) return 'Full-zip hoodie. Premium heavyweight.';
     if (lower.includes('hoodie')) return 'Premium heavyweight hoodie. Street certified.';
     if (lower.includes('t-shirt') || lower.includes('tee')) return 'Classic premium cotton tee.';
-    if (lower.includes('mug')) return 'Ceramic mug. Rep the movement daily.';
     if (lower.includes('tote')) return 'Premium canvas tote bag.';
     if (lower.includes('cap') || lower.includes('hat')) return 'Structured snapback cap.';
     return 'Premium merchandise from IDMG.';
@@ -260,7 +250,7 @@ export default function MerchPage() {
 
   function getCategory(name) {
     const lower = name.toLowerCase();
-    if (lower.includes('cap') || lower.includes('hat') || lower.includes('mug') || lower.includes('tote')) return 'accessories';
+    if (lower.includes('cap') || lower.includes('hat') || lower.includes('tote')) return 'accessories';
     return 'apparel';
   }
 
@@ -272,7 +262,7 @@ export default function MerchPage() {
   }
 
   async function handleQuickView(item) {
-    if (!item.isPrintful) return; // catalog items don't have Printful details
+    if (!item.isPrintful) return;
     setSelectedItem(item);
     setLoadingDetails(true);
     setProductDetails(null);
@@ -311,8 +301,8 @@ export default function MerchPage() {
     setTimeout(() => setAddedToCart(false), 2000);
   };
 
-  // Combine all items for the unified shop
-  const allItems = [...CATALOG_ITEMS, ...KIDS_ITEMS, ...products];
+  // Only Printful products + Kids Stripe items
+  const allItems = [...KIDS_ITEMS, ...products];
   const filteredItems = activeCategory === 'all'
     ? allItems
     : allItems.filter(item => item.category === activeCategory);
@@ -324,32 +314,51 @@ export default function MerchPage() {
     { id: 'kids', label: 'Kids' },
   ];
 
+  const [heroRef, heroVisible] = useInView();
+  const [shopRef, shopVisible] = useInView();
+  const [ctaRef, ctaVisible] = useInView();
+  const [promoRef, promoVisible] = useInView();
+
   return (
     <div className="min-h-screen">
+      <style jsx global>{`
+        @keyframes merch-float { 0%, 100% { transform: translateY(0px) rotate(0deg); } 50% { transform: translateY(-12px) rotate(1deg); } }
+        @keyframes merch-fade-up { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes merch-fade-scale { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        @keyframes merch-slide-left { from { opacity: 0; transform: translateX(-60px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes merch-slide-right { from { opacity: 0; transform: translateX(60px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes merch-shimmer { 0% { background-position: -200% center; } 100% { background-position: 200% center; } }
+        @keyframes merch-glow-pulse { 0%, 100% { box-shadow: 0 0 20px rgba(59,130,246,0.3); } 50% { box-shadow: 0 0 40px rgba(59,130,246,0.6); } }
+        @keyframes merch-badge-pop { 0% { transform: scale(0); } 60% { transform: scale(1.2); } 100% { transform: scale(1); } }
+        .merch-float { animation: merch-float 6s ease-in-out infinite; }
+        .merch-card { opacity: 0; transform: translateY(40px); }
+        .merch-card.visible { animation: merch-fade-up 0.6s ease-out forwards; }
+        .merch-card:hover { transform: translateY(-8px) scale(1.02) !important; }
+        .merch-card:hover .merch-card-glow { opacity: 1; }
+        .merch-shimmer { background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent); background-size: 200% 100%; animation: merch-shimmer 3s ease-in-out infinite; }
+      `}</style>
 
       {/* ============ HERO ============ */}
-      <section className="relative overflow-hidden">
+      <section ref={heroRef} className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-purple-900/80 via-blue-900/60 to-pink-900/50" />
         <div className="bg-orb w-[600px] h-[600px] bg-fuchsia-500 top-[-200px] left-[-200px]" />
         <div className="bg-orb w-[500px] h-[500px] bg-blue-500 top-[100px] right-[-150px]" style={{ animationDelay: '-3s' }} />
 
         <div className="relative max-w-screen-xl mx-auto px-6 py-16 lg:py-20">
           <div className="flex flex-col lg:flex-row items-center gap-10">
-            {/* Hero Image */}
-            <div className="relative w-full max-w-lg">
+            <div className={`relative w-full max-w-lg transition-all duration-1000 ${heroVisible ? 'opacity-100' : 'opacity-0 -translate-x-16'}`}>
               <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-pink-500/20 rounded-3xl blur-2xl" />
-              <div className="relative rounded-3xl overflow-hidden border border-white/20 shadow-2xl">
-                <img src="/images/merch/catalog/idmg-shortset-couple.png" alt="IDMG The Label" className="w-full h-auto" />
+              <div className="relative rounded-3xl overflow-hidden border border-white/20 shadow-2xl merch-float" style={{ animationDuration: '6s' }}>
+                <img src="/images/merch/idmg-black-hoodie.jpg" alt="IDMG The Label" className="w-full h-auto transition-transform duration-700 hover:scale-110" />
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
-                  <p className="text-white/60 text-sm font-medium uppercase tracking-wider">New 2026 Collection</p>
+                  <p className="text-white/60 text-sm font-medium uppercase tracking-wider">Official Collection</p>
                   <p className="text-white font-black text-2xl">IDMG The Label</p>
                 </div>
               </div>
             </div>
 
-            {/* Hero Text */}
-            <div className="text-center lg:text-left flex-1">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/10 border border-blue-500/30 rounded-full mb-6">
+            <div className={`text-center lg:text-left flex-1 transition-all duration-1000 delay-300 ${heroVisible ? 'opacity-100' : 'opacity-0 translate-x-16'}`}>
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/10 border border-blue-500/30 rounded-full mb-6 merch-shimmer">
                 <ShoppingBag size={16} className="text-blue-400" />
                 <span className="text-blue-400 text-sm font-medium">Official Merchandise</span>
               </div>
@@ -357,13 +366,13 @@ export default function MerchPage() {
                 Mike Page<br /><span className="gradient-text">Merch</span>
               </h1>
               <p className="text-lg text-white/50 mb-6 max-w-lg">
-                Adults. Teens. Toddlers. The whole family can rep the movement. 100% of proceeds support youth music programs.
+                Every item printed and shipped by Printful. Proceeds help build youth and community programs worldwide.
               </p>
               <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
-                <Link href="#shop" className="btn-primary flex items-center gap-2">
+                <Link href="#shop" className="btn-primary flex items-center gap-2 hover:scale-105 hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-300">
                   <ShoppingBag size={18} /> Shop Now
                 </Link>
-                <a href="https://cash.app/$RIDE4PAGEMUSIC847" target="_blank" rel="noopener noreferrer" className="btn-secondary flex items-center gap-2">
+                <a href="https://cash.app/$RIDE4PAGEMUSIC847" target="_blank" rel="noopener noreferrer" className="btn-secondary flex items-center gap-2 hover:scale-105 transition-all duration-300">
                   <Heart size={18} /> Donate Direct
                 </a>
               </div>
@@ -382,7 +391,7 @@ export default function MerchPage() {
               { icon: Heart, label: 'Supports Youth Programs' },
               { icon: Package, label: 'Print on Demand' },
             ].map((item, i) => (
-              <div key={i} className="flex items-center gap-3 text-white/50">
+              <div key={i} className="flex items-center gap-3 text-white/50 hover:text-white transition-all duration-300 hover:scale-110 cursor-default" style={{ animation: heroVisible ? `merch-fade-up 0.5s ease-out ${0.6 + i * 0.1}s forwards` : 'none', opacity: heroVisible ? 0 : 1 }}>
                 <item.icon size={20} className="text-blue-400" />
                 <span className="text-sm">{item.label}</span>
               </div>
@@ -392,10 +401,10 @@ export default function MerchPage() {
       </section>
 
       {/* ============ LOTL 2026 PROMO BANNER ============ */}
-      <section className="py-6">
-        <div className="max-w-screen-xl mx-auto px-6">
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-green-600 via-emerald-500 to-green-600 p-[2px]">
-            <div className="relative bg-gradient-to-r from-green-900/95 via-emerald-800/95 to-green-900/95 rounded-2xl px-6 py-5 md:px-10 md:py-6">
+      <section ref={promoRef} className="py-6">
+        <div className={`max-w-screen-xl mx-auto px-6 transition-all duration-700 ${promoVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-green-600 via-emerald-500 to-green-600 p-[2px]" style={{ animation: promoVisible ? 'merch-glow-pulse 3s ease-in-out infinite' : 'none', boxShadow: '0 0 20px rgba(16,185,129,0.3)' }}>
+            <div className="relative bg-gradient-to-r from-green-900/95 via-emerald-800/95 to-green-900/95 rounded-2xl px-6 py-5 md:px-10 md:py-6 merch-shimmer">
               <div className="relative flex flex-col md:flex-row items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
                   <div className="flex-shrink-0 w-14 h-14 bg-green-500/20 rounded-xl flex items-center justify-center border border-green-400/30">
@@ -423,16 +432,16 @@ export default function MerchPage() {
         </div>
       </section>
 
-      {/* ============ ONE SHOP — EVERYTHING ============ */}
-      <section id="shop" className="py-16 relative overflow-hidden">
+      {/* ============ SHOP ============ */}
+      <section ref={shopRef} id="shop" className="py-16 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-purple-900/30 via-blue-900/20 to-mystation-black" />
         <div className="bg-orb w-[400px] h-[400px] bg-pink-500 top-[20%] left-[-100px] opacity-50" />
         <div className="bg-orb w-[300px] h-[300px] bg-blue-400 bottom-[10%] right-[-50px] opacity-40" style={{ animationDelay: '-4s' }} />
         <div className="relative max-w-screen-xl mx-auto px-6">
-          <div className="text-center mb-12">
+          <div className={`text-center mb-12 transition-all duration-700 ${shopVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             <h2 className="text-4xl font-black text-white mb-4">Shop the Collection</h2>
             <p className="text-white/50">
-              {loading ? 'Loading...' : `${allItems.length} items — IDMG The Label + Mike Page Foundation + LOTL`}
+              {loading ? 'Loading store...' : `${allItems.length} items — All printed & shipped by Printful`}
             </p>
           </div>
 
@@ -462,107 +471,92 @@ export default function MerchPage() {
 
           {/* Products Grid */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {/* Catalog + Kids items (always shown, not loading dependent) */}
-            {filteredItems.filter(i => !i.isPrintful).map((item) => (
-              <div key={item.id} className="group glass rounded-2xl overflow-hidden hover:border-blue-500/30 transition-all duration-300">
-                {item.link ? (
-                  <a href={item.link} target="_blank" rel="noopener noreferrer" className="block">
-                    <div className="aspect-square relative overflow-hidden bg-white">
-                      <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                      {item.badge && (
-                        <div className={`absolute top-4 left-4 px-3 py-1 text-xs font-bold rounded-full z-10 ${
-                          item.badge === 'KIDS' ? 'bg-pink-500 text-white' :
-                          item.badge === 'MPF' ? 'bg-red-500 text-white' :
-                          item.badge === 'LOTL' ? 'bg-purple-500 text-white' :
-                          'bg-blue-500 text-white'
-                        }`}>{item.badge}</div>
-                      )}
-                    </div>
-                    <div className="p-4">
-                      <h3 className="text-base font-bold text-white mb-1">{item.name}</h3>
-                      <p className="text-white/40 text-xs mb-2">{item.description}</p>
-                      <div className="flex items-center justify-between">
-                        <span className="text-lg font-black text-white">{item.price}</span>
-                        <span className="px-3 py-1 bg-blue-500 text-white text-xs font-bold rounded-full">Buy Now</span>
-                      </div>
-                    </div>
-                  </a>
-                ) : (
-                  <>
-                    <div className="aspect-square relative overflow-hidden bg-white">
-                      <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                      {item.badge && (
-                        <div className={`absolute top-4 left-4 px-3 py-1 text-xs font-bold rounded-full z-10 ${
-                          item.badge === 'KIDS' ? 'bg-pink-500 text-white' :
-                          item.badge === 'MPF' ? 'bg-red-500 text-white' :
-                          item.badge === 'LOTL' ? 'bg-purple-500 text-white' :
-                          'bg-blue-500 text-white'
-                        }`}>{item.badge}</div>
-                      )}
-                    </div>
-                    <div className="p-4">
-                      <h3 className="text-base font-bold text-white mb-1">{item.name}</h3>
-                      <p className="text-white/40 text-xs mb-2">{item.description}</p>
-                      {item.colors && <p className="text-white/30 text-xs">{item.colors}</p>}
-                    </div>
-                  </>
-                )}
-              </div>
-            ))}
 
-            {/* Printful items */}
+            {/* Printful items — click to Quick View & buy */}
             {loading ? (
-              [...Array(6)].map((_, i) => <ProductSkeleton key={`skel-${i}`} />)
+              [...Array(8)].map((_, i) => <ProductSkeleton key={`skel-${i}`} />)
             ) : (
-              filteredItems.filter(i => i.isPrintful).map((item) => (
+              filteredItems.filter(i => i.isPrintful).map((item, idx) => (
                 <div
                   key={item.id}
-                  className="group glass rounded-2xl overflow-hidden hover:border-blue-500/30 transition-all duration-300 cursor-pointer"
+                  className={`group glass rounded-2xl overflow-hidden hover:border-blue-500/30 transition-all duration-500 cursor-pointer merch-card ${shopVisible ? 'visible' : ''}`}
+                  style={{ animationDelay: shopVisible ? `${idx * 0.08}s` : '0s' }}
                   onClick={() => handleQuickView(item)}
                 >
                   <div className="aspect-square relative overflow-hidden">
-                    <ProductImage src={item.image} fallbackSrc={item.printfulImage} alt={item.name} />
+                    <ProductImage src={item.image} fallbackSrc={item.printfulImage} alt={item.name} className="transition-transform duration-700 group-hover:scale-110" />
                     {item.badge && (
                       <div className={`absolute top-4 left-4 px-3 py-1 text-xs font-bold rounded-full z-10 ${
                         item.badge === 'LOTL' ? 'bg-purple-500 text-white' :
                         item.badge === 'MPF' ? 'bg-red-500 text-white' :
                         'bg-blue-500 text-white'
-                      }`}>{item.badge}</div>
+                      }`} style={{ animation: shopVisible ? `merch-badge-pop 0.4s ease-out ${0.3 + idx * 0.08}s both` : 'none' }}>{item.badge}</div>
                     )}
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
-                      <span className="px-6 py-3 bg-white text-black font-bold rounded-full">Quick View</span>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-end justify-center pb-6">
+                      <span className="px-6 py-3 bg-white text-black font-bold rounded-full transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">Select Size & Buy</span>
                     </div>
+                    <div className="merch-card-glow absolute inset-0 opacity-0 transition-opacity duration-500 pointer-events-none rounded-2xl" style={{ boxShadow: 'inset 0 0 30px rgba(59,130,246,0.15)' }} />
                   </div>
                   <div className="p-4">
-                    <h3 className="text-base font-bold text-white mb-1">{item.name}</h3>
+                    <h3 className="text-base font-bold text-white mb-1 group-hover:text-blue-300 transition-colors duration-300">{item.name}</h3>
                     <p className="text-white/40 text-xs mb-2">{item.description}</p>
                     <div className="flex items-center justify-between">
-                      <span className="text-white/50 text-sm">{item.synced} variants</span>
-                      <span className="px-3 py-1 bg-blue-500/10 text-blue-400 text-xs font-medium rounded-lg">Select</span>
+                      <span className="text-lg font-black text-white">
+                        {item.startingPrice ? `$${item.startingPrice.toFixed(2)}` : '---'}
+                      </span>
+                      <span className="px-3 py-1 bg-blue-500 text-white text-xs font-bold rounded-full group-hover:bg-blue-400 transition-colors duration-300">
+                        {item.synced > 1 ? `${item.synced} sizes` : 'Buy Now'}
+                      </span>
                     </div>
                   </div>
                 </div>
               ))
             )}
+
+            {/* Kids items — direct Stripe checkout */}
+            {filteredItems.filter(i => !i.isPrintful).map((item, idx) => {
+              const totalPrintful = filteredItems.filter(i => i.isPrintful).length;
+              return (
+              <div key={item.id} className={`group glass rounded-2xl overflow-hidden hover:border-pink-500/30 transition-all duration-500 merch-card ${shopVisible ? 'visible' : ''}`}
+                style={{ animationDelay: shopVisible ? `${(totalPrintful + idx) * 0.08}s` : '0s' }}>
+                <a href={item.link} target="_blank" rel="noopener noreferrer" className="block">
+                  <div className="aspect-square relative overflow-hidden bg-white">
+                    <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                    {item.badge && (
+                      <div className="absolute top-4 left-4 px-3 py-1 text-xs font-bold rounded-full z-10 bg-pink-500 text-white" style={{ animation: shopVisible ? `merch-badge-pop 0.4s ease-out ${0.3 + (totalPrintful + idx) * 0.08}s both` : 'none' }}>{item.badge}</div>
+                    )}
+                  </div>
+                  <div className="p-4">
+                    <h3 className="text-base font-bold text-white mb-1 group-hover:text-pink-300 transition-colors duration-300">{item.name}</h3>
+                    <p className="text-white/40 text-xs mb-2">{item.description}</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-lg font-black text-white">{item.price}</span>
+                      <span className="px-3 py-1 bg-pink-500 text-white text-xs font-bold rounded-full group-hover:bg-pink-400 transition-colors duration-300">Buy Now</span>
+                    </div>
+                  </div>
+                </a>
+              </div>
+              );
+            })}
           </div>
         </div>
       </section>
 
       {/* ============ CTA ============ */}
-      <section className="py-20">
+      <section ref={ctaRef} className="py-20">
         <div className="max-w-screen-xl mx-auto px-6">
-          <div className="glass rounded-3xl p-10 lg:p-16 text-center relative overflow-hidden">
+          <div className={`glass rounded-3xl p-10 lg:p-16 text-center relative overflow-hidden transition-all duration-1000 ${ctaVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
             <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10" />
             <div className="relative">
-              <Image src="/images/mpf-logo.png" alt="Mike Page Foundation" width={80} height={80} className="mx-auto mb-6" />
-              <h2 className="text-3xl lg:text-4xl font-black text-white mb-4">Every Purchase Supports the Mission</h2>
-              <p className="text-white/50 text-lg mb-8 max-w-2xl mx-auto">
+              <Image src="/images/mpf-logo.png" alt="Mike Page Foundation" width={80} height={80} className={`mx-auto mb-6 transition-all duration-700 delay-300 ${ctaVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}`} />
+              <h2 className={`text-3xl lg:text-4xl font-black text-white mb-4 transition-all duration-700 delay-500 ${ctaVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>Every Purchase Supports the Mission</h2>
+              <p className={`text-white/50 text-lg mb-8 max-w-2xl mx-auto transition-all duration-700 delay-700 ${ctaVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
                 The Mike Page Foundation is a 501(c)(3) nonprofit dedicated to youth music education,
                 scholarships, and community programs like Love on the Lawn.
               </p>
-              <div className="flex flex-wrap gap-4 justify-center">
-                <Link href="/about" className="btn-primary">Learn About the Foundation</Link>
-                <a href="https://cash.app/$RIDE4PAGEMUSIC847" target="_blank" rel="noopener noreferrer" className="btn-secondary flex items-center gap-2">
+              <div className={`flex flex-wrap gap-4 justify-center transition-all duration-700 delay-[900ms] ${ctaVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
+                <Link href="/about" className="btn-primary hover:scale-105 hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-300">Learn About the Foundation</Link>
+                <a href="https://cash.app/$RIDE4PAGEMUSIC847" target="_blank" rel="noopener noreferrer" className="btn-secondary flex items-center gap-2 hover:scale-105 transition-all duration-300">
                   <Heart size={18} /> Donate Now
                 </a>
               </div>
@@ -573,8 +567,8 @@ export default function MerchPage() {
 
       {/* ============ QUICK VIEW MODAL ============ */}
       {selectedItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={() => { setSelectedItem(null); setProductDetails(null); setSelectedVariant(null); }}>
-          <div className="glass rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-[merch-fade-up_0.3s_ease-out]" onClick={() => { setSelectedItem(null); setProductDetails(null); setSelectedVariant(null); }}>
+          <div className="glass rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto" style={{ animation: 'merch-fade-scale 0.4s ease-out' }} onClick={(e) => e.stopPropagation()}>
             <div className="grid md:grid-cols-2 gap-0">
               <div className="aspect-square relative bg-white">
                 <ProductImage src={getVariantImage(selectedVariant, selectedItem.image)} fallbackSrc={selectedItem.printfulImage} alt={selectedItem.name} />
@@ -589,13 +583,13 @@ export default function MerchPage() {
                 {loadingDetails ? (
                   <div className="flex items-center gap-3 py-8">
                     <Loader2 size={24} className="animate-spin text-blue-400" />
-                    <span className="text-white/60">Loading variants...</span>
+                    <span className="text-white/60">Loading sizes...</span>
                   </div>
                 ) : productDetails ? (
                   <>
                     <p className="text-3xl font-black text-white mb-6">${selectedVariant ? getPrice(selectedVariant).toFixed(2) : '---'}</p>
                     <div className="mb-6">
-                      <label className="text-white/60 text-sm mb-3 block">Select Variant ({productDetails.sync_variants?.length || 0} available)</label>
+                      <label className="text-white/60 text-sm mb-3 block">Select Size ({productDetails.sync_variants?.length || 0} available)</label>
                       <div className="max-h-48 overflow-y-auto space-y-2 pr-2">
                         {productDetails.sync_variants?.map((variant) => (
                           <button key={variant.id} onClick={() => setSelectedVariant(variant)}
@@ -612,7 +606,7 @@ export default function MerchPage() {
                       className={`w-full flex items-center justify-center gap-2 py-4 rounded-xl font-bold transition ${addedToCart ? 'bg-green-500 text-white' : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:shadow-lg hover:shadow-blue-500/30'}`}>
                       {addedToCart ? (<><Check size={18} /> Added to Cart!</>) : (<><ShoppingBag size={18} /> Add to Cart - ${selectedVariant ? getPrice(selectedVariant).toFixed(2) : '---'}</>)}
                     </button>
-                    <p className="text-center text-white/40 text-xs mt-2">Secure checkout powered by Printful</p>
+                    <p className="text-center text-white/40 text-xs mt-2">Printed & shipped by Printful</p>
                   </>
                 ) : (
                   <p className="text-white/40 py-8">Unable to load product details</p>

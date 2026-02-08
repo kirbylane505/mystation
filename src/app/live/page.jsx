@@ -493,7 +493,7 @@ export default function LivePage() {
               </div>
 
               <p className="text-white/40 text-xs text-center mt-4">
-                100% goes to Mike Page. Powered by Stripe.
+                Helping build youth and community programs worldwide. Powered by Stripe.
               </p>
             </div>
           </div>

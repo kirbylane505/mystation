@@ -25,10 +25,10 @@ export async function generateMetadata({ params }) {
     openGraph: {
       title: `🎵 ${track.title} - Mike Page`,
       description: `Tap to listen & drop a 🔥 if it's fire!`,
-      url: `https://mystation.vercel.app/track/${id}`,
+      url: `https://mystationlive.com/track/${id}`,
       siteName: 'MyStation',
       images: [{
-        url: `https://mystation.vercel.app${imageUrl}`,
+        url: `https://mystationlive.com${imageUrl}`,
         width: 1200,
         height: 630,
         alt: `${track.title} by Mike Page`,
@@ -40,7 +40,7 @@ export async function generateMetadata({ params }) {
       card: 'summary_large_image',
       title: `🎵 ${track.title} - Mike Page`,
       description: `Tap to listen & drop a 🔥 if it's fire!`,
-      images: [`https://mystation.vercel.app${imageUrl}`],
+      images: [`https://mystationlive.com${imageUrl}`],
     },
   };
 }

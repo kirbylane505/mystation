@@ -16,7 +16,7 @@ import {
 // Mock data - in production this would come from database
 const mockArtistData = {
   name: "Mike Page",
-  stationUrl: "mystation.vercel.app",
+  stationUrl: "mystationlive.com",
   cashApp: "$RIDE4PAGEMUSIC847",
   totalPlays: 12847,
   uniqueListeners: 3421,

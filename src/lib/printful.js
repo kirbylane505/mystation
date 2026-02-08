@@ -58,7 +58,15 @@ class PrintfulClient {
    * Get all synced products in your store
    */
   async getStoreProducts() {
-    return this.request('/store/products');
+    let all = [], offset = 0;
+    while (true) {
+      const page = await this.request(`/store/products?offset=${offset}&limit=100`);
+      if (!page || page.length === 0) break;
+      all = all.concat(page);
+      if (page.length < 100) break;
+      offset += 100;
+    }
+    return all;
   }
 
   /**

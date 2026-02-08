@@ -93,8 +93,8 @@ export async function POST(request) {
         printful_items: JSON.stringify(printfulItems),
         source: 'mystation',
       },
-      success_url: 'https://mystation.vercel.app/checkout/success?session_id={CHECKOUT_SESSION_ID}',
-      cancel_url: 'https://mystation.vercel.app/checkout',
+      success_url: 'https://mystationlive.com/checkout/success?session_id={CHECKOUT_SESSION_ID}',
+      cancel_url: 'https://mystationlive.com/checkout',
     });
 
     return NextResponse.json({

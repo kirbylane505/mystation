@@ -13,9 +13,8 @@ export default function ShareTrack({ track }) {
   const [copied, setCopied] = useState(false);
 
   // Always use production URL for sharing - never localhost
-  // Use /track/[id] route for proper OG tags in link previews
-  const siteUrl = 'https://mystation.vercel.app';
-  const trackUrl = `${siteUrl}/track/${track.id}`;
+  const siteUrl = 'https://mystationlive.com';
+  const trackUrl = `${siteUrl}/song/${track.id}`;
 
   // Share message - title prominent, encourages engagement back on site
   const shareTitle = `${track.title} - Mike Page`;

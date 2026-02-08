@@ -28,6 +28,47 @@ function checkRateLimit(ip) {
 }
 
 export function middleware(request) {
+  const sitePassword = process.env.SITE_PASSWORD;
+
+  // Password gate — if SITE_PASSWORD env var is set, require basic auth
+  if (sitePassword) {
+    // Whitelisted IPs bypass password (owner's machines)
+    const visitorIp = request.ip || request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || '';
+    const whitelist = (process.env.SITE_WHITELIST_IPS || '').split(',').map(s => s.trim()).filter(Boolean);
+    const isWhitelisted = whitelist.includes(visitorIp);
+
+    // Skip auth for static assets, whitelisted IPs, and API health checks
+    const { pathname } = request.nextUrl;
+    if (!isWhitelisted && !pathname.startsWith('/_next') && !pathname.startsWith('/favicon')) {
+      const authHeader = request.headers.get('authorization');
+      if (authHeader) {
+        try {
+          const encoded = authHeader.split(' ')[1] || '';
+          const decoded = atob(encoded);
+          const pass = decoded.substring(decoded.indexOf(':') + 1);
+          if (pass === sitePassword) {
+            // Authorized — continue to rest of middleware
+          } else {
+            return new NextResponse('Invalid password', {
+              status: 401,
+              headers: { 'WWW-Authenticate': 'Basic realm="MyStation"' },
+            });
+          }
+        } catch {
+          return new NextResponse('Unauthorized', {
+            status: 401,
+            headers: { 'WWW-Authenticate': 'Basic realm="MyStation"' },
+          });
+        }
+      } else {
+        return new NextResponse('Site is under construction. Enter password to access.', {
+          status: 401,
+          headers: { 'WWW-Authenticate': 'Basic realm="MyStation"' },
+        });
+      }
+    }
+  }
+
   const response = NextResponse.next();
   const ip = request.ip || request.headers.get('x-forwarded-for') || 'unknown';
 

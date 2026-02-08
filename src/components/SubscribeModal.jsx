@@ -29,7 +29,7 @@ export default function SubscribeModal() {
       }
 
       // Redirect to Stripe payment link - $4.99/month subscription
-      // Success URL configured in Stripe Dashboard: https://mystation.vercel.app/subscribe/success
+      // Success URL configured in Stripe Dashboard: https://mystationlive.com/subscribe/success
       window.location.href = 'https://buy.stripe.com/eVq5kEcWS8VW8z10xs73G04';
     } catch (err) {
       console.error('Subscription error:', err);

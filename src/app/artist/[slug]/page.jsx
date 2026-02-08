@@ -34,7 +34,7 @@ const DEMO_ARTISTS = {
     socialLinks: {
       instagram: 'https://instagram.com/mikepagelivin',
       twitter: 'https://twitter.com/mikepageidmg',
-      website: 'https://mystation.vercel.app',
+      website: 'https://mystationlive.com',
     },
     streamingLinks: {
       spotify: 'https://open.spotify.com/artist/3JwFt4Qb3uAUzipnMyM6G6',

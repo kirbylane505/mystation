@@ -20,7 +20,7 @@ export default function TermsOfService() {
             <section>
               <h2 className="text-2xl font-bold text-white mb-4">1. Acceptance of Terms</h2>
               <p>
-                By accessing or using MyStation (mystation.vercel.app), operated by Impossible Dreamz
+                By accessing or using MyStation (mystationlive.com), operated by Impossible Dreamz
                 Music Group (IDMG), you agree to be bound by these Terms of Service. If you do not
                 agree to these terms, please do not use our service.
               </p>

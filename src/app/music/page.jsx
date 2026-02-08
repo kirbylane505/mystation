@@ -29,7 +29,7 @@ export async function generateMetadata({ searchParams }) {
           description: `Tap to listen & drop a 🔥 if it's fire!\n\nStream free on MyStation`,
           images: [
             {
-              url: `https://mystation.vercel.app${imageUrl}`,
+              url: `https://mystationlive.com${imageUrl}`,
               width: 1200,
               height: 630,
               alt: `${track.title} - Mike Page`,
@@ -42,7 +42,7 @@ export async function generateMetadata({ searchParams }) {
           card: 'summary_large_image',
           title: `🎵 ${track.title} - Mike Page`,
           description: `Tap to listen & drop a 🔥 if it's fire!`,
-          images: [`https://mystation.vercel.app${imageUrl}`],
+          images: [`https://mystationlive.com${imageUrl}`],
         },
       };
     }
@@ -57,7 +57,7 @@ export async function generateMetadata({ searchParams }) {
       description: 'Stream free. Support the Foundation.',
       images: [
         {
-          url: 'https://mystation.vercel.app/images/albums/cindys-son.jpg',
+          url: 'https://mystationlive.com/images/albums/cindys-son.jpg',
           width: 1200,
           height: 630,
         }
