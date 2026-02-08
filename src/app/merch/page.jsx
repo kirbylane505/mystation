@@ -766,7 +766,7 @@ export default function MerchPage() {
           <div className={`text-center mb-12 transition-all duration-700 ${shopVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             <h2 className="text-4xl font-black text-white mb-4">Shop the Collection</h2>
             <p className="text-white/50">
-              {loading ? 'Loading store...' : `${allItems.length} items — Printed & shipped by Printful + Printify`}
+              {loading ? 'Loading store...' : `${adultProducts.length + KIDS_ITEMS.length} items — Printed & shipped by Printful + Printify`}
             </p>
           </div>
 
