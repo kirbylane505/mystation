@@ -35,7 +35,7 @@ class PrintifyClient {
           headers: {
             'Authorization': `Bearer ${this.apiKey}`,
             'Content-Type': 'application/json',
-            'User-Agent': 'MyStation-NextJS',
+            'User-Agent': 'Mozilla/5.0 (compatible; MyStation/1.0)',
             ...options.headers
           }
         });
