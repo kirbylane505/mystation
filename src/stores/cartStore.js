@@ -12,11 +12,12 @@ export const useCartStore = create(
       items: [],
       isOpen: false,
 
-      // Add item to cart
-      addItem: (product, variant) => {
+      // Add item to cart (supports 'printful' and 'printify' providers)
+      addItem: (product, variant, provider = 'printful') => {
         const items = get().items;
+        const cartKey = `${provider}_${variant.id}`;
         const existingIndex = items.findIndex(
-          (item) => item.variantId === variant.id
+          (item) => item.variantId === cartKey
         );
 
         if (existingIndex > -1) {
@@ -25,20 +26,42 @@ export const useCartStore = create(
           newItems[existingIndex].quantity += 1;
           set({ items: newItems, isOpen: true });
         } else {
-          // Add new item
+          // Build provider-specific fields
+          const providerFields =
+            provider === 'printify'
+              ? {
+                  printifyProductId: product.id,
+                  printifyVariantId: variant.id,
+                }
+              : {
+                  printfulVariantId: variant.variant_id,
+                  printfulSyncVariantId: variant.id,
+                };
+
+          // Resolve price & image per provider
+          const price =
+            provider === 'printify'
+              ? parseFloat(variant.price) / 100 || 0
+              : parseFloat(variant.retail_price) || 0;
+
+          const image =
+            provider === 'printify'
+              ? variant.image || product.image
+              : variant.files?.[0]?.preview_url || product.image;
+
           set({
             items: [
               ...items,
               {
                 id: product.id,
-                variantId: variant.id,
+                variantId: cartKey,
                 name: product.name,
-                variantName: variant.name,
-                price: parseFloat(variant.retail_price) || 0,
-                image: variant.files?.[0]?.preview_url || product.image,
+                variantName: variant.title || variant.name,
+                price,
+                image,
                 quantity: 1,
-                printfulVariantId: variant.variant_id,
-                printfulSyncVariantId: variant.id,
+                provider,
+                ...providerFields,
               },
             ],
             isOpen: true,
@@ -85,6 +108,15 @@ export const useCartStore = create(
 
       getItemCount: () => {
         return get().items.reduce((count, item) => count + item.quantity, 0);
+      },
+
+      // Filter helpers by provider
+      getPrintfulItems: () => {
+        return get().items.filter((item) => item.provider === 'printful' || !item.provider);
+      },
+
+      getPrintifyItems: () => {
+        return get().items.filter((item) => item.provider === 'printify');
       },
     }),
     {

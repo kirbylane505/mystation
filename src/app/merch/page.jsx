@@ -1,6 +1,6 @@
 /**
  * MYSTATION - Merch Page
- * ONLY items Printful can make + Kids with Stripe links
+ * Dual-provider: Printful + Printify products + Kids with Stripe links
  */
 
 'use client';
@@ -129,13 +129,23 @@ export default function MerchPage() {
     async function fetchProducts() {
       try {
         setLoading(true);
-        const res = await fetch('/api/printful/products');
-        const data = await res.json();
-        if (data.success) {
-          // Filter out mugs
-          const filtered = data.products.filter((p) => !p.name.toLowerCase().includes('mug'));
 
-          // Fetch starting prices for all products in parallel
+        // Fetch from both Printful AND Printify in parallel
+        const [printfulRes, printifyRes] = await Promise.all([
+          fetch('/api/printful/products'),
+          fetch('/api/printify/products'),
+        ]);
+        const [printfulData, printifyData] = await Promise.all([
+          printfulRes.json(),
+          printifyRes.json(),
+        ]);
+
+        let allProducts = [];
+
+        // === PRINTFUL PRODUCTS ===
+        if (printfulData.success) {
+          const filtered = printfulData.products.filter((p) => !p.name.toLowerCase().includes('mug'));
+
           const withPrices = await Promise.all(
             filtered.map(async (p) => {
               let startingPrice = null;
@@ -149,7 +159,6 @@ export default function MerchPage() {
                     .map((v) => parseFloat(v.retail_price))
                     .filter((pr) => pr > 0);
                   if (prices.length > 0) startingPrice = Math.min(...prices);
-                  // Extract first variant preview image (actual product mockup from Printful)
                   const firstVariant = variants[0];
                   const previewFile = firstVariant?.files?.find(f => f.type === 'preview');
                   previewImage = previewFile?.preview_url || null;
@@ -166,12 +175,13 @@ export default function MerchPage() {
                 synced: p.synced,
                 badge: getBadge(p.name),
                 startingPrice,
+                provider: 'printful',
                 isPrintful: true,
               };
             })
           );
 
-          // Deduplicate by name (keep the one with more variants)
+          // Deduplicate by name
           const seen = new Map();
           for (const p of withPrices) {
             const key = p.name.toLowerCase();
@@ -179,23 +189,54 @@ export default function MerchPage() {
               seen.set(key, p);
             }
           }
-
-          // Sort: hoodies first, then tees, then everything else
-          const sorted = Array.from(seen.values()).sort((a, b) => {
-            const getPriority = (name) => {
-              const n = name.toLowerCase();
-              if (n.includes('hoodie')) return 0;
-              if (n.includes('tee') || n.includes('t-shirt')) return 1;
-              if (n.includes('cap') || n.includes('hat')) return 2;
-              if (n.includes('tote')) return 3;
-              return 4; // shorts, joggers, bomber, etc. go last
-            };
-            return getPriority(a.name) - getPriority(b.name);
-          });
-          setProducts(sorted);
-        } else {
-          setError(data.error);
+          allProducts = Array.from(seen.values());
         }
+
+        // === PRINTIFY PRODUCTS ===
+        if (printifyData.success && !printifyData.demo) {
+          const printifyProducts = printifyData.products.map((p) => {
+            const enabledVariants = (p.variants || []).filter(v => v.is_enabled);
+            const prices = enabledVariants.map(v => v.price / 100).filter(pr => pr > 0);
+            const startingPrice = prices.length > 0 ? Math.min(...prices) : null;
+            const defaultImg = (p.images || []).find(img => img.is_default);
+            const firstImg = (p.images || [])[0];
+            const image = defaultImg?.src || firstImg?.src || null;
+            const name = p.title || 'Printify Product';
+
+            return {
+              id: `printify_${p.id}`,
+              printifyId: p.id,
+              name,
+              description: p.description || getProductDescription(name),
+              category: getPrintifyCategory(p.tags, name),
+              image,
+              printfulImage: null,
+              variants: enabledVariants,
+              synced: enabledVariants.length,
+              badge: getBadge(name) || 'NEW',
+              startingPrice,
+              provider: 'printify',
+              isPrintify: true,
+            };
+          });
+          allProducts = [...allProducts, ...printifyProducts];
+        }
+
+        // Sort: hoodies first, then tees, then everything else
+        const sorted = allProducts.sort((a, b) => {
+          const getPriority = (name) => {
+            const n = name.toLowerCase();
+            if (n.includes('hoodie')) return 0;
+            if (n.includes('tee') || n.includes('t-shirt')) return 1;
+            if (n.includes('cap') || n.includes('hat')) return 2;
+            if (n.includes('tote')) return 3;
+            if (n.includes('sock')) return 4;
+            if (n.includes('headband') || n.includes('band')) return 4;
+            return 5;
+          };
+          return getPriority(a.name) - getPriority(b.name);
+        });
+        setProducts(sorted);
       } catch (err) {
         setError('Failed to load products');
       } finally {
@@ -274,18 +315,58 @@ export default function MerchPage() {
     return null;
   }
 
+  function getPrintifyCategory(tags, name) {
+    const allTags = (tags || []).join(' ').toLowerCase();
+    const lower = (name || '').toLowerCase();
+    if (allTags.includes('accessories') || lower.includes('cap') || lower.includes('hat') || lower.includes('tote') || lower.includes('bag') || lower.includes('sock') || lower.includes('headband') || lower.includes('fan')) return 'accessories';
+    if (lower.includes('kid') || allTags.includes('kid')) return 'kids';
+    return 'apparel';
+  }
+
   async function handleQuickView(item) {
-    if (!item.isPrintful) return;
+    if (!item.isPrintful && !item.isPrintify) return;
     setSelectedItem(item);
     setLoadingDetails(true);
     setProductDetails(null);
     setSelectedVariant(null);
     try {
-      const res = await fetch(`/api/printful/products/${item.id}`);
-      const data = await res.json();
-      if (data.success && data.product) {
-        setProductDetails(data.product);
-        if (data.product.sync_variants?.length > 0) setSelectedVariant(data.product.sync_variants[0]);
+      if (item.isPrintify) {
+        // Printify: fetch product details
+        const res = await fetch(`/api/printify/products/${item.printifyId}`);
+        const data = await res.json();
+        if (data.success && data.product) {
+          const enabledVariants = (data.product.variants || []).filter(v => v.is_enabled);
+          // Normalize to common shape
+          setProductDetails({
+            ...data.product,
+            sync_variants: enabledVariants.map(v => ({
+              id: v.id,
+              name: v.title,
+              retail_price: (v.price / 100).toFixed(2),
+              printifyVariantId: v.id,
+              printifyProductId: data.product.id,
+            })),
+            provider: 'printify',
+          });
+          if (enabledVariants.length > 0) {
+            const first = enabledVariants[0];
+            setSelectedVariant({
+              id: first.id,
+              name: first.title,
+              retail_price: (first.price / 100).toFixed(2),
+              printifyVariantId: first.id,
+              printifyProductId: data.product.id,
+            });
+          }
+        }
+      } else {
+        // Printful: existing logic
+        const res = await fetch(`/api/printful/products/${item.id}`);
+        const data = await res.json();
+        if (data.success && data.product) {
+          setProductDetails({ ...data.product, provider: 'printful' });
+          if (data.product.sync_variants?.length > 0) setSelectedVariant(data.product.sync_variants[0]);
+        }
       }
     } catch (err) {
       console.error('Failed to load product details:', err);
@@ -309,7 +390,12 @@ export default function MerchPage() {
 
   const handleAddToCart = () => {
     if (!selectedVariant || !selectedItem) return;
-    addItem({ id: selectedItem.id, name: selectedItem.name, image: getVariantImage(selectedVariant, selectedItem.image) }, selectedVariant);
+    const provider = productDetails?.provider || selectedItem.provider || 'printful';
+    addItem(
+      { id: selectedItem.isPrintify ? selectedItem.printifyId : selectedItem.id, name: selectedItem.name, image: getVariantImage(selectedVariant, selectedItem.image) },
+      selectedVariant,
+      provider
+    );
     setAddedToCart(true);
     setTimeout(() => setAddedToCart(false), 2000);
   };
@@ -461,7 +547,7 @@ export default function MerchPage() {
           <div className={`text-center mb-12 transition-all duration-700 ${shopVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             <h2 className="text-4xl font-black text-white mb-4">Shop the Collection</h2>
             <p className="text-white/50">
-              {loading ? 'Loading store...' : `${allItems.length} items — All printed & shipped by Printful`}
+              {loading ? 'Loading store...' : `${allItems.length} items — Printed & shipped by Printful + Printify`}
             </p>
           </div>
 
@@ -496,13 +582,13 @@ export default function MerchPage() {
               [...Array(8)].map((_, i) => <ProductSkeleton key={`skel-${i}`} />)
             ) : (
               (() => {
-                const printful = filteredItems.filter(i => i.isPrintful);
-                const kids = filteredItems.filter(i => !i.isPrintful);
-                // Insert kids in the middle of printful items
-                const midpoint = Math.ceil(printful.length / 2);
-                const merged = [...printful.slice(0, midpoint), ...kids, ...printful.slice(midpoint)];
+                const shopItems = filteredItems.filter(i => i.isPrintful || i.isPrintify);
+                const kids = filteredItems.filter(i => !i.isPrintful && !i.isPrintify);
+                // Insert kids in the middle of shop items
+                const midpoint = Math.ceil(shopItems.length / 2);
+                const merged = [...shopItems.slice(0, midpoint), ...kids, ...shopItems.slice(midpoint)];
                 return merged.map((item, idx) => {
-                  if (item.isPrintful) {
+                  if (item.isPrintful || item.isPrintify) {
                     return (
                       <div
                         key={item.id}
@@ -516,6 +602,7 @@ export default function MerchPage() {
                             <div className={`absolute top-4 left-4 px-3 py-1 text-xs font-bold rounded-full z-10 ${
                               item.badge === 'LOTL' ? 'bg-purple-500 text-white' :
                               item.badge === 'MPF' ? 'bg-red-500 text-white' :
+                              item.badge === 'NEW' ? 'bg-green-500 text-white' :
                               'bg-blue-500 text-white'
                             }`} style={{ animation: shopVisible ? `merch-badge-pop 0.4s ease-out ${0.3 + idx * 0.08}s both` : 'none' }}>{item.badge}</div>
                           )}
@@ -632,7 +719,7 @@ export default function MerchPage() {
                       className={`w-full flex items-center justify-center gap-2 py-4 rounded-xl font-bold transition ${addedToCart ? 'bg-green-500 text-white' : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:shadow-lg hover:shadow-blue-500/30'}`}>
                       {addedToCart ? (<><Check size={18} /> Added to Cart!</>) : (<><ShoppingBag size={18} /> Add to Cart - ${selectedVariant ? getPrice(selectedVariant).toFixed(2) : '---'}</>)}
                     </button>
-                    <p className="text-center text-white/40 text-xs mt-2">Printed & shipped by Printful</p>
+                    <p className="text-center text-white/40 text-xs mt-2">Printed & shipped by {productDetails?.provider === 'printify' ? 'Printify' : 'Printful'}</p>
                   </>
                 ) : (
                   <p className="text-white/40 py-8">Unable to load product details</p>

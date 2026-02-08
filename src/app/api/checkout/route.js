@@ -57,6 +57,16 @@ export async function POST(request) {
         name: item.name,
       }));
 
+    // Build Printify items metadata for webhook
+    const printifyItems = items
+      .filter(item => item.printifyProductId && item.printifyVariantId)
+      .map(item => ({
+        product_id: item.printifyProductId,
+        variant_id: item.printifyVariantId,
+        quantity: item.quantity,
+        name: item.name,
+      }));
+
     // Create Stripe Checkout session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card', 'klarna', 'afterpay_clearpay'],
@@ -88,9 +98,10 @@ export async function POST(request) {
           },
         },
       ],
-      // Store Printful item data for webhook to create order
+      // Store item data for webhook to create orders with both providers
       metadata: {
         printful_items: JSON.stringify(printfulItems),
+        printify_items: JSON.stringify(printifyItems),
         source: 'mystation',
       },
       success_url: 'https://mystationlive.com/checkout/success?session_id={CHECKOUT_SESSION_ID}',

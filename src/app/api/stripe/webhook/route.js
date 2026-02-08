@@ -1,17 +1,18 @@
 /**
  * MYSTATION - Stripe Webhook Handler
- * Receives payment confirmations and creates Printful orders
+ * Receives payment confirmations and creates Printful/Printify orders
  *
  * Flow:
  * 1. Customer pays on MyStation
  * 2. Stripe sends webhook to this endpoint
- * 3. We create order on Printful with shipping address
- * 4. Printful prints and ships, sends tracking to customer
+ * 3. We create orders on Printful and/or Printify based on item metadata
+ * 4. Each provider prints and ships their items, sends tracking to customer
  */
 
 import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import { printful } from '@/lib/printful';
+import { printify } from '@/lib/printify';
 
 // Stripe webhook secret for signature verification
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -73,7 +74,7 @@ export async function POST(request) {
 
 /**
  * Handle checkout.session.completed event
- * Creates Printful order with shipping address and items
+ * Creates Printful and/or Printify orders with shipping address and items
  */
 async function handleCheckoutCompleted(session, stripe) {
   console.log('Processing checkout session:', session.id);
@@ -169,27 +170,75 @@ async function handleCheckoutCompleted(session, stripe) {
     }
 
     // Create order on Printful
+    let printfulResult = null;
     if (printfulOrder.items.length > 0) {
       console.log('Creating Printful order:', JSON.stringify(printfulOrder, null, 2));
 
       const order = await printful.createOrder(printfulOrder, true); // confirm=true to submit immediately
 
       console.log('Printful order created:', order.id);
-      console.log('Status:', order.status);
+      console.log('Printful status:', order.status);
 
-      // Log for debugging
+      printfulResult = { printfulOrderId: order.id, status: order.status };
+    } else {
+      console.log('No Printful items in this order');
+    }
+
+    // Create order on Printify
+    let printifyResult = null;
+    if (metadata.printify_items) {
+      try {
+        const printifyItems = JSON.parse(metadata.printify_items);
+        if (printifyItems.length > 0) {
+          const printifyOrder = {
+            external_id: session.id,
+            label: `MyStation Order ${session.id.slice(-8)}`,
+            line_items: printifyItems.map(item => ({
+              product_id: item.product_id,
+              variant_id: item.variant_id,
+              quantity: item.quantity,
+            })),
+            shipping_method: 1,
+            address_to: {
+              first_name: (shipping.name || '').split(' ')[0] || 'Customer',
+              last_name: (shipping.name || '').split(' ').slice(1).join(' ') || '',
+              email: fullSession.customer_details?.email || session.customer_email || '',
+              phone: fullSession.customer_details?.phone || '',
+              country: shipping.address.country || 'US',
+              region: shipping.address.state || '',
+              address1: shipping.address.line1 || '',
+              address2: shipping.address.line2 || '',
+              city: shipping.address.city || '',
+              zip: shipping.address.postal_code || '',
+            },
+          };
+
+          console.log('Creating Printify order:', JSON.stringify(printifyOrder, null, 2));
+
+          const order = await printify.createOrder(printifyOrder, true); // confirm=true sends to production
+
+          console.log('Printify order created:', order.id);
+          printifyResult = { printifyOrderId: order.id, sent_to_production: order.sent_to_production };
+        }
+      } catch (e) {
+        console.error('Failed to create Printify order:', e);
+      }
+    }
+
+    // Return combined results
+    if (printfulResult || printifyResult) {
       return {
         success: true,
-        printfulOrderId: order.id,
-        status: order.status,
+        ...printfulResult,
+        ...printifyResult,
       };
     } else {
-      console.error('Could not match any items with Printful products');
+      console.error('Could not match any items with Printful or Printify products');
       console.log('Line items:', JSON.stringify(merchItems, null, 2));
     }
   } catch (error) {
-    console.error('Failed to create Printful order:', error);
-    // Don't throw - we don't want to retry the webhook for Printful errors
+    console.error('Failed to create fulfillment order:', error);
+    // Don't throw - we don't want to retry the webhook for fulfillment errors
     // The order is paid, we'll need to manually fulfill if this fails
   }
 }
