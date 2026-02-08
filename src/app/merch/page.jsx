@@ -343,6 +343,11 @@ export default function MerchPage() {
         @keyframes merch-shimmer { 0% { background-position: -200% center; } 100% { background-position: 200% center; } }
         @keyframes merch-glow-pulse { 0%, 100% { box-shadow: 0 0 20px rgba(59,130,246,0.3); } 50% { box-shadow: 0 0 40px rgba(59,130,246,0.6); } }
         @keyframes merch-badge-pop { 0% { transform: scale(0); } 60% { transform: scale(1.2); } 100% { transform: scale(1); } }
+        @keyframes lotl-border-flow { 0% { background-position: 0% center; } 100% { background-position: 300% center; } }
+        @keyframes lotl-float { 0%, 100% { transform: translateY(0) scale(1); opacity: 0.3; } 50% { transform: translateY(-15px) scale(1.3); opacity: 0.6; } }
+        @keyframes lotl-icon-pulse { 0%, 100% { transform: scale(1); box-shadow: 0 0 0 rgba(249,115,22,0); } 50% { transform: scale(1.05); box-shadow: 0 0 20px rgba(249,115,22,0.3); } }
+        @keyframes lotl-sparkle { 0%, 100% { transform: scale(1) rotate(0deg); } 50% { transform: scale(1.3) rotate(15deg); } }
+        @keyframes lotl-text-flow { 0% { background-position: 0% center; } 100% { background-position: 200% center; } }
         .merch-float { animation: merch-float 6s ease-in-out infinite; }
         .merch-card { opacity: 0; transform: translateY(40px); }
         .merch-card.visible { animation: merch-fade-up 0.6s ease-out forwards; }
@@ -416,26 +421,39 @@ export default function MerchPage() {
       {/* ============ LOTL 2026 PROMO BANNER ============ */}
       <section ref={promoRef} className="py-6">
         <div className={`max-w-screen-xl mx-auto px-6 transition-all duration-700 ${promoVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-green-600 via-emerald-500 to-green-600 p-[2px]" style={{ animation: promoVisible ? 'merch-glow-pulse 3s ease-in-out infinite' : 'none', boxShadow: '0 0 20px rgba(16,185,129,0.3)' }}>
-            <div className="relative bg-gradient-to-r from-green-900/95 via-emerald-800/95 to-green-900/95 rounded-2xl px-6 py-5 md:px-10 md:py-6 merch-shimmer">
-              <div className="relative flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="relative overflow-hidden rounded-2xl p-[2px]" style={{ background: 'linear-gradient(90deg, #f97316, #ec4899, #8b5cf6, #f97316)', backgroundSize: '300% 100%', animation: promoVisible ? 'lotl-border-flow 4s linear infinite' : 'none', boxShadow: '0 0 25px rgba(249,115,22,0.4)' }}>
+            <div className="relative rounded-2xl px-6 py-6 md:px-10 md:py-8 overflow-hidden" style={{ background: 'linear-gradient(135deg, #1a0a2e 0%, #16213e 50%, #1a0a2e 100%)' }}>
+              {/* Animated background particles */}
+              <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                <div className="absolute w-2 h-2 bg-orange-400/30 rounded-full" style={{ top: '20%', left: '10%', animation: 'lotl-float 3s ease-in-out infinite' }} />
+                <div className="absolute w-3 h-3 bg-pink-400/20 rounded-full" style={{ top: '60%', left: '80%', animation: 'lotl-float 4s ease-in-out infinite 1s' }} />
+                <div className="absolute w-2 h-2 bg-purple-400/25 rounded-full" style={{ top: '30%', left: '50%', animation: 'lotl-float 3.5s ease-in-out infinite 0.5s' }} />
+                <div className="absolute w-1.5 h-1.5 bg-yellow-400/30 rounded-full" style={{ top: '70%', left: '30%', animation: 'lotl-float 2.5s ease-in-out infinite 1.5s' }} />
+              </div>
+
+              <div className="relative flex flex-col md:flex-row items-center justify-between gap-6">
                 <div className="flex items-center gap-4">
-                  <div className="flex-shrink-0 w-14 h-14 bg-green-500/20 rounded-xl flex items-center justify-center border border-green-400/30">
-                    <Ticket size={28} className="text-green-300" />
+                  <div className="flex-shrink-0 w-16 h-16 rounded-xl flex items-center justify-center border border-orange-400/40" style={{ background: 'linear-gradient(135deg, rgba(249,115,22,0.2), rgba(236,72,153,0.2))', animation: 'lotl-icon-pulse 2s ease-in-out infinite' }}>
+                    <Ticket size={30} className="text-orange-300" />
                   </div>
                   <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <Sparkles size={16} className="text-yellow-400" />
-                      <span className="text-yellow-400 text-sm font-bold uppercase tracking-wider">Love on the Lawn 2026 Promo</span>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Sparkles size={16} className="text-yellow-400" style={{ animation: 'lotl-sparkle 1.5s ease-in-out infinite' }} />
+                      <span className="text-sm font-bold uppercase tracking-wider" style={{ background: 'linear-gradient(90deg, #fbbf24, #f97316, #ec4899)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundSize: '200% 100%', animation: 'lotl-text-flow 3s linear infinite' }}>Love on the Lawn 2026 Promo</span>
                     </div>
-                    <h3 className="text-xl md:text-2xl font-black text-white">
-                      Spend $26+ on merch &rarr; Get <span className="text-green-300">25% OFF</span> your LOTL tickets!
-                    </h3>
-                    <p className="text-green-200/70 text-sm mt-1">Discount code will appear on your receipt after checkout.</p>
+                    <div className="space-y-1.5">
+                      <h3 className="text-lg md:text-xl font-black text-white">
+                        Spend $50+ &rarr; Get <span className="text-orange-300">25% OFF</span> LOTL tickets
+                      </h3>
+                      <h3 className="text-lg md:text-xl font-black text-white">
+                        Spend $100+ &rarr; Get <span className="text-pink-300">1 FREE TICKET</span>
+                      </h3>
+                    </div>
+                    <p className="text-white/50 text-sm mt-2">Discount code comes on your receipt after checkout.</p>
                   </div>
                 </div>
                 <div className="flex-shrink-0">
-                  <Link href="#shop" className="inline-flex items-center gap-2 px-6 py-3 bg-green-500 hover:bg-green-400 text-black font-bold rounded-full transition-all hover:scale-105 shadow-lg shadow-green-500/30">
+                  <Link href="#shop" className="inline-flex items-center gap-2 px-7 py-3.5 font-bold rounded-full transition-all hover:scale-105 text-white shadow-lg" style={{ background: 'linear-gradient(135deg, #f97316, #ec4899)', boxShadow: '0 4px 20px rgba(249,115,22,0.4)' }}>
                     <ShoppingBag size={18} /> Shop & Save
                   </Link>
                 </div>
