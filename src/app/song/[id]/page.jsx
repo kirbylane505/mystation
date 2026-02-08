@@ -39,7 +39,7 @@ export async function generateMetadata({ params }) {
           alt: title,
         },
       ],
-      audio: track.audioFile ? `https://mystationlive.com${track.audioFile}` : undefined,
+      audio: track.audioFile ? [{ url: `https://mystationlive.com${track.audioFile}` }] : undefined,
     },
     twitter: {
       card: 'summary_large_image',

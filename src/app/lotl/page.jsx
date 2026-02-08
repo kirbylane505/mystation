@@ -48,7 +48,7 @@ function MerchPromoBanner() {
             <div className="flex items-center gap-4">
               <div className="w-24 h-24 lg:w-32 lg:h-32 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 border border-white/10 overflow-hidden transform -rotate-6 group-hover:rotate-0 transition-transform shadow-xl">
                 <img
-                  src="/images/mockups/mpf-tee-black.jpg"
+                  src="/images/mockups/mpf-tee.jpg"
                   alt="MPF Tee"
                   className="w-full h-full object-cover"
                   onError={(e) => { e.target.style.display = 'none'; }}
@@ -64,7 +64,7 @@ function MerchPromoBanner() {
               </div>
               <div className="hidden lg:block w-24 h-24 lg:w-32 lg:h-32 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 border border-white/10 overflow-hidden transform -rotate-3 group-hover:rotate-0 transition-transform shadow-xl">
                 <img
-                  src="/images/mockups/mpf-tee-white.jpg"
+                  src="/images/mockups/lotl-tee-black.jpg"
                   alt="MPF Tee White"
                   className="w-full h-full object-cover"
                   onError={(e) => { e.target.style.display = 'none'; }}
