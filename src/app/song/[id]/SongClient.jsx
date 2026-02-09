@@ -3,12 +3,16 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Play, Pause, Music, Share2, Heart, Disc3, Loader2 } from 'lucide-react';
+import { Play, Pause, Music, Share2, Heart, Disc3, Loader2, SkipBack, SkipForward, Volume2, VolumeX } from 'lucide-react';
 import { usePlayerStore } from '@/store/playerStore';
 import { shareMP3 } from '@/lib/shareAudio';
 
 export default function SongClient({ track, allTracks, albumArt }) {
-  const { currentTrack, isPlaying, setTrack, setQueue, togglePlay } = usePlayerStore();
+  const {
+    currentTrack, isPlaying, setTrack, setQueue, togglePlay,
+    progress, duration, setProgress, volume, isMuted, setVolume, toggleMute,
+    nextTrack, prevTrack
+  } = usePlayerStore();
   const [shared, setShared] = useState(false);
   const [mp3Loading, setMp3Loading] = useState(false);
   const isThisTrack = currentTrack?.id === track.id;
@@ -39,6 +43,20 @@ export default function SongClient({ track, allTracks, albumArt }) {
       setShared(true);
       setTimeout(() => setShared(false), 2000);
     }
+  };
+
+  const formatTime = (seconds) => {
+    if (!seconds || isNaN(seconds)) return '0:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const handleSeek = (e) => {
+    const bar = e.currentTarget;
+    const rect = bar.getBoundingClientRect();
+    const percent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    setProgress(percent * duration);
   };
 
   const handleSendMP3 = async () => {
@@ -100,13 +118,84 @@ export default function SongClient({ track, allTracks, albumArt }) {
         )}
         <p className="text-white/30 text-sm mb-8">{track.album} &bull; {track.year} &bull; {track.duration}</p>
 
-        {/* Play Button */}
-        <button
-          onClick={handlePlay}
-          className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-2xl shadow-blue-500/40 hover:scale-110 transition-all duration-300 mb-8"
-        >
-          {isThisPlaying ? <Pause size={36} className="text-white" /> : <Play size={36} className="text-white ml-1" />}
-        </button>
+        {/* Player Controls */}
+        <div className="w-full max-w-md mb-8">
+          {/* Transport: Prev / Play / Next */}
+          <div className="flex items-center justify-center gap-6 mb-5">
+            <button onClick={prevTrack} className="text-white/50 hover:text-white transition active:scale-95">
+              <SkipBack size={28} fill="currentColor" />
+            </button>
+            <button
+              onClick={handlePlay}
+              className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-2xl shadow-blue-500/40 hover:scale-110 transition-all duration-300"
+            >
+              {isThisPlaying ? <Pause size={36} className="text-white" /> : <Play size={36} className="text-white ml-1" />}
+            </button>
+            <button onClick={nextTrack} className="text-white/50 hover:text-white transition active:scale-95">
+              <SkipForward size={28} fill="currentColor" />
+            </button>
+          </div>
+
+          {/* Progress / Seek Bar */}
+          {isThisTrack && (
+            <>
+              <div
+                className="w-full h-3 bg-white/10 rounded-full cursor-pointer relative group"
+                onClick={handleSeek}
+              >
+                <div
+                  className="h-full bg-gradient-to-r from-blue-500 to-blue-400 rounded-full relative"
+                  style={{ width: `${duration ? (progress / duration) * 100 : 0}%` }}
+                >
+                  <div className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition" />
+                </div>
+              </div>
+              <div className="flex justify-between mt-2 px-1">
+                <span className="text-xs text-white/40 font-mono">{formatTime(progress)}</span>
+                <span className="text-xs text-white/40 font-mono">{formatTime(duration)}</span>
+              </div>
+            </>
+          )}
+
+          {/* Volume Control */}
+          <div className="flex items-center justify-center gap-3 mt-4">
+            <button
+              onClick={() => setVolume(Math.max(0, volume - 0.2))}
+              className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white text-lg font-bold active:bg-white/20 transition"
+            >
+              −
+            </button>
+            <button onClick={toggleMute} className="flex items-center gap-2">
+              {isMuted || volume === 0 ? (
+                <VolumeX size={22} className="text-red-400" />
+              ) : (
+                <Volume2 size={22} className="text-blue-400" />
+              )}
+              <span className="text-white font-bold text-sm w-10">{Math.round((isMuted ? 0 : volume) * 100)}%</span>
+            </button>
+            <button
+              onClick={() => setVolume(Math.min(1, volume + 0.2))}
+              className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white text-lg font-bold active:bg-white/20 transition"
+            >
+              +
+            </button>
+          </div>
+
+          {/* Volume Bars */}
+          <div className="flex justify-center gap-1.5 mt-3">
+            {[1, 2, 3, 4, 5].map((level) => (
+              <button
+                key={level}
+                onClick={() => setVolume(level * 0.2)}
+                className={`h-6 w-10 rounded-full transition-all ${
+                  (isMuted ? 0 : volume) >= level * 0.2
+                    ? 'bg-gradient-to-t from-blue-500 to-cyan-400'
+                    : 'bg-white/10'
+                }`}
+              />
+            ))}
+          </div>
+        </div>
 
         {/* Actions */}
         <div className="flex items-center gap-3 mb-12 flex-wrap justify-center">
