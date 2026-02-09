@@ -14,7 +14,7 @@ import { Radio, Users, Heart, MessageCircle, Send, Bell, Calendar, Video, Copy, 
 const MuxPlayer = dynamic(() => import('@mux/mux-player-react'), { ssr: false });
 
 export default function LivePage() {
-  const [isAdmin] = useState(true); // Mike Page admin mode
+  const [isAdmin] = useState(false); // TODO: wire to real auth — set true only for Mike
   const [streamData, setStreamData] = useState(null);
   const [isLive, setIsLive] = useState(false);
   const [streamTitle, setStreamTitle] = useState('');
@@ -37,21 +37,21 @@ export default function LivePage() {
     {
       id: 1,
       title: 'New Music Friday',
-      date: 'Feb 7, 2026',
+      date: 'Feb 14, 2026',
       time: '8:00 PM EST',
       description: 'Previewing unreleased tracks from the vault'
     },
     {
       id: 2,
       title: 'Motivation Monday',
-      date: 'Feb 10, 2026',
+      date: 'Feb 17, 2026',
       time: '12:00 PM EST',
       description: 'Weekly motivation talk and Q&A'
     },
     {
       id: 3,
       title: 'Studio Session',
-      date: 'Feb 14, 2026',
+      date: 'Feb 21, 2026',
       time: '9:00 PM EST',
       description: 'Behind the scenes of the new single'
     }

@@ -121,16 +121,11 @@ export default function FanZonePage() {
 
       {/* Main Content */}
       <section className="max-w-screen-xl mx-auto px-6 py-12">
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid lg:grid-cols-2 gap-8">
           {/* Left Column - Streaks & Unlocks */}
           <div className="space-y-8">
             <StreakBadges />
             <UnlockProgress />
-          </div>
-
-          {/* Center Column - Vault Preview */}
-          <div>
-            <VaultPreview />
           </div>
 
           {/* Right Column - Activity Feed */}
