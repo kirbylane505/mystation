@@ -23,7 +23,8 @@ export default function ShareTrack({ track }) {
   const shareText = `🎵 "${track.title}" - Mike Page\n\nTap to listen & drop a 🔥 if it's fire!`;
 
   // Open share modal - always show our custom modal with SMS/Email/Copy options
-  const handleShare = () => {
+  const handleShare = (e) => {
+    e.stopPropagation();
     setShowModal(true);
   };
 
@@ -85,8 +86,8 @@ export default function ShareTrack({ track }) {
 
       {/* Share Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="glass rounded-2xl max-w-md w-full animate-scale-in">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowModal(false)}>
+          <div className="glass rounded-2xl max-w-md w-full animate-scale-in" onClick={(e) => e.stopPropagation()}>
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-white/10">
               <div>
