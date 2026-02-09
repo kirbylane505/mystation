@@ -1,3 +1,13 @@
-# MyStation - Private
+# MyStation - Mike Page Foundation
 User-agent: *
-Disallow: /
+Allow: /
+
+# Protected paths
+Disallow: /api/
+Disallow: /password
+Disallow: /checkout
+Disallow: /station/dashboard
+Disallow: /admin/
+
+# Sitemap
+Sitemap: https://mystationlive.com/sitemap.xml

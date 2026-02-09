@@ -11,6 +11,7 @@ import SubscribeModal from '@/components/SubscribeModal';
 import ClientProviders from '@/components/ClientProviders';
 import Cart from '@/components/Cart';
 import InstallPWA from '@/components/InstallPWA';
+import PageTracker from '@/components/PageTracker';
 import Script from 'next/script';
 
 export const metadata = {
@@ -24,28 +25,28 @@ export const metadata = {
 
   // Open Graph - Shows when sharing on social media/iMessage
   openGraph: {
-    title: 'FAVORITE PERSON - Mike Page | MyStation',
-    description: 'Stream "Favorite Person" by Mike Page FREE on MyStation. Prod. The Cubist (SHOW_IDMG).',
+    title: 'MyStation - Stream Mike Page Music Free',
+    description: 'Stream Mike Page music for free. Official merch, Love on the Lawn Festival tickets, and more. All donations support youth music programs.',
     url: 'https://mystationlive.com',
     siteName: 'MyStation',
     images: [
       {
-        url: '/images/og-favorite-person.png',
+        url: '/images/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'Favorite Person - Mike Page - Stream on MyStation',
+        alt: 'MyStation - Stream Mike Page Music Free',
       },
     ],
     locale: 'en_US',
-    type: 'music.song',
+    type: 'website',
   },
 
   // Twitter Card
   twitter: {
     card: 'summary_large_image',
-    title: 'FAVORITE PERSON - Mike Page',
-    description: 'Stream FREE on MyStation. Prod. The Cubist.',
-    images: ['/images/og-favorite-person.png'],
+    title: 'MyStation - Stream Mike Page Music Free',
+    description: 'Stream Mike Page music for free. Official merch & Love on the Lawn Festival tickets.',
+    images: ['/images/og-image.png'],
   },
 
   // Apple/iMessage specific
@@ -64,7 +65,8 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <head>
-        <link rel="apple-touch-icon" href="/images/mpf-logo.png" />
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
         <meta name="theme-color" content="#6366f1" />
       </head>
       <body className="min-h-screen bg-mystation-darker">
@@ -78,6 +80,7 @@ export default function RootLayout({ children }) {
           <SubscribeModal />
           <Cart />
           <InstallPWA />
+          <PageTracker />
         </ClientProviders>
         <Script id="register-sw" strategy="afterInteractive">
           {`

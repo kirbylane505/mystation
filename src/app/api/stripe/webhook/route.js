@@ -13,6 +13,7 @@ import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import { printful } from '@/lib/printful';
 import { printify } from '@/lib/printify';
+import { sendSaleAlert, sendOrderConfirmation } from '@/lib/email';
 
 // Stripe webhook secret for signature verification
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -223,6 +224,57 @@ async function handleCheckoutCompleted(session, stripe) {
       } catch (e) {
         console.error('Failed to create Printify order:', e);
       }
+    }
+
+    // Send email notifications BEFORE returning (don't block on failures)
+    const customerEmail = fullSession.customer_details?.email || session.customer_email;
+    const customerName = shipping.name || fullSession.customer_details?.name || 'Customer';
+    const totalAmount = fullSession.amount_total || 0;
+    const itemsForEmail = merchItems.map(item => ({
+      name: item.description || item.price?.product?.name || 'Merch Item',
+      quantity: item.quantity,
+      amount: item.amount_total || item.price?.unit_amount * item.quantity || 0,
+    }));
+
+    // Admin sale alert
+    sendSaleAlert({
+      customerName,
+      customerEmail,
+      items: itemsForEmail,
+      total: totalAmount,
+      shippingAddress: shipping.address,
+      sessionId: session.id,
+      printfulOrderId: printfulResult?.printfulOrderId,
+      printifyOrderId: printifyResult?.printifyOrderId,
+    }).catch(err => console.error('Sale alert email failed:', err));
+
+    // Customer order confirmation
+    if (customerEmail) {
+      sendOrderConfirmation({
+        customerName,
+        customerEmail,
+        items: itemsForEmail,
+        total: totalAmount,
+        sessionId: session.id,
+      }).catch(err => console.error('Order confirmation email failed:', err));
+    }
+
+    // Track purchase analytics
+    try {
+      const { getSupabaseAdmin } = await import('@/lib/supabaseAdmin');
+      const supabase = getSupabaseAdmin();
+      if (supabase) {
+        await supabase.from('analytics_events').insert({
+          event_type: 'purchase',
+          page_path: '/checkout',
+          amount_cents: totalAmount,
+          session_id: session.id?.slice(-16) || 'unknown',
+          ip_hash: 'webhook',
+          device_type: 'unknown',
+        });
+      }
+    } catch (e) {
+      console.error('Purchase analytics error:', e);
     }
 
     // Return combined results

@@ -184,6 +184,18 @@ export default function AudioPlayer() {
       incrementPlayCount(currentTrack.id);
       lastTrackIdRef.current = currentTrack.id;
 
+      // Fire analytics event (fire-and-forget)
+      fetch('/api/analytics/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event_type: 'play',
+          track_id: currentTrack.id,
+          track_title: currentTrack.title,
+          page_path: window.location.pathname,
+        }),
+      }).catch(() => {});
+
       try {
         useEngagementStore.getState().recordPlay(currentTrack.id, currentTrack.albumId);
       } catch (e) {

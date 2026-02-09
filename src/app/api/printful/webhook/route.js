@@ -1,3 +1,5 @@
+import { sendShippingNotification, sendOrderFailedAlert } from '@/lib/email';
+
 /**
  * POST /api/printful/webhook
  * Handle Printful webhook events
@@ -74,12 +76,15 @@ async function handlePackageShipped(data) {
     service: shipment.service
   });
 
-  // TODO: Send shipping notification to customer
-  // await sendShippingEmail(order.recipient.email, {
-  //   trackingNumber: shipment.tracking_number,
-  //   trackingUrl: shipment.tracking_url,
-  //   carrier: shipment.carrier
-  // });
+  // Send shipping notification to customer
+  sendShippingNotification({
+    customerName: data?.order?.recipient?.name || '',
+    customerEmail: data?.order?.recipient?.email || '',
+    trackingNumber: data?.shipment?.tracking_number || '',
+    trackingUrl: data?.shipment?.tracking_url || '',
+    carrier: data?.shipment?.carrier || data?.shipment?.service || '',
+    items: [],
+  }).catch(err => console.error('Shipping email failed:', err));
 }
 
 async function handleOrderCreated(data) {
@@ -114,8 +119,13 @@ async function handleOrderFailed(data) {
     reason
   });
 
-  // TODO: Alert admin, potentially refund customer
-  // await sendAdminAlert('Order Failed', { orderId: order.id, reason });
+  // Alert admin about failed order
+  sendOrderFailedAlert({
+    orderId: data?.order?.id || 'unknown',
+    provider: 'Printful',
+    error: data?.reason || 'Order fulfillment failed',
+    customerEmail: data?.order?.recipient?.email || '',
+  }).catch(err => console.error('Failed alert email failed:', err));
 }
 
 async function handleOrderCanceled(data) {

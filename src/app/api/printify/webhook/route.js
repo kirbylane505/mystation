@@ -1,5 +1,7 @@
 export const dynamic = 'force-dynamic';
 
+import { sendShippingNotification, sendOrderFailedAlert } from '@/lib/email';
+
 /**
  * POST /api/printify/webhook
  * Handle Printify webhook events
@@ -74,7 +76,16 @@ export async function POST(request) {
         }
 
         // TODO: Store tracking info in database
-        // TODO: Send shipping notification with tracking link to customer
+
+        // Send shipping notification with tracking link to customer
+        sendShippingNotification({
+          customerName: resource?.address_to?.first_name + ' ' + (resource?.address_to?.last_name || ''),
+          customerEmail: resource?.address_to?.email || '',
+          trackingNumber: resource?.shipments?.[0]?.tracking_number || shipment?.tracking?.number || '',
+          trackingUrl: resource?.shipments?.[0]?.tracking_url || shipment?.tracking?.url || '',
+          carrier: resource?.shipments?.[0]?.carrier || shipment?.carrier || '',
+          items: [],
+        }).catch(err => console.error('Shipping email failed:', err));
 
         break;
       }
@@ -112,8 +123,13 @@ export async function POST(request) {
         const { id, title } = resource;
         console.error(`[Printify Webhook] Product publish FAILED: ${title} (${id})`);
 
-        // TODO: Alert admin about failed publish
-        // TODO: Log failure reason
+        // Alert admin about failed publish
+        sendOrderFailedAlert({
+          orderId: id,
+          provider: 'Printify',
+          error: `Product publish failed: ${title}`,
+          customerEmail: null,
+        }).catch(err => console.error('Publish failure alert email failed:', err));
 
         break;
       }
@@ -126,6 +142,14 @@ export async function POST(request) {
     return Response.json({ received: true, type });
   } catch (error) {
     console.error('[Printify Webhook] Processing error:', error);
+
+    // Alert admin about webhook processing failure
+    sendOrderFailedAlert({
+      orderId: 'webhook-error',
+      provider: 'Printify',
+      error: `Webhook processing error: ${error.message}`,
+      customerEmail: null,
+    }).catch(err => console.error('Webhook error alert email failed:', err));
 
     // Still return 200 to prevent Printify from retrying on parse errors
     return Response.json(
