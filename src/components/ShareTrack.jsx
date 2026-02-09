@@ -6,11 +6,13 @@
 'use client';
 
 import { useState } from 'react';
-import { Share2, Mail, MessageCircle, Link2, Check, X } from 'lucide-react';
+import { Share2, Mail, MessageCircle, Link2, Check, X, Music, Loader2 } from 'lucide-react';
+import { shareMP3 } from '@/lib/shareAudio';
 
 export default function ShareTrack({ track }) {
   const [showModal, setShowModal] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [mp3Loading, setMp3Loading] = useState(false);
 
   // Always use production URL for sharing - never localhost
   const siteUrl = 'https://mystationlive.com';
@@ -23,6 +25,18 @@ export default function ShareTrack({ track }) {
   // Open share modal - always show our custom modal with SMS/Email/Copy options
   const handleShare = () => {
     setShowModal(true);
+  };
+
+  // Send MP3 via native share sheet
+  const handleSendMP3 = async () => {
+    setMp3Loading(true);
+    try {
+      await shareMP3(track);
+    } catch (err) {
+      // User cancelled share or error - no action needed
+    } finally {
+      setMp3Loading(false);
+    }
   };
 
   // Copy link to clipboard
@@ -89,6 +103,27 @@ export default function ShareTrack({ track }) {
 
             {/* Share Options */}
             <div className="p-6 space-y-3">
+              {/* Send MP3 - Featured Option */}
+              <button
+                onClick={handleSendMP3}
+                disabled={mp3Loading}
+                className="w-full flex items-center gap-4 p-4 bg-orange-500/10 hover:bg-orange-500/20 rounded-xl border border-orange-500/30 transition disabled:opacity-60"
+              >
+                <div className="w-12 h-12 bg-orange-500/20 rounded-full flex items-center justify-center">
+                  {mp3Loading ? (
+                    <Loader2 size={24} className="text-orange-400 animate-spin" />
+                  ) : (
+                    <Music size={24} className="text-orange-400" />
+                  )}
+                </div>
+                <div className="text-left">
+                  <p className="font-bold text-white">
+                    {mp3Loading ? 'Preparing audio...' : 'Send MP3'}
+                  </p>
+                  <p className="text-sm text-white/50">Share the actual audio file</p>
+                </div>
+              </button>
+
               {/* SMS */}
               <button
                 onClick={sendSMS}
@@ -141,7 +176,7 @@ export default function ShareTrack({ track }) {
             {/* Footer */}
             <div className="p-4 border-t border-white/10 text-center">
               <p className="text-white/30 text-xs">
-                Sharing helps support the Mike Page Foundation 💙
+                Sharing helps support the Mike Page Foundation
               </p>
             </div>
           </div>

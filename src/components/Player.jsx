@@ -10,9 +10,10 @@ import { usePlayerStore, useUserStore } from '@/store/playerStore';
 import {
   Play, Pause, SkipBack, SkipForward,
   Volume2, VolumeX, Shuffle, Repeat,
-  Heart, Share2, Music, Sparkles, ChevronUp, X, Crown, AlarmClock
+  Heart, Share2, Music, Sparkles, ChevronUp, X, Crown, AlarmClock, Loader2
 } from 'lucide-react';
 import AlarmClockModal from './AlarmClock';
+import { shareMP3 } from '@/lib/shareAudio';
 import { albums } from '@/data/tracks';
 import Image from 'next/image';
 
@@ -30,6 +31,7 @@ export default function Player() {
   const [expanded, setExpanded] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [showAlarmModal, setShowAlarmModal] = useState(false);
+  const [mp3Loading, setMp3Loading] = useState(false);
   const {
     currentTrack,
     isPlaying,
@@ -116,6 +118,18 @@ export default function Player() {
       window.open(shareUrls[platform], '_blank', 'width=600,height=400');
     }
     setShowShareMenu(false);
+  };
+
+  const handleSendMP3 = async () => {
+    setMp3Loading(true);
+    try {
+      await shareMP3(currentTrack);
+    } catch (err) {
+      // User cancelled or error
+    } finally {
+      setMp3Loading(false);
+      setShowShareMenu(false);
+    }
   };
 
   if (!currentTrack) {
@@ -249,8 +263,20 @@ export default function Player() {
             ))}
           </div>
 
-          {/* Share Button - Mobile */}
+          {/* Send MP3 Button - Mobile */}
           <div className="mt-8 flex justify-center">
+            <button
+              onClick={handleSendMP3}
+              disabled={mp3Loading}
+              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 rounded-full text-white font-semibold disabled:opacity-60"
+            >
+              {mp3Loading ? <Loader2 size={20} className="animate-spin" /> : <Music size={20} />}
+              {mp3Loading ? 'Preparing audio...' : 'Send MP3'}
+            </button>
+          </div>
+
+          {/* Share Link Button - Mobile */}
+          <div className="mt-3 flex justify-center">
             <button
               onClick={() => shareTrack('native')}
               className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full text-white font-semibold"
@@ -476,6 +502,9 @@ export default function Player() {
                 <div className="p-2 border-b border-white/10">
                   <p className="text-white/60 text-xs px-2">Share this track</p>
                 </div>
+                <button onClick={handleSendMP3} disabled={mp3Loading} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-orange-500/20 text-white text-sm border-b border-white/10 disabled:opacity-60">
+                  {mp3Loading ? <Loader2 size={16} className="animate-spin text-orange-400" /> : <span>🎵</span>} {mp3Loading ? 'Preparing...' : 'Send MP3'}
+                </button>
                 <button onClick={() => shareTrack('native')} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/10 text-white text-sm">
                   <span>📱</span> Share...
                 </button>

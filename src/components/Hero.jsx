@@ -8,7 +8,6 @@
 import { Play } from 'lucide-react';
 import { getOfficialTracks } from '@/data/tracks';
 import { usePlayerStore } from '@/store/playerStore';
-import Image from 'next/image';
 
 export default function Hero() {
   const { setQueue } = usePlayerStore();
@@ -22,14 +21,14 @@ export default function Hero() {
     <div className="relative min-h-[85vh] flex items-center justify-center" style={{ background: '#0a1628' }}>
       <div className="text-center px-6">
         {/* Logo */}
-        <div className="mb-10">
-          <Image
+        <div className="mb-8 flex justify-center">
+          <img
             src="/images/mpf-logo.png"
-            alt="MyStation"
-            width={180}
-            height={180}
-            className="mx-auto"
-            priority
+            alt="Mike Page Foundation"
+            width={320}
+            height={320}
+            className="drop-shadow-2xl"
+            style={{ imageRendering: 'auto' }}
           />
         </div>
 

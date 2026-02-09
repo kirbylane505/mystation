@@ -8,7 +8,8 @@
 
 import { useState } from 'react';
 import { usePlayerStore, useUserStore } from '@/store/playerStore';
-import { X, Music, Sparkles, Heart, Check, CreditCard, Zap, Crown } from 'lucide-react';
+import { X, Music, Sparkles, Heart, Check, CreditCard, Zap, Crown, ShoppingBag } from 'lucide-react';
+import Link from 'next/link';
 
 export default function SubscribeModal() {
   const [loading, setLoading] = useState(false);
@@ -171,6 +172,18 @@ export default function SubscribeModal() {
                 </div>
               </div>
             )}
+
+            {/* Merch CTA */}
+            <div className="px-8 pb-4">
+              <Link
+                href="/merch"
+                onClick={handleSkip}
+                className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-orange-500/20 to-amber-500/20 border border-orange-500/30 text-orange-300 font-semibold rounded-xl hover:bg-orange-500/30 transition text-sm"
+              >
+                <ShoppingBag size={16} />
+                Shop Official Merch
+              </Link>
+            </div>
 
             {/* Skip option */}
             <div className="px-8 pb-8 flex flex-col items-center">

@@ -3,12 +3,14 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Play, Pause, Music, Share2, Heart, Disc3 } from 'lucide-react';
+import { Play, Pause, Music, Share2, Heart, Disc3, Loader2 } from 'lucide-react';
 import { usePlayerStore } from '@/store/playerStore';
+import { shareMP3 } from '@/lib/shareAudio';
 
 export default function SongClient({ track, allTracks, albumArt }) {
   const { currentTrack, isPlaying, setTrack, setQueue, togglePlay } = usePlayerStore();
   const [shared, setShared] = useState(false);
+  const [mp3Loading, setMp3Loading] = useState(false);
   const isThisTrack = currentTrack?.id === track.id;
   const isThisPlaying = isThisTrack && isPlaying;
 
@@ -36,6 +38,17 @@ export default function SongClient({ track, allTracks, albumArt }) {
       await navigator.clipboard.writeText(url);
       setShared(true);
       setTimeout(() => setShared(false), 2000);
+    }
+  };
+
+  const handleSendMP3 = async () => {
+    setMp3Loading(true);
+    try {
+      await shareMP3(track);
+    } catch (err) {
+      // User cancelled or error
+    } finally {
+      setMp3Loading(false);
     }
   };
 
@@ -96,13 +109,21 @@ export default function SongClient({ track, allTracks, albumArt }) {
         </button>
 
         {/* Actions */}
-        <div className="flex items-center gap-4 mb-12">
+        <div className="flex items-center gap-3 mb-12 flex-wrap justify-center">
+          <button
+            onClick={handleSendMP3}
+            disabled={mp3Loading}
+            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 rounded-full text-white text-sm font-semibold transition-all hover:opacity-90 disabled:opacity-60"
+          >
+            {mp3Loading ? <Loader2 size={16} className="animate-spin" /> : <Music size={16} />}
+            {mp3Loading ? 'Preparing...' : 'Send MP3'}
+          </button>
           <button
             onClick={handleShare}
             className="flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 rounded-full text-white text-sm font-medium transition-all"
           >
             <Share2 size={16} />
-            {shared ? 'Link Copied!' : 'Share Song'}
+            {shared ? 'Link Copied!' : 'Share Link'}
           </button>
           <Link
             href="/music"
