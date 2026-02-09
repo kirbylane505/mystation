@@ -113,11 +113,11 @@ const KIDS_ITEMS = [
   },
 ];
 
-function ProductCard({ item, idx, shopVisible, onQuickView }) {
+function ProductCard({ item, idx, onQuickView }) {
   return (
     <div
-      className={`group glass rounded-2xl overflow-hidden hover:border-blue-500/30 transition-all duration-500 cursor-pointer merch-card ${shopVisible ? 'visible' : ''}`}
-      style={{ animationDelay: shopVisible ? `${idx * 0.06}s` : '0s' }}
+      className="group glass rounded-2xl overflow-hidden hover:border-blue-500/30 transition-all duration-500 cursor-pointer merch-card"
+      style={{ animationDelay: `${idx * 0.06}s` }}
       onClick={() => onQuickView(item)}
     >
       <div className="aspect-square relative overflow-hidden">
@@ -151,10 +151,10 @@ function ProductCard({ item, idx, shopVisible, onQuickView }) {
   );
 }
 
-function KidsCard({ item, idx, shopVisible }) {
+function KidsCard({ item, idx }) {
   return (
-    <div className={`group glass rounded-2xl overflow-hidden hover:border-pink-500/30 transition-all duration-500 merch-card ${shopVisible ? 'visible' : ''}`}
-      style={{ animationDelay: shopVisible ? `${idx * 0.08}s` : '0s' }}>
+    <div className="group glass rounded-2xl overflow-hidden hover:border-pink-500/30 transition-all duration-500 merch-card"
+      style={{ animationDelay: `${idx * 0.08}s` }}>
       <a href={item.link} target="_blank" rel="noopener noreferrer" className="block">
         <div className="aspect-square relative overflow-hidden bg-white">
           <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
@@ -540,8 +540,7 @@ export default function MerchPage() {
         @keyframes merch-badge-pop { 0% { transform: scale(0); } 60% { transform: scale(1.2); } 100% { transform: scale(1); } }
         @keyframes lotl-border-flow { 0% { background-position: 0% center; } 100% { background-position: 300% center; } }
         .merch-float { animation: merch-float 6s ease-in-out infinite; }
-        .merch-card { opacity: 0; transform: translateY(40px); }
-        .merch-card.visible { animation: merch-fade-up 0.6s ease-out forwards; }
+        .merch-card { opacity: 0; transform: translateY(20px); animation: merch-fade-up 0.6s ease-out forwards; }
         .merch-card:hover { transform: translateY(-8px) scale(1.02) !important; }
         .merch-card:hover .merch-card-glow { opacity: 1; }
         .merch-shimmer { background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent); background-size: 200% 100%; animation: merch-shimmer 3s ease-in-out infinite; }
@@ -600,7 +599,7 @@ export default function MerchPage() {
               { icon: Heart, label: 'Supports Youth Programs' },
               { icon: Package, label: 'Print on Demand' },
             ].map((item, i) => (
-              <div key={i} className="flex items-center gap-3 text-white/50 hover:text-white transition-all duration-300 hover:scale-110 cursor-default" style={{ animation: heroVisible ? `merch-fade-up 0.5s ease-out ${0.6 + i * 0.1}s forwards` : 'none', opacity: heroVisible ? 0 : 1 }}>
+              <div key={i} className="flex items-center gap-3 text-white/50 hover:text-white transition-all duration-300 hover:scale-110 cursor-default" style={{ animation: `merch-fade-up 0.5s ease-out ${0.6 + i * 0.1}s forwards`, opacity: 0 }}>
                 <item.icon size={20} className="text-blue-400" />
                 <span className="text-sm">{item.label}</span>
               </div>
@@ -803,7 +802,7 @@ export default function MerchPage() {
             /* Kids-only view */
             <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {KIDS_ITEMS.map((item, idx) => (
-                <KidsCard key={item.id} item={item} idx={idx} shopVisible={shopVisible} />
+                <KidsCard key={item.id} item={item} idx={idx} />
               ))}
             </div>
           ) : activeCategory === 'all' ? (
@@ -822,7 +821,7 @@ export default function MerchPage() {
                     </div>
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                       {items.map((item, idx) => (
-                        <ProductCard key={item.id} item={item} idx={idx} shopVisible={shopVisible} onQuickView={handleQuickView} />
+                        <ProductCard key={item.id} item={item} idx={idx} onQuickView={handleQuickView} />
                       ))}
                     </div>
                   </div>
@@ -838,7 +837,7 @@ export default function MerchPage() {
                 </div>
                 <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                   {KIDS_ITEMS.map((item, idx) => (
-                    <KidsCard key={item.id} item={item} idx={idx} shopVisible={shopVisible} />
+                    <KidsCard key={item.id} item={item} idx={idx} />
                   ))}
                 </div>
               </div>
@@ -847,7 +846,7 @@ export default function MerchPage() {
             /* Filtered category view */
             <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredItems.map((item, idx) => (
-                <ProductCard key={item.id} item={item} idx={idx} shopVisible={shopVisible} onQuickView={handleQuickView} />
+                <ProductCard key={item.id} item={item} idx={idx} onQuickView={handleQuickView} />
               ))}
             </div>
           )}
