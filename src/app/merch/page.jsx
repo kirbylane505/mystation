@@ -475,10 +475,10 @@ export default function MerchPage() {
   // Organize into sections
   const getSection = (name) => {
     const n = (name || '').toLowerCase();
-    if (n.includes('hoodie') || n.includes('zip')) return 'hoodies';
+    if (n.includes('hoodie') || n.includes('zip') || n.includes('jacket')) return 'hoodies';
     if (n.includes('tee') || n.includes('t-shirt')) return 'tees';
     if (n.includes('tank') || n.includes('crop')) return 'tops';
-    if (n.includes('legging') || n.includes('jogger') || n.includes('short') || n.includes('bra')) return 'activewear';
+    if (n.includes('legging') || n.includes('jogger') || n.includes('short') || n.includes('bra') || n.includes('pant')) return 'activewear';
     if (n.includes('hat') || n.includes('bucket') || n.includes('cap') || n.includes('headband')) return 'headwear';
     if (n.includes('bag') || n.includes('backpack') || n.includes('tote') || n.includes('fanny') || n.includes('drawstring')) return 'bags';
     if (n.includes('sock') || n.includes('bottle') || n.includes('towel') || n.includes('mat')) return 'essentials';
