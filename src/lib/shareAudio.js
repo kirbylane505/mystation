@@ -12,7 +12,8 @@ export async function shareMP3(track) {
     await navigator.share({
       files: [file],
       title: `${track.title} - Mike Page`,
-      text: `🎵 "${track.title}" - Mike Page\n\n🎧 Stream more: ${songUrl}`,
+      text: `🎵 "${track.title}" - Mike Page`,
+      url: songUrl,
     });
     return 'shared';
   } else {
