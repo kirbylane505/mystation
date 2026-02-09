@@ -7,7 +7,8 @@
 'use client';
 
 import { artistInfo } from '@/data/tracks';
-import { Heart, Music, Award, Users, MapPin, Calendar, ExternalLink, Check } from 'lucide-react';
+import Image from 'next/image';
+import { Heart, Music, Award, Users, MapPin, Calendar, ExternalLink, Check, HeartHandshake, Utensils } from 'lucide-react';
 
 export default function AboutPage() {
   return (
@@ -127,6 +128,94 @@ export default function AboutPage() {
                 for community members in need.
               </p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Feed My Friends */}
+      <section className="max-w-screen-xl mx-auto px-6 py-16">
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-500/10 border border-green-500/20 rounded-full mb-6">
+            <HeartHandshake size={16} className="text-green-400" />
+            <span className="text-green-400 text-sm font-bold uppercase tracking-wider">Community Outreach</span>
+          </div>
+          <h2 className="text-4xl md:text-5xl font-black text-white mb-4">
+            Feed My <span className="text-green-400">Friends</span>
+          </h2>
+          <p className="text-white/60 text-lg max-w-2xl mx-auto">
+            We show up for our community. Free food, free clothes, free blankets, free tents — because nobody should go without the basics.
+          </p>
+        </div>
+
+        {/* Photo Grid */}
+        <div className="grid md:grid-cols-3 gap-6 mb-12">
+          <div className="group relative aspect-[4/3] rounded-2xl overflow-hidden border border-white/10">
+            <Image
+              src="/images/foundation/feed-signs.jpg"
+              alt="Volunteers holding signs — Free Tents, Free Clothes, Free Blankets"
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-500"
+              sizes="(max-width: 768px) 100vw, 33vw"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+            <div className="absolute bottom-4 left-4 right-4">
+              <p className="text-white font-bold text-sm">Free Clothes, Tents & Blankets</p>
+              <p className="text-white/60 text-xs">Giving away essentials to those in need</p>
+            </div>
+          </div>
+
+          <div className="group relative aspect-[4/3] rounded-2xl overflow-hidden border border-white/10">
+            <Image
+              src="/images/foundation/feed-team.jpg"
+              alt="Feed My Friends volunteer team"
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-500"
+              sizes="(max-width: 768px) 100vw, 33vw"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+            <div className="absolute bottom-4 left-4 right-4">
+              <p className="text-white font-bold text-sm">The Team</p>
+              <p className="text-white/60 text-xs">Volunteers making it happen every time</p>
+            </div>
+          </div>
+
+          <div className="group relative aspect-[4/3] rounded-2xl overflow-hidden border border-white/10">
+            <Image
+              src="/images/foundation/feed-kitchen.jpg"
+              alt="Volunteers preparing meals in the kitchen"
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-500"
+              sizes="(max-width: 768px) 100vw, 33vw"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+            <div className="absolute bottom-4 left-4 right-4">
+              <p className="text-white font-bold text-sm">Feeding the Community</p>
+              <p className="text-white/60 text-xs">Hot meals prepared with love</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Impact Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="glass rounded-2xl p-5 text-center border border-white/10">
+            <Utensils size={24} className="text-green-400 mx-auto mb-2" />
+            <p className="text-2xl font-black text-white">Hot Meals</p>
+            <p className="text-white/50 text-sm">Served every event</p>
+          </div>
+          <div className="glass rounded-2xl p-5 text-center border border-white/10">
+            <Heart size={24} className="text-green-400 mx-auto mb-2" />
+            <p className="text-2xl font-black text-white">Free Clothes</p>
+            <p className="text-white/50 text-sm">Coats, blankets & more</p>
+          </div>
+          <div className="glass rounded-2xl p-5 text-center border border-white/10">
+            <Users size={24} className="text-green-400 mx-auto mb-2" />
+            <p className="text-2xl font-black text-white">Volunteers</p>
+            <p className="text-white/50 text-sm">Community powered</p>
+          </div>
+          <div className="glass rounded-2xl p-5 text-center border border-white/10">
+            <HeartHandshake size={24} className="text-green-400 mx-auto mb-2" />
+            <p className="text-2xl font-black text-white">100%</p>
+            <p className="text-white/50 text-sm">Donated to those in need</p>
           </div>
         </div>
       </section>

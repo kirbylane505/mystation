@@ -42,7 +42,7 @@ export default function AdminAnalyticsPage() {
   const fetchData = async (p) => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/admin/analytics?period=${p}`);
+      const res = await fetch(`/api/admin/analytics?period=${p}&key=mpf2026`);
       if (res.ok) {
         const json = await res.json();
         setData(json);
