@@ -69,6 +69,26 @@ export function middleware(request) {
     }
   }
 
+  // Vault protection — server-side block, only accessible with secret key
+  const { pathname, searchParams } = request.nextUrl;
+  if (pathname.startsWith('/vault')) {
+    const vaultKey = searchParams.get('key');
+    const vaultCookie = request.cookies.get('vault_access')?.value;
+    const secret = process.env.VAULT_SECRET || 'mpf2026';
+
+    if (vaultKey === secret) {
+      // Valid key — set cookie so they don't need the key every time
+      const res = NextResponse.redirect(new URL('/vault', request.url));
+      res.cookies.set('vault_access', secret, { httpOnly: true, secure: true, maxAge: 60 * 60 * 24 }); // 24h
+      return res;
+    }
+
+    if (vaultCookie !== secret) {
+      // No access — redirect to home
+      return NextResponse.redirect(new URL('/', request.url));
+    }
+  }
+
   const response = NextResponse.next();
   const ip = request.ip || request.headers.get('x-forwarded-for') || 'unknown';
 

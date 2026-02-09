@@ -341,8 +341,12 @@ export default function MerchPage() {
     if ((lower.includes('mike page foundation') || lower.includes('mpf')) && !lower.includes('sweater')) return '/images/merch/catalog/mpf-collection-trio.png';
     // LOTL Tote
     if ((lower.includes('lotl') || lower.includes('love on the lawn')) && lower.includes('tote')) return '/images/mockups/lotl-tote.jpg';
-    // Caps/Hats
-    if (lower.includes('cap') || lower.includes('hat')) return '/images/merch/lotl-cap-final.jpg';
+    // Caps/Hats — brand-specific mockups
+    if (lower.includes('idmg') && (lower.includes('snapback') || lower.includes('cap'))) return '/images/mockups/idmg-snapback-black.jpg';
+    if (lower.includes('idmg') && lower.includes('bucket')) return '/images/mockups/idmg-snapback-black.jpg';
+    if ((lower.includes('lotl') || lower.includes('love on the lawn')) && (lower.includes('snapback') || lower.includes('cap'))) return '/images/mockups/lotl-snapback-black.jpg';
+    if ((lower.includes('lotl') || lower.includes('love on the lawn')) && lower.includes('bucket')) return '/images/mockups/lotl-snapback-black.jpg';
+    if (lower.includes('cap') || lower.includes('hat')) return '/images/mockups/lotl-snapback-black.jpg';
     // Generic hoodie fallback
     if (lower.includes('hoodie')) return '/images/merch/idmg-black-hoodie.jpg';
     // Leggings
@@ -366,7 +370,8 @@ export default function MerchPage() {
     if (lower.includes('hoodie')) return 'Premium heavyweight hoodie. Street certified.';
     if (lower.includes('t-shirt') || lower.includes('tee')) return 'Classic premium cotton tee.';
     if (lower.includes('tote')) return 'Premium canvas tote bag.';
-    if (lower.includes('cap') || lower.includes('hat')) return 'Structured snapback cap.';
+    if (lower.includes('snapback') || lower.includes('cap')) return 'Embroidered snapback trucker cap. Full logo front panel.';
+    if (lower.includes('bucket') && lower.includes('hat')) return 'All-over print bucket hat. Festival ready.';
     return 'Premium merchandise from IDMG.';
   }
 

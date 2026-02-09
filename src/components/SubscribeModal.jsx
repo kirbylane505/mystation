@@ -1,6 +1,6 @@
 /**
  * MYSTATION - Subscribe Modal
- * Shows after 3 free songs - $4.99/month subscription
+ * Shows after 4 free songs - $4.99/month subscription
  * Unlocks unlimited streaming
  */
 

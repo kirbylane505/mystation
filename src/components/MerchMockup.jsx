@@ -207,9 +207,9 @@ export default function MerchMockup({
       large: { width: 160, height: 160, top: '32%', left: '50%' },
     },
     cap: {
-      small: { width: 50, height: 50, top: '35%', left: '50%' },
-      medium: { width: 70, height: 70, top: '32%', left: '50%' },
-      large: { width: 90, height: 90, top: '28%', left: '50%' },
+      small: { width: 100, height: 100, top: '30%', left: '50%' },
+      medium: { width: 130, height: 130, top: '26%', left: '50%' },
+      large: { width: 155, height: 155, top: '22%', left: '50%' },
     },
     crewneck: {
       small: { width: 80, height: 80, top: '35%', left: '50%' },

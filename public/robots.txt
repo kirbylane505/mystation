@@ -8,6 +8,7 @@ Disallow: /password
 Disallow: /checkout
 Disallow: /station/dashboard
 Disallow: /admin/
+Disallow: /vault
 
 # Sitemap
 Sitemap: https://mystationlive.com/sitemap.xml
