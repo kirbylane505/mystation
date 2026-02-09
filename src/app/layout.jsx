@@ -75,7 +75,7 @@ export default function RootLayout({ children }) {
           </main>
           <Player />
           <AudioPlayer />
-          {/* <SubscribeModal /> */}
+          <SubscribeModal />
           <Cart />
           <InstallPWA />
         </ClientProviders>
