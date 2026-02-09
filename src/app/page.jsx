@@ -11,7 +11,7 @@ import TrackList from '@/components/TrackList';
 import EmailCapture from '@/components/EmailCapture';
 import { tracks, albums, getOfficialTracks, getNonVaultTracks } from '@/data/tracks';
 import { usePlayerStore } from '@/store/playerStore';
-import { Play, Pause, Heart, ExternalLink, Music, Award, Users, Sparkles, Headphones, ChevronLeft, Shuffle } from 'lucide-react';
+import { Play, Pause, Heart, ExternalLink, Music, Headphones, ChevronLeft, Shuffle } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -189,59 +189,6 @@ export default function HomePage() {
         <h2 className="text-3xl font-bold text-white mb-10">Featured Tracks</h2>
         <div className="glass rounded-2xl p-2">
           <TrackList trackIds={featuredTracks} />
-        </div>
-      </section>
-
-      {/* Foundation Section */}
-      <section className="relative py-24 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-mystation-black via-mystation-navy/50 to-mystation-black" />
-        <div className="bg-orb w-[500px] h-[500px] bg-blue-600 top-[-100px] left-[-200px]" />
-        <div className="bg-orb w-[400px] h-[400px] bg-blue-500 bottom-[-100px] right-[-100px]" style={{ animationDelay: '-10s' }} />
-
-        <div className="relative max-w-screen-xl mx-auto px-6">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <div>
-              <div className="foundation-badge mb-8 inline-flex items-center gap-2">
-                <Sparkles size={14} />
-                501(c)(3) Nonprofit
-              </div>
-              <h2 className="text-4xl font-bold text-white mb-6 leading-tight">
-                Mike Page<br/>
-                <span className="gradient-text">Foundation</span>
-              </h2>
-              <p className="text-xl text-white/50 mb-10 leading-relaxed">
-                Every stream, every donation goes directly to supporting youth music programs,
-                scholarships, and community events like Love on the Lawn.
-              </p>
-
-              <div className="space-y-4 mb-10">
-                {['Youth Music Programs', 'Scholarships', 'Love on the Lawn Festival', 'Community Events'].map((program, i) => (
-                  <div key={i} className="flex items-center gap-4">
-                    <div className="w-2 h-2 bg-blue-400 rounded-full" />
-                    <span className="text-white/70">{program}</span>
-                  </div>
-                ))}
-              </div>
-
-            </div>
-
-            <div className="grid grid-cols-2 gap-6">
-              {[
-                { icon: Music, title: 'Youth Music', desc: 'Instruments & lessons for kids' },
-                { icon: Award, title: 'Scholarships', desc: 'Supporting education' },
-                { icon: Users, title: 'Community', desc: 'Local events & support' },
-                { icon: Heart, title: 'Love on Lawn', desc: 'Annual festival in Elgin' },
-              ].map((item, i) => (
-                <div key={i} className="glass rounded-2xl p-6 text-center">
-                  <div className="w-14 h-14 bg-blue-500/10 rounded-xl flex items-center justify-center mx-auto mb-4 border border-blue-500/20">
-                    <item.icon size={28} className="text-blue-400" />
-                  </div>
-                  <h4 className="text-lg font-bold text-white mb-1">{item.title}</h4>
-                  <p className="text-white/40 text-sm">{item.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
       </section>
 
