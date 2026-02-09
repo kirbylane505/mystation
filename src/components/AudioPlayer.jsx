@@ -173,6 +173,9 @@ export default function AudioPlayer() {
 
     if (isNewTrack) {
       if (!checkCanPlay(currentTrack.id)) {
+        // Directly pause audio DOM element to prevent race condition
+        // (play/pause effect in same render cycle still sees isPlaying=true)
+        audio.pause();
         pause();
         openSubscribeModal(currentTrack);
         return;

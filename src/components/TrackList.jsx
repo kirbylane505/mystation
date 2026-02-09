@@ -18,8 +18,9 @@ export default function TrackList({ trackIds, showAlbum = true, showNumber = tru
   const { currentTrack, isPlaying, setQueue, togglePlay } = usePlayerStore();
   const [commentTrack, setCommentTrack] = useState(null);
 
+  // Preserve trackIds order (filter loses intended ordering)
   const displayTracks = trackIds
-    ? tracks.filter(t => trackIds.includes(t.id))
+    ? trackIds.map(id => tracks.find(t => t.id === id)).filter(Boolean)
     : tracks;
 
   const handleTrackClick = (track, index) => {

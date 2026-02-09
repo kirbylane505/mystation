@@ -181,9 +181,8 @@ export const usePlayerStore = create(
         shuffle: state.shuffle,
         repeat: state.repeat,
         lastPlayedTrack: state.lastPlayedTrack,
-        // Persist play tracking for subscription wall
-        playCount: state.playCount,
-        uniquePlaysThisSession: state.uniquePlaysThisSession,
+        // playCount & uniquePlaysThisSession NOT persisted — resets per session
+        // This prevents cumulative lockout where users can never play new tracks
       })
     }
   )
