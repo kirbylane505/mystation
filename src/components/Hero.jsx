@@ -21,14 +21,13 @@ export default function Hero() {
     <div className="relative min-h-[85vh] flex items-center justify-center" style={{ background: '#0a1628' }}>
       <div className="text-center px-6">
         {/* Logo */}
-        <div className="mb-8 flex justify-center">
+        <div className="mb-6 flex justify-center">
           <img
             src="/images/mpf-logo.png"
             alt="Mike Page Foundation"
-            width={320}
-            height={320}
+            width={400}
+            height={400}
             className="drop-shadow-2xl"
-            style={{ imageRendering: 'auto' }}
           />
         </div>
 
