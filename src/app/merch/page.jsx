@@ -343,9 +343,9 @@ export default function MerchPage() {
     if ((lower.includes('lotl') || lower.includes('love on the lawn')) && lower.includes('tote')) return '/images/mockups/lotl-tote.jpg';
     // Caps/Hats — brand-specific mockups
     if (lower.includes('idmg') && (lower.includes('snapback') || lower.includes('cap'))) return '/images/mockups/idmg-snapback-black.jpg';
-    if (lower.includes('idmg') && lower.includes('bucket')) return '/images/mockups/idmg-snapback-black.jpg';
+    if (lower.includes('idmg') && lower.includes('bucket')) return '/images/mockups/idmg-bucket-white.jpg';
     if ((lower.includes('lotl') || lower.includes('love on the lawn')) && (lower.includes('snapback') || lower.includes('cap'))) return '/images/mockups/lotl-snapback-black.jpg';
-    if ((lower.includes('lotl') || lower.includes('love on the lawn')) && lower.includes('bucket')) return '/images/mockups/lotl-snapback-black.jpg';
+    if ((lower.includes('lotl') || lower.includes('love on the lawn')) && lower.includes('bucket')) return '/images/mockups/lotl-bucket-white.jpg';
     if (lower.includes('cap') || lower.includes('hat')) return '/images/mockups/lotl-snapback-black.jpg';
     // Generic hoodie fallback
     if (lower.includes('hoodie')) return '/images/merch/idmg-black-hoodie.jpg';
