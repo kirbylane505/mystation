@@ -9,8 +9,9 @@ const RETRY_DELAY_MS = 1000;
 
 class PrintifyClient {
   constructor(apiKey, shopId) {
-    this.apiKey = (apiKey || '').trim();
-    this.shopId = (shopId || '').trim();
+    // Aggressively strip ALL whitespace/newlines/control chars from API key
+    this.apiKey = (apiKey || '').replace(/[\s\r\n]+/g, '');
+    this.shopId = (shopId || '').replace(/[\s\r\n]+/g, '');
   }
 
   /**
