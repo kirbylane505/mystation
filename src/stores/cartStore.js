@@ -39,10 +39,7 @@ export const useCartStore = create(
                 };
 
           // Resolve price & image per provider
-          const price =
-            provider === 'printify'
-              ? parseFloat(variant.price) / 100 || 0
-              : parseFloat(variant.retail_price) || 0;
+          const price = parseFloat(variant.retail_price) || (variant.price ? parseFloat(variant.price) / 100 : 0) || 0;
 
           const image =
             provider === 'printify'
