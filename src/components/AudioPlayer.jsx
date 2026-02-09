@@ -172,16 +172,19 @@ export default function AudioPlayer() {
     const isNewTrack = lastTrackIdRef.current !== currentTrack.id;
 
     if (isNewTrack) {
-      if (!checkCanPlay(currentTrack.id)) {
-        // Directly pause audio DOM element to prevent race condition
-        // (play/pause effect in same render cycle still sees isPlaying=true)
-        audio.pause();
-        pause();
-        openSubscribeModal(currentTrack);
-        return;
+      const { isPlaying } = usePlayerStore.getState();
+
+      // Only count as a play if user actually initiated playback
+      if (isPlaying) {
+        if (!checkCanPlay(currentTrack.id)) {
+          audio.pause();
+          pause();
+          openSubscribeModal(currentTrack);
+          return;
+        }
+        incrementPlayCount(currentTrack.id);
       }
 
-      incrementPlayCount(currentTrack.id);
       lastTrackIdRef.current = currentTrack.id;
 
       // Fire analytics event (fire-and-forget)
@@ -233,6 +236,17 @@ export default function AudioPlayer() {
     if (isLoadingRef.current) return;
 
     if (isPlaying) {
+      // Count play if this track hasn't been counted yet (e.g. auto-loaded track)
+      const { uniquePlaysThisSession } = usePlayerStore.getState();
+      if (!uniquePlaysThisSession.includes(currentTrack.id)) {
+        if (!checkCanPlay(currentTrack.id)) {
+          audio.pause();
+          pause();
+          openSubscribeModal(currentTrack);
+          return;
+        }
+        incrementPlayCount(currentTrack.id);
+      }
       audio.play().catch(() => {});
     } else {
       audio.pause();
