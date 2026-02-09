@@ -149,13 +149,12 @@ export default function AboutPage() {
 
         {/* Photo Grid */}
         <div className="grid md:grid-cols-3 gap-6 mb-12">
-          <div className="group relative aspect-[4/3] rounded-2xl overflow-hidden border border-white/10">
-            <Image
+          <div className="group relative rounded-2xl overflow-hidden border border-white/10">
+            <img
               src="/images/foundation/feed-signs.jpg"
               alt="Volunteers holding signs — Free Tents, Free Clothes, Free Blankets"
-              fill
-              className="object-cover group-hover:scale-105 transition-transform duration-500"
-              sizes="(max-width: 768px) 100vw, 33vw"
+              className="w-full aspect-[4/3] object-cover group-hover:scale-105 transition-transform duration-500"
+              loading="lazy"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
             <div className="absolute bottom-4 left-4 right-4">
@@ -164,13 +163,12 @@ export default function AboutPage() {
             </div>
           </div>
 
-          <div className="group relative aspect-[4/3] rounded-2xl overflow-hidden border border-white/10">
-            <Image
+          <div className="group relative rounded-2xl overflow-hidden border border-white/10">
+            <img
               src="/images/foundation/feed-team.jpg"
               alt="Feed My Friends volunteer team"
-              fill
-              className="object-cover group-hover:scale-105 transition-transform duration-500"
-              sizes="(max-width: 768px) 100vw, 33vw"
+              className="w-full aspect-[4/3] object-cover group-hover:scale-105 transition-transform duration-500"
+              loading="lazy"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
             <div className="absolute bottom-4 left-4 right-4">
@@ -179,13 +177,12 @@ export default function AboutPage() {
             </div>
           </div>
 
-          <div className="group relative aspect-[4/3] rounded-2xl overflow-hidden border border-white/10">
-            <Image
+          <div className="group relative rounded-2xl overflow-hidden border border-white/10">
+            <img
               src="/images/foundation/feed-kitchen.jpg"
               alt="Volunteers preparing meals in the kitchen"
-              fill
-              className="object-cover group-hover:scale-105 transition-transform duration-500"
-              sizes="(max-width: 768px) 100vw, 33vw"
+              className="w-full aspect-[4/3] object-cover group-hover:scale-105 transition-transform duration-500"
+              loading="lazy"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
             <div className="absolute bottom-4 left-4 right-4">
@@ -194,13 +191,12 @@ export default function AboutPage() {
             </div>
           </div>
 
-          <div className="group relative aspect-[4/3] rounded-2xl overflow-hidden border border-white/10">
-            <Image
+          <div className="group relative rounded-2xl overflow-hidden border border-white/10">
+            <img
               src="/images/foundation/feed-community-1.jpg"
               alt="Volunteers outdoors with green signs — Free Tents, Free Clothes, Free Blankets, Free Coats"
-              fill
-              className="object-cover group-hover:scale-105 transition-transform duration-500"
-              sizes="(max-width: 768px) 100vw, 33vw"
+              className="w-full aspect-[4/3] object-cover group-hover:scale-105 transition-transform duration-500"
+              loading="lazy"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
             <div className="absolute bottom-4 left-4 right-4">
@@ -209,13 +205,12 @@ export default function AboutPage() {
             </div>
           </div>
 
-          <div className="group relative aspect-[4/3] rounded-2xl overflow-hidden border border-white/10">
-            <Image
+          <div className="group relative rounded-2xl overflow-hidden border border-white/10">
+            <img
               src="/images/foundation/feed-community-2.jpg"
               alt="Feed My Friends full volunteer crew group photo"
-              fill
-              className="object-cover group-hover:scale-105 transition-transform duration-500"
-              sizes="(max-width: 768px) 100vw, 33vw"
+              className="w-full aspect-[4/3] object-cover group-hover:scale-105 transition-transform duration-500"
+              loading="lazy"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
             <div className="absolute bottom-4 left-4 right-4">
@@ -224,13 +219,12 @@ export default function AboutPage() {
             </div>
           </div>
 
-          <div className="group relative aspect-[4/3] rounded-2xl overflow-hidden border border-white/10">
-            <Image
+          <div className="group relative rounded-2xl overflow-hidden border border-white/10">
+            <img
               src="/images/foundation/feed-community-3.jpg"
               alt="Kitchen volunteers in hairnets preparing meals at serving table"
-              fill
-              className="object-cover group-hover:scale-105 transition-transform duration-500"
-              sizes="(max-width: 768px) 100vw, 33vw"
+              className="w-full aspect-[4/3] object-cover group-hover:scale-105 transition-transform duration-500"
+              loading="lazy"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
             <div className="absolute bottom-4 left-4 right-4">
