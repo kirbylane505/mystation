@@ -59,7 +59,7 @@ export default function SongClient({ track, allTracks, albumArt }) {
       <div className="bg-orb w-[600px] h-[600px] bg-blue-500 top-[-200px] left-[-150px]" />
       <div className="bg-orb w-[400px] h-[400px] bg-purple-500 bottom-[10%] right-[-100px]" style={{ animationDelay: '-4s' }} />
 
-      <div className="relative max-w-2xl mx-auto px-6 py-12 flex flex-col items-center text-center">
+      <div className="relative max-w-2xl mx-auto px-6 py-12 pb-36 flex flex-col items-center text-center">
         {/* Album Art */}
         <div className="relative mb-8">
           <div className={`w-72 h-72 md:w-80 md:h-80 rounded-3xl bg-gradient-to-br from-blue-600/40 to-purple-900/60 border border-white/10 shadow-2xl flex items-center justify-center overflow-hidden relative ${isThisPlaying ? 'shadow-blue-500/30' : ''}`}>
