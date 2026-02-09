@@ -16,10 +16,17 @@ export async function generateMetadata({ params }) {
     return { title: 'Song Not Found | MyStation' };
   }
 
+  const album = albums.find(a => a.id === track.albumId);
   const title = `${track.title}${track.featured ? ` ft. ${track.featured}` : ''} - Mike Page`;
   const description = `Stream "${track.title}" by Mike Page${track.featured ? ` ft. ${track.featured}` : ''}${track.producer ? ` | Prod. ${track.producer}` : ''} | ${track.album} (${track.year}) | Free on MyStation`;
   const url = `https://mystationlive.com/song/${track.id}`;
-  const ogImage = `https://mystationlive.com/api/og?id=${track.id}`;
+  const ogParams = new URLSearchParams({
+    title: track.title,
+    artist: `Mike Page${track.featured ? ` ft. ${track.featured}` : ''}`,
+    album: track.album || '',
+    year: track.year || '2026',
+  });
+  const ogImage = `https://mystationlive.com/api/og?${ogParams.toString()}`;
 
   return {
     title,

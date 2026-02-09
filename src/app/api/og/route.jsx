@@ -1,33 +1,28 @@
 import { ImageResponse } from 'next/og';
-import { tracks, albums } from '@/data/tracks';
 
 export const runtime = 'edge';
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
-  const songId = searchParams.get('id');
-
-  const track = songId ? tracks.find(t => String(t.id) === String(songId)) : null;
-  const album = track ? albums.find(a => a.id === track.albumId) : null;
-
-  const title = track ? track.title : 'MyStation';
-  const artist = track ? `Mike Page${track.featured ? ` ft. ${track.featured}` : ''}` : 'Mike Page Foundation';
-  const albumName = track ? track.album : 'Stream Free';
-  const year = track?.year || '2026';
+  const title = searchParams.get('title') || 'MyStation';
+  const artist = searchParams.get('artist') || 'Mike Page';
+  const album = searchParams.get('album') || 'Stream Free';
+  const year = searchParams.get('year') || '2026';
 
   return new ImageResponse(
     (
       <div
         style={{
-          width: '1200',
-          height: '630',
+          width: '1200px',
+          height: '630px',
           display: 'flex',
           background: 'linear-gradient(135deg, #0a1628 0%, #0f2042 50%, #0a1628 100%)',
           fontFamily: 'system-ui, sans-serif',
           position: 'relative',
+          overflow: 'hidden',
         }}
       >
-        {/* Blue accent orb */}
+        {/* Blue accent orbs */}
         <div
           style={{
             position: 'absolute',
@@ -37,6 +32,7 @@ export async function GET(request) {
             background: 'radial-gradient(circle, rgba(59,130,246,0.3) 0%, transparent 70%)',
             top: '-100px',
             left: '-100px',
+            display: 'flex',
           }}
         />
         <div
@@ -48,6 +44,7 @@ export async function GET(request) {
             background: 'radial-gradient(circle, rgba(99,102,241,0.2) 0%, transparent 70%)',
             bottom: '-50px',
             right: '-50px',
+            display: 'flex',
           }}
         />
 
@@ -66,7 +63,6 @@ export async function GET(request) {
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '12px',
               marginBottom: '40px',
             }}
           >
@@ -80,6 +76,7 @@ export async function GET(request) {
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontSize: '24px',
+                marginRight: '12px',
               }}
             >
               🎵
@@ -95,14 +92,12 @@ export async function GET(request) {
           {/* Song title */}
           <div
             style={{
-              fontSize: track ? '64px' : '80px',
+              fontSize: title.length > 20 ? '52px' : '64px',
               fontWeight: 900,
               color: '#ffffff',
               lineHeight: 1.1,
               marginBottom: '16px',
-              maxWidth: '900px',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
+              display: 'flex',
             }}
           >
             {title}
@@ -114,6 +109,7 @@ export async function GET(request) {
               fontSize: '32px',
               color: 'rgba(255,255,255,0.6)',
               marginBottom: '8px',
+              display: 'flex',
             }}
           >
             {artist}
@@ -125,9 +121,10 @@ export async function GET(request) {
               fontSize: '22px',
               color: 'rgba(255,255,255,0.3)',
               marginBottom: '40px',
+              display: 'flex',
             }}
           >
-            {albumName} • {year}
+            {album} • {year}
           </div>
 
           {/* CTA */}
@@ -135,15 +132,14 @@ export async function GET(request) {
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '12px',
               padding: '16px 32px',
               background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
               borderRadius: '50px',
-              width: 'fit-content',
+              width: '280px',
             }}
           >
-            <span style={{ fontSize: '20px' }}>▶</span>
-            <span style={{ color: '#ffffff', fontSize: '20px', fontWeight: 700, letterSpacing: '2px' }}>
+            <span style={{ fontSize: '20px', marginRight: '12px', display: 'flex' }}>▶</span>
+            <span style={{ color: '#ffffff', fontSize: '20px', fontWeight: 700, letterSpacing: '2px', display: 'flex' }}>
               STREAM FREE
             </span>
           </div>
@@ -158,6 +154,7 @@ export async function GET(request) {
             right: '0',
             height: '4px',
             background: 'linear-gradient(90deg, #3b82f6, #6366f1, #8b5cf6)',
+            display: 'flex',
           }}
         />
       </div>
