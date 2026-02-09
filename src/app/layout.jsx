@@ -12,6 +12,7 @@ import ClientProviders from '@/components/ClientProviders';
 import Cart from '@/components/Cart';
 import InstallPWA from '@/components/InstallPWA';
 import PageTracker from '@/components/PageTracker';
+import TimedPopups from '@/components/TimedPopups';
 import Script from 'next/script';
 
 export const metadata = {
@@ -80,6 +81,7 @@ export default function RootLayout({ children }) {
           <SubscribeModal />
           <Cart />
           <InstallPWA />
+          <TimedPopups />
           <PageTracker />
         </ClientProviders>
         <Script id="register-sw" strategy="afterInteractive">
