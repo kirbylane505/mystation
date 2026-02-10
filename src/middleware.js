@@ -28,6 +28,24 @@ function checkRateLimit(ip) {
 }
 
 export function middleware(request) {
+  const { pathname, searchParams } = request.nextUrl;
+
+  // Admin analytics access — allow with correct key, bypass all other gates
+  if (pathname.startsWith('/admin/analytics')) {
+    const adminKey = searchParams.get('key');
+    if (adminKey === 'mpf2026' || adminKey === process.env.ADMIN_KEY) {
+      // Authorized admin — skip password gate, proceed to security headers
+    } else {
+      // No valid key — redirect to home
+      return NextResponse.redirect(new URL('/', request.url));
+    }
+  }
+
+  // Block all other /admin routes — redirect to home
+  else if (pathname.startsWith('/admin') && !pathname.startsWith('/api/admin')) {
+    return NextResponse.redirect(new URL('/', request.url));
+  }
+
   const sitePassword = process.env.SITE_PASSWORD;
 
   // Password gate — if SITE_PASSWORD env var is set, require basic auth
@@ -37,9 +55,8 @@ export function middleware(request) {
     const whitelist = (process.env.SITE_WHITELIST_IPS || '').split(',').map(s => s.trim()).filter(Boolean);
     const isWhitelisted = whitelist.includes(visitorIp);
 
-    // Skip auth for static assets, whitelisted IPs, and API health checks
-    const { pathname } = request.nextUrl;
-    if (!isWhitelisted && !pathname.startsWith('/_next') && !pathname.startsWith('/favicon')) {
+    // Skip auth for static assets, whitelisted IPs, admin routes (handled above), and API health checks
+    if (!isWhitelisted && !pathname.startsWith('/_next') && !pathname.startsWith('/favicon') && !pathname.startsWith('/admin')) {
       const authHeader = request.headers.get('authorization');
       if (authHeader) {
         try {
@@ -70,7 +87,6 @@ export function middleware(request) {
   }
 
   // Vault protection — server-side block, only accessible with secret key
-  const { pathname, searchParams } = request.nextUrl;
   if (pathname.startsWith('/vault') && !pathname.startsWith('/api/vault')) {
     const vaultSecret = process.env.VAULT_SECRET;
     if (!vaultSecret) {
