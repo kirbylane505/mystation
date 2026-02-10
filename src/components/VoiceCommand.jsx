@@ -1,9 +1,32 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { Mic, MicOff } from 'lucide-react';
 import { usePlayerStore } from '@/store/playerStore';
 import { tracks } from '@/data/tracks';
+
+// Navigation routes — voice command triggers → page path
+const NAV_ROUTES = [
+  { patterns: ['merch', 'store', 'shop', 'merchandise', 'clothing', 'clothes', 'apparel'], path: '/merch', label: 'Merch Store' },
+  { patterns: ['lotl', 'love on the lawn', 'lawn', 'festival', 'tickets', 'lotl tickets', 'concert'], path: '/lotl', label: 'Love on the Lawn' },
+  { patterns: ['about', 'about us', 'about page', 'who are you', 'info'], path: '/about', label: 'About' },
+  { patterns: ['home', 'home page', 'main', 'main page', 'go home'], path: '/', label: 'Home' },
+  { patterns: ['music', 'songs', 'all songs', 'catalog', 'library', 'all music'], path: '/music', label: 'Music' },
+  { patterns: ['vault', 'the vault', 'open vault', 'vault songs'], path: '/vault', label: 'Vault' },
+  { patterns: ['account', 'my account', 'profile', 'my profile', 'settings'], path: '/account', label: 'Account' },
+  { patterns: ['news', 'updates', 'blog', 'whats new', "what's new"], path: '/news', label: 'News' },
+  { patterns: ['videos', 'video', 'watch', 'visuals'], path: '/videos', label: 'Videos' },
+  { patterns: ['live', 'live stream', 'stream', 'go live'], path: '/live', label: 'Live' },
+  { patterns: ['station', 'my station', 'create station', 'radio', 'create'], path: '/station', label: 'Station' },
+  { patterns: ['contact', 'contact us', 'reach out', 'get in touch', 'email'], path: '/contact', label: 'Contact' },
+  { patterns: ['subscribe', 'subscription', 'sign up', 'upgrade', 'premium'], path: '/subscribe', label: 'Subscribe' },
+  { patterns: ['cubist', 'the cubist', 'tyrell', 'artist'], path: '/artists/the-cubist', label: 'The Cubist' },
+  { patterns: ['fan zone', 'fan', 'fans', 'community'], path: '/fan-zone', label: 'Fan Zone' },
+  { patterns: ['events', 'calendar', 'shows', 'upcoming'], path: '/lotl', label: 'Events' },
+  { patterns: ['checkout', 'cart', 'pay', 'payment'], path: '/checkout', label: 'Checkout' },
+  { patterns: ['make a hit', 'beat maker', 'make music', 'create music'], path: '/make-a-hit', label: 'Make a Hit' },
+];
 
 // Normalize text for matching — handles speech-to-text quirks
 function normalize(str) {
@@ -62,6 +85,28 @@ function findBestTrack(query) {
   return bestScore >= 0.3 ? bestTrack : null;
 }
 
+// Match a navigation command — returns { path, label } or null
+function matchNavigation(cmd) {
+  // Strip common prefixes: "go to", "open", "pull up", "take me to", "show me", "navigate to"
+  const stripped = cmd
+    .replace(/^(go\s+to|open|pull\s+up|take\s+me\s+to|show\s*me|navigate\s+to|bring\s+up|load|visit|check\s+out|show)\s+/i, '')
+    .replace(/\s+page$/i, '')
+    .trim();
+
+  for (const route of NAV_ROUTES) {
+    for (const pattern of route.patterns) {
+      if (stripped === pattern || cmd === pattern) {
+        return route;
+      }
+      // Fuzzy: check if the stripped command contains the pattern
+      if (stripped.includes(pattern) || pattern.includes(stripped)) {
+        return route;
+      }
+    }
+  }
+  return null;
+}
+
 // Strip wake word "MyStation" / "my station" / "hey mystation" from start
 function stripWakeWord(text) {
   return text
@@ -79,6 +124,7 @@ function isIOSSafari() {
 }
 
 export default function VoiceCommand() {
+  const router = useRouter();
   const [supported, setSupported] = useState(false);
   const [unsupportedBrowser, setUnsupportedBrowser] = useState(false);
   const [listening, setListening] = useState(false);
@@ -227,6 +273,14 @@ export default function VoiceCommand() {
       return;
     }
 
+    // --- NAVIGATION COMMANDS ---
+    const navMatch = matchNavigation(cmd);
+    if (navMatch) {
+      showConfirmation(`Opening ${navMatch.label}...`);
+      router.push(navMatch.path);
+      return;
+    }
+
     // If no command matched, try as a song search
     const matched = findBestTrack(cmd);
     if (matched) {
@@ -236,7 +290,7 @@ export default function VoiceCommand() {
     }
 
     showConfirmation(`Didn't catch that`);
-  }, [play, pause, setTrack, nextTrack, prevTrack, setVolume, toggleMute, toggleShuffle, toggleRepeat, volume, showConfirmation]);
+  }, [play, pause, setTrack, nextTrack, prevTrack, setVolume, toggleMute, toggleShuffle, toggleRepeat, volume, showConfirmation, router]);
 
   const startListening = useCallback(async () => {
     // Unsupported browser (iOS Safari etc.) — show tooltip message
