@@ -1,6 +1,6 @@
 /**
  * MYSTATION - Timed Popups
- * 1. Donate/Subscribe popup every 2 minutes
+ * 1. Donate/Subscribe popup every 7 minutes
  * 2. Merch/Deals popup every 4 minutes
  * Music keeps playing — these are overlay-only
  */
@@ -191,7 +191,7 @@ export default function TimedPopups() {
       if (!isSubscribed) {
         setShowDonate(true);
       }
-    }, 2 * 60 * 1000); // 2 minutes
+    }, 7 * 60 * 1000); // 7 minutes
 
     const merchInterval = setInterval(() => {
       setShowMerch(true);
