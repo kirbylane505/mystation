@@ -86,29 +86,9 @@ export function middleware(request) {
     }
   }
 
-  // Vault protection — server-side block, only accessible with secret key
-  if (pathname.startsWith('/vault') && !pathname.startsWith('/api/vault')) {
-    const vaultSecret = process.env.VAULT_SECRET;
-    if (!vaultSecret) {
-      // No secret configured — vault locked
-      return NextResponse.redirect(new URL('/', request.url));
-    }
-
-    const vaultKey = searchParams.get('key');
-    const vaultCookie = request.cookies.get('vault_access')?.value;
-
-    if (vaultKey === vaultSecret) {
-      // Valid key — set cookie so they don't need the key every time
-      const res = NextResponse.redirect(new URL('/vault', request.url));
-      res.cookies.set('vault_access', vaultSecret, { httpOnly: true, secure: true, maxAge: 60 * 60 * 24, sameSite: 'strict' }); // 24h
-      return res;
-    }
-
-    if (vaultCookie !== vaultSecret) {
-      // No access — redirect to home
-      return NextResponse.redirect(new URL('/', request.url));
-    }
-  }
+  // Vault — let users through to see the PIN lock screen
+  // The vault page handles authentication client-side via /api/vault/auth
+  // No middleware blocking needed — the page itself is the gate
 
   const response = NextResponse.next();
   const ip = request.ip || request.headers.get('x-forwarded-for') || 'unknown';
