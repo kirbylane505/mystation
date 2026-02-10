@@ -221,9 +221,19 @@ export default function VoiceCommand() {
     showConfirmation(`Didn't catch that`);
   }, [play, pause, setTrack, nextTrack, prevTrack, setVolume, toggleMute, toggleShuffle, toggleRepeat, volume, showConfirmation]);
 
-  const startListening = useCallback(() => {
+  const startListening = useCallback(async () => {
     const recognition = recognitionRef.current;
     if (!recognition || listening) return;
+
+    // Request microphone permission first — triggers browser prompt
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // Got permission — stop the stream immediately (SpeechRecognition manages its own)
+      stream.getTracks().forEach(t => t.stop());
+    } catch (err) {
+      showConfirmation('Mic access denied — check browser permissions');
+      return;
+    }
 
     setTranscript('');
     setFeedback('');
@@ -250,8 +260,15 @@ export default function VoiceCommand() {
       }
     };
 
-    recognition.onerror = () => {
+    recognition.onerror = (e) => {
       setListening(false);
+      if (e.error === 'not-allowed') {
+        showConfirmation('Mic blocked — allow in browser settings');
+      } else if (e.error === 'no-speech') {
+        showConfirmation('No speech detected — try again');
+      } else if (e.error === 'network') {
+        showConfirmation('Network error — check connection');
+      }
     };
 
     recognition.onend = () => {
@@ -262,9 +279,10 @@ export default function VoiceCommand() {
       recognition.start();
       setListening(true);
     } catch {
+      showConfirmation('Could not start mic');
       setListening(false);
     }
-  }, [listening, processCommand]);
+  }, [listening, processCommand, showConfirmation]);
 
   const stopListening = useCallback(() => {
     const recognition = recognitionRef.current;
