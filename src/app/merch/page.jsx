@@ -205,7 +205,7 @@ export default function MerchPage() {
         // === PRINTFUL PRODUCTS ===
         if (printfulData.success) {
           // Hide mugs + 6 sportswear items replaced by Printify products
-          const HIDDEN_PRINTFUL = ['bomber jacket', 'athletic short', 'windbreaker', 'track pants', 'track jacket'];
+          const HIDDEN_PRINTFUL = ['bomber jacket', 'athletic short', 'windbreaker', 'track pants', 'track jacket', 'mesh short', 'wide-leg'];
           const filtered = printfulData.products.filter((p) => {
             const lower = p.name.toLowerCase();
             if (lower.includes('mug')) return false;
