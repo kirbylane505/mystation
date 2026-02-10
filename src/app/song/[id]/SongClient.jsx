@@ -6,6 +6,8 @@ import Image from 'next/image';
 import { Play, Pause, Music, Share2, Heart, Disc3, Loader2, SkipBack, SkipForward, Volume2, VolumeX, RotateCcw } from 'lucide-react';
 import { usePlayerStore } from '@/store/playerStore';
 import { shareMP3 } from '@/lib/shareAudio';
+import CommentSection from '@/components/CommentSection';
+import VoiceCommand from '@/components/VoiceCommand';
 
 export default function SongClient({ track, allTracks, albumArt }) {
   const {
@@ -248,7 +250,7 @@ export default function SongClient({ track, allTracks, albumArt }) {
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-3 mb-12 flex-wrap justify-center">
+        <div className="flex items-center gap-3 mb-6 flex-wrap justify-center">
           <button
             onClick={handleSendMP3}
             disabled={mp3Loading}
@@ -264,6 +266,8 @@ export default function SongClient({ track, allTracks, albumArt }) {
             <Share2 size={16} />
             {shared ? 'Link Copied!' : 'Share Link'}
           </button>
+          <CommentSection trackId={track.id} trackTitle={track.title} />
+          <VoiceCommand />
           <Link
             href="/music"
             className="flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 rounded-full text-white text-sm font-medium transition-all"

@@ -1,359 +1,273 @@
 /**
  * MYSTATION - Comment Section
- * Clean, modern comments on songs
+ * Dropdown comment panel for song pages
+ * Glass morphism dark theme, API-backed
  */
 
 'use client';
 
-import { useState, useEffect } from 'react';
-import { MessageCircle, ThumbsUp, Send, User, X, Heart } from 'lucide-react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { MessageCircle, Send } from 'lucide-react';
 
-// Demo comments
-const DEMO_COMMENTS = {
-  1: [
-    { id: 1, username: 'ATLFan847', content: 'This track is FIRE! Been playing on repeat all week 🔥', likes: 24, createdAt: '2026-01-28', avatar: '🎧' },
-    { id: 2, username: 'PageNation', content: 'Live Like A King hits different. Mike Page always delivering real music.', likes: 18, createdAt: '2026-01-29', avatar: '👑' },
-  ],
-  2: [
-    { id: 3, username: 'MusicLover404', content: 'Very Special is that perfect vibe. Production is clean!', likes: 12, createdAt: '2026-01-30', avatar: '🎵' },
-  ],
-  100: [
-    { id: 4, username: 'ChiTownVibes', content: 'Favorite Person is already a classic. Cubist production crazy on this one!', likes: 45, createdAt: '2026-02-01', avatar: '💜' },
-    { id: 5, username: 'LOTLCrew', content: 'Cant wait to hear this live at Love on the Lawn!', likes: 31, createdAt: '2026-02-02', avatar: '🌿' },
-    { id: 6, username: 'DreamzFan', content: 'Mike Page never misses. Support the Foundation! 🙏', likes: 22, createdAt: '2026-02-03', avatar: '⭐' },
-  ],
-};
+function relativeTime(dateStr) {
+  const now = Date.now();
+  const then = new Date(dateStr).getTime();
+  const diff = Math.max(0, now - then);
 
-export default function CommentSection({ trackId, trackTitle, onClose }) {
+  const seconds = Math.floor(diff / 1000);
+  if (seconds < 60) return 'just now';
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 30) return `${days}d ago`;
+  const months = Math.floor(days / 30);
+  if (months < 12) return `${months}mo ago`;
+  return `${Math.floor(months / 12)}y ago`;
+}
+
+export default function CommentSection({ trackId, trackTitle }) {
+  const [open, setOpen] = useState(false);
   const [comments, setComments] = useState([]);
-  const [newComment, setNewComment] = useState('');
-  const [username, setUsername] = useState('');
-  const [showNamePrompt, setShowNamePrompt] = useState(false);
-  const [likedComments, setLikedComments] = useState([]);
+  const [count, setCount] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [name, setName] = useState('');
+  const [message, setMessage] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const panelRef = useRef(null);
+  const listRef = useRef(null);
+  const hasFetched = useRef(false);
 
+  // Restore saved name from localStorage
   useEffect(() => {
-    const saved = localStorage.getItem(`mystation-comments-${trackId}`);
-    const savedLikes = localStorage.getItem('mystation-liked-comments');
-    const savedUsername = localStorage.getItem('mystation-username');
+    const savedName = localStorage.getItem('mystation-comment-name');
+    if (savedName) setName(savedName);
+  }, []);
 
-    if (saved) {
-      setComments(JSON.parse(saved));
-    } else {
-      setComments(DEMO_COMMENTS[trackId] || []);
+  const fetchComments = useCallback(async () => {
+    if (!trackId) return;
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/comments?trackId=${encodeURIComponent(trackId)}`);
+      if (res.ok) {
+        const data = await res.json();
+        const list = Array.isArray(data) ? data : data.comments || [];
+        setComments(list);
+        setCount(list.length);
+      }
+    } catch {
+      // silent fail — comments are non-critical
+    } finally {
+      setLoading(false);
     }
-
-    if (savedLikes) setLikedComments(JSON.parse(savedLikes));
-    if (savedUsername) setUsername(savedUsername);
   }, [trackId]);
 
-  const handleSubmit = () => {
-    if (!newComment.trim()) return;
+  // Fetch comment count on mount (lightweight)
+  useEffect(() => {
+    if (!trackId) return;
+    fetch(`/api/comments?trackId=${encodeURIComponent(trackId)}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data) {
+          const list = Array.isArray(data) ? data : data.comments || [];
+          setCount(list.length);
+        }
+      })
+      .catch(() => {});
+  }, [trackId]);
 
-    if (!username) {
-      setShowNamePrompt(true);
-      return;
+  // Full fetch when dropdown opens
+  useEffect(() => {
+    if (open && !hasFetched.current) {
+      hasFetched.current = true;
+      fetchComments();
     }
+  }, [open, fetchComments]);
 
-    const comment = {
-      id: Date.now(),
-      username,
-      content: newComment.trim(),
-      likes: 0,
-      createdAt: new Date().toISOString().split('T')[0],
-      avatar: '🎤',
+  // Reset fetch flag when trackId changes
+  useEffect(() => {
+    hasFetched.current = false;
+    setComments([]);
+    setCount(0);
+    setOpen(false);
+  }, [trackId]);
+
+  // Close on outside click
+  useEffect(() => {
+    if (!open) return;
+    function handleClick(e) {
+      if (panelRef.current && !panelRef.current.contains(e.target)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [open]);
+
+  // Scroll to bottom after posting
+  const scrollToBottom = () => {
+    if (listRef.current) {
+      listRef.current.scrollTop = listRef.current.scrollHeight;
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e?.preventDefault();
+    const trimmedName = name.trim();
+    const trimmedMsg = message.trim();
+    if (!trimmedName || !trimmedMsg || submitting) return;
+
+    // Save name for next time
+    localStorage.setItem('mystation-comment-name', trimmedName);
+
+    // Optimistic comment
+    const optimistic = {
+      id: `temp-${Date.now()}`,
+      name: trimmedName,
+      message: trimmedMsg,
+      trackId,
+      trackTitle,
+      createdAt: new Date().toISOString(),
     };
 
-    const updatedComments = [comment, ...comments];
-    setComments(updatedComments);
-    localStorage.setItem(`mystation-comments-${trackId}`, JSON.stringify(updatedComments));
-    setNewComment('');
-  };
+    setComments(prev => [...prev, optimistic]);
+    setCount(prev => prev + 1);
+    setMessage('');
+    setTimeout(scrollToBottom, 50);
 
-  const handleSetUsername = () => {
-    if (!username.trim()) return;
-    localStorage.setItem('mystation-username', username.trim());
-    setShowNamePrompt(false);
-    handleSubmit();
-  };
+    setSubmitting(true);
+    try {
+      const res = await fetch('/api/comments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          trackId,
+          trackTitle,
+          name: trimmedName,
+          message: trimmedMsg,
+        }),
+      });
 
-  const handleLike = (commentId) => {
-    if (likedComments.includes(commentId)) return;
-
-    const updatedComments = comments.map(c =>
-      c.id === commentId ? { ...c, likes: c.likes + 1 } : c
-    );
-    setComments(updatedComments);
-    localStorage.setItem(`mystation-comments-${trackId}`, JSON.stringify(updatedComments));
-
-    const updatedLikes = [...likedComments, commentId];
-    setLikedComments(updatedLikes);
-    localStorage.setItem('mystation-liked-comments', JSON.stringify(updatedLikes));
-  };
-
-  const formatDate = (dateStr) => {
-    const date = new Date(dateStr);
-    const now = new Date();
-    const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
-
-    if (diffDays === 0) return 'Today';
-    if (diffDays === 1) return 'Yesterday';
-    if (diffDays < 7) return `${diffDays}d ago`;
-    return date.toLocaleDateString();
+      if (res.ok) {
+        const saved = await res.json();
+        // Replace optimistic with real data
+        setComments(prev =>
+          prev.map(c => (c.id === optimistic.id ? { ...optimistic, ...saved } : c))
+        );
+      }
+    } catch {
+      // Keep optimistic comment visible regardless
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 9999,
-        display: 'flex',
-        alignItems: 'flex-end',
-        justifyContent: 'center',
-        backgroundColor: 'rgba(0,0,0,0.85)',
-        backdropFilter: 'blur(8px)'
-      }}
-      onClick={onClose}
-    >
+    <div className="relative" ref={panelRef}>
+      {/* Comment Button with Badge */}
+      <button
+        onClick={() => setOpen(prev => !prev)}
+        className="relative flex items-center gap-1.5 px-3 py-2 rounded-full bg-white/5 hover:bg-white/10 backdrop-blur transition-all duration-200 text-white/60 hover:text-white/90"
+        aria-label="Toggle comments"
+      >
+        <MessageCircle size={18} />
+        {count > 0 && (
+          <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-blue-500 text-[10px] font-bold text-white px-1 leading-none">
+            {count > 99 ? '99+' : count}
+          </span>
+        )}
+      </button>
+
+      {/* Dropdown Panel */}
       <div
-        style={{
-          width: '100%',
-          maxWidth: '600px',
-          maxHeight: '80vh',
-          backgroundColor: '#0f172a',
-          borderTopLeftRadius: '24px',
-          borderTopRightRadius: '24px',
-          border: '1px solid rgba(255,255,255,0.1)',
-          borderBottom: 'none',
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden'
-        }}
-        onClick={(e) => e.stopPropagation()}
+        className={`absolute top-full left-0 mt-2 w-[360px] max-w-[calc(100vw-2rem)] z-50 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-2xl overflow-hidden transition-all duration-300 origin-top ${
+          open
+            ? 'opacity-100 scale-y-100 translate-y-0'
+            : 'opacity-0 scale-y-0 translate-y-[-8px] pointer-events-none'
+        }`}
       >
         {/* Header */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '16px 20px',
-          borderBottom: '1px solid rgba(255,255,255,0.1)',
-          backgroundColor: '#1e293b'
-        }}>
-          <div>
-            <h2 style={{
-              fontSize: '18px',
-              fontWeight: 'bold',
-              color: 'white',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              margin: 0
-            }}>
-              <MessageCircle size={20} style={{ color: '#3b82f6' }} />
-              Comments
-            </h2>
-            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', margin: '4px 0 0 0' }}>
-              {trackTitle}
-            </p>
-          </div>
-          <button
-            onClick={onClose}
-            style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: '50%',
-              backgroundColor: 'rgba(255,255,255,0.1)',
-              border: 'none',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              color: 'white'
-            }}
-          >
-            <X size={18} />
-          </button>
+        <div className="px-4 py-3 border-b border-white/10">
+          <h3 className="text-sm font-semibold text-white/80 flex items-center gap-2">
+            <MessageCircle size={14} className="text-blue-400" />
+            Comments
+            {count > 0 && (
+              <span className="text-[11px] text-white/40 font-normal">({count})</span>
+            )}
+          </h3>
+          {trackTitle && (
+            <p className="text-[11px] text-white/30 mt-0.5 truncate">{trackTitle}</p>
+          )}
         </div>
 
-        {/* Comments List */}
-        <div style={{
-          flex: 1,
-          overflowY: 'auto',
-          padding: '16px 20px'
-        }}>
-          {comments.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '40px 0' }}>
-              <MessageCircle size={48} style={{ color: 'rgba(255,255,255,0.2)', marginBottom: '16px' }} />
-              <p style={{ color: 'rgba(255,255,255,0.4)', margin: 0 }}>No comments yet</p>
-              <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '14px', margin: '8px 0 0 0' }}>
-                Be the first to share your thoughts!
+        {/* Comment List */}
+        <div
+          ref={listRef}
+          className="max-h-[300px] overflow-y-auto overscroll-contain px-4 py-3 space-y-3 scrollbar-thin scrollbar-thumb-white/10"
+        >
+          {loading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="w-5 h-5 border-2 border-white/20 border-t-blue-400 rounded-full animate-spin" />
+            </div>
+          ) : comments.length === 0 ? (
+            <div className="text-center py-8">
+              <MessageCircle size={28} className="mx-auto mb-2 text-white/15" />
+              <p className="text-xs text-white/30">
+                Be the first to comment on this track
               </p>
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              {comments.map(comment => (
-                <div key={comment.id} style={{ display: 'flex', gap: '12px' }}>
-                  {/* Avatar */}
-                  <div style={{
-                    width: '40px',
-                    height: '40px',
-                    borderRadius: '50%',
-                    background: 'linear-gradient(135deg, rgba(59,130,246,0.3), rgba(147,51,234,0.3))',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '18px',
-                    flexShrink: 0
-                  }}>
-                    {comment.avatar}
-                  </div>
-
-                  {/* Content */}
-                  <div style={{ flex: 1 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                      <span style={{ fontWeight: '600', color: 'white', fontSize: '14px' }}>
-                        {comment.username}
-                      </span>
-                      <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '12px' }}>
-                        {formatDate(comment.createdAt)}
-                      </span>
-                    </div>
-                    <p style={{
-                      color: 'rgba(255,255,255,0.8)',
-                      fontSize: '14px',
-                      lineHeight: '1.5',
-                      margin: 0
-                    }}>
-                      {comment.content}
-                    </p>
-
-                    {/* Like Button */}
-                    <button
-                      onClick={() => handleLike(comment.id)}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '4px',
-                        marginTop: '8px',
-                        padding: '4px 8px',
-                        borderRadius: '12px',
-                        border: 'none',
-                        backgroundColor: likedComments.includes(comment.id) ? 'rgba(239,68,68,0.2)' : 'transparent',
-                        color: likedComments.includes(comment.id) ? '#ef4444' : 'rgba(255,255,255,0.4)',
-                        fontSize: '13px',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      <Heart size={14} fill={likedComments.includes(comment.id) ? '#ef4444' : 'none'} />
-                      {comment.likes}
-                    </button>
-                  </div>
+            comments.map((comment) => (
+              <div key={comment.id} className="group">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-xs font-bold text-white/80 shrink-0">
+                    {comment.name || comment.username}
+                  </span>
+                  <span className="text-[10px] text-white/25">
+                    {relativeTime(comment.createdAt)}
+                  </span>
                 </div>
-              ))}
-            </div>
+                <p className="text-xs text-white/60 leading-relaxed mt-0.5 break-words">
+                  {comment.message || comment.content}
+                </p>
+              </div>
+            ))
           )}
         </div>
 
-        {/* Comment Input */}
-        <div style={{
-          padding: '16px 20px',
-          borderTop: '1px solid rgba(255,255,255,0.1)',
-          backgroundColor: '#1e293b'
-        }}>
-          {showNamePrompt ? (
-            <div>
-              <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px', marginBottom: '12px' }}>
-                Enter your name to comment:
-              </p>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <input
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Your name"
-                  autoFocus
-                  style={{
-                    flex: 1,
-                    backgroundColor: 'rgba(255,255,255,0.1)',
-                    border: '1px solid rgba(255,255,255,0.2)',
-                    borderRadius: '12px',
-                    padding: '12px 16px',
-                    color: 'white',
-                    fontSize: '14px',
-                    outline: 'none'
-                  }}
-                />
-                <button
-                  onClick={handleSetUsername}
-                  disabled={!username.trim()}
-                  style={{
-                    padding: '12px 20px',
-                    backgroundColor: username.trim() ? '#3b82f6' : 'rgba(255,255,255,0.1)',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '12px',
-                    fontWeight: '600',
-                    cursor: username.trim() ? 'pointer' : 'not-allowed',
-                    opacity: username.trim() ? 1 : 0.5
-                  }}
-                >
-                  Save
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-              <div style={{
-                width: '40px',
-                height: '40px',
-                borderRadius: '50%',
-                backgroundColor: 'rgba(59,130,246,0.2)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0
-              }}>
-                <User size={18} style={{ color: '#3b82f6' }} />
-              </div>
-              <input
-                type="text"
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
-                placeholder="Add a comment..."
-                style={{
-                  flex: 1,
-                  backgroundColor: 'rgba(255,255,255,0.1)',
-                  border: '1px solid rgba(255,255,255,0.2)',
-                  borderRadius: '24px',
-                  padding: '12px 20px',
-                  color: 'white',
-                  fontSize: '14px',
-                  outline: 'none'
-                }}
-              />
-              <button
-                onClick={handleSubmit}
-                disabled={!newComment.trim()}
-                style={{
-                  width: '44px',
-                  height: '44px',
-                  borderRadius: '50%',
-                  backgroundColor: newComment.trim() ? '#3b82f6' : 'rgba(255,255,255,0.1)',
-                  border: 'none',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: newComment.trim() ? 'pointer' : 'not-allowed',
-                  color: 'white'
-                }}
-              >
-                <Send size={18} />
-              </button>
-            </div>
-          )}
-        </div>
+        {/* Input Area */}
+        <form
+          onSubmit={handleSubmit}
+          className="px-4 py-3 border-t border-white/10 bg-white/[0.02]"
+        >
+          <div className="flex gap-2 items-center">
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Name"
+              maxLength={30}
+              className="w-20 shrink-0 bg-white/5 border border-white/10 rounded-lg px-2.5 py-2 text-xs text-white/80 placeholder:text-white/25 outline-none focus:border-blue-500/50 transition"
+            />
+            <input
+              type="text"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="Add a comment..."
+              maxLength={500}
+              className="flex-1 min-w-0 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-white/80 placeholder:text-white/25 outline-none focus:border-blue-500/50 transition"
+            />
+            <button
+              type="submit"
+              disabled={!name.trim() || !message.trim() || submitting}
+              className="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-blue-500/80 hover:bg-blue-500 disabled:bg-white/5 disabled:text-white/20 text-white transition-all duration-200 disabled:cursor-not-allowed"
+              aria-label="Send comment"
+            >
+              <Send size={14} />
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

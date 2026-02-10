@@ -136,6 +136,7 @@ export const usePlayerStore = create(
       queueIndex: nextIndex,
       currentTrack: nextTrack,
       progress: 0,
+      isPlaying: true,
       lastPlayedTrack: nextTrack
     });
   },

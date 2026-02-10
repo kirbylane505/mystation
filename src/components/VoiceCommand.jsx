@@ -1,0 +1,317 @@
+'use client';
+
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { Mic, MicOff } from 'lucide-react';
+import { usePlayerStore } from '@/store/playerStore';
+import { tracks } from '@/data/tracks';
+
+// Normalize text for matching — handles speech-to-text quirks
+function normalize(str) {
+  return str
+    .toLowerCase()
+    .replace(/['']/g, "'")
+    .replace(/[^\w\s']/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+// Smart fuzzy match — handles speech-to-text variations
+function fuzzyMatch(query, title) {
+  const q = normalize(query);
+  const t = normalize(title);
+  if (t === q) return 1.0;
+  if (t.includes(q)) return 0.95;
+  if (q.includes(t)) return 0.85;
+
+  // Word-by-word matching (handles "going up" vs "goin up")
+  const qWords = q.split(/\s+/);
+  const tWords = t.split(/\s+/);
+
+  let wordMatches = 0;
+  for (const qw of qWords) {
+    for (const tw of tWords) {
+      // Exact word match
+      if (tw === qw) { wordMatches += 1; break; }
+      // Starts-with match ("goin" matches "going", "doin" matches "doing")
+      if (tw.startsWith(qw) || qw.startsWith(tw)) { wordMatches += 0.8; break; }
+      // Contains match
+      if (tw.includes(qw) || qw.includes(tw)) { wordMatches += 0.6; break; }
+    }
+  }
+
+  const score = wordMatches / Math.max(qWords.length, tWords.length);
+  return score;
+}
+
+function findBestTrack(query) {
+  let bestScore = 0;
+  let bestTrack = null;
+  for (const track of tracks) {
+    // Match against title
+    let score = fuzzyMatch(query, track.title);
+    // Also try title + featured artist
+    if (track.featured) {
+      const combo = `${track.title} ${track.featured}`;
+      score = Math.max(score, fuzzyMatch(query, combo));
+    }
+    if (score > bestScore) {
+      bestScore = score;
+      bestTrack = track;
+    }
+  }
+  return bestScore >= 0.3 ? bestTrack : null;
+}
+
+// Strip wake word "MyStation" / "my station" / "hey mystation" from start
+function stripWakeWord(text) {
+  return text
+    .replace(/^(hey\s+)?(my\s*station)\s*/i, '')
+    .trim();
+}
+
+export default function VoiceCommand() {
+  const [supported, setSupported] = useState(false);
+  const [listening, setListening] = useState(false);
+  const [transcript, setTranscript] = useState('');
+  const [feedback, setFeedback] = useState('');
+  const [showFeedback, setShowFeedback] = useState(false);
+  const recognitionRef = useRef(null);
+  const feedbackTimerRef = useRef(null);
+
+  const {
+    isPlaying,
+    volume,
+    play,
+    pause,
+    setTrack,
+    nextTrack,
+    prevTrack,
+    setVolume,
+    toggleMute,
+    toggleShuffle,
+    toggleRepeat,
+  } = usePlayerStore();
+
+  useEffect(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      setSupported(true);
+      const recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = true;
+      recognition.lang = 'en-US';
+      recognition.maxAlternatives = 1;
+      recognitionRef.current = recognition;
+    }
+    return () => {
+      if (recognitionRef.current) {
+        try { recognitionRef.current.abort(); } catch {}
+      }
+      if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
+    };
+  }, []);
+
+  const showConfirmation = useCallback((msg) => {
+    setFeedback(msg);
+    setShowFeedback(true);
+    if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
+    feedbackTimerRef.current = setTimeout(() => {
+      setShowFeedback(false);
+      setTranscript('');
+    }, 2500);
+  }, []);
+
+  const processCommand = useCallback((text) => {
+    // Strip wake word: "MyStation play Goin Up" → "play Goin Up"
+    const cmd = stripWakeWord(text).toLowerCase().trim();
+    if (!cmd) { showConfirmation('Say a command...'); return; }
+
+    // "play [song name]" — check before bare "play"
+    const playMatch = cmd.match(/^(?:play|playing|put on|queue)\s+(.+)$/);
+    if (playMatch) {
+      const songQuery = playMatch[1];
+      const matched = findBestTrack(songQuery);
+      if (matched) {
+        setTrack(matched);
+        showConfirmation(`Playing "${matched.title}"`);
+      } else {
+        showConfirmation(`Can't find "${songQuery}"`);
+      }
+      return;
+    }
+
+    // resume / play (bare)
+    if (/^(play|resume|go|start)$/.test(cmd)) {
+      play();
+      showConfirmation('Playing');
+      return;
+    }
+
+    // pause / stop
+    if (/^(pause|stop|hold|wait)$/.test(cmd)) {
+      pause();
+      showConfirmation('Paused');
+      return;
+    }
+
+    // next / skip
+    if (/^(next|next song|skip|skip this|next track)$/.test(cmd)) {
+      nextTrack();
+      showConfirmation('Next track');
+      return;
+    }
+
+    // previous / go back
+    if (/^(previous|go back|previous song|back|last song|rewind)$/.test(cmd)) {
+      prevTrack();
+      showConfirmation('Previous track');
+      return;
+    }
+
+    // volume up / louder
+    if (/^(volume\s*up|louder|turn\s*(it\s*)?up)$/.test(cmd)) {
+      setVolume(Math.min(1, volume + 0.2));
+      showConfirmation('Volume up');
+      return;
+    }
+
+    // volume down / quieter
+    if (/^(volume\s*down|quieter|softer|turn\s*(it\s*)?down)$/.test(cmd)) {
+      setVolume(Math.max(0, volume - 0.2));
+      showConfirmation('Volume down');
+      return;
+    }
+
+    // mute / unmute
+    if (/^(mute|unmute)$/.test(cmd)) {
+      toggleMute();
+      showConfirmation('Mute toggled');
+      return;
+    }
+
+    // shuffle
+    if (/^(shuffle|mix it up|random)$/.test(cmd)) {
+      toggleShuffle();
+      showConfirmation('Shuffle toggled');
+      return;
+    }
+
+    // repeat
+    if (/^(repeat|loop|replay)$/.test(cmd)) {
+      toggleRepeat();
+      showConfirmation('Repeat toggled');
+      return;
+    }
+
+    // what's playing / what song is this
+    if (/^(what.?s playing|what song|current song|what is this)$/.test(cmd)) {
+      const track = usePlayerStore.getState().currentTrack;
+      showConfirmation(track ? `"${track.title}" by Mike Page` : 'Nothing playing');
+      return;
+    }
+
+    // If no command matched, try as a song search
+    const matched = findBestTrack(cmd);
+    if (matched) {
+      setTrack(matched);
+      showConfirmation(`Playing "${matched.title}"`);
+      return;
+    }
+
+    showConfirmation(`Didn't catch that`);
+  }, [play, pause, setTrack, nextTrack, prevTrack, setVolume, toggleMute, toggleShuffle, toggleRepeat, volume, showConfirmation]);
+
+  const startListening = useCallback(() => {
+    const recognition = recognitionRef.current;
+    if (!recognition || listening) return;
+
+    setTranscript('');
+    setFeedback('');
+    setShowFeedback(false);
+
+    recognition.onresult = (event) => {
+      let interim = '';
+      let final = '';
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const t = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          final += t;
+        } else {
+          interim += t;
+        }
+      }
+      if (final) {
+        setTranscript(final);
+      } else {
+        setTranscript(interim);
+      }
+      if (final) {
+        processCommand(final);
+      }
+    };
+
+    recognition.onerror = () => {
+      setListening(false);
+    };
+
+    recognition.onend = () => {
+      setListening(false);
+    };
+
+    try {
+      recognition.start();
+      setListening(true);
+    } catch {
+      setListening(false);
+    }
+  }, [listening, processCommand]);
+
+  const stopListening = useCallback(() => {
+    const recognition = recognitionRef.current;
+    if (recognition && listening) {
+      try { recognition.stop(); } catch {}
+      setListening(false);
+    }
+  }, [listening]);
+
+  if (!supported) return null;
+
+  return (
+    <div className="relative flex items-center">
+      {/* Feedback / Transcript Overlay */}
+      {(listening || showFeedback || transcript) && (
+        <div className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 whitespace-nowrap px-4 py-2 rounded-xl text-sm font-medium shadow-xl border border-white/10 bg-mystation-navy/95 backdrop-blur-xl z-50">
+          {showFeedback && feedback ? (
+            <span className="text-blue-400">{feedback}</span>
+          ) : transcript ? (
+            <span className="text-white/70">{transcript}</span>
+          ) : (
+            <span className="text-red-400 animate-pulse">Listening...</span>
+          )}
+        </div>
+      )}
+
+      {/* Mic Button */}
+      <button
+        onClick={listening ? stopListening : startListening}
+        className={`relative w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 ${
+          listening
+            ? 'bg-red-500/20 text-red-400'
+            : 'bg-white/10 text-white/60 hover:bg-white/20 hover:text-white'
+        }`}
+        title="Voice Command"
+        aria-label={listening ? 'Stop listening' : 'Voice command'}
+      >
+        <Mic size={20} />
+
+        {/* Pulsing Red Ring */}
+        {listening && (
+          <>
+            <span className="absolute inset-0 rounded-full border-2 border-red-500 animate-ping opacity-40" />
+            <span className="absolute inset-0 rounded-full border-2 border-red-500 opacity-70" />
+          </>
+        )}
+      </button>
+    </div>
+  );
+}

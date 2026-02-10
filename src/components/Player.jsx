@@ -14,6 +14,7 @@ import {
   Heart, Share2, Music, Sparkles, ChevronUp, X, Crown, AlarmClock, Loader2
 } from 'lucide-react';
 import AlarmClockModal from './AlarmClock';
+import VoiceCommand from './VoiceCommand';
 import { shareMP3 } from '@/lib/shareAudio';
 import { albums } from '@/data/tracks';
 import Image from 'next/image';
@@ -501,6 +502,9 @@ export default function Player() {
             >
               <AlarmClock size={18} />
             </button>
+
+            {/* Voice Command */}
+            <VoiceCommand />
 
             {/* Share Menu */}
             {showShareMenu && (
