@@ -74,6 +74,11 @@ export const usePlayerStore = create(
   canPlay: (trackId) => {
     const { isSubscribed } = useUserStore.getState();
     if (isSubscribed) return true;
+    // Fallback: check localStorage in case zustand state was cleared
+    if (typeof window !== 'undefined' && localStorage.getItem('mystation-subscribed') === 'true') {
+      useUserStore.getState().subscribe(localStorage.getItem('mystation-user-email') || 'subscriber');
+      return true;
+    }
 
     const { playCount, uniquePlaysThisSession } = get();
     // Allow replay of already-played tracks

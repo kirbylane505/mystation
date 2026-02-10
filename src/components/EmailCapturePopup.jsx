@@ -20,8 +20,10 @@ export default function EmailCapturePopup() {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    // Don't show if already captured
+    // Already subscribed — never show again
     if (localStorage.getItem(STORAGE_KEY)) return;
+    // Already dismissed — never show again
+    if (localStorage.getItem(STORAGE_KEY + '_dismissed')) return;
 
     const timer = setTimeout(() => {
       setShow(true);
@@ -60,16 +62,9 @@ export default function EmailCapturePopup() {
 
   const handleClose = () => {
     setShow(false);
-    // Don't show again for 24h even if they didn't sign up
-    localStorage.setItem(STORAGE_KEY + '_dismissed', Date.now().toString());
+    // Dismissed = never show again
+    localStorage.setItem(STORAGE_KEY + '_dismissed', 'true');
   };
-
-  useEffect(() => {
-    const dismissed = localStorage.getItem(STORAGE_KEY + '_dismissed');
-    if (dismissed && Date.now() - parseInt(dismissed) < 24 * 60 * 60 * 1000) {
-      setShow(false);
-    }
-  }, []);
 
   if (!show) return null;
 
