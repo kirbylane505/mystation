@@ -13,7 +13,7 @@ import { CartButton } from './Cart';
 import { useUserStore, usePlayerStore } from '@/store/playerStore';
 import {
   Home, Music, Flame, Heart, Users, ShoppingBag,
-  Search, User, LogOut, X, Play, Menu, Lock, Mail, Calendar, Crown, Newspaper
+  Search, User, LogOut, X, Play, Menu, Lock, Mail, Calendar, Crown, Newspaper, Download
 } from 'lucide-react';
 import { useEngagementStore } from '@/store/engagementStore';
 import { useStationStore } from '@/store/stationStore';
@@ -26,6 +26,7 @@ export default function Navbar() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [installPrompt, setInstallPrompt] = useState(null);
   const searchRef = useRef(null);
   const { user, isLoggedIn, logout, isSubscribed } = useUserStore();
   const { currentStreak } = useEngagementStore();
@@ -71,6 +72,25 @@ export default function Navbar() {
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
+
+  // Capture PWA install prompt
+  useEffect(() => {
+    const handler = (e) => { e.preventDefault(); setInstallPrompt(e); };
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  const handleInstall = async () => {
+    if (installPrompt) {
+      installPrompt.prompt();
+      const result = await installPrompt.userChoice;
+      if (result.outcome === 'accepted') setInstallPrompt(null);
+    } else {
+      // iOS fallback — show instructions
+      alert('Tap the share button in your browser, then "Add to Home Screen"');
+    }
+    setMobileMenuOpen(false);
+  };
 
   // Check for saved user on mount
   useEffect(() => {
@@ -356,6 +376,15 @@ export default function Navbar() {
                 Create Your Station
               </Link>
             )}
+
+            {/* Add to Home Screen - Mobile */}
+            <button
+              onClick={handleInstall}
+              className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl text-white font-bold mb-2"
+            >
+              <Download size={18} />
+              Add to Home Screen
+            </button>
 
             {/* Subscribe Button - Mobile */}
             {!isSubscribed && (
