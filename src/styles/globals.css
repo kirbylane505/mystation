@@ -162,7 +162,8 @@ body {
 }
 
 .donation-highlight {
-  animation: pulse-blue 2s ease-in-out infinite;
+  animation: none;
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
 }
 
 /* Foundation badge - premium */
@@ -487,8 +488,14 @@ input[type="range"]:active::-moz-range-thumb {
   animation: bounce 2s ease-in-out infinite;
 }
 
+/* Kill all blinking/pulsing — static opacity instead */
+.animate-pulse,
+[class*="animate-pulse"] {
+  animation: none !important;
+}
+
 .animate-glow-pulse {
-  animation: glowPulse 2s ease-in-out infinite;
+  animation: none;
 }
 
 .animate-shimmer {
