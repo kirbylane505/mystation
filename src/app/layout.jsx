@@ -13,6 +13,8 @@ import Cart from '@/components/Cart';
 import InstallPWA from '@/components/InstallPWA';
 import PageTracker from '@/components/PageTracker';
 import TimedPopups from '@/components/TimedPopups';
+import EmailCapturePopup from '@/components/EmailCapturePopup';
+import TrackingPixels from '@/components/TrackingPixels';
 import Script from 'next/script';
 
 export const metadata = {
@@ -82,6 +84,8 @@ export default function RootLayout({ children }) {
           <Cart />
           <InstallPWA />
           <TimedPopups />
+          <EmailCapturePopup />
+          <TrackingPixels />
           <PageTracker />
         </ClientProviders>
         <Script id="register-sw" strategy="afterInteractive">

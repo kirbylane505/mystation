@@ -6,7 +6,7 @@ import { NextResponse } from 'next/server';
 
 export async function POST(request) {
   try {
-    const { items, email } = await request.json();
+    const { items, email, discountCode } = await request.json();
 
     // Validate items
     if (!items || items.length === 0) {
@@ -39,6 +39,15 @@ export async function POST(request) {
     let discountPercent = 0;
     if (totalQuantity >= 5) discountPercent = 15;
     else if (totalQuantity >= 2) discountPercent = 10;
+
+    // Promo code discounts (stacks with bundle if code is better)
+    const PROMO_CODES = {
+      'WELCOME10': 10,
+      'REFER15': 15,
+    };
+    const promoDiscount = discountCode ? (PROMO_CODES[discountCode.toUpperCase()] || 0) : 0;
+    // Use whichever discount is higher
+    discountPercent = Math.max(discountPercent, promoDiscount);
     const discountMultiplier = 1 - discountPercent / 100;
 
     // Build line items for Stripe (with bundle discount applied)

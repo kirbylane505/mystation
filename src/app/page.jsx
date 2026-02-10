@@ -9,6 +9,9 @@ import { useState } from 'react';
 import Hero from '@/components/Hero';
 import TrackList from '@/components/TrackList';
 import EmailCapture from '@/components/EmailCapture';
+import LOTLCountdown from '@/components/LOTLCountdown';
+import SocialEmbeds from '@/components/SocialEmbeds';
+import ReferralProgram from '@/components/ReferralProgram';
 import { tracks, albums, getOfficialTracks, getNonVaultTracks } from '@/data/tracks';
 import { usePlayerStore } from '@/store/playerStore';
 import { Play, Pause, Heart, ExternalLink, Music, Headphones, ChevronLeft, Shuffle } from 'lucide-react';
@@ -200,6 +203,11 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* LOTL Countdown */}
+      <section className="max-w-screen-xl mx-auto px-6 py-10">
+        <LOTLCountdown variant="compact" />
+      </section>
+
       {/* Email Capture Section */}
       <section className="py-20 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-900/20 via-purple-900/20 to-pink-900/20" />
@@ -212,6 +220,14 @@ export default function HomePage() {
             Get notified when new music drops. No spam, just fire.
           </p>
           <EmailCapture variant="minimal" className="max-w-md mx-auto" />
+        </div>
+      </section>
+
+      {/* Social + Referral */}
+      <section className="max-w-screen-xl mx-auto px-6 pb-20">
+        <div className="grid md:grid-cols-2 gap-6">
+          <SocialEmbeds />
+          <ReferralProgram />
         </div>
       </section>
 
