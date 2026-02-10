@@ -267,7 +267,7 @@ export default function MerchPage() {
             const lower = (p.title || '').toLowerCase();
             return !HIDDEN_PRINTIFY.some(ex => lower.includes(ex));
           }).map((p) => {
-            const enabledVariants = (p.variants || []).filter(v => v.is_available);
+            const enabledVariants = (p.variants || []).filter(v => v.is_enabled !== false);
             const prices = enabledVariants.map(v => v.price / 100).filter(pr => pr > 0);
             const startingPrice = prices.length > 0 ? Math.min(...prices) : null;
             const defaultImg = (p.images || []).find(img => img.is_default);
@@ -275,11 +275,15 @@ export default function MerchPage() {
             const image = defaultImg?.src || firstImg?.src || null;
             const name = p.title || 'Printify Product';
 
+            // Strip HTML tags from Printify descriptions
+            const rawDesc = (p.description || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+            const cleanDesc = rawDesc.length > 120 ? rawDesc.slice(0, 120) + '...' : rawDesc;
+
             return {
               id: `printify_${p.id}`,
               printifyId: p.id,
               name,
-              description: p.description || getProductDescription(name),
+              description: cleanDesc || getProductDescription(name),
               category: getPrintifyCategory(p.tags, name),
               image,
               printfulImage: null,
@@ -412,7 +416,7 @@ export default function MerchPage() {
         const res = await fetch(`/api/printify/products/${item.printifyId}`);
         const data = await res.json();
         if (data.success && data.product) {
-          const enabledVariants = (data.product.variants || []).filter(v => v.is_available);
+          const enabledVariants = (data.product.variants || []).filter(v => v.is_enabled !== false);
           // Normalize to common shape
           setProductDetails({
             ...data.product,
