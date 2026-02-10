@@ -8,12 +8,16 @@
 
 import { useState } from 'react';
 import { usePlayerStore, useUserStore } from '@/store/playerStore';
-import { X, Music, Sparkles, Heart, Check, CreditCard, Zap, Crown, ShoppingBag } from 'lucide-react';
+import { X, Music, Sparkles, Heart, Check, CreditCard, Zap, Crown, ShoppingBag, Gift } from 'lucide-react';
 import Link from 'next/link';
 
 export default function SubscribeModal() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [showCodeInput, setShowCodeInput] = useState(false);
+  const [accessCode, setAccessCode] = useState('');
+  const [codeError, setCodeError] = useState('');
+  const [codeLoading, setCodeLoading] = useState(false);
 
   const { showSubscribeModal, closeSubscribeModal, pendingTrack, setTrack, playCount } = usePlayerStore();
   const { subscribe, isSubscribed } = useUserStore();
@@ -50,6 +54,39 @@ export default function SubscribeModal() {
       }
       setSuccess(false);
     }, 1500);
+  };
+
+  const handleAccessCode = async () => {
+    if (!accessCode.trim()) return;
+    setCodeLoading(true);
+    setCodeError('');
+
+    try {
+      const res = await fetch('/api/access-code/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: accessCode.trim() }),
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        subscribe('friend@mystation.com');
+        setSuccess(true);
+        setTimeout(() => {
+          closeSubscribeModal();
+          if (pendingTrack) {
+            setTrack(pendingTrack);
+          }
+          setSuccess(false);
+        }, 1500);
+      } else {
+        setCodeError('Invalid code. Try again.');
+      }
+    } catch {
+      setCodeError('Something went wrong. Try again.');
+    } finally {
+      setCodeLoading(false);
+    }
   };
 
   const handleSkip = () => {
@@ -183,6 +220,43 @@ export default function SubscribeModal() {
                 <ShoppingBag size={16} />
                 Shop Official Merch
               </Link>
+            </div>
+
+            {/* Access Code */}
+            <div className="px-8 pb-4">
+              {!showCodeInput ? (
+                <button
+                  onClick={() => setShowCodeInput(true)}
+                  className="w-full text-center text-blue-400/70 text-sm hover:text-blue-400 transition"
+                >
+                  Have an access code?
+                </button>
+              ) : (
+                <div className="bg-white/5 rounded-xl border border-white/10 p-4">
+                  <p className="text-white/60 text-xs mb-3 text-center">Enter your access code for free unlimited streaming</p>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={accessCode}
+                      onChange={(e) => { setAccessCode(e.target.value); setCodeError(''); }}
+                      onKeyDown={(e) => e.key === 'Enter' && handleAccessCode()}
+                      placeholder="Enter code"
+                      className="flex-1 px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/30 text-sm focus:outline-none focus:border-blue-500 uppercase tracking-wider"
+                      autoFocus
+                    />
+                    <button
+                      onClick={handleAccessCode}
+                      disabled={codeLoading || !accessCode.trim()}
+                      className="px-5 py-3 bg-green-500 text-white font-bold rounded-xl hover:bg-green-400 transition disabled:opacity-50 text-sm"
+                    >
+                      {codeLoading ? '...' : 'Go'}
+                    </button>
+                  </div>
+                  {codeError && (
+                    <p className="text-red-400 text-xs mt-2 text-center">{codeError}</p>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Skip option */}
