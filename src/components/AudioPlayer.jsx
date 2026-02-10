@@ -85,6 +85,13 @@ export default function AudioPlayer() {
 
   const { isSubscribed } = useUserStore();
 
+  // Check if track is a vault track
+  const isVaultTrack = useCallback((track) => {
+    if (!track) return false;
+    return track.albumId === 'vault' || track.album === 'Vault' ||
+      (typeof track.id === 'string' && track.id.startsWith('vault-'));
+  }, []);
+
   // Get audio URL directly from track
   const getAudioUrl = useCallback((track) => {
     if (!track) return null;
@@ -172,7 +179,20 @@ export default function AudioPlayer() {
     const isNewTrack = lastTrackIdRef.current !== currentTrack.id;
 
     if (isNewTrack) {
-      const { isPlaying } = usePlayerStore.getState();
+      const { isPlaying, vaultUnlocked } = usePlayerStore.getState();
+
+      // Block vault tracks if vault is not unlocked
+      if (isVaultTrack(currentTrack) && !vaultUnlocked) {
+        audio.pause();
+        pause();
+        // Skip to next non-vault track or stop
+        const { queue, queueIndex } = usePlayerStore.getState();
+        const nextNonVault = queue.slice(queueIndex + 1).find(t => !isVaultTrack(t));
+        if (nextNonVault) {
+          usePlayerStore.getState().setTrack(nextNonVault);
+        }
+        return;
+      }
 
       // Only count as a play if user actually initiated playback
       if (isPlaying) {

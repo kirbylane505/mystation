@@ -35,7 +35,27 @@ const getDefaultTracks = () => {
 // Vault PIN is now server-side only (env: VAULT_PIN)
 
 export default function VaultPage() {
-  const [isUnlocked, setIsUnlocked] = useState(false);
+  const [isUnlocked, setIsUnlockedState] = useState(false);
+  const { setVaultUnlocked } = usePlayerStore();
+
+  // Wrapper that sets both local state AND global store
+  const setIsUnlocked = (val) => {
+    setIsUnlockedState(val);
+    setVaultUnlocked(val);
+  };
+
+  // Auto-verify vault session on mount (if cookie exists from earlier PIN entry)
+  useEffect(() => {
+    fetch('/api/vault/verify')
+      .then(res => res.json())
+      .then(data => {
+        if (data.valid) {
+          setIsUnlockedState(true);
+          setVaultUnlocked(true);
+        }
+      })
+      .catch(() => {});
+  }, [setVaultUnlocked]);
   const [pinInput, setPinInput] = useState('');
   const [pinError, setPinError] = useState(false);
   const [vaultTracks, setVaultTracks] = useState([]);

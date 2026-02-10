@@ -4,6 +4,7 @@
  */
 
 import { tracks, albums } from '@/data/tracks';
+import { redirect } from 'next/navigation';
 import TrackRedirect from './TrackRedirect';
 
 export const dynamic = 'force-dynamic';
@@ -48,6 +49,11 @@ export async function generateMetadata({ params }) {
 export default async function TrackPage({ params }) {
   const { id } = await params;
   const track = tracks.find(t => t.id === parseInt(id));
+
+  // Block direct access to vault tracks — redirect to vault page
+  if (track && (track.albumId === 'vault' || track.album === 'Vault')) {
+    redirect('/vault');
+  }
 
   return <TrackRedirect trackId={id} trackTitle={track?.title || 'Track'} />;
 }

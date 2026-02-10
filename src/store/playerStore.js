@@ -24,6 +24,10 @@ export const usePlayerStore = create(
   shuffle: false,
   repeat: 'off', // 'off', 'all', 'one'
 
+  // Vault access (session-only, not persisted)
+  vaultUnlocked: false,
+  setVaultUnlocked: (val) => set({ vaultUnlocked: val }),
+
   // Engagement tracking
   playCount: 0,
   uniquePlaysThisSession: [],

@@ -1,9 +1,11 @@
 /**
  * MYSTATION - Vault Auth API
  * Server-side PIN verification — PIN never exposed to client
+ * Sets signed session cookie on success for vault track protection
  */
 
 import { NextResponse } from 'next/server';
+import crypto from 'crypto';
 
 // Rate limit vault attempts per IP
 const attempts = new Map();
@@ -47,9 +49,26 @@ export async function POST(request) {
     }
 
     if (pin === vaultPin) {
-      // Success — clear attempts
+      // Success — clear attempts and set vault session cookie
       attempts.delete(ip);
-      return NextResponse.json({ success: true });
+
+      const vaultSecret = process.env.VAULT_SECRET || 'fallback-vault-secret';
+      const timestamp = Date.now().toString();
+      const signature = crypto
+        .createHmac('sha256', vaultSecret)
+        .update(timestamp)
+        .digest('hex')
+        .slice(0, 32);
+
+      const response = NextResponse.json({ success: true });
+      response.cookies.set('mystation_vault', `${timestamp}.${signature}`, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 24 * 60 * 60, // 24 hours
+        path: '/',
+      });
+      return response;
     }
 
     // Wrong PIN — track attempts
