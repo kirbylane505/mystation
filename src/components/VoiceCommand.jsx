@@ -69,14 +69,26 @@ function stripWakeWord(text) {
     .trim();
 }
 
+// Detect iOS Safari (SpeechRecognition is not available)
+function isIOSSafari() {
+  if (typeof navigator === 'undefined') return false;
+  const ua = navigator.userAgent;
+  const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const isSafari = /Safari/.test(ua) && !/CriOS|FxiOS|OPiOS|EdgiOS|Chrome/.test(ua);
+  return isIOS && isSafari;
+}
+
 export default function VoiceCommand() {
   const [supported, setSupported] = useState(false);
+  const [unsupportedBrowser, setUnsupportedBrowser] = useState(false);
   const [listening, setListening] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [feedback, setFeedback] = useState('');
   const [showFeedback, setShowFeedback] = useState(false);
+  const [permDenied, setPermDenied] = useState(false);
   const recognitionRef = useRef(null);
   const feedbackTimerRef = useRef(null);
+  const retryCountRef = useRef(0);
 
   const {
     isPlaying,
@@ -102,6 +114,11 @@ export default function VoiceCommand() {
       recognition.lang = 'en-US';
       recognition.maxAlternatives = 1;
       recognitionRef.current = recognition;
+    } else {
+      // SpeechRecognition not available — check if iOS Safari
+      if (isIOSSafari()) {
+        setUnsupportedBrowser(true);
+      }
     }
     return () => {
       if (recognitionRef.current) {
@@ -111,14 +128,14 @@ export default function VoiceCommand() {
     };
   }, []);
 
-  const showConfirmation = useCallback((msg) => {
+  const showConfirmation = useCallback((msg, durationMs = 2500) => {
     setFeedback(msg);
     setShowFeedback(true);
     if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
     feedbackTimerRef.current = setTimeout(() => {
       setShowFeedback(false);
       setTranscript('');
-    }, 2500);
+    }, durationMs);
   }, []);
 
   const processCommand = useCallback((text) => {
@@ -222,22 +239,45 @@ export default function VoiceCommand() {
   }, [play, pause, setTrack, nextTrack, prevTrack, setVolume, toggleMute, toggleShuffle, toggleRepeat, volume, showConfirmation]);
 
   const startListening = useCallback(async () => {
+    // Unsupported browser (iOS Safari etc.) — show tooltip message
+    if (unsupportedBrowser || !recognitionRef.current) {
+      showConfirmation('Voice not supported on this browser', 3000);
+      return;
+    }
+
     const recognition = recognitionRef.current;
-    if (!recognition || listening) return;
+    if (listening) return;
+
+    // --- Permission pre-check via Permissions API ---
+    try {
+      if (navigator.permissions && navigator.permissions.query) {
+        const permStatus = await navigator.permissions.query({ name: 'microphone' });
+        if (permStatus.state === 'denied') {
+          setPermDenied(true);
+          showConfirmation('Tap the lock icon \u{1F512} in your browser to allow mic', 4000);
+          return;
+        }
+      }
+    } catch {
+      // Permissions API not supported for mic in this browser — fall through to getUserMedia
+    }
 
     // Request microphone permission first — triggers browser prompt
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       // Got permission — stop the stream immediately (SpeechRecognition manages its own)
       stream.getTracks().forEach(t => t.stop());
+      setPermDenied(false);
     } catch (err) {
-      showConfirmation('Mic access denied — check browser permissions');
+      setPermDenied(true);
+      showConfirmation('Tap the lock icon \u{1F512} in your browser to allow mic', 4000);
       return;
     }
 
     setTranscript('');
     setFeedback('');
     setShowFeedback(false);
+    retryCountRef.current = 0;
 
     recognition.onresult = (event) => {
       let interim = '';
@@ -261,13 +301,32 @@ export default function VoiceCommand() {
     };
 
     recognition.onerror = (e) => {
-      setListening(false);
       if (e.error === 'not-allowed') {
-        showConfirmation('Mic blocked — allow in browser settings');
+        // Auto-retry once with a small delay if getUserMedia succeeded but recognition got blocked
+        if (retryCountRef.current < 1) {
+          retryCountRef.current += 1;
+          setTimeout(() => {
+            try {
+              recognition.start();
+            } catch {
+              setListening(false);
+              setPermDenied(true);
+              showConfirmation('Tap the lock icon \u{1F512} in your browser to allow mic', 4000);
+            }
+          }, 500);
+          return;
+        }
+        setListening(false);
+        setPermDenied(true);
+        showConfirmation('Tap the lock icon \u{1F512} in your browser to allow mic', 4000);
       } else if (e.error === 'no-speech') {
-        showConfirmation('No speech detected — try again');
+        setListening(false);
+        showConfirmation('No speech detected \u2014 try again');
       } else if (e.error === 'network') {
-        showConfirmation('Network error — check connection');
+        setListening(false);
+        showConfirmation('Network error \u2014 check connection');
+      } else {
+        setListening(false);
       }
     };
 
@@ -278,11 +337,26 @@ export default function VoiceCommand() {
     try {
       recognition.start();
       setListening(true);
+      retryCountRef.current = 0;
     } catch {
-      showConfirmation('Could not start mic');
-      setListening(false);
+      // Auto-retry once on start failure
+      if (retryCountRef.current < 1) {
+        retryCountRef.current += 1;
+        setTimeout(() => {
+          try {
+            recognition.start();
+            setListening(true);
+          } catch {
+            showConfirmation('Could not start mic');
+            setListening(false);
+          }
+        }, 500);
+      } else {
+        showConfirmation('Could not start mic');
+        setListening(false);
+      }
     }
-  }, [listening, processCommand, showConfirmation]);
+  }, [listening, unsupportedBrowser, processCommand, showConfirmation]);
 
   const stopListening = useCallback(() => {
     const recognition = recognitionRef.current;
@@ -292,7 +366,8 @@ export default function VoiceCommand() {
     }
   }, [listening]);
 
-  if (!supported) return null;
+  // Show button for unsupported browsers too (with click-to-show tooltip)
+  if (!supported && !unsupportedBrowser) return null;
 
   return (
     <div className="relative flex items-center">
@@ -300,7 +375,7 @@ export default function VoiceCommand() {
       {(listening || showFeedback || transcript) && (
         <div className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 whitespace-nowrap px-4 py-2 rounded-xl text-sm font-medium shadow-xl border border-white/10 bg-mystation-navy/95 backdrop-blur-xl z-50">
           {showFeedback && feedback ? (
-            <span className="text-blue-400">{feedback}</span>
+            <span className={permDenied ? 'text-amber-400' : 'text-blue-400'}>{feedback}</span>
           ) : transcript ? (
             <span className="text-white/70">{transcript}</span>
           ) : (
@@ -312,24 +387,40 @@ export default function VoiceCommand() {
       {/* Mic Button */}
       <button
         onClick={listening ? stopListening : startListening}
-        className={`relative w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 ${
+        className={`relative w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 ${
           listening
-            ? 'bg-red-500/20 text-red-400'
-            : 'bg-white/10 text-white/60 hover:bg-white/20 hover:text-white'
+            ? 'bg-red-500/25 text-red-400 shadow-[0_0_20px_rgba(239,68,68,0.5),0_0_40px_rgba(239,68,68,0.25)]'
+            : 'bg-white/10 text-white/60 hover:bg-white/20 hover:text-white border border-white/20 hover:border-white/40'
         }`}
-        title="Voice Command"
-        aria-label={listening ? 'Stop listening' : 'Voice command'}
+        style={listening ? {
+          animation: 'voicePulseGlow 1.5s ease-in-out infinite',
+        } : undefined}
+        title={unsupportedBrowser ? 'Voice not supported on this browser' : 'Voice Command'}
+        aria-label={listening ? 'Stop listening' : unsupportedBrowser ? 'Voice not supported' : 'Voice command'}
       >
-        <Mic size={20} />
+        {listening ? <Mic size={22} /> : <Mic size={20} />}
 
-        {/* Pulsing Red Ring */}
+        {/* Pulsing Glow Rings — bigger, more visible */}
         {listening && (
           <>
-            <span className="absolute inset-0 rounded-full border-2 border-red-500 animate-ping opacity-40" />
-            <span className="absolute inset-0 rounded-full border-2 border-red-500 opacity-70" />
+            <span className="absolute -inset-1 rounded-full border-2 border-red-500 animate-ping opacity-30" />
+            <span className="absolute -inset-0.5 rounded-full border-2 border-red-400 opacity-60" />
+            <span className="absolute -inset-2 rounded-full border border-red-500/30 animate-pulse" />
           </>
         )}
       </button>
+
+      {/* Keyframe for glow pulse — injected once */}
+      <style jsx>{`
+        @keyframes voicePulseGlow {
+          0%, 100% {
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.5), 0 0 40px rgba(239, 68, 68, 0.25);
+          }
+          50% {
+            box-shadow: 0 0 30px rgba(239, 68, 68, 0.7), 0 0 60px rgba(239, 68, 68, 0.4), 0 0 80px rgba(239, 68, 68, 0.15);
+          }
+        }
+      `}</style>
     </div>
   );
 }
