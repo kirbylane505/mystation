@@ -67,8 +67,8 @@ function LOTLMerchBanner() {
               </div>
               <div className="hidden lg:block w-24 h-24 lg:w-32 lg:h-32 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 border border-green-500/20 overflow-hidden transform -rotate-3 group-hover:rotate-0 transition-transform shadow-xl">
                 <img
-                  src="/images/mockups/lotl-snapback-black.jpg"
-                  alt="LOTL Snapback"
+                  src="/images/merch/lotl-cap-final.jpg"
+                  alt="LOTL Cap"
                   className="w-full h-full object-cover"
                   onError={(e) => { e.target.style.display = 'none'; }}
                 />
