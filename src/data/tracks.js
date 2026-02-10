@@ -453,23 +453,25 @@ export const tracks = [
   { id: 275, title: "No Baggage", album: "Vault", year: 2024, albumId: 'vault', audioFile: '/audio/iDMG No Baggage Final1.mp3', producer: "IDMG", needsNaming: true },
   { id: 276, title: "IDMG v107 (Gee Mix)", album: "Vault", year: 2024, albumId: 'vault', audioFile: '/audio/iDMG x gee_v107 - Mike Page _x1.1_.mp3', producer: "IDMG", needsNaming: true },
   { id: 277, title: "IDMG v120", album: "Vault", year: 2024, albumId: 'vault', audioFile: '/audio/iDMG x v120 - Mike Page (X1.0) new bass01.mp3', producer: "IDMG", needsNaming: true },
+  { id: 278, title: "Having My Way", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/vault/Mike Page - Having My Way.mp3', duration: "3:07", featured: "Varro", producer: "The Cubist", bpm: 0, key: '', isFeatured: true, featuredWeek: '2026-02-09' },
 ];
 
 // Featured Song of the Week
 export const featuredSong = {
-  id: 126,
-  title: "Hope Yo Soul",
+  id: 278,
+  title: "Having My Way",
   artist: "Mike Page",
-  album: "Coming Soon",
+  featured: "Varro",
+  album: "Vault",
   year: 2026,
-  duration: "3:45",
-  audioFile: '/audio/singles/Mike Page - Hope Yo Soul_MASTERED.mp3',
-  coverGradient: "from-purple-500 via-indigo-600 to-blue-800",
-  weekOf: "February 3, 2026",
-  description: "Soulful vibes from Mike Page. Produced by The Cubist (SHOW_IDMG). Stream now on MyStation.",
+  duration: "3:07",
+  audioFile: '/audio/vault/Mike Page - Having My Way.mp3',
+  coverGradient: "from-emerald-500 via-teal-600 to-cyan-800",
+  weekOf: "February 9, 2026",
+  description: "Mike Page and Varro link up on this Cubist-produced banger. Fresh from the vault — stream exclusively on MyStation.",
   stats: {
-    bpm: 90,
-    key: "G Minor",
+    bpm: 0,
+    key: "",
     loudness: "-9.0 LUFS",
     mastered: true
   }
