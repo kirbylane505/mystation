@@ -24,22 +24,6 @@ export const tracks = [
     producer: 'The Cubist (SHOW_IDMG)'
   },
   // ========================================
-  // SHEZZY KNEW IT (Album) - 2014
-  // ========================================
-  { id: 301, title: "Hope Ya Livin Good", album: "Shezzy Knew It", year: 2014, duration: "2:10", trackNumber: 1, albumId: 'shezzy-knew-it', audioFile: '/audio/shezzy-knew-it/01 - MIKE PAGE- HOPE YA LIVIN GOOD.mp3', producer: "IDMG" },
-  { id: 302, title: "Outta Here", album: "Shezzy Knew It", year: 2014, duration: "3:57", trackNumber: 2, albumId: 'shezzy-knew-it', audioFile: '/audio/shezzy-knew-it/02 - Outta Here.mp3', producer: "IDMG" },
-  { id: 303, title: "Ain't for Me (Young Shezzy Tribute)", album: "Shezzy Knew It", year: 2014, duration: "3:08", trackNumber: 3, albumId: 'shezzy-knew-it', audioFile: "/audio/shezzy-knew-it/03 - Ain't for Me (Young Shezzy Tribute).mp3", producer: "IDMG" },
-  { id: 304, title: "Goin' Crazy", album: "Shezzy Knew It", year: 2014, duration: "3:55", trackNumber: 4, albumId: 'shezzy-knew-it', audioFile: "/audio/shezzy-knew-it/04 - Goin' crazy.mp3", producer: "IDMG" },
-  { id: 305, title: "I Know", album: "Shezzy Knew It", year: 2014, duration: "3:57", trackNumber: 5, albumId: 'shezzy-knew-it', audioFile: '/audio/shezzy-knew-it/05 - I Know (feat. King Deazel).mp3', featured: "King Deazel", producer: "IDMG" },
-  { id: 306, title: "Fast & Slow", album: "Shezzy Knew It", year: 2014, duration: "3:42", trackNumber: 6, albumId: 'shezzy-knew-it', audioFile: '/audio/shezzy-knew-it/06 - Fast & Slow (feat. Coop Deville).mp3', featured: "Coop Deville", producer: "IDMG" },
-  { id: 307, title: "Warrior", album: "Shezzy Knew It", year: 2014, duration: "4:22", trackNumber: 7, albumId: 'shezzy-knew-it', audioFile: '/audio/shezzy-knew-it/07 - Warroir (feat. Yung Majik).mp3', featured: "Yung Majik", producer: "IDMG" },
-  { id: 308, title: "Survive", album: "Shezzy Knew It", year: 2014, duration: "3:03", trackNumber: 8, albumId: 'shezzy-knew-it', audioFile: '/audio/shezzy-knew-it/08 - Survive.mp3', producer: "IDMG" },
-  { id: 309, title: "We Can Work", album: "Shezzy Knew It", year: 2014, duration: "3:57", trackNumber: 9, albumId: 'shezzy-knew-it', audioFile: '/audio/shezzy-knew-it/09 - We Can Work (feat. Yung Majik).mp3', featured: "Yung Majik", producer: "IDMG" },
-  { id: 310, title: "Mo' Money", album: "Shezzy Knew It", year: 2014, duration: "4:17", trackNumber: 10, albumId: 'shezzy-knew-it', audioFile: "/audio/shezzy-knew-it/10 - Mo' money.mp3", producer: "IDMG" },
-  { id: 311, title: "In My Head", album: "Shezzy Knew It", year: 2014, duration: "3:54", trackNumber: 11, albumId: 'shezzy-knew-it', audioFile: '/audio/shezzy-knew-it/11 - In My Head (feat. Yung Majik).mp3', featured: "Yung Majik", producer: "IDMG" },
-  { id: 312, title: "I'm the Man", album: "Shezzy Knew It", year: 2014, duration: "4:05", trackNumber: 12, albumId: 'shezzy-knew-it', audioFile: "/audio/shezzy-knew-it/12 - I'm the Man (feat. Yung Majik).mp3", featured: "Yung Majik", producer: "IDMG" },
-  { id: 313, title: "Club Clothes", album: "Shezzy Knew It", year: 2014, duration: "4:36", trackNumber: 13, albumId: 'shezzy-knew-it', audioFile: '/audio/shezzy-knew-it/13 - Club Clothes.mp3', producer: "IDMG" },
-  // ========================================
   // CINDY'S SON (Extended Album) - 2022
   // ========================================
   {
@@ -369,6 +353,22 @@ export const tracks = [
     hitScore: 55,
     producer: "The Cubist"
   },
+  // ========================================
+  // SHEZZY KNEW IT (Album) - 2014
+  // ========================================
+  { id: 301, title: "Hope Ya Livin Good", album: "Shezzy Knew It", year: 2014, duration: "2:10", trackNumber: 1, albumId: 'shezzy-knew-it', audioFile: '/audio/shezzy-knew-it/01 - MIKE PAGE- HOPE YA LIVIN GOOD.mp3', producer: "IDMG" },
+  { id: 302, title: "Outta Here", album: "Shezzy Knew It", year: 2014, duration: "3:57", trackNumber: 2, albumId: 'shezzy-knew-it', audioFile: '/audio/shezzy-knew-it/02 - Outta Here.mp3', producer: "IDMG" },
+  { id: 303, title: "Ain't for Me (Young Shezzy Tribute)", album: "Shezzy Knew It", year: 2014, duration: "3:08", trackNumber: 3, albumId: 'shezzy-knew-it', audioFile: "/audio/shezzy-knew-it/03 - Ain't for Me (Young Shezzy Tribute).mp3", producer: "IDMG" },
+  { id: 304, title: "Goin' Crazy", album: "Shezzy Knew It", year: 2014, duration: "3:55", trackNumber: 4, albumId: 'shezzy-knew-it', audioFile: "/audio/shezzy-knew-it/04 - Goin' crazy.mp3", producer: "IDMG" },
+  { id: 305, title: "I Know", album: "Shezzy Knew It", year: 2014, duration: "3:57", trackNumber: 5, albumId: 'shezzy-knew-it', audioFile: '/audio/shezzy-knew-it/05 - I Know (feat. King Deazel).mp3', featured: "King Deazel", producer: "IDMG" },
+  { id: 306, title: "Fast & Slow", album: "Shezzy Knew It", year: 2014, duration: "3:42", trackNumber: 6, albumId: 'shezzy-knew-it', audioFile: '/audio/shezzy-knew-it/06 - Fast & Slow (feat. Coop Deville).mp3', featured: "Coop Deville", producer: "IDMG" },
+  { id: 307, title: "Warrior", album: "Shezzy Knew It", year: 2014, duration: "4:22", trackNumber: 7, albumId: 'shezzy-knew-it', audioFile: '/audio/shezzy-knew-it/07 - Warroir (feat. Yung Majik).mp3', featured: "Yung Majik", producer: "IDMG" },
+  { id: 308, title: "Survive", album: "Shezzy Knew It", year: 2014, duration: "3:03", trackNumber: 8, albumId: 'shezzy-knew-it', audioFile: '/audio/shezzy-knew-it/08 - Survive.mp3', producer: "IDMG" },
+  { id: 309, title: "We Can Work", album: "Shezzy Knew It", year: 2014, duration: "3:57", trackNumber: 9, albumId: 'shezzy-knew-it', audioFile: '/audio/shezzy-knew-it/09 - We Can Work (feat. Yung Majik).mp3', featured: "Yung Majik", producer: "IDMG" },
+  { id: 310, title: "Mo' Money", album: "Shezzy Knew It", year: 2014, duration: "4:17", trackNumber: 10, albumId: 'shezzy-knew-it', audioFile: "/audio/shezzy-knew-it/10 - Mo' money.mp3", producer: "IDMG" },
+  { id: 311, title: "In My Head", album: "Shezzy Knew It", year: 2014, duration: "3:54", trackNumber: 11, albumId: 'shezzy-knew-it', audioFile: '/audio/shezzy-knew-it/11 - In My Head (feat. Yung Majik).mp3', featured: "Yung Majik", producer: "IDMG" },
+  { id: 312, title: "I'm the Man", album: "Shezzy Knew It", year: 2014, duration: "4:05", trackNumber: 12, albumId: 'shezzy-knew-it', audioFile: "/audio/shezzy-knew-it/12 - I'm the Man (feat. Yung Majik).mp3", featured: "Yung Majik", producer: "IDMG" },
+  { id: 313, title: "Club Clothes", album: "Shezzy Knew It", year: 2014, duration: "4:36", trackNumber: 13, albumId: 'shezzy-knew-it', audioFile: '/audio/shezzy-knew-it/13 - Club Clothes.mp3', producer: "IDMG" },
   // ========================================
   // VAULT - UNNAMED TRACKS (Need Naming)
   // Play to listen, then rename
