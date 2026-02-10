@@ -12,8 +12,17 @@ import { X, Heart, CreditCard, Crown, ShoppingBag, Sparkles, Ticket, Package, Gi
 import Link from 'next/link';
 import { useUserStore } from '@/store/playerStore';
 
-// ============ DONATE / SUBSCRIBE POPUP (every 2 min) ============
+// ============ DONATE / SUBSCRIBE POPUP (every 7 min) ============
 function DonatePopup({ onClose }) {
+  const [freeSlots, setFreeSlots] = useState(null);
+
+  useEffect(() => {
+    fetch('/api/subscription/subscribe')
+      .then(r => r.json())
+      .then(d => setFreeSlots(d.remaining))
+      .catch(() => {});
+  }, []);
+
   return (
     <div className="fixed inset-0 z-[90] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fadeIn" onClick={onClose}>
       <div
@@ -37,6 +46,19 @@ function DonatePopup({ onClose }) {
             Every dollar funds youth music programs, free meals, and community support through the Mike Page Foundation.
           </p>
         </div>
+
+        {/* Free slots urgency banner */}
+        {freeSlots !== null && freeSlots > 0 && (
+          <div className="px-8 pb-4">
+            <div className="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/30 rounded-xl p-3 text-center">
+              <p className="text-yellow-300 text-sm font-bold">
+                <Sparkles size={14} className="inline mr-1" />
+                Only {freeSlots} FREE spots left!
+              </p>
+              <p className="text-white/50 text-xs">First 26 subscribers get their first month FREE</p>
+            </div>
+          </div>
+        )}
 
         <div className="px-8 pb-4 space-y-3">
           {/* Subscribe */}
@@ -88,22 +110,17 @@ function DonatePopup({ onClose }) {
 }
 
 // ============ MERCH / DEALS POPUP (every 4 min, auto-dismiss 10s) ============
+// Featuring LOTL hoodie visual — pushing LOTL merch for 2026 Year 5
 function MerchPopup({ onClose }) {
   useEffect(() => {
     const timer = setTimeout(onClose, 10 * 1000);
     return () => clearTimeout(timer);
   }, [onClose]);
 
-  const deals = [
-    { emoji: '👕', name: '2 Tanks', price: '$35.98', was: '$39.98', save: 'SAVE $4', color: 'green' },
-    { emoji: '🎪', name: 'Festival Pack', price: '$85.69', was: '$100.81', save: 'FESTIVAL PACK', color: 'purple' },
-    { emoji: '🔥', name: 'Full Fit Pack', price: '$103.53', was: '$121.80', save: 'FULL FIT', color: 'pink' },
-  ];
-
   return (
     <div className="fixed inset-0 z-[90] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fadeIn" onClick={onClose}>
       <div
-        className="relative w-full max-w-lg bg-gradient-to-b from-mystation-navy to-mystation-navyDark rounded-3xl border border-white/10 overflow-hidden shadow-2xl"
+        className="relative w-full max-w-md bg-gradient-to-b from-green-900/80 via-mystation-navy to-mystation-navyDark rounded-3xl border border-green-500/20 overflow-hidden shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close */}
@@ -111,46 +128,44 @@ function MerchPopup({ onClose }) {
           <X size={18} />
         </button>
 
-        {/* Header glow */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 bg-orange-500/20 rounded-full blur-3xl" />
+        {/* Animated glow */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-80 h-40 bg-green-500/20 rounded-full blur-3xl animate-pulse" />
 
-        <div className="relative pt-10 pb-4 px-8 text-center">
-          <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-orange-500 to-pink-600 rounded-2xl flex items-center justify-center shadow-lg shadow-orange-500/30">
-            <ShoppingBag size={32} className="text-white" />
+        {/* LOTL Year 5 Badge */}
+        <div className="relative pt-6 px-8 text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-green-500/20 border border-green-500/30 rounded-full mb-4">
+            <Sparkles size={14} className="text-green-400" />
+            <span className="text-green-400 text-xs font-black uppercase tracking-wider">LOTL 2026 — Year 5</span>
           </div>
-          <h2 className="text-2xl font-black text-white mb-2">Official Merch</h2>
-          <p className="text-white/60 text-sm">Rep the movement. Every purchase supports the Mike Page Foundation.</p>
         </div>
 
-        {/* LOTL Promo */}
+        {/* LOTL Hoodie Visual */}
         <div className="px-8 pb-4">
-          <div className="bg-gradient-to-r from-orange-500/10 to-pink-500/10 border border-orange-500/20 rounded-xl p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <Ticket size={16} className="text-orange-400" />
-              <span className="text-orange-300 text-xs font-bold uppercase tracking-wider">Love on the Lawn 2026</span>
+          <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-white/5 to-white/0 border border-white/10">
+            <img
+              src="/images/mockups/lotl-hoodie-black.jpg"
+              alt="Love on the Lawn 2026 Hoodie"
+              className="w-full h-56 object-cover"
+              onError={(e) => { e.target.parentElement.style.display = 'none'; }}
+            />
+            <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+              <p className="text-white font-black text-lg">LOTL Official Hoodie</p>
+              <p className="text-green-400 text-sm font-bold">Limited Edition Festival Gear</p>
             </div>
-            <p className="text-white text-sm font-bold">Spend $50+ = 25% OFF tickets</p>
-            <p className="text-white text-sm font-bold">Spend $100+ = 1 FREE TICKET</p>
           </div>
         </div>
 
-        {/* Deal Cards */}
-        <div className="px-8 pb-4 space-y-3">
-          {deals.map((deal, i) => (
-            <div key={i} className="flex items-center gap-4 p-3 bg-white/5 rounded-xl border border-white/5 hover:border-white/10 transition">
-              <span className="text-2xl">{deal.emoji}</span>
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <p className="text-white font-bold text-sm">{deal.name}</p>
-                  <span className={`px-2 py-0.5 bg-${deal.color}-500/20 text-${deal.color}-400 text-[10px] font-bold rounded-full`}>{deal.save}</span>
-                </div>
-                <div className="flex items-baseline gap-2">
-                  <span className={`text-${deal.color}-400 font-black`}>{deal.price}</span>
-                  <span className="text-white/30 line-through text-xs">{deal.was}</span>
-                </div>
-              </div>
+        {/* Ticket Promo */}
+        <div className="px-8 pb-4">
+          <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20 rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Ticket size={16} className="text-green-400" />
+              <span className="text-green-300 text-xs font-bold uppercase tracking-wider">Festival Merch Deal</span>
             </div>
-          ))}
+            <p className="text-white text-sm font-bold">Spend $50+ = 25% OFF LOTL tickets</p>
+            <p className="text-white text-sm font-bold">Spend $100+ = 1 FREE TICKET</p>
+            <p className="text-white/40 text-xs mt-1">September 5, 2026 — Festival Park, Elgin IL</p>
+          </div>
         </div>
 
         {/* CTA */}
@@ -158,23 +173,15 @@ function MerchPopup({ onClose }) {
           <Link
             href="/merch"
             onClick={onClose}
-            className="w-full flex items-center justify-center gap-2 py-4 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold rounded-xl hover:opacity-90 transition shadow-lg shadow-orange-500/30"
+            className="w-full flex items-center justify-center gap-2 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-xl hover:opacity-90 transition shadow-lg shadow-green-500/30"
           >
             <ShoppingBag size={18} />
-            Shop Now
+            Shop LOTL Merch
             <ArrowRight size={16} />
           </Link>
         </div>
 
-        {/* Any 5+ discount */}
-        <div className="px-8 pb-4 text-center">
-          <p className="text-white/50 text-xs">
-            <Sparkles size={12} className="inline text-blue-400 mr-1" />
-            Any 5+ items = <span className="text-blue-400 font-bold">15% OFF</span> auto-applied at checkout
-          </p>
-        </div>
-
-        <div className="px-8 pb-8 text-center">
+        <div className="px-8 pb-6 text-center">
           <button onClick={onClose} className="text-white/40 text-sm hover:text-white/60 transition">
             Keep listening
           </button>

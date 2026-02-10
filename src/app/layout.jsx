@@ -15,6 +15,7 @@ import PageTracker from '@/components/PageTracker';
 import TimedPopups from '@/components/TimedPopups';
 import EmailCapturePopup from '@/components/EmailCapturePopup';
 import TrackingPixels from '@/components/TrackingPixels';
+import SessionGuard from '@/components/SessionGuard';
 import Script from 'next/script';
 
 export const metadata = {
@@ -86,6 +87,7 @@ export default function RootLayout({ children }) {
           <TimedPopups />
           <EmailCapturePopup />
           <TrackingPixels />
+          <SessionGuard />
           <PageTracker />
         </ClientProviders>
         <Script id="register-sw" strategy="afterInteractive">

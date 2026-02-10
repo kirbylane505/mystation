@@ -13,59 +13,62 @@ import {
   Mic, Camera, Ticket, Heart, Clock, Flame, ShoppingBag, Sparkles
 } from 'lucide-react';
 
-// MyStation Merch Promo Banner
-function MerchPromoBanner() {
+// LOTL Merch Banner — Feature LOTL gear prominently for Year 5
+function LOTLMerchBanner() {
   return (
     <Link href="/merch" className="block group">
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 p-1">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-green-600 via-emerald-500 to-teal-500 p-1">
         <div className="relative bg-black/90 rounded-[22px] p-6 lg:p-8 overflow-hidden">
           {/* Animated background */}
-          <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-orange-500/20 animate-pulse" />
-          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-pink-500/30 to-transparent rounded-full blur-3xl" />
-          <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-purple-500/30 to-transparent rounded-full blur-3xl" />
+          <div className="absolute inset-0 bg-gradient-to-r from-green-500/20 via-emerald-500/20 to-teal-500/20 animate-pulse" />
+          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-green-500/30 to-transparent rounded-full blur-3xl" />
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-emerald-500/30 to-transparent rounded-full blur-3xl" />
 
           <div className="relative flex flex-col lg:flex-row items-center gap-6">
             {/* Left: Text */}
             <div className="flex-1 text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full mb-4">
-                <Sparkles size={14} className="text-yellow-400" />
-                <span className="text-white/80 text-xs font-bold uppercase tracking-wider">Official Merch</span>
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-green-500/20 border border-green-500/30 rounded-full mb-4">
+                <Sparkles size={14} className="text-green-400" />
+                <span className="text-green-300 text-xs font-black uppercase tracking-wider">LOTL Year 5 Merch</span>
               </div>
               <h3 className="text-2xl lg:text-3xl font-black text-white mb-2">
-                REP <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 bg-clip-text text-transparent">MYSTATION</span>
+                REP <span className="bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400 bg-clip-text text-transparent">LOVE ON THE LAWN</span>
               </h3>
-              <p className="text-white/60 text-sm lg:text-base mb-4">
-                Exclusive tees, hoodies & more. Rock the brand that rocks the culture.
+              <p className="text-white/60 text-sm lg:text-base mb-2">
+                Limited edition festival hoodies, tees, hats & more.
+              </p>
+              <p className="text-green-400 text-sm font-bold mb-4">
+                Spend $50+ = 25% OFF tickets | $100+ = FREE ticket
               </p>
               <div className="inline-flex items-center gap-2 text-white font-bold group-hover:gap-3 transition-all">
-                <ShoppingBag size={18} className="text-pink-400" />
-                Shop Now
+                <ShoppingBag size={18} className="text-green-400" />
+                Shop LOTL Collection
                 <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
               </div>
             </div>
 
-            {/* Right: Product images */}
+            {/* Right: LOTL Product images */}
             <div className="flex items-center gap-4">
-              <div className="w-24 h-24 lg:w-32 lg:h-32 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 border border-white/10 overflow-hidden transform -rotate-6 group-hover:rotate-0 transition-transform shadow-xl">
-                <img
-                  src="/images/mockups/mpf-tee.jpg"
-                  alt="MPF Tee"
-                  className="w-full h-full object-cover"
-                  onError={(e) => { e.target.style.display = 'none'; }}
-                />
-              </div>
-              <div className="w-28 h-28 lg:w-36 lg:h-36 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 border border-white/10 overflow-hidden transform rotate-3 group-hover:rotate-0 transition-transform shadow-xl z-10">
-                <img
-                  src="/images/mockups/idmg-label-tee-white.jpg"
-                  alt="IDMG Tee"
-                  className="w-full h-full object-cover"
-                  onError={(e) => { e.target.style.display = 'none'; }}
-                />
-              </div>
-              <div className="hidden lg:block w-24 h-24 lg:w-32 lg:h-32 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 border border-white/10 overflow-hidden transform -rotate-3 group-hover:rotate-0 transition-transform shadow-xl">
+              <div className="w-24 h-24 lg:w-32 lg:h-32 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 border border-green-500/20 overflow-hidden transform -rotate-6 group-hover:rotate-0 transition-transform shadow-xl">
                 <img
                   src="/images/mockups/lotl-tee-black.jpg"
-                  alt="MPF Tee White"
+                  alt="LOTL Tee"
+                  className="w-full h-full object-cover"
+                  onError={(e) => { e.target.style.display = 'none'; }}
+                />
+              </div>
+              <div className="w-28 h-28 lg:w-36 lg:h-36 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 border border-green-500/20 overflow-hidden transform rotate-3 group-hover:rotate-0 transition-transform shadow-xl z-10">
+                <img
+                  src="/images/mockups/lotl-hoodie-black.jpg"
+                  alt="LOTL Hoodie"
+                  className="w-full h-full object-cover"
+                  onError={(e) => { e.target.style.display = 'none'; }}
+                />
+              </div>
+              <div className="hidden lg:block w-24 h-24 lg:w-32 lg:h-32 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 border border-green-500/20 overflow-hidden transform -rotate-3 group-hover:rotate-0 transition-transform shadow-xl">
+                <img
+                  src="/images/mockups/lotl-snapback-black.jpg"
+                  alt="LOTL Snapback"
                   className="w-full h-full object-cover"
                   onError={(e) => { e.target.style.display = 'none'; }}
                 />
@@ -108,7 +111,7 @@ function CountdownTimer({ targetDate }) {
   if (!mounted) return null;
 
   return (
-    <div className="flex gap-4 justify-center">
+    <div className="flex gap-3 lg:gap-5 justify-center">
       {[
         { value: timeLeft.days, label: 'Days' },
         { value: timeLeft.hours, label: 'Hours' },
@@ -116,10 +119,11 @@ function CountdownTimer({ targetDate }) {
         { value: timeLeft.seconds, label: 'Secs' },
       ].map((item, i) => (
         <div key={i} className="text-center">
-          <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center mb-2 shadow-lg shadow-green-500/30">
-            <span className="text-3xl font-black text-white">{String(item.value).padStart(2, '0')}</span>
+          <div className="w-20 h-20 lg:w-24 lg:h-24 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center mb-2 shadow-xl shadow-green-500/40 border border-green-400/30 relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+            <span className="text-3xl lg:text-4xl font-black text-white relative">{String(item.value).padStart(2, '0')}</span>
           </div>
-          <span className="text-white/50 text-sm">{item.label}</span>
+          <span className="text-green-400/60 text-xs font-bold uppercase tracking-wider">{item.label}</span>
         </div>
       ))}
     </div>
@@ -234,78 +238,102 @@ export default function LOTLPage() {
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section */}
-      <section className="relative py-20 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-green-900/80 via-emerald-900/60 to-teal-900/50" />
-        <div className="bg-orb w-[600px] h-[600px] bg-green-500 top-[-200px] left-[-200px]" />
-        <div className="bg-orb w-[500px] h-[500px] bg-emerald-400 top-[100px] right-[-150px]" style={{ animationDelay: '-3s' }} />
-        <div className="bg-orb w-[400px] h-[400px] bg-teal-400 bottom-[-100px] left-[30%]" style={{ animationDelay: '-7s' }} />
+      {/* Hero Section — SUPER LIT */}
+      <section className="relative py-16 lg:py-24 overflow-hidden">
+        {/* Multi-layer animated background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-green-900 via-emerald-950 to-black" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-green-500/30 via-transparent to-transparent" />
+        <div className="bg-orb w-[700px] h-[700px] bg-green-500 top-[-300px] left-[-200px] opacity-40" />
+        <div className="bg-orb w-[600px] h-[600px] bg-emerald-400 top-[50px] right-[-200px] opacity-30" style={{ animationDelay: '-3s' }} />
+        <div className="bg-orb w-[500px] h-[500px] bg-teal-400 bottom-[-150px] left-[20%] opacity-25" style={{ animationDelay: '-7s' }} />
+        <div className="bg-orb w-[300px] h-[300px] bg-yellow-400 top-[200px] left-[60%] opacity-15" style={{ animationDelay: '-5s' }} />
+
+        {/* Animated grid lines */}
+        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)', backgroundSize: '60px 60px' }} />
 
         <div className="relative max-w-screen-xl mx-auto px-6 text-center">
+          {/* YEAR 5 Badge */}
+          <div className="inline-flex items-center gap-3 px-6 py-2.5 bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-400/40 rounded-full mb-8 shadow-lg shadow-green-500/10">
+            <Flame size={18} className="text-yellow-400 animate-pulse" />
+            <span className="text-green-300 text-sm font-black uppercase tracking-[0.2em]">Year 5 — The Biggest One Yet</span>
+            <Flame size={18} className="text-yellow-400 animate-pulse" />
+          </div>
+
           {/* LOTL Logo */}
           <div className="mb-8">
             <img
               src="/images/lotl-logo-2026.png"
               alt="Love on the Lawn Day 2026"
-              className="w-80 lg:w-96 mx-auto drop-shadow-2xl"
+              className="w-80 lg:w-[28rem] mx-auto drop-shadow-[0_0_40px_rgba(34,197,94,0.3)]"
             />
           </div>
 
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-500/10 border border-green-500/30 rounded-full mb-6">
-            <Flame size={16} className="text-green-400" />
-            <span className="text-green-400 text-sm font-medium">10,000 Capacity Annual Festival</span>
-          </div>
+          <h1 className="text-4xl lg:text-6xl font-black text-white mb-4 leading-tight">
+            <span className="bg-gradient-to-r from-green-300 via-emerald-200 to-teal-300 bg-clip-text text-transparent">
+              10,000 Fans. 15+ Artists.
+            </span>
+            <br />
+            <span className="text-white">One Legendary Day.</span>
+          </h1>
 
-          <p className="text-xl text-white/60 mb-8 max-w-2xl mx-auto">
-            Elgin's premier outdoor music festival at Festival Park, brought to you by Mike Page Foundation.
-            Live music, community, and good vibes.
+          <p className="text-lg lg:text-xl text-white/60 mb-8 max-w-2xl mx-auto">
+            Elgin's premier outdoor music festival. Live music, community, food, and culture — all supporting youth music programs.
           </p>
 
-          <div className="flex items-center justify-center gap-6 text-white/50 mb-10">
-            <span className="flex items-center gap-2">
-              <Calendar size={18} className="text-green-400" />
-              September 5, 2026
+          <div className="flex flex-wrap items-center justify-center gap-4 lg:gap-8 text-white/60 mb-10">
+            <span className="flex items-center gap-2 text-lg">
+              <Calendar size={20} className="text-green-400" />
+              <span className="font-bold text-white">September 5, 2026</span>
             </span>
-            <span className="flex items-center gap-2">
-              <MapPin size={18} className="text-green-400" />
-              Festival Park, Elgin, IL
+            <span className="hidden lg:block text-white/20">|</span>
+            <span className="flex items-center gap-2 text-lg">
+              <MapPin size={20} className="text-green-400" />
+              <span className="font-bold text-white">Festival Park, Elgin, IL</span>
             </span>
-            <span className="flex items-center gap-2">
-              <Users size={18} className="text-green-400" />
-              10,000 Capacity
+            <span className="hidden lg:block text-white/20">|</span>
+            <span className="flex items-center gap-2 text-lg">
+              <Users size={20} className="text-green-400" />
+              <span className="font-bold text-white">10,000 Capacity</span>
             </span>
           </div>
 
           {/* Countdown */}
-          <div className="mb-10">
-            <p className="text-white/40 text-sm mb-4">COUNTDOWN TO SEPTEMBER 5, 2026</p>
+          <div className="mb-12">
+            <p className="text-green-400/60 text-sm font-bold uppercase tracking-widest mb-4">Countdown to Festival Day</p>
             <CountdownTimer targetDate={FESTIVAL_DATE} />
           </div>
 
-          <div className="flex flex-wrap gap-4 justify-center">
+          {/* CTA Buttons */}
+          <div className="flex flex-wrap gap-4 justify-center mb-8">
             <a
               href="https://cash.app/$RIDE4PAGEMUSIC847?note=LOTL%20Ticket"
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-primary bg-gradient-to-r from-green-500 to-emerald-600 flex items-center gap-2"
+              className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-black text-lg rounded-2xl hover:shadow-xl hover:shadow-green-500/30 transition-all hover:scale-105 flex items-center gap-2"
             >
-              <Ticket size={18} />
+              <Ticket size={20} />
               Get Tickets
             </a>
+            <Link
+              href="/merch"
+              className="px-8 py-4 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border-2 border-yellow-500/40 text-yellow-300 font-black text-lg rounded-2xl hover:bg-yellow-500/30 transition-all flex items-center gap-2"
+            >
+              <ShoppingBag size={20} />
+              Shop LOTL Merch
+            </Link>
             <button
               onClick={() => setActiveTab('streams')}
-              className="btn-secondary flex items-center gap-2"
+              className="px-8 py-4 bg-white/10 border border-white/20 text-white font-bold text-lg rounded-2xl hover:bg-white/20 transition-all flex items-center gap-2"
             >
-              <Video size={18} />
+              <Video size={20} />
               Watch Streams
             </button>
-            <button
-              onClick={() => setActiveTab('streamers')}
-              className="btn-secondary flex items-center gap-2"
-            >
-              <Camera size={18} />
-              Become a Streamer
-            </button>
+          </div>
+
+          {/* Merch deal callout */}
+          <div className="inline-flex items-center gap-2 px-5 py-2 bg-yellow-500/10 border border-yellow-500/20 rounded-full">
+            <Gift size={14} className="text-yellow-400" />
+            <span className="text-yellow-300 text-sm font-bold">Spend $50+ merch = 25% OFF tickets | $100+ = FREE ticket</span>
           </div>
         </div>
       </section>
@@ -339,9 +367,9 @@ export default function LOTLPage() {
       {activeTab === 'overview' && (
         <section className="py-16">
           <div className="max-w-screen-xl mx-auto px-6">
-            {/* MyStation Merch Banner */}
+            {/* LOTL Merch Banner — Year 5 Featured */}
             <div className="mb-12">
-              <MerchPromoBanner />
+              <LOTLMerchBanner />
             </div>
 
             {/* Stats */}
@@ -826,17 +854,29 @@ export default function LOTLPage() {
         </section>
       )}
 
+      {/* LOTL Merch Spotlight — Push merch before CTA */}
+      <section className="py-12">
+        <div className="max-w-screen-xl mx-auto px-6">
+          <LOTLMerchBanner />
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="py-20">
         <div className="max-w-screen-xl mx-auto px-6">
-          <div className="glass rounded-3xl p-10 lg:p-16 text-center relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-green-500/10 via-emerald-500/10 to-teal-500/10" />
+          <div className="relative rounded-3xl p-10 lg:p-16 text-center overflow-hidden border border-green-500/20">
+            <div className="absolute inset-0 bg-gradient-to-br from-green-900/40 via-emerald-900/30 to-black" />
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-48 bg-green-500/20 rounded-full blur-3xl" />
             <div className="relative">
-              <h2 className="text-3xl lg:text-4xl font-black text-white mb-4">
-                Don't Miss LOTL 2026
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-green-500/10 border border-green-500/20 rounded-full mb-6">
+                <Flame size={14} className="text-yellow-400" />
+                <span className="text-green-400 text-xs font-black uppercase tracking-wider">Year 5 — September 5, 2026</span>
+              </div>
+              <h2 className="text-3xl lg:text-5xl font-black text-white mb-4">
+                Don't Miss <span className="bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">LOTL 2026</span>
               </h2>
               <p className="text-white/50 text-lg mb-8 max-w-2xl mx-auto">
-                10,000 fans. 15+ artists. One incredible day. All proceeds support youth music programs
+                10,000 fans. 15+ artists. One legendary day. All proceeds support youth music programs
                 through the Mike Page Foundation.
               </p>
               <div className="flex flex-wrap gap-4 justify-center">
@@ -844,16 +884,16 @@ export default function LOTLPage() {
                   href="https://cash.app/$RIDE4PAGEMUSIC847?note=LOTL%20Ticket"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="btn-primary bg-gradient-to-r from-green-500 to-emerald-600 flex items-center gap-2"
+                  className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-black rounded-2xl hover:shadow-xl hover:shadow-green-500/30 transition-all hover:scale-105 flex items-center gap-2"
                 >
                   <Ticket size={18} />
                   Get Tickets
                 </a>
-                <Link href="/merch" className="btn-primary bg-gradient-to-r from-purple-500 to-pink-500 flex items-center gap-2">
+                <Link href="/merch" className="px-8 py-4 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border-2 border-yellow-500/30 text-yellow-300 font-black rounded-2xl hover:bg-yellow-500/30 transition-all flex items-center gap-2">
                   <ShoppingBag size={18} />
-                  Shop Merch
+                  Shop LOTL Merch
                 </Link>
-                <Link href="/fan-zone" className="btn-secondary flex items-center gap-2">
+                <Link href="/fan-zone" className="px-8 py-4 bg-white/10 border border-white/20 text-white font-bold rounded-2xl hover:bg-white/20 transition flex items-center gap-2">
                   <Heart size={18} />
                   Join Fan Zone
                 </Link>

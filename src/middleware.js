@@ -71,19 +71,24 @@ export function middleware(request) {
 
   // Vault protection — server-side block, only accessible with secret key
   const { pathname, searchParams } = request.nextUrl;
-  if (pathname.startsWith('/vault')) {
+  if (pathname.startsWith('/vault') && !pathname.startsWith('/api/vault')) {
+    const vaultSecret = process.env.VAULT_SECRET;
+    if (!vaultSecret) {
+      // No secret configured — vault locked
+      return NextResponse.redirect(new URL('/', request.url));
+    }
+
     const vaultKey = searchParams.get('key');
     const vaultCookie = request.cookies.get('vault_access')?.value;
-    const secret = process.env.VAULT_SECRET || 'mpf2026';
 
-    if (vaultKey === secret) {
+    if (vaultKey === vaultSecret) {
       // Valid key — set cookie so they don't need the key every time
       const res = NextResponse.redirect(new URL('/vault', request.url));
-      res.cookies.set('vault_access', secret, { httpOnly: true, secure: true, maxAge: 60 * 60 * 24 }); // 24h
+      res.cookies.set('vault_access', vaultSecret, { httpOnly: true, secure: true, maxAge: 60 * 60 * 24, sameSite: 'strict' }); // 24h
       return res;
     }
 
-    if (vaultCookie !== secret) {
+    if (vaultCookie !== vaultSecret) {
       // No access — redirect to home
       return NextResponse.redirect(new URL('/', request.url));
     }

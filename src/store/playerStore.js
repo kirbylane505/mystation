@@ -188,7 +188,7 @@ export const usePlayerStore = create(
   )
 );
 
-// User state with persistence
+// User state with persistence + concurrent session prevention
 export const useUserStore = create(
   persist(
     (set, get) => ({
@@ -198,6 +198,8 @@ export const useUserStore = create(
       supporterTier: 'free', // 'free', 'supporter', 'vip', 'foundation'
       favorites: [],
       email: '',
+      sessionToken: null,
+      sessionKicked: false,
 
       setUser: (user) => set({
         user,
@@ -214,13 +216,61 @@ export const useUserStore = create(
         user: { email, isSubscribed: true, tier: 'supporter' }
       }),
 
-      logout: () => set({
-        user: null,
-        isLoggedIn: false,
-        isSubscribed: false,
-        supporterTier: 'free',
-        email: ''
-      }),
+      logout: () => {
+        set({
+          user: null,
+          isLoggedIn: false,
+          isSubscribed: false,
+          supporterTier: 'free',
+          email: '',
+          sessionToken: null,
+          sessionKicked: false,
+        });
+      },
+
+      // Session heartbeat — call every 30s to enforce single device login
+      sendHeartbeat: async () => {
+        const { email, sessionToken, isLoggedIn } = get();
+        if (!isLoggedIn || !email) return;
+
+        try {
+          const res = await fetch('/api/auth/heartbeat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, sessionToken }),
+          });
+          const data = await res.json();
+
+          if (data.kicked) {
+            // Another device signed in — force logout
+            set({ sessionKicked: true, isLoggedIn: false, isSubscribed: false });
+            return;
+          }
+
+          if (data.sessionToken && data.sessionToken !== sessionToken) {
+            set({ sessionToken: data.sessionToken });
+          }
+        } catch {
+          // Network error — don't kick on connectivity issues
+        }
+      },
+
+      // Initialize session on login
+      initSession: async (email) => {
+        try {
+          const res = await fetch('/api/auth/heartbeat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, sessionToken: null }),
+          });
+          const data = await res.json();
+          if (data.sessionToken) {
+            set({ sessionToken: data.sessionToken, sessionKicked: false });
+          }
+        } catch {}
+      },
+
+      dismissKicked: () => set({ sessionKicked: false }),
 
       toggleFavorite: (trackId) => set((state) => ({
         favorites: state.favorites.includes(trackId)
@@ -234,7 +284,8 @@ export const useUserStore = create(
         isSubscribed: state.isSubscribed,
         email: state.email,
         favorites: state.favorites,
-        supporterTier: state.supporterTier
+        supporterTier: state.supporterTier,
+        sessionToken: state.sessionToken,
       })
     }
   )

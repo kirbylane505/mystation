@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Play, Pause, Music, Share2, Heart, Disc3, Loader2, SkipBack, SkipForward, Volume2, VolumeX } from 'lucide-react';
+import { Play, Pause, Music, Share2, Heart, Disc3, Loader2, SkipBack, SkipForward, Volume2, VolumeX, RotateCcw } from 'lucide-react';
 import { usePlayerStore } from '@/store/playerStore';
 import { shareMP3 } from '@/lib/shareAudio';
 
@@ -15,8 +15,13 @@ export default function SongClient({ track, allTracks, albumArt }) {
   } = usePlayerStore();
   const [shared, setShared] = useState(false);
   const [mp3Loading, setMp3Loading] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const seekBarRef = useRef(null);
+  const isDraggingRef = useRef(false);
   const isThisTrack = currentTrack?.id === track.id;
   const isThisPlaying = isThisTrack && isPlaying;
+
+  useEffect(() => { setMounted(true); }, []);
 
   // Auto-play on mount
   useEffect(() => {
@@ -32,6 +37,20 @@ export default function SongClient({ track, allTracks, albumArt }) {
       setTrack(track);
     }
   };
+
+  // Rewind 10 seconds
+  const handleRewind = useCallback(() => {
+    if (isThisTrack && duration > 0) {
+      setProgress(Math.max(0, progress - 10));
+    }
+  }, [isThisTrack, duration, progress, setProgress]);
+
+  // Forward 10 seconds
+  const handleForward = useCallback(() => {
+    if (isThisTrack && duration > 0) {
+      setProgress(Math.min(duration, progress + 10));
+    }
+  }, [isThisTrack, duration, progress, setProgress]);
 
   const handleShare = async () => {
     const url = `https://mystationlive.com/song/${track.id}`;
@@ -52,12 +71,29 @@ export default function SongClient({ track, allTracks, albumArt }) {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const handleSeek = (e) => {
-    const bar = e.currentTarget;
+  // Seek handler that works for both click and touch drag
+  const seekToPosition = useCallback((clientX) => {
+    const bar = seekBarRef.current;
+    if (!bar || !duration) return;
     const rect = bar.getBoundingClientRect();
-    const percent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    const percent = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
     setProgress(percent * duration);
+  }, [duration, setProgress]);
+
+  const handleSeek = (e) => seekToPosition(e.clientX);
+
+  // Touch drag support for seek bar
+  const handleTouchStart = (e) => {
+    isDraggingRef.current = true;
+    seekToPosition(e.touches[0].clientX);
   };
+  const handleTouchMove = (e) => {
+    if (isDraggingRef.current) {
+      e.preventDefault();
+      seekToPosition(e.touches[0].clientX);
+    }
+  };
+  const handleTouchEnd = () => { isDraggingRef.current = false; };
 
   const handleSendMP3 = async () => {
     setMp3Loading(true);
@@ -120,76 +156,90 @@ export default function SongClient({ track, allTracks, albumArt }) {
 
         {/* Player Controls */}
         <div className="w-full max-w-md mb-8">
-          {/* Transport: Prev / Play / Next */}
-          <div className="flex items-center justify-center gap-6 mb-5">
-            <button onClick={prevTrack} className="text-white/50 hover:text-white transition active:scale-95">
-              <SkipBack size={28} fill="currentColor" />
+          {/* Progress / Seek Bar — Always visible */}
+          <div
+            ref={seekBarRef}
+            className="w-full h-3 bg-white/10 rounded-full cursor-pointer relative group touch-none"
+            onClick={handleSeek}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
+            <div
+              className="h-full bg-gradient-to-r from-blue-500 to-blue-400 rounded-full relative transition-[width] duration-100"
+              style={{ width: `${duration ? (progress / duration) * 100 : 0}%` }}
+            >
+              <div className="absolute right-0 top-1/2 -translate-y-1/2 w-5 h-5 bg-white rounded-full shadow-lg md:opacity-0 md:group-hover:opacity-100 transition" />
+            </div>
+          </div>
+          <div className="flex justify-between mt-2 px-1">
+            <span className="text-xs text-white/40 font-mono">{formatTime(isThisTrack ? progress : 0)}</span>
+            <span className="text-xs text-white/40 font-mono">{formatTime(isThisTrack ? duration : 0)}</span>
+          </div>
+
+          {/* Transport: Rewind / Prev / Play / Next / Forward */}
+          <div className="flex items-center justify-center gap-4 mt-4 mb-5">
+            <button
+              onClick={handleRewind}
+              className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/20 active:scale-90 transition-all"
+              title="Rewind 10s"
+            >
+              <RotateCcw size={20} />
+            </button>
+            <button onClick={prevTrack} className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/20 active:scale-90 transition-all">
+              <SkipBack size={24} fill="currentColor" />
             </button>
             <button
               onClick={handlePlay}
-              className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-2xl shadow-blue-500/40 hover:scale-110 transition-all duration-300"
+              className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-2xl shadow-blue-500/40 hover:scale-110 active:scale-95 transition-all duration-300"
             >
               {isThisPlaying ? <Pause size={36} className="text-white" /> : <Play size={36} className="text-white ml-1" />}
             </button>
-            <button onClick={nextTrack} className="text-white/50 hover:text-white transition active:scale-95">
-              <SkipForward size={28} fill="currentColor" />
+            <button onClick={nextTrack} className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/20 active:scale-90 transition-all">
+              <SkipForward size={24} fill="currentColor" />
+            </button>
+            <button
+              onClick={handleForward}
+              className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/20 active:scale-90 transition-all rotate-180"
+              title="Forward 10s"
+            >
+              <RotateCcw size={20} />
             </button>
           </div>
 
-          {/* Progress / Seek Bar */}
-          {isThisTrack && (
-            <>
-              <div
-                className="w-full h-3 bg-white/10 rounded-full cursor-pointer relative group"
-                onClick={handleSeek}
-              >
-                <div
-                  className="h-full bg-gradient-to-r from-blue-500 to-blue-400 rounded-full relative"
-                  style={{ width: `${duration ? (progress / duration) * 100 : 0}%` }}
-                >
-                  <div className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition" />
-                </div>
-              </div>
-              <div className="flex justify-between mt-2 px-1">
-                <span className="text-xs text-white/40 font-mono">{formatTime(progress)}</span>
-                <span className="text-xs text-white/40 font-mono">{formatTime(duration)}</span>
-              </div>
-            </>
-          )}
-
           {/* Volume Control */}
-          <div className="flex items-center justify-center gap-3 mt-4">
+          <div className="flex items-center justify-center gap-3">
             <button
               onClick={() => setVolume(Math.max(0, volume - 0.2))}
-              className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white text-lg font-bold active:bg-white/20 transition"
+              className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-white text-xl font-bold active:bg-white/20 active:scale-90 transition-all"
             >
               −
             </button>
-            <button onClick={toggleMute} className="flex items-center gap-2">
-              {isMuted || volume === 0 ? (
-                <VolumeX size={22} className="text-red-400" />
+            <button onClick={toggleMute} className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-white/5 transition">
+              {mounted && (isMuted || volume === 0) ? (
+                <VolumeX size={24} className="text-red-400" />
               ) : (
-                <Volume2 size={22} className="text-blue-400" />
+                <Volume2 size={24} className="text-blue-400" />
               )}
-              <span className="text-white font-bold text-sm w-10">{Math.round((isMuted ? 0 : volume) * 100)}%</span>
+              <span className="text-white font-bold text-lg w-12 text-center">{mounted ? Math.round((isMuted ? 0 : volume) * 100) : 80}%</span>
             </button>
             <button
               onClick={() => setVolume(Math.min(1, volume + 0.2))}
-              className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white text-lg font-bold active:bg-white/20 transition"
+              className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-white text-xl font-bold active:bg-white/20 active:scale-90 transition-all"
             >
               +
             </button>
           </div>
 
-          {/* Volume Bars */}
-          <div className="flex justify-center gap-1.5 mt-3">
+          {/* Volume Bars — larger touch targets */}
+          <div className="flex justify-center gap-2 mt-3">
             {[1, 2, 3, 4, 5].map((level) => (
               <button
                 key={level}
                 onClick={() => setVolume(level * 0.2)}
-                className={`h-6 w-10 rounded-full transition-all ${
-                  (isMuted ? 0 : volume) >= level * 0.2
-                    ? 'bg-gradient-to-t from-blue-500 to-cyan-400'
+                className={`h-8 w-12 rounded-lg transition-all active:scale-90 ${
+                  mounted && (isMuted ? 0 : volume) >= level * 0.2
+                    ? 'bg-gradient-to-t from-blue-500 to-cyan-400 shadow-md shadow-blue-500/20'
                     : 'bg-white/10'
                 }`}
               />

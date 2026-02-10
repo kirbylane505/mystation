@@ -32,8 +32,7 @@ const getDefaultTracks = () => {
   return [...newVaultTracks, ...legacyVaultTracks];
 };
 
-// Vault PIN - Change this to your secure PIN
-const VAULT_PIN = '0505'; // Owner Access
+// Vault PIN is now server-side only (env: VAULT_PIN)
 
 export default function VaultPage() {
   const [isUnlocked, setIsUnlocked] = useState(false);
@@ -72,14 +71,37 @@ export default function VaultPage() {
     }
   }, [vaultTracks]);
 
-  const handlePinSubmit = (e) => {
+  const [pinLoading, setPinLoading] = useState(false);
+  const [pinMessage, setPinMessage] = useState('');
+
+  const handlePinSubmit = async (e) => {
     e.preventDefault();
-    if (pinInput === VAULT_PIN) {
-      setIsUnlocked(true);
-      setPinError(false);
-    } else {
+    setPinLoading(true);
+    setPinError(false);
+    setPinMessage('');
+
+    try {
+      const res = await fetch('/api/vault/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pin: pinInput }),
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        setIsUnlocked(true);
+        setPinError(false);
+      } else {
+        setPinError(true);
+        setPinMessage(data.error || 'Wrong PIN');
+        setPinInput('');
+      }
+    } catch {
       setPinError(true);
+      setPinMessage('Connection error. Try again.');
       setPinInput('');
+    } finally {
+      setPinLoading(false);
     }
   };
 
@@ -190,15 +212,16 @@ export default function VaultPage() {
                 autoFocus
               />
               {pinError && (
-                <p className="text-red-400 text-sm mt-2 text-center">Wrong PIN. Try again.</p>
+                <p className="text-red-400 text-sm mt-2 text-center">{pinMessage || 'Wrong PIN. Try again.'}</p>
               )}
             </div>
             <button
               type="submit"
-              className="w-full py-4 bg-gradient-to-r from-red-500 to-red-600 text-white font-bold rounded-xl hover:shadow-lg hover:shadow-red-500/30 transition flex items-center justify-center gap-2"
+              disabled={pinLoading}
+              className="w-full py-4 bg-gradient-to-r from-red-500 to-red-600 text-white font-bold rounded-xl hover:shadow-lg hover:shadow-red-500/30 transition flex items-center justify-center gap-2 disabled:opacity-50"
             >
               <Unlock size={20} />
-              Unlock Vault
+              {pinLoading ? 'Verifying...' : 'Unlock Vault'}
             </button>
           </form>
 
