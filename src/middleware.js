@@ -139,7 +139,7 @@ export function middleware(request) {
   headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
 
   // Permissions policy - restrict browser features
-  headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  headers.set('Permissions-Policy', 'camera=(), microphone=(self), geolocation=()');
 
   // Content Security Policy - prevent XSS and data injection
   const csp = [

@@ -263,7 +263,7 @@ export default function MerchPage() {
         // === PRINTIFY PRODUCTS ===
         if (printifyData.success && !printifyData.demo) {
           const printifyProducts = printifyData.products.map((p) => {
-            const enabledVariants = (p.variants || []).filter(v => v.is_enabled);
+            const enabledVariants = (p.variants || []).filter(v => v.is_available);
             const prices = enabledVariants.map(v => v.price / 100).filter(pr => pr > 0);
             const startingPrice = prices.length > 0 ? Math.min(...prices) : null;
             const defaultImg = (p.images || []).find(img => img.is_default);
@@ -408,7 +408,7 @@ export default function MerchPage() {
         const res = await fetch(`/api/printify/products/${item.printifyId}`);
         const data = await res.json();
         if (data.success && data.product) {
-          const enabledVariants = (data.product.variants || []).filter(v => v.is_enabled);
+          const enabledVariants = (data.product.variants || []).filter(v => v.is_available);
           // Normalize to common shape
           setProductDetails({
             ...data.product,
