@@ -127,22 +127,18 @@ export default function VaultPage() {
 
   // Play track using global player
   const playTrack = (track) => {
-    // Convert vault track format to global player format
-    const playerTrack = {
-      id: `vault-${track.id}`,
-      title: track.title,
-      album: 'Vault',
-      audioFile: track.audioUrl,
-      producer: track.producer,
-      featured: null,
-    };
+    // Ensure vault is unlocked in global store before playing
+    setVaultUnlocked(true);
+
     const trackIndex = vaultTracks.findIndex(t => t.id === track.id);
     const allPlayerTracks = vaultTracks.map(t => ({
       id: `vault-${t.id}`,
       title: t.title,
       album: 'Vault',
+      albumId: 'vault',
       audioFile: t.audioUrl,
       producer: t.producer,
+      featured: null,
     }));
     setQueue(allPlayerTracks, trackIndex >= 0 ? trackIndex : 0);
   };
@@ -324,6 +320,7 @@ export default function VaultPage() {
                 return (
                 <div
                   key={track.id}
+                  onClick={() => isCurrentTrack && isPlaying ? togglePlay() : playTrack(track)}
                   className={`flex items-center gap-4 p-4 hover:bg-white/5 transition cursor-pointer ${isCurrentTrack ? 'bg-red-500/10' : ''}`}
                 >
                   {/* Play Button */}

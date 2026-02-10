@@ -32,11 +32,10 @@ function fuzzyMatch(query, title) {
   return queryWords.length > 0 ? matches / queryWords.length : 0;
 }
 
-function findBestTrack(query) {
+function findBestTrack(query, includeVault = false) {
   let best = null;
   let bestScore = 0;
-  // Only search non-vault tracks (vault requires PIN)
-  const searchable = tracks.filter(t => t.albumId !== 'vault');
+  const searchable = includeVault ? tracks : tracks.filter(t => t.albumId !== 'vault');
   for (const track of searchable) {
     const score = fuzzyMatch(query, track.title);
     if (score > bestScore) {
@@ -93,11 +92,15 @@ export default function ExtensionBridge() {
       // Play a specific song
       else if (cmd.startsWith('play ')) {
         const query = cmd.replace('play ', '').trim();
+        const vaultOpen = store.vaultUnlocked;
         if (query === 'all' || query === 'everything') {
-          const nonVault = tracks.filter(t => t.albumId !== 'vault');
-          store.setQueue(nonVault, 0);
+          const playable = vaultOpen ? tracks : tracks.filter(t => t.albumId !== 'vault');
+          store.setQueue(playable, 0);
+        } else if (query === 'vault' && vaultOpen) {
+          const vaultTracks = tracks.filter(t => t.albumId === 'vault');
+          if (vaultTracks.length > 0) store.setQueue(vaultTracks, 0);
         } else {
-          const track = findBestTrack(query);
+          const track = findBestTrack(query, vaultOpen);
           if (track) {
             store.setTrack(track);
           }
@@ -105,7 +108,7 @@ export default function ExtensionBridge() {
       }
       // Bare query — try to match a song
       else {
-        const track = findBestTrack(cmd);
+        const track = findBestTrack(cmd, store.vaultUnlocked);
         if (track) {
           store.setTrack(track);
         }
