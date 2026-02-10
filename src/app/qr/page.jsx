@@ -1,14 +1,11 @@
+'use client';
+
 /**
  * MYSTATION - QR Code Flyers
  * Printable QR codes for physical marketing
  */
 
 import { QrCode, Music, ShoppingBag, Ticket, Heart } from 'lucide-react';
-
-export const metadata = {
-  title: 'QR Codes - Print & Share',
-  description: 'Printable QR codes for MyStation. Use at events, shows, and LOTL.',
-};
 
 const qrCodes = [
   {

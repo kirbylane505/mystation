@@ -56,10 +56,8 @@ export async function generateMetadata({ params }) {
   };
 }
 
-// Generate static params for all tracks
-export async function generateStaticParams() {
-  return tracks.map(t => ({ id: String(t.id) }));
-}
+// Dynamic rendering — too many tracks to statically generate all at build time
+export const dynamic = 'force-dynamic';
 
 export default function SongPage({ params }) {
   const { id } = params;

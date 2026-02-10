@@ -87,8 +87,13 @@ function DonatePopup({ onClose }) {
   );
 }
 
-// ============ MERCH / DEALS POPUP (every 4 min) ============
+// ============ MERCH / DEALS POPUP (every 4 min, auto-dismiss 10s) ============
 function MerchPopup({ onClose }) {
+  useEffect(() => {
+    const timer = setTimeout(onClose, 10 * 1000);
+    return () => clearTimeout(timer);
+  }, [onClose]);
+
   const deals = [
     { emoji: '👕', name: '2 Tanks', price: '$35.98', was: '$39.98', save: 'SAVE $4', color: 'green' },
     { emoji: '🎪', name: 'Festival Pack', price: '$85.69', was: '$100.81', save: 'FESTIVAL PACK', color: 'purple' },
