@@ -270,7 +270,7 @@ export default function LOTLPage() {
 
           <h1 className="text-4xl lg:text-6xl font-black text-white mb-4 leading-tight">
             <span className="bg-gradient-to-r from-green-300 via-emerald-200 to-teal-300 bg-clip-text text-transparent">
-              10,000 Fans. 15+ Artists.
+              5,000+ Fans. One Stage.
             </span>
             <br />
             <span className="text-white">One Legendary Day.</span>
@@ -375,8 +375,8 @@ export default function LOTLPage() {
             {/* Stats */}
             <div className="grid md:grid-cols-4 gap-6 mb-16">
               {[
-                { icon: Users, value: '10K', label: 'Capacity', color: 'from-green-500 to-emerald-600' },
-                { icon: Mic, value: '15+', label: 'Artists', color: 'from-blue-500 to-indigo-600' },
+                { icon: Users, value: '5K+', label: 'Fans', color: 'from-green-500 to-emerald-600' },
+                { icon: Mic, value: 'Live', label: 'Performances', color: 'from-blue-500 to-indigo-600' },
                 { icon: Video, value: '5', label: 'Live Streams', color: 'from-purple-500 to-pink-600' },
                 { icon: Gift, value: '$50K', label: 'To Youth Programs', color: 'from-orange-500 to-red-600' },
               ].map((stat, i) => {
@@ -876,7 +876,7 @@ export default function LOTLPage() {
                 Don't Miss <span className="bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">LOTL 2026</span>
               </h2>
               <p className="text-white/50 text-lg mb-8 max-w-2xl mx-auto">
-                10,000 fans. 15+ artists. One legendary day. All proceeds support youth music programs
+                5,000+ fans. One legendary day. All proceeds support youth music programs
                 through the Mike Page Foundation.
               </p>
               <div className="flex flex-wrap gap-4 justify-center">
