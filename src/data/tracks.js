@@ -16,12 +16,30 @@ export const tracks = [
     trackNumber: 1,
     albumId: 'singles-2026',
     audioFile: '/audio/singles/Mike Page - Favorite Person_MASTERED.mp3',
+    isNew: true,
     isFeatured: true,
     featuredWeek: '2026-01-31',
     bpm: 150,
     key: 'C Minor',
     hitScore: 95,
     producer: 'The Cubist (SHOW_IDMG)'
+  },
+  {
+    id: 101,
+    title: "723",
+    artist: "Mike Page",
+    featured: "Varro",
+    album: "Coming Soon",
+    year: 2026,
+    duration: "3:07",
+    trackNumber: 2,
+    albumId: 'singles-2026',
+    audioFile: '/audio/singles/Mike Page x Varro - 723_MASTERED.mp3',
+    isNew: true,
+    bpm: 140,
+    key: 'D Minor',
+    hitScore: 90,
+    producer: 'The Cubist'
   },
   // ========================================
   // CINDY'S SON (Extended Album) - 2022
