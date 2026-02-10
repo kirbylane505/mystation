@@ -262,7 +262,11 @@ export default function MerchPage() {
 
         // === PRINTIFY PRODUCTS ===
         if (printifyData.success && !printifyData.demo) {
-          const printifyProducts = printifyData.products.map((p) => {
+          const HIDDEN_PRINTIFY = ['jogger', 'sweatpant', 'track pant', 'bike short', 'legging'];
+          const printifyProducts = printifyData.products.filter((p) => {
+            const lower = (p.title || '').toLowerCase();
+            return !HIDDEN_PRINTIFY.some(ex => lower.includes(ex));
+          }).map((p) => {
             const enabledVariants = (p.variants || []).filter(v => v.is_available);
             const prices = enabledVariants.map(v => v.price / 100).filter(pr => pr > 0);
             const startingPrice = prices.length > 0 ? Math.min(...prices) : null;
