@@ -293,7 +293,7 @@ export default function LOTLPage() {
             <span className="hidden lg:block text-white/20">|</span>
             <span className="flex items-center gap-2 text-lg">
               <Users size={20} className="text-green-400" />
-              <span className="font-bold text-white">10,000 Capacity</span>
+              <span className="font-bold text-white">5,000 Capacity</span>
             </span>
           </div>
 
@@ -499,7 +499,7 @@ export default function LOTLPage() {
               </h3>
               <div className="grid md:grid-cols-4 gap-6">
                 {[
-                  { icon: Users, value: '8,500+', label: 'Attendees' },
+                  { icon: Users, value: '5,000+', label: 'Attendees' },
                   { icon: Mic, value: '12', label: 'Artists' },
                   { icon: Heart, value: '$35K', label: 'Raised for Youth' },
                   { icon: Video, value: '50K+', label: 'Stream Views' },
