@@ -216,7 +216,7 @@ export const useEngagementStore = create(
         }
 
         // Check pages visited
-        const allPages = ['/', '/music', '/videos', '/live', '/about', '/name-this-song'];
+        const allPages = ['/', '/music', '/videos', '/live', '/about', '/merch'];
         if (allPages.every(p => state.pagesVisited.includes(p)) && !newBadges.includes('explorer')) {
           newBadges.push('explorer');
         }
