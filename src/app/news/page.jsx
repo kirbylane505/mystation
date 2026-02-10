@@ -113,13 +113,14 @@ export default function NewsPage() {
         </div>
 
         {/* Featured Post */}
+        {(() => { const FeaturedIcon = posts[0].icon; const fc = colorMap[posts[0].categoryColor]; return (
         <div className="mb-12">
           <Link href={posts[0].link} className="block group">
             <div className="relative overflow-hidden rounded-3xl p-[1px]" style={{ background: 'linear-gradient(90deg, #f97316, #ec4899, #8b5cf6)' }}>
               <div className="bg-mystation-navyDark rounded-[22px] p-8 md:p-12">
-                <div className={`inline-flex items-center gap-2 px-3 py-1 ${colorMap[posts[0].categoryColor].bg} border ${colorMap[posts[0].categoryColor].border} rounded-full mb-4`}>
-                  <posts[0].icon size={12} className={colorMap[posts[0].categoryColor].text} />
-                  <span className={`${colorMap[posts[0].categoryColor].text} text-xs font-bold uppercase`}>{posts[0].category}</span>
+                <div className={`inline-flex items-center gap-2 px-3 py-1 ${fc.bg} border ${fc.border} rounded-full mb-4`}>
+                  <FeaturedIcon size={12} className={fc.text} />
+                  <span className={`${fc.text} text-xs font-bold uppercase`}>{posts[0].category}</span>
                 </div>
                 <h2 className="text-3xl md:text-4xl font-black text-white mb-4 group-hover:text-blue-400 transition">{posts[0].title}</h2>
                 <p className="text-white/60 text-lg mb-4 max-w-3xl">{posts[0].content}</p>
@@ -133,6 +134,7 @@ export default function NewsPage() {
             </div>
           </Link>
         </div>
+        ); })()}
 
         {/* Post Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
