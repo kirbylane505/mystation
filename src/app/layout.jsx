@@ -37,7 +37,7 @@ export const metadata = {
     siteName: 'MyStation',
     images: [
       {
-        url: '/images/og-image.png',
+        url: 'https://mystationlive.com/api/og?title=MYSTATION&artist=Mike%20Page&album=Stream%20Free%20%E2%80%A2%20Official%20Merch%20%E2%80%A2%20LOTL&year=IDMG',
         width: 1200,
         height: 630,
         alt: 'MyStation - Stream Mike Page Music Free',
@@ -52,7 +52,7 @@ export const metadata = {
     card: 'summary_large_image',
     title: 'MyStation - Stream Mike Page Music Free',
     description: 'Stream Mike Page music for free. Official merch & Love on the Lawn Festival tickets.',
-    images: ['/images/og-image.png'],
+    images: ['https://mystationlive.com/api/og?title=MYSTATION&artist=Mike%20Page&album=Stream%20Free%20%E2%80%A2%20Official%20Merch%20%E2%80%A2%20LOTL&year=IDMG'],
   },
 
   // Apple/iMessage specific
