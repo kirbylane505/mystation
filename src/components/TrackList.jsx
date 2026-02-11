@@ -58,7 +58,6 @@ export default function TrackList({ trackIds, showAlbum = true, showNumber = tru
           <div
             key={track.id}
             className={`track-item track-list-item group ${isCurrentTrack ? 'playing' : ''}`}
-            style={{ animationDelay: `${index * 0.05}s` }}
             onClick={() => handleTrackClick(track, index)}
           >
             {/* Mobile Layout - Full names, no truncation */}

@@ -107,8 +107,7 @@ export default function HomePage() {
           {albums.map(album => (
             <div
               key={album.id}
-              className="album-3d glass rounded-2xl p-5 hover:border-blue-500/30 transition-all duration-300 cursor-pointer group animate-fade-in"
-              style={{ animationDelay: `${albums.indexOf(album) * 0.1}s` }}
+              className="album-3d glass rounded-2xl p-5 hover:border-blue-500/30 transition-all duration-300 cursor-pointer group"
               onClick={() => !album.comingSoon && !album.isComingSoon && handleOpenAlbum(album)}
             >
               {/* Album Cover */}

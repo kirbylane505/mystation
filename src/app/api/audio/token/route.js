@@ -1,7 +1,18 @@
 import { NextResponse } from 'next/server';
-import crypto from 'crypto';
 
 const AUDIO_SECRET = process.env.AUDIO_SECRET || 'ms-audio-2026-idmg';
+
+// Use Web Crypto API (same as middleware) for HMAC signing — ensures token compatibility
+async function signToken(payload) {
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    'raw', encoder.encode(AUDIO_SECRET),
+    { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+  );
+  const sigBuf = await crypto.subtle.sign('HMAC', key, encoder.encode(payload));
+  const hex = Array.from(new Uint8Array(sigBuf)).map(b => b.toString(16).padStart(2, '0')).join('');
+  return hex.slice(0, 16);
+}
 
 export async function POST(request) {
   try {
@@ -18,10 +29,10 @@ export async function POST(request) {
     }
 
     const expires = Date.now() + 30 * 60 * 1000; // 30 min
-    // Encode the audio file path in the token so middleware can verify it
     const payload = `${track.audioFile}:${expires}`;
-    const signature = crypto.createHmac('sha256', AUDIO_SECRET).update(payload).digest('hex').slice(0, 16);
-    const token = Buffer.from(`${payload}:${signature}`).toString('base64url');
+    const signature = await signToken(payload);
+    // base64url encode: audioPath:expires:signature
+    const token = btoa(`${payload}:${signature}`).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 
     return NextResponse.json({ token, expires });
   } catch {
