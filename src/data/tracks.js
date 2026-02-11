@@ -55,7 +55,7 @@ export const tracks = [
     bpm: 130,
     key: 'G Minor',
     hitScore: 88,
-    producer: 'The Cubist'
+    producer: 'The Cubist & Jack Thomas'
   },
   {
     id: 103,

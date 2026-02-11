@@ -120,6 +120,25 @@ export default function CubistPage() {
         <div className="max-w-4xl mx-auto px-6">
           <h2 className="text-2xl font-black text-white mb-8">Recent Works</h2>
 
+          {/* YouTube Video - Bulletproof Maybach (Official Video) */}
+          <div className="mb-10">
+            <div className="aspect-video rounded-2xl overflow-hidden mb-4">
+              <iframe
+                width="100%"
+                height="100%"
+                src="https://www.youtube.com/embed/YfytB9lD_k4"
+                title="French Montana x Max B - BULLETPROOF MAYBACH (Official Video)"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="w-full h-full"
+              />
+            </div>
+            <h3 className="text-xl font-bold text-white">Bulletproof Maybach</h3>
+            <p className="text-white/50">French Montana x Max B — Prod. The Cubist</p>
+            <p className="text-white/30 text-xs mt-1">From <em>Coke Wave 3.5: Narcos</em></p>
+          </div>
+
           {/* YouTube Video - Ever Since U Left Me (Official Video) */}
           <div className="mb-10">
             <div className="aspect-video rounded-2xl overflow-hidden mb-4">
