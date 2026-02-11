@@ -149,6 +149,59 @@ export default function CubistPage() {
         </div>
       </section>
 
+      {/* My Work — iDMG Coke Wave Beats */}
+      <section className="py-16 bg-white/[0.02]">
+        <div className="max-w-4xl mx-auto px-6">
+          <h2 className="text-2xl font-black text-white mb-2">My Work</h2>
+          <p className="text-white/40 mb-8">iDMG Coke Wave Beats — Produced by The Cubist</p>
+
+          {/* Featured Video - Coke Wave Back */}
+          <div className="mb-10">
+            <div className="aspect-video rounded-2xl overflow-hidden mb-4">
+              <iframe
+                width="100%"
+                height="100%"
+                src="https://www.youtube.com/embed/jUI5rFOXbQs"
+                title="Coke Wave Back — Prod. The Cubist (iDMG Coke Wave Beats)"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="w-full h-full"
+              />
+            </div>
+            <h3 className="text-xl font-bold text-white">Coke Wave Back</h3>
+            <p className="text-white/50">Prod. The Cubist — iDMG Coke Wave Beats</p>
+          </div>
+
+          {/* Album Tracklist */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {[
+              { title: 'Vein', duration: '1:55', id: 'bpvD_vwFzkM' },
+              { title: 'The Connect', duration: '3:15', id: null },
+              { title: 'Coke Wave Back', duration: '3:13', id: 'jUI5rFOXbQs' },
+              { title: 'Count Up', duration: '3:13', id: 's6yUu6Gmxlo' },
+              { title: 'The Fruit', duration: '3:00', id: null },
+              { title: 'That\'s Her', duration: '3:27', id: 'R4Mn-Ye3dGk' },
+              { title: '2 Steps Ahead', duration: '', id: 'mfKXFEco8jk' },
+              { title: 'Slide', duration: '', id: 'AIC5QHVkvyE' },
+              { title: 'Run It Up', duration: '', id: 'D2J-XeDfwyg' },
+            ].map((track, i) => (
+              <a
+                key={i}
+                href={track.id ? `https://www.youtube.com/watch?v=${track.id}` : '#'}
+                target={track.id ? '_blank' : undefined}
+                rel={track.id ? 'noopener noreferrer' : undefined}
+                className="flex items-center gap-3 py-3 px-4 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] transition-colors group"
+              >
+                <span className="text-amber-400/60 text-sm font-mono w-5">{i + 1}</span>
+                <span className="text-white font-medium flex-1 group-hover:text-amber-400 transition-colors">{track.title}</span>
+                {track.duration && <span className="text-white/30 text-sm">{track.duration}</span>}
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* BET+ Feature */}
       <section className="py-16">
         <div className="max-w-3xl mx-auto px-6">
