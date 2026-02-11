@@ -56,7 +56,7 @@ export function middleware(request) {
     const isWhitelisted = whitelist.includes(visitorIp);
 
     // Skip auth for static assets, whitelisted IPs, admin routes (handled above), and API health checks
-    if (!isWhitelisted && !pathname.startsWith('/_next') && !pathname.startsWith('/favicon') && !pathname.startsWith('/admin')) {
+    if (!isWhitelisted && !pathname.startsWith('/_next') && !pathname.startsWith('/favicon') && !pathname.startsWith('/admin') && !pathname.startsWith('/api/')) {
       const authHeader = request.headers.get('authorization');
       if (authHeader) {
         try {

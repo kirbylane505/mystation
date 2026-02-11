@@ -73,6 +73,22 @@ export const tracks = [
     hitScore: 88,
     producer: 'The Cubist'
   },
+  {
+    id: 104,
+    title: "4 A Min",
+    artist: "Mike Page",
+    album: "Coming Soon",
+    year: 2026,
+    duration: "3:11",
+    trackNumber: 5,
+    albumId: 'singles-2026',
+    audioFile: '/audio/singles/Mike Page - 4 A Min_MASTERED.mp3',
+    isNew: true,
+    bpm: 130,
+    key: 'F Minor',
+    hitScore: 88,
+    producer: 'The Cubist'
+  },
   // ========================================
   // CINDY'S SON (Extended Album) - 2022
   // ========================================
