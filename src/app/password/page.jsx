@@ -15,14 +15,22 @@ export default function PasswordPage() {
     setLoading(true);
     setError('');
 
-    // Check password
-    if (password === 'IDMG2026') {
-      // Set cookie
-      document.cookie = 'mystation_access=granted; path=/; max-age=604800'; // 7 days
-      // Hard redirect to ensure middleware picks up the cookie
-      window.location.href = '/';
-    } else {
-      setError('Incorrect password');
+    try {
+      const res = await fetch('/api/auth/password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      });
+
+      if (res.ok) {
+        // Cookie set by API response — hard redirect so middleware picks it up
+        window.location.href = '/';
+      } else {
+        setError('Incorrect password');
+        setLoading(false);
+      }
+    } catch {
+      setError('Something went wrong. Try again.');
       setLoading(false);
     }
   };

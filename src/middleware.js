@@ -59,33 +59,13 @@ export function middleware(request) {
     const ua = (request.headers.get('user-agent') || '').toLowerCase();
     const isCrawler = /facebookexternalhit|twitterbot|linkedinbot|whatsapp|slackbot|telegrambot|applebot|googlebot|bingbot|discordbot|pinterest|snapchat|redditbot|skypeuripreview/i.test(ua);
 
-    // Skip auth for static assets, whitelisted IPs, crawlers, admin routes, and API routes
-    if (!isWhitelisted && !isCrawler && !pathname.startsWith('/_next') && !pathname.startsWith('/favicon') && !pathname.startsWith('/admin') && !pathname.startsWith('/api/')) {
-      const authHeader = request.headers.get('authorization');
-      if (authHeader) {
-        try {
-          const encoded = authHeader.split(' ')[1] || '';
-          const decoded = atob(encoded);
-          const pass = decoded.substring(decoded.indexOf(':') + 1);
-          if (pass === sitePassword) {
-            // Authorized — continue to rest of middleware
-          } else {
-            return new NextResponse('Invalid password', {
-              status: 401,
-              headers: { 'WWW-Authenticate': 'Basic realm="MyStation"' },
-            });
-          }
-        } catch {
-          return new NextResponse('Unauthorized', {
-            status: 401,
-            headers: { 'WWW-Authenticate': 'Basic realm="MyStation"' },
-          });
-        }
-      } else {
-        return new NextResponse('Site is under construction. Enter password to access.', {
-          status: 401,
-          headers: { 'WWW-Authenticate': 'Basic realm="MyStation"' },
-        });
+    // Skip auth for static assets, whitelisted IPs, crawlers, admin routes, password page, and API routes
+    if (!isWhitelisted && !isCrawler && !pathname.startsWith('/_next') && !pathname.startsWith('/favicon') && !pathname.startsWith('/admin') && !pathname.startsWith('/api/') && pathname !== '/password') {
+      // Check for access cookie
+      const accessCookie = request.cookies.get('mystation_access')?.value;
+      if (accessCookie !== 'granted') {
+        // Redirect to password page
+        return NextResponse.redirect(new URL('/password', request.url));
       }
     }
   }
