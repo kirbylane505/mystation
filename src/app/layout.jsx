@@ -17,6 +17,7 @@ import EmailCapturePopup from '@/components/EmailCapturePopup';
 import TrackingPixels from '@/components/TrackingPixels';
 import SessionGuard from '@/components/SessionGuard';
 import ExtensionBridge from '@/components/ExtensionBridge';
+import SharePage from '@/components/SharePage';
 import Script from 'next/script';
 
 export const metadata = {
@@ -91,6 +92,7 @@ export default function RootLayout({ children }) {
           <SessionGuard />
           <ExtensionBridge />
           <PageTracker />
+          <SharePage />
         </ClientProviders>
         <Script id="register-sw" strategy="afterInteractive">
           {`
