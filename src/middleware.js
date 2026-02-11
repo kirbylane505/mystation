@@ -55,8 +55,12 @@ export function middleware(request) {
     const whitelist = (process.env.SITE_WHITELIST_IPS || '').split(',').map(s => s.trim()).filter(Boolean);
     const isWhitelisted = whitelist.includes(visitorIp);
 
-    // Skip auth for static assets, whitelisted IPs, admin routes (handled above), and API health checks
-    if (!isWhitelisted && !pathname.startsWith('/_next') && !pathname.startsWith('/favicon') && !pathname.startsWith('/admin') && !pathname.startsWith('/api/')) {
+    // Allow social media / search crawlers through for OG link previews
+    const ua = (request.headers.get('user-agent') || '').toLowerCase();
+    const isCrawler = /facebookexternalhit|twitterbot|linkedinbot|whatsapp|slackbot|telegrambot|applebot|googlebot|bingbot|discordbot|pinterest|snapchat|redditbot|skypeuripreview/i.test(ua);
+
+    // Skip auth for static assets, whitelisted IPs, crawlers, admin routes, and API routes
+    if (!isWhitelisted && !isCrawler && !pathname.startsWith('/_next') && !pathname.startsWith('/favicon') && !pathname.startsWith('/admin') && !pathname.startsWith('/api/')) {
       const authHeader = request.headers.get('authorization');
       if (authHeader) {
         try {

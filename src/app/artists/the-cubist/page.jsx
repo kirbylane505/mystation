@@ -14,14 +14,14 @@ export const metadata = {
     description: 'Tyrell Thornton aka The Cubist — producer for French Montana, Max B, Big30, Pooh Shiesty & Blac Youngsta. Stream his beats, watch his videos, and catch Season 2 on BET+.',
     url: 'https://mystationlive.com/artists/the-cubist',
     siteName: 'MyStation',
-    images: [{ url: 'https://img.youtube.com/vi/u9rdzKwhxhI/maxresdefault.jpg', width: 1280, height: 720, alt: 'The Cubist — Coke Wave 3.5 Narcos' }],
+    images: [{ url: 'https://mystationlive.com/api/og?title=THE%20CUBIST&artist=Tyrell%20Thornton&album=100M%2B%20Streams%20%E2%80%A2%20BET%2B&year=IDMG', width: 1200, height: 630, alt: 'The Cubist — MyStation' }],
     type: 'profile',
   },
   twitter: {
     card: 'summary_large_image',
     title: 'THE CUBIST — 100M+ Streams. The Sound Behind The Stars.',
     description: 'Producer for French Montana, Max B, Big30 & more. Stream beats + catch BET+ Season 2.',
-    images: ['https://img.youtube.com/vi/u9rdzKwhxhI/maxresdefault.jpg'],
+    images: ['https://mystationlive.com/api/og?title=THE%20CUBIST&artist=Tyrell%20Thornton&album=100M%2B%20Streams%20%E2%80%A2%20BET%2B&year=IDMG'],
   },
 };
 
