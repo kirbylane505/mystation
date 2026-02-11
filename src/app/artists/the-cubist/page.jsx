@@ -193,6 +193,23 @@ export default function CubistPage() {
             <h3 className="text-xl font-bold text-white">Free Shiest Life</h3>
             <p className="text-white/50">Big30 ft. Pooh Shiesty — Prod. The Cubist</p>
           </div>
+
+          {/* Joe & Jada - Pop The Half Review */}
+          <div className="mb-10">
+            <div className="max-w-sm mx-auto">
+              <div className="aspect-[9/16] rounded-2xl overflow-hidden mb-4 bg-black">
+                <video
+                  src="/videos/cubist-pop-the-half-review.mp4"
+                  controls
+                  playsInline
+                  preload="metadata"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </div>
+            <h3 className="text-xl font-bold text-white text-center">{'"'}Pop a Half is TOUGH{'"'}</h3>
+            <p className="text-white/50 text-center">Joe & Jada react to French Montana x Max B — Prod. The Cubist</p>
+          </div>
         </div>
       </section>
 
