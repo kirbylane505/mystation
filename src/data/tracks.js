@@ -57,6 +57,22 @@ export const tracks = [
     hitScore: 88,
     producer: 'The Cubist'
   },
+  {
+    id: 103,
+    title: "Crash Out",
+    artist: "Mike Page",
+    album: "Coming Soon",
+    year: 2026,
+    duration: "2:23",
+    trackNumber: 4,
+    albumId: 'singles-2026',
+    audioFile: '/audio/singles/Mike Page - Crash Out_MASTERED.mp3',
+    isNew: true,
+    bpm: 135,
+    key: 'E Minor',
+    hitScore: 88,
+    producer: 'The Cubist'
+  },
   // ========================================
   // CINDY'S SON (Extended Album) - 2022
   // ========================================
