@@ -145,7 +145,8 @@ export default function AudioPlayer() {
         body: JSON.stringify({ trackId: track.id })
       });
       const { token } = await resp.json();
-      return `/api/audio?id=${track.id}&t=${token}`;
+      // Direct CDN URL with token — middleware validates and serves static file
+      return `${track.audioFile}?_t=${token}`;
     } catch {
       // Fallback to direct URL if token fails
       return track.audioFile;
@@ -323,7 +324,13 @@ export default function AudioPlayer() {
       }
 
       const currentSrc = audio.src ? audio.src : '';
-      if (!currentSrc.includes(`id=${currentTrack.id}`)) {
+      // Check if this track's audio file is already loaded
+      const trackFile = currentTrack.audioFile;
+      const trackLoaded = currentSrc && (
+        currentSrc.includes(trackFile) ||
+        currentSrc.includes(encodeURI(trackFile))
+      );
+      if (!trackLoaded) {
         isLoadingRef.current = true;
         audio.src = audioUrl;
         audio.load();

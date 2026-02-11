@@ -2,8 +2,10 @@ import { NextResponse } from 'next/server';
 
 /**
  * MYSTATION SECURITY MIDDLEWARE
- * Protects against common web attacks
+ * Protects against common web attacks + token-gated audio streaming
  */
+
+const AUDIO_SECRET = process.env.AUDIO_SECRET || 'ms-audio-2026-idmg';
 
 // Rate limiting store (in-memory, resets on deploy)
 const rateLimitStore = new Map();
@@ -27,7 +29,40 @@ function checkRateLimit(ip) {
   return true;
 }
 
-export function middleware(request) {
+// Verify audio token using Web Crypto API (Edge-compatible HMAC-SHA256)
+async function verifyAudioToken(token, pathname) {
+  try {
+    const base64 = token.replace(/-/g, '+').replace(/_/g, '/');
+    const pad = base64.length % 4 === 0 ? '' : '='.repeat(4 - (base64.length % 4));
+    const decoded = atob(base64 + pad);
+
+    // Token format: audioFilePath:expires:signature
+    const lastColon = decoded.lastIndexOf(':');
+    const sig = decoded.slice(lastColon + 1);
+    const rest = decoded.slice(0, lastColon);
+    const secondLastColon = rest.lastIndexOf(':');
+    const expires = rest.slice(secondLastColon + 1);
+    const audioPath = rest.slice(0, secondLastColon);
+
+    // Verify path matches and token not expired
+    if (audioPath !== pathname) return false;
+    if (Date.now() > parseInt(expires)) return false;
+
+    // Verify HMAC-SHA256 signature
+    const encoder = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+      'raw', encoder.encode(AUDIO_SECRET),
+      { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+    );
+    const sigBuf = await crypto.subtle.sign('HMAC', key, encoder.encode(`${audioPath}:${expires}`));
+    const hex = Array.from(new Uint8Array(sigBuf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    return hex.slice(0, 16) === sig;
+  } catch {
+    return false;
+  }
+}
+
+export async function middleware(request) {
   const { pathname, searchParams } = request.nextUrl;
 
   // Admin analytics access — allow with correct key, bypass all other gates
@@ -47,14 +82,21 @@ export function middleware(request) {
   }
 
   // ─── AUDIO FILE PROTECTION ───
-  // Block direct access to audio files — must use /api/audio proxy
+  // Token-gated: valid signed token = serve from CDN, no token = 403
   if (pathname.match(/\.(mp3|wav|m4a|flac|ogg|aac)$/i)) {
+    const token = searchParams.get('_t');
+    if (token && await verifyAudioToken(token, pathname)) {
+      // Valid token — serve static file with anti-download headers
+      const response = NextResponse.next();
+      response.headers.set('Content-Disposition', 'inline');
+      response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+      response.headers.set('X-Content-Type-Options', 'nosniff');
+      response.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive');
+      response.headers.set('Cross-Origin-Resource-Policy', 'same-origin');
+      return response;
+    }
     return new NextResponse('Access Denied', { status: 403 });
   }
-
-  // Password gate DISABLED — site is LIVE and public
-  // Vault — let users through to see the PIN lock screen
-  // The vault page handles authentication client-side via /api/vault/auth
 
   const response = NextResponse.next();
   const ip = request.ip || request.headers.get('x-forwarded-for') || 'unknown';
