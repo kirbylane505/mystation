@@ -10,9 +10,18 @@ export const metadata = {
   title: 'The Cubist - Tyrell Thornton | MyStation',
   description: 'The Cubist (Tyrell Thornton) — 100M+ streams & views. Credits: French Montana, Max B, Big30, Pooh Shiesty, Blac Youngsta. BET+ "I Got a Story to Tell" Season 2.',
   openGraph: {
-    title: 'The Cubist - Tyrell Thornton',
-    description: '100M+ streams & views. BET+ Season 2. Credits: French Montana, Max B, Big30, Pooh Shiesty.',
-    images: [{ url: '/images/og-image.png', width: 1200, height: 630 }],
+    title: 'THE CUBIST — 100M+ Streams. BET+. The Sound Behind The Stars.',
+    description: 'Tyrell Thornton aka The Cubist — producer for French Montana, Max B, Big30, Pooh Shiesty & Blac Youngsta. Stream his beats, watch his videos, and catch Season 2 on BET+.',
+    url: 'https://mystationlive.com/artists/the-cubist',
+    siteName: 'MyStation',
+    images: [{ url: 'https://img.youtube.com/vi/u9rdzKwhxhI/maxresdefault.jpg', width: 1280, height: 720, alt: 'The Cubist — Coke Wave 3.5 Narcos' }],
+    type: 'profile',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'THE CUBIST — 100M+ Streams. The Sound Behind The Stars.',
+    description: 'Producer for French Montana, Max B, Big30 & more. Stream beats + catch BET+ Season 2.',
+    images: ['https://img.youtube.com/vi/u9rdzKwhxhI/maxresdefault.jpg'],
   },
 };
 

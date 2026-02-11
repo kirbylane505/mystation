@@ -1,16 +1,18 @@
 export const metadata = {
-  title: 'Love on the Lawn 2026',
-  description: 'Love on the Lawn Festival 2026. Live music, community, and culture. 10K capacity annual festival by Mike Page Foundation.',
+  title: 'Love on the Lawn 2026 — Year 5',
+  description: 'Love on the Lawn Festival 2026 — Year 5. Live music, food, culture & community. 10K capacity. Presented by the Mike Page Foundation.',
   openGraph: {
-    title: 'Love on the Lawn 2026 | MyStation',
-    description: 'Love on the Lawn Festival 2026. Live music, community, and culture. 10K capacity annual festival.',
-    images: [{ url: '/images/og-image.png', width: 1200, height: 630 }],
+    title: 'LOVE ON THE LAWN 2026 — Year 5. The Festival That Feeds The Culture.',
+    description: 'Live music, food, culture & community. 10K capacity annual festival by the Mike Page Foundation. Get your tickets now.',
+    url: 'https://mystationlive.com/lotl',
+    siteName: 'MyStation',
+    images: [{ url: '/images/og-image.png', width: 1200, height: 630, alt: 'Love on the Lawn 2026 — MyStation' }],
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Love on the Lawn 2026 | MyStation',
-    description: 'Live music, community, and culture. 10K capacity annual festival.',
+    title: 'LOVE ON THE LAWN 2026 — Year 5',
+    description: 'Live music, food, culture & community. 10K capacity. Get your tickets now.',
     images: ['/images/og-image.png'],
   },
 };
