@@ -15,6 +15,7 @@ export const makeAHitTracks = [
     key: 'C minor',
     mood: 'Reflective / Hard',
     openVerse: 2, // Second verse is open
+    verseOpen: true, // Set to false when verse is taken
     price: 500,
     description: 'Hard-hitting trap track with an open second verse. Perfect for artists who want to showcase their lyrical ability.',
   },
@@ -27,6 +28,7 @@ export const makeAHitTracks = [
     key: 'G minor',
     mood: 'Motivational / Trap',
     openVerse: 2,
+    verseOpen: true,
     price: 500,
     description: 'Comeback anthem with space for your verse. Great for artists with a story to tell.',
   },
@@ -39,6 +41,7 @@ export const makeAHitTracks = [
     key: 'D minor',
     mood: 'Confident / Street',
     openVerse: 2,
+    verseOpen: true,
     price: 750,
     description: 'Club-ready banger. Your verse could be the one that makes this go viral.',
   },

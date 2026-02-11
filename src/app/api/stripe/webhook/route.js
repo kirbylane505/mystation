@@ -259,7 +259,7 @@ async function handleCheckoutCompleted(session, stripe) {
       }).catch(err => console.error('Order confirmation email failed:', err));
     }
 
-    // Track purchase analytics
+    // Track purchase analytics + spending for rewards
     try {
       const { getSupabaseAdmin } = await import('@/lib/supabaseAdmin');
       const supabase = getSupabaseAdmin();
@@ -272,9 +272,37 @@ async function handleCheckoutCompleted(session, stripe) {
           ip_hash: 'webhook',
           device_type: 'unknown',
         });
+
+        // Accumulate spending for rewards tiers
+        if (customerEmail && totalAmount > 0) {
+          const email = customerEmail.toLowerCase();
+          const { data: existing } = await supabase
+            .from('user_spending')
+            .select('total_spent_cents')
+            .eq('email', email)
+            .single();
+
+          if (existing) {
+            await supabase
+              .from('user_spending')
+              .update({
+                total_spent_cents: existing.total_spent_cents + totalAmount,
+                updated_at: new Date().toISOString(),
+              })
+              .eq('email', email);
+          } else {
+            await supabase
+              .from('user_spending')
+              .insert({
+                email,
+                total_spent_cents: totalAmount,
+                updated_at: new Date().toISOString(),
+              });
+          }
+        }
       }
     } catch (e) {
-      console.error('Purchase analytics error:', e);
+      console.error('Purchase analytics/spending error:', e);
     }
 
     // Return combined results
