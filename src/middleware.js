@@ -46,29 +46,8 @@ export function middleware(request) {
     return NextResponse.redirect(new URL('/', request.url));
   }
 
-  const sitePassword = process.env.SITE_PASSWORD;
-
-  // Password gate — if SITE_PASSWORD env var is set, require basic auth
-  if (sitePassword) {
-    // Whitelisted IPs bypass password (owner's machines)
-    const visitorIp = request.ip || request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || '';
-    const whitelist = (process.env.SITE_WHITELIST_IPS || '').split(',').map(s => s.trim()).filter(Boolean);
-    const isWhitelisted = whitelist.includes(visitorIp);
-
-    // Allow social media / search crawlers through for OG link previews
-    const ua = (request.headers.get('user-agent') || '').toLowerCase();
-    const isCrawler = /facebookexternalhit|twitterbot|linkedinbot|whatsapp|slackbot|telegrambot|applebot|googlebot|bingbot|discordbot|pinterest|snapchat|redditbot|skypeuripreview/i.test(ua);
-
-    // Skip auth for static assets, whitelisted IPs, crawlers, admin routes, password page, and API routes
-    if (!isWhitelisted && !isCrawler && !pathname.startsWith('/_next') && !pathname.startsWith('/favicon') && !pathname.startsWith('/admin') && !pathname.startsWith('/api/') && pathname !== '/password') {
-      // Check for access cookie
-      const accessCookie = request.cookies.get('mystation_access')?.value;
-      if (accessCookie !== 'granted') {
-        // Redirect to password page
-        return NextResponse.redirect(new URL('/password', request.url));
-      }
-    }
-  }
+  // Password gate DISABLED — site is LIVE and public
+  // To re-enable: uncomment below and set SITE_PASSWORD env var in Vercel
 
   // Vault — let users through to see the PIN lock screen
   // The vault page handles authentication client-side via /api/vault/auth

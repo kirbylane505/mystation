@@ -22,7 +22,7 @@ export const usePlayerStore = create(
   queue: [],
   queueIndex: 0,
   shuffle: false,
-  repeat: 'off', // 'off', 'all', 'one'
+  repeat: 'all', // 'off', 'all', 'one' — default to continuous play
 
   // Vault access (session-only, not persisted)
   vaultUnlocked: false,
