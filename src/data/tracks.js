@@ -40,6 +40,23 @@ export const tracks = [
     hitScore: 90,
     producer: 'The Cubist'
   },
+  {
+    id: 102,
+    title: "Rent Due",
+    artist: "Mike Page",
+    featured: "IDMGSmokey",
+    album: "Coming Soon",
+    year: 2026,
+    duration: "3:55",
+    trackNumber: 3,
+    albumId: 'singles-2026',
+    audioFile: '/audio/singles/Mike Page - Rent Due_MASTERED.mp3',
+    isNew: true,
+    bpm: 130,
+    key: 'G Minor',
+    hitScore: 88,
+    producer: 'The Cubist'
+  },
   // ========================================
   // CINDY'S SON (Extended Album) - 2022
   // ========================================
