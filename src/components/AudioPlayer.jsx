@@ -134,9 +134,22 @@ export default function AudioPlayer() {
       (typeof track.id === 'string' && track.id.startsWith('vault-'));
   }, []);
 
-  const getAudioUrl = useCallback((track) => {
+  const getAudioUrl = useCallback(async (track) => {
     if (!track) return null;
-    return track.audioFile || null;
+    if (!track.audioFile) return null;
+    try {
+      // Get signed token from server
+      const resp = await fetch('/api/audio/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ trackId: track.id })
+      });
+      const { token } = await resp.json();
+      return `/api/audio?id=${track.id}&t=${token}`;
+    } catch {
+      // Fallback to direct URL if token fails
+      return track.audioFile;
+    }
   }, []);
 
   const checkCanPlay = useCallback((trackId) => {
@@ -297,46 +310,49 @@ export default function AudioPlayer() {
       useEngagementStore.getState().recordPlay(currentTrack.id, currentTrack.albumId);
     } catch (e) {}
 
-    const audioUrl = getAudioUrl(currentTrack);
-    if (!audioUrl) return;
+    // Async: get secure audio URL with token
+    (async () => {
+      const audioUrl = await getAudioUrl(currentTrack);
+      if (!audioUrl) return;
 
-    // Remove any stale canplay listener
-    if (canPlayListenerRef.current) {
-      audio.removeEventListener('canplay', canPlayListenerRef.current);
-      audio.removeEventListener('canplaythrough', canPlayListenerRef.current);
-      canPlayListenerRef.current = null;
-    }
-
-    const currentSrc = audio.src ? new URL(audio.src, window.location.origin).pathname : '';
-    if (currentSrc !== audioUrl) {
-      isLoadingRef.current = true;
-      audio.src = audioUrl;
-      audio.load();
-
-      // Use both canplay and canplaythrough for maximum compatibility
-      const onReady = () => {
-        audio.removeEventListener('canplay', onReady);
-        audio.removeEventListener('canplaythrough', onReady);
+      // Remove any stale canplay listener
+      if (canPlayListenerRef.current) {
+        audio.removeEventListener('canplay', canPlayListenerRef.current);
+        audio.removeEventListener('canplaythrough', canPlayListenerRef.current);
         canPlayListenerRef.current = null;
-        isLoadingRef.current = false;
-        if (usePlayerStore.getState().isPlaying) {
-          safePlay(audio);
-        }
-      };
-      canPlayListenerRef.current = onReady;
-      audio.addEventListener('canplay', onReady);
-      audio.addEventListener('canplaythrough', onReady);
+      }
 
-      // Fallback: if canplay doesn't fire within 5s (cached audio edge case), force play
-      setTimeout(() => {
-        if (isLoadingRef.current && audio.readyState >= 2) {
+      const currentSrc = audio.src ? audio.src : '';
+      if (!currentSrc.includes(`id=${currentTrack.id}`)) {
+        isLoadingRef.current = true;
+        audio.src = audioUrl;
+        audio.load();
+
+        // Use both canplay and canplaythrough for maximum compatibility
+        const onReady = () => {
+          audio.removeEventListener('canplay', onReady);
+          audio.removeEventListener('canplaythrough', onReady);
+          canPlayListenerRef.current = null;
           isLoadingRef.current = false;
           if (usePlayerStore.getState().isPlaying) {
             safePlay(audio);
           }
-        }
-      }, 5000);
-    }
+        };
+        canPlayListenerRef.current = onReady;
+        audio.addEventListener('canplay', onReady);
+        audio.addEventListener('canplaythrough', onReady);
+
+        // Fallback: if canplay doesn't fire within 5s (cached audio edge case), force play
+        setTimeout(() => {
+          if (isLoadingRef.current && audio.readyState >= 2) {
+            isLoadingRef.current = false;
+            if (usePlayerStore.getState().isPlaying) {
+              safePlay(audio);
+            }
+          }
+        }, 5000);
+      }
+    })();
   }, [currentTrack?.id, getAudioUrl, checkCanPlay, incrementPlayCount, openSubscribeModal, pause, isVaultTrack]);
 
   // ─── Handle play/pause state changes ───

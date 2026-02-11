@@ -122,6 +122,321 @@ export const tracks = [
     producer: 'Shawn Hibbler & The Cubist'
   },
   // ========================================
+  // NEW RELEASE - I Want This One (Single from Grammy Nights)
+  // ========================================
+  {
+    id: 138,
+    title: "I Want This One",
+    artist: "Mike Page",
+    featured: "Vincent Berry II",
+    album: "Coming Soon",
+    year: 2026,
+    duration: "3:26",
+    trackNumber: 8,
+    albumId: 'singles-2026',
+    audioFile: '/audio/grammy-nights/02-i-want-this-one.mp3',
+    isNew: true,
+    bpm: 160,
+    key: 'B Minor',
+    hitScore: 92,
+    producer: 'The Cubist'
+  },
+  // ========================================
+  // GRAMMY NIGHTS VOL. 1 - VB & MP (PRIVATE)
+  // Access: MP2026 (Mike Page), VB2026 (Vincent Berry)
+  // ========================================
+  {
+    id: 200,
+    title: "Black Forces",
+    artist: "Mike Page",
+    featured: "Vincent Berry II",
+    album: "Grammy Nights Vol. 1",
+    year: 2026,
+    duration: "3:26",
+    trackNumber: 1,
+    albumId: 'grammy-nights',
+    audioFile: '/audio/grammy-nights/01-black-forces.mp3',
+    isPrivate: true,
+    accessCodes: ['MP2026', 'VB2026'],
+    bpm: 160,
+    key: 'B Minor',
+    hitScore: 90,
+    producer: 'The Cubist'
+  },
+  {
+    id: 201,
+    title: "I Want This One",
+    artist: "Mike Page",
+    featured: "Vincent Berry II",
+    album: "Grammy Nights Vol. 1",
+    year: 2026,
+    duration: "3:26",
+    trackNumber: 2,
+    albumId: 'grammy-nights',
+    audioFile: '/audio/grammy-nights/02-i-want-this-one.mp3',
+    isPrivate: true,
+    accessCodes: ['MP2026', 'VB2026'],
+    bpm: 160,
+    key: 'B Minor',
+    hitScore: 92,
+    producer: 'The Cubist'
+  },
+  {
+    id: 202,
+    title: "R.U.N Or R U Out",
+    artist: "Mike Page",
+    featured: "Vincent Berry II",
+    album: "Grammy Nights Vol. 1",
+    year: 2026,
+    duration: "3:30",
+    trackNumber: 3,
+    albumId: 'grammy-nights',
+    audioFile: '/audio/grammy-nights/03-run-or-r-u-out.mp3',
+    isPrivate: true,
+    accessCodes: ['MP2026', 'VB2026'],
+    producer: 'The Cubist'
+  },
+  {
+    id: 203,
+    title: "Love On The Lawn",
+    artist: "Mike Page",
+    featured: "Vincent Berry II",
+    album: "Grammy Nights Vol. 1",
+    year: 2026,
+    duration: "3:48",
+    trackNumber: 4,
+    albumId: 'grammy-nights',
+    audioFile: '/audio/grammy-nights/04-love-on-the-lawn.mp3',
+    isPrivate: true,
+    accessCodes: ['MP2026', 'VB2026'],
+    producer: 'The Cubist'
+  },
+  {
+    id: 204,
+    title: "Family Back",
+    artist: "Mike Page",
+    featured: "Vincent Berry II",
+    album: "Grammy Nights Vol. 1",
+    year: 2026,
+    duration: "2:44",
+    trackNumber: 5,
+    albumId: 'grammy-nights',
+    audioFile: '/audio/grammy-nights/05-family-back.mp3',
+    isPrivate: true,
+    accessCodes: ['MP2026', 'VB2026'],
+    producer: 'The Cubist'
+  },
+  {
+    id: 205,
+    title: "Never Let The Money",
+    artist: "Mike Page",
+    featured: "Vincent Berry II",
+    album: "Grammy Nights Vol. 1",
+    year: 2026,
+    duration: "3:10",
+    trackNumber: 6,
+    albumId: 'grammy-nights',
+    audioFile: '/audio/grammy-nights/06-never-let-the-money.mp3',
+    isPrivate: true,
+    accessCodes: ['MP2026', 'VB2026'],
+    producer: 'The Cubist'
+  },
+  {
+    id: 206,
+    title: "Give Me My Wings",
+    artist: "Mike Page",
+    featured: "Vincent Berry II",
+    album: "Grammy Nights Vol. 1",
+    year: 2026,
+    duration: "3:32",
+    trackNumber: 7,
+    albumId: 'grammy-nights',
+    audioFile: '/audio/grammy-nights/07-give-me-my-wings.mp3',
+    isPrivate: true,
+    accessCodes: ['MP2026', 'VB2026'],
+    producer: 'Art Teacher'
+  },
+  {
+    id: 207,
+    title: "VVS",
+    artist: "Mike Page",
+    featured: "Vincent Berry II",
+    album: "Grammy Nights Vol. 1",
+    year: 2026,
+    duration: "3:17",
+    trackNumber: 8,
+    albumId: 'grammy-nights',
+    audioFile: '/audio/grammy-nights/08-vvs.mp3',
+    isPrivate: true,
+    accessCodes: ['MP2026', 'VB2026'],
+    producer: 'The Cubist'
+  },
+  {
+    id: 208,
+    title: "No Make Believe",
+    artist: "Mike Page",
+    featured: "Vincent Berry II",
+    album: "Grammy Nights Vol. 1",
+    year: 2026,
+    duration: "5:24",
+    trackNumber: 9,
+    albumId: 'grammy-nights',
+    audioFile: '/audio/grammy-nights/09-no-make-believe.mp3',
+    isPrivate: true,
+    accessCodes: ['MP2026', 'VB2026'],
+    producer: 'The Cubist'
+  },
+  {
+    id: 209,
+    title: "Stay",
+    artist: "Mike Page",
+    featured: "Vincent Berry II",
+    album: "Grammy Nights Vol. 1",
+    year: 2026,
+    duration: "4:35",
+    trackNumber: 10,
+    albumId: 'grammy-nights',
+    audioFile: '/audio/grammy-nights/10-stay.mp3',
+    isPrivate: true,
+    accessCodes: ['MP2026', 'VB2026'],
+    producer: 'The Cubist'
+  },
+  {
+    id: 210,
+    title: "I Need It",
+    artist: "Mike Page",
+    featured: "Vincent Berry II",
+    album: "Grammy Nights Vol. 1",
+    year: 2026,
+    duration: "3:45",
+    trackNumber: 11,
+    albumId: 'grammy-nights',
+    audioFile: '/audio/grammy-nights/11-i-need-it.mp3',
+    isPrivate: true,
+    accessCodes: ['MP2026', 'VB2026'],
+    producer: 'The Cubist'
+  },
+  {
+    id: 211,
+    title: "Failed Mission",
+    artist: "Mike Page",
+    featured: "Vincent Berry II",
+    album: "Grammy Nights Vol. 1",
+    year: 2026,
+    duration: "3:15",
+    trackNumber: 12,
+    albumId: 'grammy-nights',
+    audioFile: '/audio/grammy-nights/12-failed-mission.mp3',
+    isPrivate: true,
+    accessCodes: ['MP2026', 'VB2026'],
+    producer: 'The Cubist'
+  },
+  {
+    id: 212,
+    title: "Overrated",
+    artist: "Mike Page",
+    featured: "Vincent Berry II",
+    album: "Grammy Nights Vol. 1",
+    year: 2026,
+    duration: "2:52",
+    trackNumber: 13,
+    albumId: 'grammy-nights',
+    audioFile: '/audio/grammy-nights/13-overrated.mp3',
+    isPrivate: true,
+    accessCodes: ['MP2026', 'VB2026'],
+    producer: 'Vincent Berry II'
+  },
+  {
+    id: 213,
+    title: "Take A Trip (Lagos)",
+    artist: "Mike Page",
+    featured: "Vincent Berry II",
+    album: "Grammy Nights Vol. 1",
+    year: 2026,
+    duration: "3:00",
+    trackNumber: 14,
+    albumId: 'grammy-nights',
+    audioFile: '/audio/grammy-nights/14-take-a-trip.mp3',
+    isPrivate: true,
+    accessCodes: ['MP2026', 'VB2026'],
+    producer: 'The Cubist'
+  },
+  {
+    id: 214,
+    title: "Would You Stay",
+    artist: "Mike Page",
+    featured: "Vincent Berry II",
+    album: "Grammy Nights Vol. 1",
+    year: 2026,
+    duration: "3:34",
+    trackNumber: 15,
+    albumId: 'grammy-nights',
+    audioFile: '/audio/grammy-nights/15-would-you-stay.mp3',
+    isPrivate: true,
+    accessCodes: ['MP2026', 'VB2026'],
+    producer: 'The Cubist'
+  },
+  {
+    id: 215,
+    title: "Stand Alone",
+    artist: "Mike Page",
+    featured: "Vincent Berry II",
+    album: "Grammy Nights Vol. 1",
+    year: 2026,
+    duration: "3:30",
+    trackNumber: 16,
+    albumId: 'grammy-nights',
+    audioFile: '/audio/grammy-nights/16-stand-alone.mp3',
+    isPrivate: true,
+    accessCodes: ['MP2026', 'VB2026'],
+    producer: 'The Cubist'
+  },
+  {
+    id: 216,
+    title: "Take Care Of Me",
+    artist: "Mike Page",
+    featured: "Vincent Berry II",
+    album: "Grammy Nights Vol. 1",
+    year: 2026,
+    duration: "3:55",
+    trackNumber: 17,
+    albumId: 'grammy-nights',
+    audioFile: '/audio/grammy-nights/17-take-care-of-me.mp3',
+    isPrivate: true,
+    accessCodes: ['MP2026', 'VB2026'],
+    producer: 'The Cubist'
+  },
+  {
+    id: 217,
+    title: "Spend It",
+    artist: "Mike Page",
+    featured: "Vincent Berry II",
+    album: "Grammy Nights Vol. 1",
+    year: 2026,
+    duration: "3:17",
+    trackNumber: 18,
+    albumId: 'grammy-nights',
+    audioFile: '/audio/grammy-nights/18-spend-it.mp3',
+    isPrivate: true,
+    accessCodes: ['MP2026', 'VB2026'],
+    producer: 'The Cubist'
+  },
+  {
+    id: 218,
+    title: "Get You Right",
+    artist: "Mike Page",
+    featured: "Vincent Berry II",
+    album: "Grammy Nights Vol. 1",
+    year: 2026,
+    duration: "3:52",
+    trackNumber: 19,
+    albumId: 'grammy-nights',
+    audioFile: '/audio/grammy-nights/19-get-you-right.mp3',
+    isPrivate: true,
+    accessCodes: ['MP2026', 'VB2026'],
+    producer: 'The Cubist'
+  },
+  // ========================================
   // LIBRARY SINGLES (not New Releases)
   // ========================================
   {
@@ -609,10 +924,16 @@ export const featuredSong = {
 };
 
 // Get all official tracks (excludes unnamed/needsNaming tracks from public view)
-export const getOfficialTracks = () => tracks.filter(t => !t.needsNaming);
+export const getOfficialTracks = () => tracks.filter(t => !t.needsNaming && !t.isPrivate);
 
 // Get non-vault tracks for public catalog (Vault is exclusive)
-export const getNonVaultTracks = () => tracks.filter(t => t.albumId !== 'vault' && !t.needsNaming);
+export const getNonVaultTracks = () => tracks.filter(t => t.albumId !== 'vault' && !t.needsNaming && !t.isPrivate);
+
+// Get private tracks (requires access code)
+export const getPrivateTracks = (accessCode) => {
+  if (!accessCode) return [];
+  return tracks.filter(t => t.isPrivate && t.accessCodes && t.accessCodes.includes(accessCode));
+};
 
 // Get all tracks including vault (for vault page only)
 export const getAllTracks = () => tracks;
@@ -633,6 +954,9 @@ const cindysSonTrackIds = cindysSonTracks.map(t => t.id);
 
 const shezzyTracks = tracks.filter(t => t.albumId === 'shezzy-knew-it');
 const shezzyTrackIds = shezzyTracks.map(t => t.id);
+
+const grammyNightsTracks = tracks.filter(t => t.albumId === 'grammy-nights' && t.id >= 200);
+const grammyNightsTrackIds = grammyNightsTracks.map(t => t.id);
 
 export const albums = [
   {
@@ -678,6 +1002,23 @@ export const albums = [
     isExclusive: true,
     trackIds: vaultTrackIds,
     description: "Exclusive for die-hard fans. Stream 26 days straight or spend $100+ to unlock The Vault."
+  },
+  {
+    id: 'grammy-nights',
+    title: "Grammy Nights Vol. 1",
+    subtitle: "Coming Soon",
+    artist: "VB & MP",
+    year: 2026,
+    trackCount: grammyNightsTrackIds.length,
+    coverGradient: "from-yellow-500 via-amber-600 to-yellow-900",
+    coverEmoji: "🏆",
+    coverImage: "/images/grammy-nights-cover.png",
+    isNew: true,
+    isPrivate: true,
+    isComingSoon: true,
+    accessCodes: ['MP2026', 'VB2026'],
+    trackIds: grammyNightsTrackIds,
+    description: "Grammy Nights Vol. 1 — VB & Mike Page. Church&Mudd x IDMG. 19 tracks. Coming Soon."
   }
 ];
 

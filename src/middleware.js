@@ -46,12 +46,15 @@ export function middleware(request) {
     return NextResponse.redirect(new URL('/', request.url));
   }
 
-  // Password gate DISABLED — site is LIVE and public
-  // To re-enable: uncomment below and set SITE_PASSWORD env var in Vercel
+  // ─── AUDIO FILE PROTECTION ───
+  // Block direct access to audio files — must use /api/audio proxy
+  if (pathname.match(/\.(mp3|wav|m4a|flac|ogg|aac)$/i)) {
+    return new NextResponse('Access Denied', { status: 403 });
+  }
 
+  // Password gate DISABLED — site is LIVE and public
   // Vault — let users through to see the PIN lock screen
   // The vault page handles authentication client-side via /api/vault/auth
-  // No middleware blocking needed — the page itself is the gate
 
   const response = NextResponse.next();
   const ip = request.ip || request.headers.get('x-forwarded-for') || 'unknown';
@@ -108,5 +111,5 @@ export function middleware(request) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:jpg|jpeg|gif|png|svg|ico|webp|mp3|wav|m4a)).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:jpg|jpeg|gif|png|svg|ico|webp)).*)'],
 };

@@ -109,7 +109,7 @@ export default function HomePage() {
               key={album.id}
               className="album-3d glass rounded-2xl p-5 hover:border-blue-500/30 transition-all duration-300 cursor-pointer group animate-fade-in"
               style={{ animationDelay: `${albums.indexOf(album) * 0.1}s` }}
-              onClick={() => !album.comingSoon && handleOpenAlbum(album)}
+              onClick={() => !album.comingSoon && !album.isComingSoon && handleOpenAlbum(album)}
             >
               {/* Album Cover */}
               <div className={`aspect-square ${album.coverImage ? '' : `bg-gradient-to-br ${album.coverGradient}`} rounded-xl mb-5 flex flex-col items-center justify-center relative overflow-hidden border border-white/10 shadow-xl`}>
@@ -128,9 +128,9 @@ export default function HomePage() {
                     NEW
                   </div>
                 )}
-                {album.comingSoon && (
-                  <div className="absolute top-3 right-3 px-3 py-1 bg-purple-500 text-white text-xs font-bold rounded-full shadow-lg z-10">
-                    SOON
+                {(album.comingSoon || album.isComingSoon) && (
+                  <div className="absolute top-3 right-3 px-3 py-1 bg-amber-500 text-black text-xs font-bold rounded-full shadow-lg z-10">
+                    COMING SOON
                   </div>
                 )}
                 {album.isExclusive && (
@@ -149,7 +149,7 @@ export default function HomePage() {
                 )}
 
                 {/* Play Overlay */}
-                {!album.comingSoon && (
+                {!album.comingSoon && !album.isComingSoon && (
                   <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
                     <button
                       onClick={(e) => { e.stopPropagation(); handleOpenAlbum(album); }}
@@ -157,6 +157,14 @@ export default function HomePage() {
                     >
                       <Play size={28} className="text-white ml-1" fill="white" />
                     </button>
+                  </div>
+                )}
+                {album.isComingSoon && album.isPrivate && (
+                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
+                    <div className="text-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mx-auto text-amber-400 mb-2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                      <p className="text-white font-bold text-sm">Private Album</p>
+                    </div>
                   </div>
                 )}
               </div>
@@ -195,6 +203,16 @@ export default function HomePage() {
 
               {album.comingSoon && (
                 <p className="text-purple-400 text-sm font-medium mt-3">Coming Soon</p>
+              )}
+
+              {/* Private Album - Access Code */}
+              {album.isPrivate && album.isComingSoon && (
+                <div className="mt-3">
+                  <p className="text-amber-400 text-sm font-medium flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                    Private - Coming Soon
+                  </p>
+                </div>
               )}
             </div>
           ))}
