@@ -5,7 +5,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Hero from '@/components/Hero';
 import TrackList from '@/components/TrackList';
 import EmailCapture from '@/components/EmailCapture';
@@ -19,7 +19,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 
 export default function HomePage() {
-  const { setQueue, currentTrack, isPlaying } = usePlayerStore();
+  const { setQueue, currentTrack, isPlaying, queue } = usePlayerStore();
   const [activeAlbum, setActiveAlbum] = useState(null);
 
   // Get official tracks only
@@ -27,6 +27,18 @@ export default function HomePage() {
 
   // New releases - official tracks marked as isNew
   const newReleases = officialTracks.filter(t => t.isNew).map(t => t.id).slice(0, 8);
+
+  // AUTO-PLAY: Queue new releases on first visit so music starts immediately
+  // Plays consecutively — newcomers get 4 free songs before subscription wall
+  useEffect(() => {
+    if (queue.length > 0) return; // Already has a queue, don't override
+    const newReleaseTracks = (newReleases.length > 0 ? newReleases : [21, 22, 23, 30, 31, 32, 34, 35])
+      .map(id => officialTracks.find(t => t.id === id))
+      .filter(Boolean);
+    if (newReleaseTracks.length > 0) {
+      setQueue(newReleaseTracks, 0);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   // Featured - Cindy's Son highlights + singles
   const featuredTracks = [1, 21, 22, 3, 7, 10];
 

@@ -10,6 +10,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ShoppingBag, Heart, Truck, Shield, Package, X, Loader2, Check, Ticket, Sparkles } from 'lucide-react';
 import { useCartStore } from '@/stores/cartStore';
+import { usePlayerStore } from '@/store/playerStore';
+import { getOfficialTracks } from '@/data/tracks';
 
 // Scroll-triggered animation hook
 function useInView(options = {}) {
@@ -184,6 +186,17 @@ export default function MerchPage() {
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [addedToCart, setAddedToCart] = useState(false);
   const { addItem } = useCartStore();
+  const { queue, setQueue } = usePlayerStore();
+
+  // Auto-play music while shopping — queue new releases if nothing playing
+  useEffect(() => {
+    if (queue.length > 0) return;
+    const officialTracks = getOfficialTracks();
+    const newReleaseTracks = officialTracks.filter(t => t.isNew);
+    if (newReleaseTracks.length > 0) {
+      setQueue(newReleaseTracks, 0);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     async function fetchProducts() {
