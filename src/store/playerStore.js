@@ -182,17 +182,14 @@ export const usePlayerStore = create(
 }),
     {
       name: 'mystation-player',
+      version: 2, // Bump to clear cached player state for all users
       partialize: (state) => ({
-        currentTrack: state.currentTrack,
-        queue: state.queue,
-        queueIndex: state.queueIndex,
         volume: state.volume,
         isMuted: state.isMuted,
         shuffle: state.shuffle,
         repeat: state.repeat,
-        lastPlayedTrack: state.lastPlayedTrack,
-        // playCount & uniquePlaysThisSession NOT persisted — resets per session
-        // This prevents cumulative lockout where users can never play new tracks
+        // Track/queue NOT persisted — fresh auto-play queue on every visit
+        // This prevents stale tracks from replaying on return visits
       })
     }
   )
