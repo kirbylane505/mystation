@@ -96,7 +96,7 @@ export default function SubscribeModal() {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
       <div
-        className="relative w-full max-w-md bg-gradient-to-b from-mystation-navy to-mystation-navyDark rounded-3xl border border-white/10 overflow-hidden shadow-2xl"
+        className="relative w-full max-w-md max-h-[90vh] overflow-y-auto bg-gradient-to-b from-mystation-navy to-mystation-navyDark rounded-3xl border border-white/10 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close button */}
@@ -263,7 +263,7 @@ export default function SubscribeModal() {
             <div className="px-8 pb-8 flex flex-col items-center">
               <button
                 onClick={handleSkip}
-                className="text-white/40 text-sm hover:text-white/60 transition"
+                className="text-white/60 text-sm hover:text-white/80 transition py-2 px-4"
               >
                 Maybe later
               </button>

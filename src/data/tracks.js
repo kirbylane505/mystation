@@ -22,7 +22,7 @@ export const tracks = [
     bpm: 150,
     key: 'C Minor',
     hitScore: 95,
-    producer: 'The Cubist (SHOW_IDMG)'
+    producer: 'The Cubist'
   },
   {
     id: 101,

@@ -188,44 +188,6 @@ export default function AboutPage() {
             </div>
           </div>
 
-          <div className="group relative rounded-2xl overflow-hidden border border-white/10">
-            <img
-              src="/images/foundation/feed-community-1.jpg"
-              alt="Volunteers outdoors with green signs — Free Tents, Free Clothes, Free Blankets, Free Coats"
-              className="w-full aspect-[4/3] object-cover group-hover:scale-105 transition-transform duration-500"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-            <div className="absolute bottom-4 left-4 right-4">
-              <p className="text-white font-bold text-sm">Out in the Community</p>
-              <p className="text-white/60 text-xs">Free coats, tents, clothes & blankets</p>
-            </div>
-          </div>
-
-          <div className="group relative rounded-2xl overflow-hidden border border-white/10">
-            <img
-              src="/images/foundation/feed-community-2.jpg"
-              alt="Feed My Friends full volunteer crew group photo"
-              className="w-full aspect-[4/3] object-cover group-hover:scale-105 transition-transform duration-500"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-            <div className="absolute bottom-4 left-4 right-4">
-              <p className="text-white font-bold text-sm">The Whole Crew</p>
-              <p className="text-white/60 text-xs">Our volunteers showing up and showing out</p>
-            </div>
-          </div>
-
-          <div className="group relative rounded-2xl overflow-hidden border border-white/10">
-            <img
-              src="/images/foundation/feed-community-3.jpg"
-              alt="Kitchen volunteers in hairnets preparing meals at serving table"
-              className="w-full aspect-[4/3] object-cover group-hover:scale-105 transition-transform duration-500"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-            <div className="absolute bottom-4 left-4 right-4">
-              <p className="text-white font-bold text-sm">Serving Up Love</p>
-              <p className="text-white/60 text-xs">Kitchen crew prepping hot meals for the community</p>
-            </div>
-          </div>
         </div>
 
         {/* Impact Stats */}

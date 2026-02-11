@@ -7,7 +7,7 @@ import Link from 'next/link';
 import CubistPlayer from '@/components/CubistPlayer';
 
 export const metadata = {
-  title: 'The Cubist - Tyrell Thornton | MyStation',
+  title: 'The Cubist - Tyrell Thornton',
   description: 'The Cubist (Tyrell Thornton) — 100M+ streams & views. Credits: French Montana, Max B, Big30, Pooh Shiesty, Blac Youngsta. BET+ "I Got a Story to Tell" Season 2.',
   openGraph: {
     title: 'THE CUBIST — 100M+ Streams. BET+. The Sound Behind The Stars.',

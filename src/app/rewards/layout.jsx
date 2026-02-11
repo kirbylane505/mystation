@@ -1,5 +1,5 @@
 export const metadata = {
-  title: 'Dreamer Rewards — Spend. Earn. Experience. | MyStation',
+  title: 'Dreamer Rewards — Spend. Earn. Experience.',
   description: 'Every dollar on MyStation counts. Hit $500 for Dreamer status with VIP perks. Hit $2,500 for a free weekend at the IDMG Compound — room, food, and lifetime friendships.',
   openGraph: {
     title: 'Dreamer Rewards — Spend. Earn. Experience.',
