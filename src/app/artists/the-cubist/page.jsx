@@ -110,14 +110,14 @@ export default function CubistPage() {
         <div className="max-w-4xl mx-auto px-6">
           <h2 className="text-2xl font-black text-white mb-8">Recent Works</h2>
 
-          {/* YouTube Video - Ever Since You Left Me */}
+          {/* YouTube Video - Ever Since U Left Me (Official Video) */}
           <div className="mb-10">
             <div className="aspect-video rounded-2xl overflow-hidden mb-4">
               <iframe
                 width="100%"
                 height="100%"
-                src="https://www.youtube.com/embed/Yqb8vZoDfvI"
-                title="French Montana x Max B - Ever Since U Left Me (Prod. The Cubist)"
+                src="https://www.youtube.com/embed/u9rdzKwhxhI"
+                title="French Montana x Max B - Ever Since U Left Me (Official Video)"
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
@@ -128,24 +128,23 @@ export default function CubistPage() {
             <p className="text-white/50">French Montana x Max B — Prod. The Cubist</p>
           </div>
 
-          {/* Pop the Half */}
-          <div className="glass rounded-2xl p-6 border border-white/10 flex items-center gap-6">
-            <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-amber-500/20 to-red-500/20 flex items-center justify-center shrink-0">
-              <span className="text-2xl">🔥</span>
+          {/* YouTube Video - Pop The Half */}
+          <div className="mb-10">
+            <div className="aspect-video rounded-2xl overflow-hidden mb-4">
+              <iframe
+                width="100%"
+                height="100%"
+                src="https://www.youtube.com/embed/oGjgMMP6wMY"
+                title="French Montana x Max B - Pop The Half (Prod. The Cubist)"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="w-full h-full"
+              />
             </div>
-            <div className="flex-1">
-              <h3 className="text-lg font-bold text-white">Pop the Half</h3>
-              <p className="text-white/50 text-sm">French Montana & Max B — Prod. The Cubist</p>
-              <p className="text-white/30 text-xs mt-1">From <em>Coke Wave 3.5: Narcos</em></p>
-            </div>
-            <a
-              href="https://music.apple.com/us/album/coke-wave-3-5-narcos/1863124168?i=1863124176"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-5 py-2.5 bg-gradient-to-r from-pink-500 to-red-500 text-white font-bold rounded-full text-sm hover:scale-105 transition-all shrink-0"
-            >
-              Apple Music
-            </a>
+            <h3 className="text-xl font-bold text-white">Pop The Half</h3>
+            <p className="text-white/50">French Montana & Max B — Prod. The Cubist</p>
+            <p className="text-white/30 text-xs mt-1">From <em>Coke Wave 3.5: Narcos</em></p>
           </div>
         </div>
       </section>
