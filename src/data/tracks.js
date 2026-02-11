@@ -199,8 +199,8 @@ export const tracks = [
   {
     id: 203,
     title: "Love On The Lawn",
-    artist: "Mike Page",
-    featured: "Vincent Berry II",
+    artist: "Vincent Berry II",
+    featured: "Mike Page",
     album: "Grammy Nights Vol. 1",
     year: 2026,
     duration: "3:48",
@@ -209,6 +209,7 @@ export const tracks = [
     audioFile: '/audio/grammy-nights/04-love-on-the-lawn.mp3',
     isPrivate: true,
     accessCodes: ['MP2026', 'VB2026'],
+    producer: 'The Cubist',
     producer: 'The Cubist'
   },
   {
