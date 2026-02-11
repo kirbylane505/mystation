@@ -209,7 +209,6 @@ export const tracks = [
     audioFile: '/audio/grammy-nights/04-love-on-the-lawn.mp3',
     isPrivate: true,
     accessCodes: ['MP2026', 'VB2026'],
-    producer: 'The Cubist',
     producer: 'The Cubist'
   },
   {
