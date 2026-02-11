@@ -129,7 +129,7 @@ export function middleware(request) {
     "img-src 'self' data: blob: https: http:",
     "font-src 'self' https://fonts.gstatic.com",
     "connect-src 'self' https://api.stripe.com https://*.supabase.co https://vercel.live wss:",
-    "frame-src https://js.stripe.com https://hooks.stripe.com",
+    "frame-src https://js.stripe.com https://hooks.stripe.com https://www.youtube.com",
     "media-src 'self' blob: https: http:",
     "object-src 'none'",
     "base-uri 'self'",
