@@ -89,6 +89,71 @@ export const tracks = [
     hitScore: 88,
     producer: 'The Cubist'
   },
+  {
+    id: 105,
+    title: "One Love",
+    artist: "Mike Page",
+    album: "Coming Soon",
+    year: 2026,
+    duration: "3:29",
+    trackNumber: 6,
+    albumId: 'singles-2026',
+    audioFile: '/audio/singles/Mike Page - One Love_MASTERED.mp3',
+    isNew: true,
+    bpm: 120,
+    key: 'G Minor',
+    hitScore: 89,
+    producer: 'Gee & The Cubist'
+  },
+  {
+    id: 106,
+    title: "10 Toes Down",
+    artist: "Mike Page",
+    album: "Coming Soon",
+    year: 2026,
+    duration: "2:16",
+    trackNumber: 7,
+    albumId: 'singles-2026',
+    audioFile: '/audio/singles/Mike Page - 10 Toes Down_MASTERED.mp3',
+    isNew: true,
+    bpm: 130,
+    key: 'E Minor',
+    hitScore: 90,
+    producer: 'Shawn Hibbler & The Cubist'
+  },
+  // ========================================
+  // LIBRARY SINGLES (not New Releases)
+  // ========================================
+  {
+    id: 107,
+    title: "Tom Brady",
+    artist: "Mike Page",
+    album: "Singles",
+    year: 2026,
+    duration: "2:18",
+    trackNumber: 1,
+    albumId: 'singles-2026',
+    audioFile: '/audio/singles/Mike Page - Tom Brady_MASTERED.mp3',
+    bpm: 130,
+    key: 'D Minor',
+    hitScore: 88,
+    producer: 'The Cubist'
+  },
+  {
+    id: 108,
+    title: "Friends On Friends",
+    artist: "Mike Page",
+    album: "Singles",
+    year: 2026,
+    duration: "3:18",
+    trackNumber: 2,
+    albumId: 'singles-2026',
+    audioFile: '/audio/singles/Mike Page - Friends On Friends_MASTERED.mp3',
+    bpm: 125,
+    key: 'C Minor',
+    hitScore: 87,
+    producer: 'The Cubist'
+  },
   // ========================================
   // CINDY'S SON (Extended Album) - 2022
   // ========================================

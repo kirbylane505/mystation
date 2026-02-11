@@ -30,8 +30,10 @@ export default function HomePage() {
 
   // AUTO-PLAY: Queue new releases on first visit so music starts immediately
   // Plays consecutively — newcomers get 4 free songs before subscription wall
+  // NEVER override if something is already playing or queued
   useEffect(() => {
-    if (queue.length > 0) return; // Already has a queue, don't override
+    const state = usePlayerStore.getState();
+    if (state.currentTrack || state.queue.length > 0 || state.isPlaying) return;
     const newReleaseTracks = (newReleases.length > 0 ? newReleases : [21, 22, 23, 30, 31, 32, 34, 35])
       .map(id => officialTracks.find(t => t.id === id))
       .filter(Boolean);

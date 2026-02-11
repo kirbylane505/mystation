@@ -189,8 +189,10 @@ export default function MerchPage() {
   const { queue, setQueue } = usePlayerStore();
 
   // Auto-play music while shopping — queue new releases if nothing playing
+  // NEVER override if something is already playing or queued
   useEffect(() => {
-    if (queue.length > 0) return;
+    const state = usePlayerStore.getState();
+    if (state.currentTrack || state.queue.length > 0 || state.isPlaying) return;
     const officialTracks = getOfficialTracks();
     const newReleaseTracks = officialTracks.filter(t => t.isNew);
     if (newReleaseTracks.length > 0) {
