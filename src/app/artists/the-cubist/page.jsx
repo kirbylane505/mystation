@@ -35,7 +35,7 @@ const CREDITS = [
 
 const MILESTONES = [
   { stat: '100M+', label: 'Streams & Views' },
-  { stat: 'BET+', label: '"I Got a Story to Tell" S2' },
+  { stat: 'BET+ / Tubi', label: '"I Got a Story to Tell"' },
   { stat: 'April 2026', label: 'Season 2 Premiere' },
   { stat: '5+', label: 'Major Artist Credits' },
 ];
@@ -175,6 +175,24 @@ export default function CubistPage() {
             <p className="text-white/50">French Montana & Max B — Prod. The Cubist</p>
             <p className="text-white/30 text-xs mt-1">From <em>Coke Wave 3.5: Narcos</em></p>
           </div>
+
+          {/* YouTube Video - Free Shiest Life */}
+          <div className="mb-10">
+            <div className="aspect-video rounded-2xl overflow-hidden mb-4">
+              <iframe
+                width="100%"
+                height="100%"
+                src="https://www.youtube.com/embed/cgqlihvt0a0"
+                title="Big30 - Free Shiest Life ft. Pooh Shiesty (Official Video)"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="w-full h-full"
+              />
+            </div>
+            <h3 className="text-xl font-bold text-white">Free Shiest Life</h3>
+            <p className="text-white/50">Big30 ft. Pooh Shiesty — Prod. The Cubist</p>
+          </div>
         </div>
       </section>
 
@@ -193,16 +211,20 @@ export default function CubistPage() {
           <div className="glass rounded-3xl p-8 lg:p-12 border border-amber-500/20 relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-red-500/5" />
             <div className="relative text-center">
-              <p className="text-amber-400 text-sm font-bold uppercase tracking-wider mb-3">Coming April 2026</p>
+              <p className="text-amber-400 text-sm font-bold uppercase tracking-wider mb-3">Season 1 Streaming Now • Season 2 April 2026</p>
               <h3 className="text-3xl lg:text-4xl font-black text-white mb-4">
-                {'"'}I Got a Story to Tell{'"'} <br />
-                <span className="text-amber-400">Season 2</span>
+                {'"'}I Got a Story to Tell{'"'}
               </h3>
               <p className="text-white/50 max-w-xl mx-auto mb-8">
-                The highly anticipated second season on BET+ follows The Cubist deeper into the music industry, featuring never-before-seen footage and exclusive behind-the-scenes stories.
+                The Cubist{"'"}s docuseries dives deep into the untold stories behind the music, featuring never-before-seen footage and exclusive behind-the-scenes content. Season 1 streaming now. Season 2 coming April 2026.
               </p>
-              <div className="inline-flex items-center gap-2 px-6 py-3 bg-amber-500/10 border border-amber-500/30 rounded-full text-amber-400 font-bold">
-                Streaming on BET+
+              <div className="flex flex-wrap gap-3 justify-center">
+                <div className="inline-flex items-center gap-2 px-6 py-3 bg-amber-500/10 border border-amber-500/30 rounded-full text-amber-400 font-bold">
+                  Streaming on BET+
+                </div>
+                <div className="inline-flex items-center gap-2 px-6 py-3 bg-purple-500/10 border border-purple-500/30 rounded-full text-purple-400 font-bold">
+                  Streaming on Tubi
+                </div>
               </div>
             </div>
           </div>
