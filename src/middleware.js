@@ -44,8 +44,8 @@ async function verifyAudioToken(token, pathname) {
     const expires = rest.slice(secondLastColon + 1);
     const audioPath = rest.slice(0, secondLastColon);
 
-    // Verify path matches and token not expired
-    if (audioPath !== pathname) return false;
+    // Verify path matches and token not expired (decode %20 → spaces for comparison)
+    if (audioPath !== decodeURIComponent(pathname)) return false;
     if (Date.now() > parseInt(expires)) return false;
 
     // Verify HMAC-SHA256 signature
