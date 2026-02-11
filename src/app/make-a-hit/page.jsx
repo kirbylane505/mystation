@@ -1,18 +1,32 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { makeAHitTracks, makeAHitInfo } from '@/data/make-a-hit';
+import { usePlayerStore } from '@/store/playerStore';
 
 export default function MakeAHitPage() {
   const [selectedTrack, setSelectedTrack] = useState(null);
   const [playing, setPlaying] = useState(null);
   const audioRef = useRef(null);
+  const { isPlaying: globalPlaying, pause: globalPause } = usePlayerStore();
+
+  // When global player starts, stop Make A Hit audio
+  useEffect(() => {
+    if (globalPlaying && playing) {
+      audioRef.current?.pause();
+      setPlaying(null);
+    }
+  }, [globalPlaying]);
 
   const playTrack = (track) => {
     if (playing === track.id) {
       audioRef.current?.pause();
       setPlaying(null);
     } else {
+      // Pause global player first — no overlapping
+      if (usePlayerStore.getState().isPlaying) {
+        globalPause();
+      }
       if (audioRef.current) {
         audioRef.current.src = track.audioFile;
         audioRef.current.play();
