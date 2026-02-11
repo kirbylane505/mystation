@@ -38,7 +38,7 @@ export default function CubistPage() {
         <div className="absolute inset-0 bg-gradient-to-br from-amber-900/60 via-red-900/40 to-black" />
         <div className="relative max-w-5xl mx-auto px-6 py-20 text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/10 border border-amber-500/30 rounded-full mb-6">
-            <span className="text-amber-400 text-sm font-medium">IDMG Artist</span>
+            <span className="text-amber-400 text-sm font-medium">IDMG Producer</span>
           </div>
           <h1 className="text-5xl lg:text-7xl font-black text-white mb-4">
             THE <span className="bg-gradient-to-r from-amber-400 to-red-500 bg-clip-text text-transparent">CUBIST</span>
