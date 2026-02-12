@@ -250,6 +250,21 @@ export const tracks = [
     genre: 'R&B',
     producer: 'The Cubist'
   },
+  {
+    id: 146,
+    title: "Now I'm Shinnin",
+    artist: "Mike Page",
+    album: "Coming Soon",
+    year: 2026,
+    duration: "2:56",
+    trackNumber: 16,
+    albumId: 'singles-2026',
+    audioFile: '/audio/Mike Page - Now Im Shinnin_MASTERED.mp3',
+    isNew: true,
+    hitScore: 90,
+    genre: 'Alternative Rap',
+    producer: 'The Cubist'
+  },
   // ========================================
   // GRAMMY NIGHTS VOL. 1 - VB & MP (PRIVATE)
   // Access: MP2026 (Mike Page), VB2026 (Vincent Berry)
