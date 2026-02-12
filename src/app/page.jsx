@@ -26,7 +26,7 @@ export default function HomePage() {
   const officialTracks = getOfficialTracks();
 
   // New releases - official tracks marked as isNew
-  const newReleases = officialTracks.filter(t => t.isNew).map(t => t.id).slice(0, 12);
+  const newReleases = officialTracks.filter(t => t.isNew).map(t => t.id);
 
   // Featured - Cindy's Son highlights + singles
   const featuredTracks = [1, 21, 22, 3, 7, 10];
