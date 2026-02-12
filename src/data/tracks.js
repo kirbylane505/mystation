@@ -170,6 +170,23 @@ export const tracks = [
     genre: 'R&B',
     producer: 'The Cubist'
   },
+  {
+    id: 141,
+    title: "One Of A Kind N...A",
+    artist: "Mike Page",
+    featured: "Bea (BeautifulEvenAfter)",
+    album: "Coming Soon",
+    year: 2026,
+    duration: "4:12",
+    trackNumber: 11,
+    albumId: 'singles-2026',
+    audioFile: '/audio/Mike Page - One Of A Kind_MASTERED.mp3',
+    isFeatured: true,
+    featuredWeek: '2026-02-12',
+    hitScore: 93,
+    genre: 'R&B',
+    producer: 'Mike Page & The Cubist'
+  },
   // ========================================
   // GRAMMY NIGHTS VOL. 1 - VB & MP (PRIVATE)
   // Access: MP2026 (Mike Page), VB2026 (Vincent Berry)
@@ -933,17 +950,17 @@ export const tracks = [
 
 // Featured Song of the Week
 export const featuredSong = {
-  id: 278,
-  title: "Having My Way",
+  id: 141,
+  title: "One Of A Kind N...A",
   artist: "Mike Page",
-  featured: "Varro",
-  album: "Vault",
+  featured: "Bea (BeautifulEvenAfter)",
+  album: "Coming Soon",
   year: 2026,
-  duration: "3:07",
-  audioFile: '/audio/vault/Mike Page - Having My Way.mp3',
-  coverGradient: "from-emerald-500 via-teal-600 to-cyan-800",
-  weekOf: "February 9, 2026",
-  description: "Mike Page and Varro link up on this Cubist-produced banger. Fresh from the vault — stream exclusively on MyStation.",
+  duration: "4:12",
+  audioFile: '/audio/Mike Page - One Of A Kind_MASTERED.mp3',
+  coverGradient: "from-purple-600 via-fuchsia-600 to-rose-700",
+  weekOf: "February 12, 2026",
+  description: "Mike Page and Bea (BeautifulEvenAfter) deliver a smooth, one-of-a-kind R&B record. Co-produced by Mike Page & The Cubist — only on MyStation.",
   stats: {
     bpm: 0,
     key: "",
