@@ -16,3 +16,8 @@ out/
 
 # Large audio - WAV masters stay local only
 public/audio/**/*.wav
+
+# One-off scripts and test artifacts
+scripts/
+*.png
+!public/**/*.png
