@@ -40,7 +40,7 @@ const POST_POOL = [
   { username: 'ChillMood', content: 'Perfect study playlist: Favorite Person → I Need Her → One Love. Thank me later', avatar: '📚', tier: 'fan' },
   { username: 'FestivalGoer', content: 'Love On The Lawn + Walgreens sponsorship = biggest year yet. Lets goooo 🎉', avatar: '🎪', tier: 'fan' },
   { username: 'SubscribedDay1', content: 'Been here since the beginning. $4.99/mo is nothing for this catalog. Worth every penny', avatar: '💎', tier: 'vip' },
-  { username: 'MixMaster', content: 'Mixed I Want This One with the DJ turntables and it sounds CRAZY with Rent Due', avatar: '🎚️', tier: 'fan' },
+  { username: 'MixMaster', content: 'Mixed Love On The Lawn with the DJ turntables and it sounds CRAZY with Rent Due', avatar: '🎚️', tier: 'fan' },
   { username: 'SoulMusic', content: 'Mike Page makes music that actually means something. Not just noise. SOUL.', avatar: '🎤', tier: 'fan' },
   { username: 'ChiTownFan', content: 'Representing Chicago! Mike Page Foundation doing more for the community than most corporations', avatar: '🏙️', tier: 'supporter' },
   { username: 'WavyVibes', content: 'I keep coming back to this app. The experience is unmatched. MyStation > everything', avatar: '🌊', tier: 'fan' },
