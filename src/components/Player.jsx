@@ -392,6 +392,7 @@ export default function Player() {
           <button
             onClick={(e) => { e.stopPropagation(); togglePlay(); }}
             className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center shrink-0"
+            aria-label={isPlaying ? 'Pause' : 'Play'}
           >
             {isPlaying ? <Pause size={18} fill="white" className="text-white" /> : <Play size={18} fill="white" className="text-white ml-0.5" />}
           </button>
@@ -400,6 +401,7 @@ export default function Player() {
           <button
             onClick={(e) => { e.stopPropagation(); nextTrack(); }}
             className="text-white/60 shrink-0"
+            aria-label="Next track"
           >
             <SkipForward size={22} fill="currentColor" />
           </button>

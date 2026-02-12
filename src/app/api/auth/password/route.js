@@ -13,7 +13,7 @@ export async function POST(request) {
     response.cookies.set('mystation_access', 'granted', {
       path: '/',
       maxAge: 60 * 60 * 24 * 7, // 7 days
-      httpOnly: false, // needs to be readable by middleware
+      httpOnly: true, // middleware can read httpOnly cookies
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
     });

@@ -5,7 +5,10 @@ import { NextResponse } from 'next/server';
  * Protects against common web attacks + token-gated audio streaming
  */
 
-const AUDIO_SECRET = process.env.AUDIO_SECRET || 'ms-audio-2026-idmg';
+const AUDIO_SECRET = process.env.AUDIO_SECRET;
+if (!AUDIO_SECRET && process.env.NODE_ENV === 'production') {
+  console.error('FATAL: AUDIO_SECRET env var is not set');
+}
 
 // Rate limiting store (in-memory, resets on deploy)
 const rateLimitStore = new Map();
@@ -56,7 +59,14 @@ async function verifyAudioToken(token, pathname) {
     );
     const sigBuf = await crypto.subtle.sign('HMAC', key, encoder.encode(`${audioPath}:${expires}`));
     const hex = Array.from(new Uint8Array(sigBuf)).map(b => b.toString(16).padStart(2, '0')).join('');
-    return hex.slice(0, 16) === sig;
+    // Timing-safe comparison to prevent timing attacks
+    const expected = hex.slice(0, 16);
+    if (expected.length !== sig.length) return false;
+    let diff = 0;
+    for (let i = 0; i < expected.length; i++) {
+      diff |= expected.charCodeAt(i) ^ sig.charCodeAt(i);
+    }
+    return diff === 0;
   } catch {
     return false;
   }
@@ -68,7 +78,7 @@ export async function middleware(request) {
   // Admin analytics access — allow with correct key, bypass all other gates
   if (pathname.startsWith('/admin/analytics')) {
     const adminKey = searchParams.get('key');
-    if (adminKey === 'mpf2026' || adminKey === process.env.ADMIN_KEY) {
+    if (process.env.ADMIN_KEY && adminKey === process.env.ADMIN_KEY) {
       // Authorized admin — skip password gate, proceed to security headers
     } else {
       // No valid key — redirect to home
