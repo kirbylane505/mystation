@@ -1,16 +1,26 @@
 /**
- * MYSTATION - Comments API
+ * MYSTATION - Comments API (Supabase-backed)
  * GET: Fetch comments for a track
  * POST: Add a comment + notify Mike via email
+ *
+ * Required Supabase table:
+ * ---------------------------------------------------------
+ * CREATE TABLE comments (
+ *   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+ *   track_id text NOT NULL,
+ *   username text NOT NULL,
+ *   content text NOT NULL,
+ *   avatar text DEFAULT '',
+ *   created_at timestamptz DEFAULT now()
+ * );
+ * CREATE INDEX idx_comments_track_id ON comments (track_id);
+ * ---------------------------------------------------------
  */
 
 import { NextResponse } from 'next/server';
+import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
 
-// In-memory comment store (upgrades to Supabase later)
-// Persists for the life of the serverless function
-const commentsStore = new Map();
-
-// Rate limit: max 5 comments per IP per 10 minutes
+// Rate limit: max 5 comments per IP per 10 minutes (in-memory, best-effort)
 const rateLimits = new Map();
 const RATE_LIMIT = 5;
 const RATE_WINDOW = 10 * 60 * 1000;
@@ -35,8 +45,39 @@ export async function GET(request) {
     return NextResponse.json({ comments: [] });
   }
 
-  const comments = commentsStore.get(trackId) || [];
-  return NextResponse.json({ comments });
+  const supabase = getSupabaseAdmin();
+  if (!supabase) {
+    // Supabase not configured -- return empty gracefully
+    return NextResponse.json({ comments: [] });
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('comments')
+      .select('id, track_id, username, content, avatar, created_at')
+      .eq('track_id', String(trackId))
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      console.error('Supabase comments fetch error:', error.message);
+      return NextResponse.json({ comments: [] });
+    }
+
+    // Map DB columns to the shape the frontend expects
+    const comments = (data || []).map(row => ({
+      id: row.id,
+      trackId: row.track_id,
+      name: row.username,
+      message: row.content,
+      avatar: row.avatar || '',
+      createdAt: row.created_at,
+    }));
+
+    return NextResponse.json({ comments });
+  } catch (err) {
+    console.error('Comments GET error:', err);
+    return NextResponse.json({ comments: [] });
+  }
 }
 
 export async function POST(request) {
@@ -57,24 +98,50 @@ export async function POST(request) {
     const cleanName = name.trim().slice(0, 50);
     const cleanMessage = message.trim().slice(0, 500);
 
-    const comment = {
-      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-      trackId: String(trackId),
-      name: cleanName,
-      message: cleanMessage,
-      createdAt: new Date().toISOString(),
-    };
+    const supabase = getSupabaseAdmin();
+    if (!supabase) {
+      // Supabase not configured -- return a fake comment so the UI still works
+      const fallback = {
+        id: `local-${Date.now()}`,
+        trackId: String(trackId),
+        name: cleanName,
+        message: cleanMessage,
+        createdAt: new Date().toISOString(),
+      };
+      return NextResponse.json({ comment: fallback, success: true });
+    }
 
-    // Store comment
-    const existing = commentsStore.get(String(trackId)) || [];
-    existing.push(comment);
-    commentsStore.set(String(trackId), existing);
+    const { data, error } = await supabase
+      .from('comments')
+      .insert({
+        track_id: String(trackId),
+        username: cleanName,
+        content: cleanMessage,
+      })
+      .select('id, track_id, username, content, avatar, created_at')
+      .single();
+
+    if (error) {
+      console.error('Supabase comments insert error:', error.message);
+      return NextResponse.json({ error: 'Failed to post comment' }, { status: 500 });
+    }
+
+    // Map DB row to frontend shape
+    const comment = {
+      id: data.id,
+      trackId: data.track_id,
+      name: data.username,
+      message: data.content,
+      avatar: data.avatar || '',
+      createdAt: data.created_at,
+    };
 
     // Send email notification to Mike (fire-and-forget)
     notifyAdmin(comment, trackTitle).catch(() => {});
 
     return NextResponse.json({ comment, success: true });
-  } catch {
+  } catch (err) {
+    console.error('Comments POST error:', err);
     return NextResponse.json({ error: 'Failed to post comment' }, { status: 500 });
   }
 }
@@ -90,7 +157,7 @@ async function notifyAdmin(comment, trackTitle) {
   await resend.emails.send({
     from: process.env.RESEND_FROM_EMAIL || 'MyStation <notifications@mystationlive.com>',
     to: 'idmgatl@gmail.com',
-    subject: `New Comment on "${trackTitle || 'a track'}" — ${comment.name}`,
+    subject: `New Comment on "${trackTitle || 'a track'}" \u2014 ${comment.name}`,
     html: `
       <div style="font-family:-apple-system,sans-serif;max-width:500px;margin:0 auto;background:#0a0e1a;color:#fff;padding:24px;border-radius:16px;">
         <h2 style="color:#3b82f6;margin:0 0 8px;">New Comment</h2>

@@ -1,15 +1,32 @@
 import { sendShippingNotification, sendOrderFailedAlert } from '@/lib/email';
+import { createHmac } from 'crypto';
 
 /**
  * POST /api/printful/webhook
  * Handle Printful webhook events
+ * Verifies webhook signature before processing
  *
  * Events: package_shipped, order_created, order_updated,
  *         order_failed, order_canceled, product_updated
  */
 export async function POST(request) {
   try {
-    const payload = await request.json();
+    const rawBody = await request.text();
+
+    // Verify Printful webhook signature (HMAC-SHA256)
+    const webhookSecret = process.env.PRINTFUL_WEBHOOK_SECRET;
+    if (webhookSecret) {
+      const signature = request.headers.get('x-printful-signature') || request.headers.get('webhook-signature') || '';
+      const expectedSig = createHmac('sha256', webhookSecret).update(rawBody).digest('hex');
+      if (!signature || signature !== expectedSig) {
+        console.error('[Printful Webhook] Invalid signature — rejecting');
+        return Response.json({ error: 'Invalid webhook signature' }, { status: 401 });
+      }
+    } else if (process.env.NODE_ENV === 'production') {
+      console.warn('[Printful Webhook] PRINTFUL_WEBHOOK_SECRET not set — accepting without verification');
+    }
+
+    const payload = JSON.parse(rawBody);
     const { type, data } = payload;
 
     console.log(`[Printful Webhook] Event: ${type}`);

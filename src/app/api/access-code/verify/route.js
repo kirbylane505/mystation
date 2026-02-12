@@ -4,6 +4,7 @@
  */
 
 import { NextResponse } from 'next/server';
+import { timingSafeEqual } from 'crypto';
 
 export async function POST(request) {
   try {
@@ -25,7 +26,13 @@ export async function POST(request) {
       );
     }
 
-    if (code.toUpperCase().trim() === validCode.toUpperCase()) {
+    // Timing-safe comparison to prevent timing attacks
+    const inputNorm = code.toUpperCase().trim();
+    const expectedNorm = validCode.toUpperCase().trim();
+    const isValid = inputNorm.length === expectedNorm.length &&
+      timingSafeEqual(Buffer.from(inputNorm), Buffer.from(expectedNorm));
+
+    if (isValid) {
       return NextResponse.json({ success: true, message: 'Welcome to the family!' });
     }
 

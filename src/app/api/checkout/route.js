@@ -41,13 +41,11 @@ export async function POST(request) {
     // Check if Stripe is configured
     const stripeKey = process.env.STRIPE_SECRET_KEY;
     if (!stripeKey) {
-      // Demo mode - simulate successful checkout
-      return NextResponse.json({
-        success: true,
-        demo: true,
-        orderId: 'DEMO-' + Date.now(),
-        message: 'Order placed (demo mode)',
-      });
+      console.error('STRIPE_SECRET_KEY not configured — checkout unavailable');
+      return NextResponse.json(
+        { success: false, error: 'Checkout is temporarily unavailable' },
+        { status: 503 }
+      );
     }
 
     // Import and initialize Stripe at runtime
@@ -212,7 +210,7 @@ export async function POST(request) {
   } catch (error) {
     console.error('Stripe checkout error:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'Checkout failed' },
+      { success: false, error: 'Checkout failed. Please try again.' },
       { status: 500 }
     );
   }

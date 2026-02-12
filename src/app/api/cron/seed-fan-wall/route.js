@@ -48,11 +48,15 @@ const POST_POOL = [
 
 export async function GET(request) {
   try {
-    // Verify cron secret or allow local calls
+    // Verify cron secret — required in production
     const authHeader = request.headers.get('authorization');
     const cronSecret = process.env.CRON_SECRET;
 
-    // Allow if no secret is set (dev mode) or if secret matches
+    if (!cronSecret && process.env.NODE_ENV === 'production') {
+      console.error('[Cron] CRON_SECRET not set in production');
+      return NextResponse.json({ error: 'Not configured' }, { status: 500 });
+    }
+
     if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

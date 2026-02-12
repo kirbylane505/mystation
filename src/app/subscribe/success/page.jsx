@@ -12,12 +12,15 @@ export default function SubscribeSuccessPage() {
   const { subscribe } = useUserStore();
 
   useEffect(() => {
-    // Mark user as subscribed
-    subscribe('subscriber@mystation.com');
+    // Set server-side subscription session cookie (httpOnly, HMAC-signed)
+    fetch('/api/subscription/session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'activate' }),
+    }).catch(() => {});
 
-    // Store subscription status
-    localStorage.setItem('mystation-subscribed', 'true');
-    localStorage.setItem('mystation-subscription-date', new Date().toISOString());
+    // Mark user as subscribed in client store
+    subscribe('subscriber@mystation.com');
 
     // Get the pending track from localStorage (saved before Stripe redirect)
     const savedPendingTrack = localStorage.getItem('mystation-pending-track');
@@ -25,9 +28,11 @@ export default function SubscribeSuccessPage() {
     // Auto-play after 3 seconds
     const timer = setTimeout(() => {
       if (savedPendingTrack) {
-        const track = JSON.parse(savedPendingTrack);
-        setTrack(track);
-        setIsPlaying(true);
+        try {
+          const track = JSON.parse(savedPendingTrack);
+          setTrack(track);
+          setIsPlaying(true);
+        } catch {}
         localStorage.removeItem('mystation-pending-track');
       }
 

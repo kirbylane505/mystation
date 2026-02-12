@@ -103,17 +103,14 @@ export const usePlayerStore = create(
     return Math.max(0, total - elapsed);
   },
 
-  // Check if can play (24-hour free trial, then subscription wall)
+  // Check if can play (client-side hint only — real enforcement is server-side in /api/audio/token)
   canPlay: (trackId) => {
     const { isSubscribed } = useUserStore.getState();
     if (isSubscribed) return true;
-    // Fallback: check localStorage in case zustand state was cleared
-    if (typeof window !== 'undefined' && localStorage.getItem('mystation-subscribed') === 'true') {
-      useUserStore.getState().subscribe(localStorage.getItem('mystation-user-email') || 'subscriber');
-      return true;
-    }
+    // NOTE: No localStorage fallback — subscription is enforced server-side via httpOnly cookie
+    // The audio token endpoint (/api/audio/token) validates subscription + trial server-side
 
-    // 24-hour free trial check
+    // 24-hour free trial check (client-side hint — server also enforces)
     const remaining = get().getTrialRemaining();
     return remaining > 0;
   },

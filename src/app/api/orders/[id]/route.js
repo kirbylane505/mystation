@@ -1,8 +1,8 @@
 import { printful } from '@/lib/printful';
 
-// Admin auth check
+// Admin auth check — header only (never accept key in URL query params)
 function isAuthorized(request) {
-  const key = request.headers.get('x-admin-key') || new URL(request.url).searchParams.get('key');
+  const key = request.headers.get('x-admin-key');
   return process.env.ADMIN_KEY && key === process.env.ADMIN_KEY;
 }
 
@@ -26,7 +26,7 @@ export async function GET(request, { params }) {
   } catch (error) {
     console.error('[Orders API] Get order error:', error);
     return Response.json(
-      { success: false, error: error.message },
+      { success: false, error: 'Failed to fetch order' },
       { status: 500 }
     );
   }
@@ -58,7 +58,7 @@ export async function POST(request, { params }) {
   } catch (error) {
     console.error('[Orders API] Confirm order error:', error);
     return Response.json(
-      { success: false, error: error.message },
+      { success: false, error: 'Failed to confirm order' },
       { status: 500 }
     );
   }
@@ -86,7 +86,7 @@ export async function DELETE(request, { params }) {
   } catch (error) {
     console.error('[Orders API] Cancel order error:', error);
     return Response.json(
-      { success: false, error: error.message },
+      { success: false, error: 'Failed to cancel order' },
       { status: 500 }
     );
   }

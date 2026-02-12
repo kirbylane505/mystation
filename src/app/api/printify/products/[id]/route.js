@@ -2,6 +2,12 @@ import { printify } from '@/lib/printify';
 
 export const dynamic = 'force-dynamic';
 
+// Admin auth — header only
+function isAuthorized(request) {
+  const key = request.headers.get('x-admin-key');
+  return process.env.ADMIN_KEY && key === process.env.ADMIN_KEY;
+}
+
 /**
  * GET /api/printify/products/[id]
  * Fetch single product with all variants, images, and details
@@ -37,7 +43,7 @@ export async function GET(request, { params }) {
         title: v.title,
         sku: v.sku,
         price: v.price,
-        cost: v.cost,
+        // cost intentionally omitted — wholesale pricing is admin-only
         grams: v.grams,
         is_enabled: v.is_enabled,
         is_default: v.is_default,
@@ -58,7 +64,7 @@ export async function GET(request, { params }) {
   } catch (error) {
     console.error('Printify product fetch error:', error);
     return Response.json(
-      { success: false, error: error.message },
+      { success: false, error: 'Failed to fetch product' },
       { status: 500 }
     );
   }
@@ -66,9 +72,12 @@ export async function GET(request, { params }) {
 
 /**
  * PUT /api/printify/products/[id]
- * Update a product
+ * Update a product (ADMIN ONLY)
  */
 export async function PUT(request, { params }) {
+  if (!isAuthorized(request)) {
+    return Response.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+  }
   try {
     const { id } = await params;
 
@@ -92,7 +101,7 @@ export async function PUT(request, { params }) {
   } catch (error) {
     console.error('Printify product update error:', error);
     return Response.json(
-      { success: false, error: error.message },
+      { success: false, error: 'Failed to update product' },
       { status: 500 }
     );
   }
@@ -100,9 +109,12 @@ export async function PUT(request, { params }) {
 
 /**
  * DELETE /api/printify/products/[id]
- * Delete a product
+ * Delete a product (ADMIN ONLY)
  */
 export async function DELETE(request, { params }) {
+  if (!isAuthorized(request)) {
+    return Response.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+  }
   try {
     const { id } = await params;
 
@@ -124,7 +136,7 @@ export async function DELETE(request, { params }) {
   } catch (error) {
     console.error('Printify product delete error:', error);
     return Response.json(
-      { success: false, error: error.message },
+      { success: false, error: 'Failed to delete product' },
       { status: 500 }
     );
   }

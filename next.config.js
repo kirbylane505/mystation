@@ -2,7 +2,39 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ['localhost', 'mystation.app', 'idmg.live'],
+    remotePatterns: [
+      // Production domains
+      {
+        protocol: 'https',
+        hostname: 'mystationlive.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'mystation.vercel.app',
+      },
+      // Merch image CDNs
+      {
+        protocol: 'https',
+        hostname: 'images.printify.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'cdn.printful.com',
+      },
+      // Legacy domains
+      {
+        protocol: 'https',
+        hostname: 'mystation.app',
+      },
+      {
+        protocol: 'https',
+        hostname: 'idmg.live',
+      },
+      // Localhost for development only
+      ...(process.env.NODE_ENV === 'development'
+        ? [{ protocol: 'http', hostname: 'localhost' }]
+        : []),
+    ],
   },
   async redirects() {
     return [

@@ -2,13 +2,21 @@
  * MYSTATION - About / Foundation Page
  * Mike Page Foundation - Proud Partner of MyStation
  * Updated: Feb 6, 2026
+ * Converted to React Server Component — no client hooks needed
  */
-
-'use client';
 
 import { artistInfo } from '@/data/tracks';
 import Image from 'next/image';
 import { Heart, Music, Award, Users, MapPin, Calendar, ExternalLink, Check, HeartHandshake, Utensils } from 'lucide-react';
+
+export const metadata = {
+  title: 'About — Mike Page Foundation',
+  description: 'Mike Page Foundation — 501(c)(3) nonprofit. Youth music programs, scholarships, community meals, and Love on the Lawn Festival. Building community through music.',
+  openGraph: {
+    title: 'About — Mike Page Foundation',
+    description: 'Mike Page Foundation — 501(c)(3) nonprofit. Youth music programs, scholarships, community meals, and the Love on the Lawn Festival.',
+  },
+};
 
 export default function AboutPage() {
   return (

@@ -2,9 +2,9 @@ import { printful } from '@/lib/printful';
 
 export const dynamic = 'force-dynamic';
 
-// Admin auth check — protects order creation and listing
+// Admin auth check — header only (never accept key in URL query params — leaks in logs/history)
 function isAuthorized(request) {
-  const key = request.headers.get('x-admin-key') || new URL(request.url).searchParams.get('key');
+  const key = request.headers.get('x-admin-key');
   return process.env.ADMIN_KEY && key === process.env.ADMIN_KEY;
 }
 
@@ -100,7 +100,7 @@ export async function POST(request) {
   } catch (error) {
     console.error('[Orders API] Error:', error);
     return Response.json(
-      { success: false, error: error.message },
+      { success: false, error: 'Order creation failed' },
       { status: 500 }
     );
   }
@@ -145,7 +145,7 @@ export async function GET(request) {
   } catch (error) {
     console.error('[Orders API] Error:', error);
     return Response.json(
-      { success: false, error: error.message },
+      { success: false, error: 'Failed to fetch orders' },
       { status: 500 }
     );
   }

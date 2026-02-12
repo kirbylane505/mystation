@@ -11,8 +11,8 @@ export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const period = searchParams.get('period') || '24h';
 
-  // Admin check via env var only — no hardcoded keys
-  const key = searchParams.get('key') || request.headers.get('x-admin-key');
+  // Admin check — header only (never accept key in URL query params — leaks in logs/history)
+  const key = request.headers.get('x-admin-key');
   const adminKey = process.env.ADMIN_KEY;
   if (!adminKey || key !== adminKey) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -41,7 +41,7 @@ export async function GET(request) {
       .limit(10000);
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: 'Analytics unavailable' }, { status: 500 });
     }
 
     const plays = events.filter(e => e.event_type === 'play');

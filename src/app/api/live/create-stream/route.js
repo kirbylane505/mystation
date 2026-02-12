@@ -15,16 +15,10 @@ export async function POST(request) {
 
     // Check if Mux is configured
     if (!process.env.MUX_TOKEN_ID || !process.env.MUX_TOKEN_SECRET) {
-      // Demo mode - return mock stream data
-      return NextResponse.json({
-        success: true,
-        demo: true,
-        streamId: 'demo-stream-id',
-        streamKey: 'demo-stream-key-configure-mux',
-        playbackId: 'demo-playback-id',
-        rtmpUrl: 'rtmps://global-live.mux.com:443/app',
-        message: 'Demo mode - configure Mux API keys to go live',
-      });
+      return NextResponse.json(
+        { success: false, error: 'Live streaming not configured' },
+        { status: 503 }
+      );
     }
 
     // Dynamic import Mux only when configured
@@ -53,7 +47,7 @@ export async function POST(request) {
   } catch (error) {
     console.error('Error creating stream:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'Failed to create stream' },
+      { success: false, error: 'Failed to create stream' },
       { status: 500 }
     );
   }

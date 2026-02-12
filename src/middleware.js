@@ -75,13 +75,14 @@ async function verifyAudioToken(token, pathname) {
 export async function middleware(request) {
   const { pathname, searchParams } = request.nextUrl;
 
-  // Admin analytics access — allow with correct key, bypass all other gates
+  // Admin analytics access — header-based auth only (page uses client-side fetch with header)
   if (pathname.startsWith('/admin/analytics')) {
-    const adminKey = searchParams.get('key');
+    const adminKey = request.headers.get('x-admin-key');
     if (process.env.ADMIN_KEY && adminKey === process.env.ADMIN_KEY) {
       // Authorized admin — skip password gate, proceed to security headers
+    } else if (!pathname.startsWith('/api/')) {
+      // Page request without key — allow page load (auth happens client-side via API)
     } else {
-      // No valid key — redirect to home
       return NextResponse.redirect(new URL('/', request.url));
     }
   }
@@ -144,11 +145,11 @@ export async function middleware(request) {
     "default-src 'self'",
     "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://vercel.live https://www.youtube.com",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-    "img-src 'self' data: blob: https: http:",
+    "img-src 'self' data: blob: https:",
     "font-src 'self' https://fonts.gstatic.com",
     "connect-src 'self' https://api.stripe.com https://*.supabase.co https://vercel.live wss:",
     "frame-src https://js.stripe.com https://hooks.stripe.com https://www.youtube.com",
-    "media-src 'self' blob: https: http:",
+    "media-src 'self' blob: https:",
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self' https://buy.stripe.com",

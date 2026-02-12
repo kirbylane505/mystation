@@ -3,23 +3,35 @@
  * Premium music streaming for Mike Page Foundation
  */
 
+import { Montserrat, Inter } from 'next/font/google';
 import '@/styles/globals.css';
+
+// Critical components — eagerly loaded (needed for initial render)
 import Navbar from '@/components/Navbar';
 import Player from '@/components/Player';
 import AudioPlayer from '@/components/AudioPlayer';
 import SubscribeModal from '@/components/SubscribeModal';
 import ClientProviders from '@/components/ClientProviders';
 import Cart from '@/components/Cart';
-import InstallPWA from '@/components/InstallPWA';
-import PageTracker from '@/components/PageTracker';
-import TimedPopups from '@/components/TimedPopups';
-import EmailCapturePopup from '@/components/EmailCapturePopup';
-import TrackingPixels from '@/components/TrackingPixels';
 import SessionGuard from '@/components/SessionGuard';
-import ExtensionBridge from '@/components/ExtensionBridge';
-import SharePage from '@/components/SharePage';
-import IDMGBadge from '@/components/IDMGBadge';
 import Script from 'next/script';
+
+// Lazy-loaded utilities — code-split into separate chunks (loaded async after hydration)
+import LazyUtilities from '@/components/LazyUtilities';
+
+const montserrat = Montserrat({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800', '900'],
+  display: 'swap',
+  variable: '--font-montserrat',
+});
+
+const inter = Inter({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700'],
+  display: 'swap',
+  variable: '--font-inter',
+});
 
 export const metadata = {
   metadataBase: new URL('https://mystationlive.com'),
@@ -70,7 +82,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${montserrat.variable} ${inter.variable}`}>
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
@@ -86,15 +98,8 @@ export default function RootLayout({ children }) {
           <AudioPlayer />
           <SubscribeModal />
           <Cart />
-          <InstallPWA />
-          <TimedPopups />
-          <EmailCapturePopup />
-          <TrackingPixels />
           <SessionGuard />
-          <ExtensionBridge />
-          <PageTracker />
-          <SharePage />
-          <IDMGBadge />
+          <LazyUtilities />
         </ClientProviders>
         <Script id="register-sw" strategy="afterInteractive">
           {`

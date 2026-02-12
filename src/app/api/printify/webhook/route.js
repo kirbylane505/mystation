@@ -1,10 +1,11 @@
 export const dynamic = 'force-dynamic';
 
 import { sendShippingNotification, sendOrderFailedAlert } from '@/lib/email';
+import { createHmac } from 'crypto';
 
 /**
  * POST /api/printify/webhook
- * Handle Printify webhook events
+ * Handle Printify webhook events — signature verified
  *
  * Supported events:
  * - order:created               New order placed
@@ -21,21 +22,32 @@ import { sendShippingNotification, sendOrderFailedAlert } from '@/lib/email';
  */
 export async function POST(request) {
   try {
-    const payload = await request.json();
+    const rawBody = await request.text();
+
+    // Verify Printify webhook signature
+    const webhookSecret = process.env.PRINTIFY_WEBHOOK_SECRET;
+    if (webhookSecret) {
+      const signature = request.headers.get('x-printify-signature') || request.headers.get('webhook-signature') || '';
+      const expectedSig = createHmac('sha256', webhookSecret).update(rawBody).digest('hex');
+      if (!signature || signature !== expectedSig) {
+        console.error('[Printify Webhook] Invalid signature — rejecting');
+        return Response.json({ error: 'Invalid webhook signature' }, { status: 401 });
+      }
+    } else if (process.env.NODE_ENV === 'production') {
+      console.warn('[Printify Webhook] PRINTIFY_WEBHOOK_SECRET not set — accepting without verification');
+    }
+
+    const payload = JSON.parse(rawBody);
     const { type, resource } = payload;
 
-    console.log(`[Printify Webhook] Event: ${type}`, JSON.stringify(resource, null, 2));
+    console.log(`[Printify Webhook] Event: ${type}`);
 
     switch (type) {
       // ============ ORDER EVENTS ============
 
       case 'order:created': {
-        const { id, status, line_items, address_to, total_price } = resource;
-        console.log(`[Printify Webhook] Order created: ${id}`);
-        console.log(`  Status: ${status}`);
-        console.log(`  Items: ${line_items?.length || 0}`);
-        console.log(`  Ship to: ${address_to?.city}, ${address_to?.region} ${address_to?.zip}`);
-        console.log(`  Total: $${(total_price / 100).toFixed(2)}`);
+        const { id, status, line_items } = resource;
+        console.log(`[Printify Webhook] Order created: ${id}, status: ${status}, items: ${line_items?.length || 0}`);
 
         // TODO: Store order in database
         // TODO: Send order confirmation email to customer

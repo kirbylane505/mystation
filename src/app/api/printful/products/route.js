@@ -2,9 +2,15 @@ import { printful } from '@/lib/printful';
 
 export const dynamic = 'force-dynamic';
 
+// Admin auth — header only
+function isAuthorized(request) {
+  const key = request.headers.get('x-admin-key');
+  return process.env.ADMIN_KEY && key === process.env.ADMIN_KEY;
+}
+
 /**
  * GET /api/printful/products
- * Fetch all synced products from Printful store
+ * Fetch all synced products from Printful store (public — no cost data)
  */
 export async function GET() {
   try {
@@ -18,7 +24,7 @@ export async function GET() {
   } catch (error) {
     console.error('Printful products fetch error:', error);
     return Response.json(
-      { success: false, error: error.message },
+      { success: false, error: 'Failed to fetch products' },
       { status: 500 }
     );
   }
@@ -26,9 +32,12 @@ export async function GET() {
 
 /**
  * POST /api/printful/products
- * Create a new sync product in Printful
+ * Create a new sync product in Printful (ADMIN ONLY)
  */
 export async function POST(request) {
+  if (!isAuthorized(request)) {
+    return Response.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+  }
   try {
     const productData = await request.json();
 
@@ -49,7 +58,7 @@ export async function POST(request) {
   } catch (error) {
     console.error('Printful product creation error:', error);
     return Response.json(
-      { success: false, error: error.message },
+      { success: false, error: 'Failed to create product' },
       { status: 500 }
     );
   }

@@ -27,7 +27,9 @@ export async function POST(request) {
 
     // Hash IP for privacy (never store raw IP)
     const ip = headersList.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
-    const ip_hash = createHash('sha256').update(ip + process.env.SUPABASE_SERVICE_ROLE_KEY?.slice(0, 8)).digest('hex').slice(0, 16);
+    // Use dedicated salt for IP hashing — never mix secrets with user-influenced data
+    const hashSalt = process.env.IP_HASH_SALT || 'ms-ip-salt-2026';
+    const ip_hash = createHash('sha256').update(ip + hashSalt).digest('hex').slice(0, 16);
 
     // Parse user agent for device type
     const ua = headersList.get('user-agent') || '';
