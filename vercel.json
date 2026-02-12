@@ -11,6 +11,10 @@
     {
       "path": "/api/cron/daily-analytics",
       "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/cron/seed-fan-wall",
+      "schedule": "0 9 * * *"
     }
   ]
 }
