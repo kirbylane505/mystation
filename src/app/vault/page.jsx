@@ -9,11 +9,13 @@
 import { useState, useEffect } from 'react';
 import {
   Lock, Unlock, Play, Pause, Music, Upload, Trash2,
-  Send, Eye, EyeOff, Shield, Clock, Calendar
+  Send, Eye, EyeOff, Shield, Clock, Calendar, Check, Star, Headphones
 } from 'lucide-react';
 import { vaultTracks as legacyVaultTracks } from '@/data/vaultTracks';
 import { tracks } from '@/data/tracks';
 import { usePlayerStore } from '@/store/playerStore';
+import { useEngagementStore, calculatePoints, getVaultAccess } from '@/store/engagementStore';
+import Link from 'next/link';
 
 // Merge legacy vault + new tracks with albumId='vault'
 const getDefaultTracks = () => {
@@ -61,6 +63,15 @@ export default function VaultPage() {
   const [vaultTracks, setVaultTracks] = useState([]);
   const [showUpload, setShowUpload] = useState(false);
   const [newTrack, setNewTrack] = useState({ title: '', artist: 'Mike Page', producer: '', notes: '' });
+
+  // Points-based access
+  const engagementStats = useEngagementStore();
+  const userPoints = calculatePoints(engagementStats);
+  const vaultAccess = getVaultAccess(userPoints);
+  const { vaultPicks, addVaultPick, removeVaultPick } = useEngagementStore();
+  const isFanAccess = !isUnlocked && vaultAccess.level !== 'locked';
+  const isFullFanAccess = vaultAccess.level === 'full';
+  const canPickMore = vaultPicks.length < vaultAccess.picks;
 
   // Use global player
   const { currentTrack, isPlaying, setQueue, togglePlay } = usePlayerStore();
@@ -185,8 +196,8 @@ export default function VaultPage() {
     ));
   };
 
-  // Lock Screen
-  if (!isUnlocked) {
+  // Lock Screen — show if no PIN access AND no points access
+  if (!isUnlocked && !isFanAccess) {
     return (
       <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-black via-gray-900 to-black" />
@@ -199,57 +210,220 @@ export default function VaultPage() {
               <Lock size={40} className="text-white" />
             </div>
             <h1 className="text-3xl font-black text-white mb-2">THE VAULT</h1>
-            <p className="text-white/50">Owner Access Only</p>
+            <p className="text-white/50">Exclusive Unreleased Music</p>
           </div>
 
-          {/* What is The Vault? */}
+          {/* Points Progress to Vault */}
+          <div className="bg-purple-500/10 border border-purple-500/20 rounded-xl p-4 mb-6">
+            <div className="flex items-center gap-2 mb-3">
+              <Headphones size={16} className="text-purple-400" />
+              <h3 className="text-white font-bold text-sm">Earn Access by Streaming</h3>
+            </div>
+            <p className="text-white/50 text-sm mb-3">
+              Listen to music and earn points to unlock the Vault. You have <span className="text-purple-400 font-bold">{userPoints.toLocaleString()} pts</span>.
+            </p>
+            <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden mb-2">
+              <div className="h-full bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full transition-all" style={{ width: `${Math.min((userPoints / 300) * 100, 100)}%` }} />
+            </div>
+            <p className="text-purple-400 text-xs font-medium">{Math.max(300 - userPoints, 0)} pts to Vault Preview (pick 3 songs)</p>
+            <Link href="/rewards" className="mt-3 flex items-center justify-center gap-2 py-2 bg-purple-500/20 rounded-lg text-purple-400 text-sm font-medium hover:bg-purple-500/30 transition">
+              <Star size={14} /> View Rewards Progress
+            </Link>
+          </div>
+
+          {/* Owner PIN */}
           <div className="bg-white/5 border border-white/10 rounded-xl p-4 mb-6">
             <h3 className="text-white font-bold mb-2 flex items-center gap-2">
               <Shield size={16} className="text-red-400" />
-              What is The Vault?
+              Owner Access
             </h3>
-            <p className="text-white/60 text-sm leading-relaxed">
-              The Vault holds <span className="text-red-400 font-semibold">unreleased music</span> that's not ready for the world yet.
-              These tracks are works-in-progress, demos, or exclusives waiting for the right moment to drop.
-              Only Mike Page has access to preview and manage these tracks.
-            </p>
-          </div>
-
-          <form onSubmit={handlePinSubmit}>
-            <div className="mb-6">
-              <label className="text-white/60 text-sm mb-2 block">Enter PIN</label>
+            <p className="text-white/60 text-sm mb-3">Full management access with PIN.</p>
+            <form onSubmit={handlePinSubmit}>
               <input
                 type="password"
                 value={pinInput}
                 onChange={(e) => setPinInput(e.target.value)}
                 placeholder="••••"
                 maxLength={4}
-                className={`w-full px-6 py-4 bg-white/5 border ${pinError ? 'border-red-500' : 'border-white/10'} rounded-xl text-white text-center text-2xl tracking-[1em] placeholder-white/20 focus:outline-none focus:border-red-500 transition`}
-                autoFocus
+                className={`w-full px-6 py-3 bg-white/5 border ${pinError ? 'border-red-500' : 'border-white/10'} rounded-xl text-white text-center text-xl tracking-[1em] placeholder-white/20 focus:outline-none focus:border-red-500 transition`}
               />
               {pinError && (
                 <p className="text-red-400 text-sm mt-2 text-center">{pinMessage || 'Wrong PIN. Try again.'}</p>
               )}
-            </div>
-            <button
-              type="submit"
-              disabled={pinLoading}
-              className="w-full py-4 bg-gradient-to-r from-red-500 to-red-600 text-white font-bold rounded-xl hover:shadow-lg hover:shadow-red-500/30 transition flex items-center justify-center gap-2 disabled:opacity-50"
-            >
-              <Unlock size={20} />
-              {pinLoading ? 'Verifying...' : 'Unlock Vault'}
-            </button>
-          </form>
-
-          <p className="text-white/30 text-xs text-center mt-6">
-            Unauthorized access is prohibited
-          </p>
+              <button
+                type="submit"
+                disabled={pinLoading}
+                className="w-full mt-3 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white font-bold rounded-xl hover:shadow-lg hover:shadow-red-500/30 transition flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                <Unlock size={18} />
+                {pinLoading ? 'Verifying...' : 'Unlock'}
+              </button>
+            </form>
+          </div>
         </div>
       </div>
     );
   }
 
-  // Vault Interface
+  // Fan Access Vault (points-based, listen only)
+  if (isFanAccess && !isUnlocked) {
+    const accessibleTracks = isFullFanAccess
+      ? vaultTracks
+      : vaultTracks.filter(t => vaultPicks.includes(t.id));
+    const canPlay = (trackId) => isFullFanAccess || vaultPicks.includes(trackId);
+
+    return (
+      <div className="min-h-screen relative">
+        <div className="absolute inset-0 bg-gradient-to-b from-purple-900/20 via-black to-black" />
+        <div className="bg-orb w-[500px] h-[500px] bg-purple-600 top-[-200px] right-[-100px] opacity-20" />
+
+        <div className="relative max-w-screen-xl mx-auto px-6 py-10">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/30">
+                <Headphones size={28} className="text-white" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-black text-white">THE VAULT</h1>
+                <p className="text-purple-400 text-sm font-medium">
+                  {isFullFanAccess ? 'Full Access — Stream Everything' : `Pick ${vaultAccess.picks - vaultPicks.length} more song${vaultAccess.picks - vaultPicks.length !== 1 ? 's' : ''}`}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="px-4 py-2 bg-purple-500/20 border border-purple-500/30 rounded-full">
+                <span className="text-purple-400 font-bold text-sm">{userPoints.toLocaleString()} pts</span>
+              </div>
+              {!isFullFanAccess && (
+                <Link href="/rewards" className="px-4 py-2 bg-white/10 text-white/60 text-sm font-medium rounded-xl hover:bg-white/20 transition">
+                  Earn More Points
+                </Link>
+              )}
+            </div>
+          </div>
+
+          {/* Pick Banner (only for 300pt tier) */}
+          {!isFullFanAccess && (
+            <div className="bg-purple-500/10 border border-purple-500/20 rounded-xl p-4 mb-6 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Star size={20} className="text-purple-400" />
+                <div>
+                  <p className="text-white font-bold text-sm">Vault Preview Mode</p>
+                  <p className="text-white/40 text-xs">Select {vaultAccess.picks} songs to stream. Earn {(12345 - userPoints).toLocaleString()} more points for full access.</p>
+                </div>
+              </div>
+              <div className="flex gap-1">
+                {Array.from({ length: vaultAccess.picks }).map((_, i) => (
+                  <div key={i} className={`w-3 h-3 rounded-full ${i < vaultPicks.length ? 'bg-purple-400' : 'bg-white/20'}`} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Track List */}
+          <div className="glass rounded-2xl overflow-hidden mb-32">
+            <div className="p-4 border-b border-white/10 flex items-center gap-4">
+              <Music size={20} className="text-purple-400" />
+              <span className="text-white font-medium">
+                {isFullFanAccess ? 'All Vault Tracks' : 'Choose Your Songs'}
+              </span>
+            </div>
+
+            <div className="divide-y divide-white/5">
+              {vaultTracks.map((track) => {
+                const isPicked = vaultPicks.includes(track.id);
+                const isPlayable = canPlay(track.id);
+                const isCurrentTrack = currentTrack?.id === `vault-${track.id}`;
+
+                return (
+                  <div
+                    key={track.id}
+                    className={`flex items-center gap-4 p-4 transition ${
+                      isPlayable ? 'hover:bg-white/5 cursor-pointer' : 'opacity-50'
+                    } ${isCurrentTrack ? 'bg-purple-500/10' : ''}`}
+                    onClick={() => {
+                      if (isPlayable) {
+                        if (isCurrentTrack && isPlaying) {
+                          togglePlay();
+                        } else {
+                          // Set vault unlocked for playback
+                          setVaultUnlocked(true);
+                          const playableTracks = isFullFanAccess
+                            ? vaultTracks
+                            : vaultTracks.filter(t => vaultPicks.includes(t.id));
+                          const trackIndex = playableTracks.findIndex(t => t.id === track.id);
+                          const allPlayerTracks = playableTracks.map(t => ({
+                            id: `vault-${t.id}`,
+                            title: t.title + (t.featured ? ` ft. ${t.featured}` : ''),
+                            album: 'Vault',
+                            albumId: 'vault',
+                            audioFile: t.audioUrl,
+                            producer: t.producer,
+                            featured: null,
+                          }));
+                          setQueue(allPlayerTracks, trackIndex >= 0 ? trackIndex : 0);
+                        }
+                      }
+                    }}
+                  >
+                    {/* Pick / Play Button */}
+                    {isFullFanAccess || isPicked ? (
+                      <button className={`w-12 h-12 rounded-full flex items-center justify-center transition ${
+                        isCurrentTrack && isPlaying
+                          ? 'bg-purple-500 text-white'
+                          : 'bg-white/10 text-white/60 hover:bg-purple-500 hover:text-white'
+                      }`}>
+                        {isCurrentTrack && isPlaying ? <Pause size={20} /> : <Play size={20} className="ml-1" />}
+                      </button>
+                    ) : (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (canPickMore) addVaultPick(track.id);
+                        }}
+                        disabled={!canPickMore}
+                        className={`w-12 h-12 rounded-full flex items-center justify-center border-2 transition ${
+                          canPickMore
+                            ? 'border-purple-500/50 text-purple-400 hover:bg-purple-500/20'
+                            : 'border-white/10 text-white/20 cursor-not-allowed'
+                        }`}
+                      >
+                        <Check size={20} />
+                      </button>
+                    )}
+
+                    {/* Track Info */}
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-white font-medium">{track.title}</h3>
+                      <p className="text-white/40 text-sm">
+                        {track.artist} {track.producer && `\u2022 Prod. ${track.producer}`}
+                      </p>
+                    </div>
+
+                    {/* Status */}
+                    {isPicked && !isFullFanAccess && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeVaultPick(track.id);
+                        }}
+                        className="px-3 py-1 bg-purple-500/20 text-purple-400 text-xs font-bold rounded-full hover:bg-red-500/20 hover:text-red-400 transition"
+                      >
+                        Selected
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Owner Vault Interface (PIN access — full management)
   return (
     <div className="min-h-screen relative">
       <div className="absolute inset-0 bg-gradient-to-b from-red-900/20 via-black to-black" />

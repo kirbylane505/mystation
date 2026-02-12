@@ -16,7 +16,8 @@ import LoyaltyProgress from '@/components/LoyaltyProgress';
 import VaultPreview from '@/components/VaultPreview';
 import VaultRewards from '@/components/VaultRewards';
 import FanWall from '@/components/FanWall';
-import { Trophy, Flame, Gift, Zap, Crown, Lock } from 'lucide-react';
+import { Trophy, Flame, Gift, Zap, Crown, Lock, Disc3 } from 'lucide-react';
+import Link from 'next/link';
 
 export default function FanZonePage() {
   const [mounted, setMounted] = useState(false);
@@ -97,6 +98,26 @@ export default function FanZonePage() {
             </div>
           </div>
         </div>
+      </section>
+
+      {/* DJ TURNTABLES - Interactive Feature */}
+      <section className="max-w-screen-xl mx-auto px-6 pt-12">
+        <Link href="/fan-zone/dj" className="block group">
+          <div className="bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-red-600/20 border border-purple-500/30 rounded-2xl p-6 hover:border-purple-400/50 transition-all">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-red-500 rounded-xl flex items-center justify-center">
+                  <Disc3 size={28} className="text-white" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-white group-hover:text-amber-400 transition">DJ Turntables</h3>
+                  <p className="text-white/50 text-sm">Load songs on two decks, blend them, control the EQ — be the DJ</p>
+                </div>
+              </div>
+              <span className="text-3xl">🎧</span>
+            </div>
+          </div>
+        </Link>
       </section>
 
       {/* FAN WALL - Community Posts (Subscriber Feature) */}

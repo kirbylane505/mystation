@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useUserStore } from '@/store/playerStore';
-import { Crown, Star, Home as HomeIcon, Gift, Check, Lock, ArrowRight } from 'lucide-react';
+import { useEngagementStore, calculatePoints, getFanRank, VAULT_TIERS, POINTS, FAN_RANKS } from '@/store/engagementStore';
+import { Crown, Star, Home as HomeIcon, Gift, Check, Lock, ArrowRight, Headphones, Zap, Music, Trophy } from 'lucide-react';
 import Link from 'next/link';
 
 const TIERS = [
@@ -156,6 +157,9 @@ export default function RewardsPage() {
         </div>
       </section>
 
+      {/* Streaming Points → Vault Access */}
+      <StreamingPointsSection />
+
       {/* Tier Cards */}
       <section className="max-w-5xl mx-auto px-6">
         <h2 className="text-2xl font-bold text-white text-center mb-10">Reward Tiers</h2>
@@ -260,6 +264,143 @@ export default function RewardsPage() {
         </div>
       </section>
     </div>
+  );
+}
+
+function StreamingPointsSection() {
+  const stats = useEngagementStore();
+  const points = calculatePoints(stats);
+  const rank = getFanRank(points);
+  const nextRank = FAN_RANKS.find(r => r.minPoints > points);
+  const vaultPreview = points >= 300;
+  const vaultFull = points >= 12345;
+
+  // Progress toward next vault tier
+  const nextVaultTier = !vaultFull ? (vaultPreview ? VAULT_TIERS[1] : VAULT_TIERS[0]) : null;
+  const prevThreshold = vaultFull ? 12345 : (vaultPreview ? 300 : 0);
+  const nextThreshold = nextVaultTier ? nextVaultTier.minPoints : 12345;
+  const vaultProgress = nextVaultTier
+    ? Math.min(((points - prevThreshold) / (nextThreshold - prevThreshold)) * 100, 100)
+    : 100;
+
+  return (
+    <section className="max-w-4xl mx-auto px-6 mb-16">
+      <div className="bg-gradient-to-br from-purple-900/20 via-white/5 to-indigo-900/20 backdrop-blur-xl rounded-2xl border border-purple-500/20 p-8">
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center">
+            <Headphones size={20} className="text-white" />
+          </div>
+          <div>
+            <h2 className="text-xl font-black text-white">Streaming Points</h2>
+            <p className="text-white/40 text-sm">Listen to music. Earn points. Unlock the Vault.</p>
+          </div>
+        </div>
+
+        {/* Points + Rank Display */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div className="bg-white/5 rounded-xl p-4 text-center">
+            <p className="text-3xl font-black text-purple-400">{points.toLocaleString()}</p>
+            <p className="text-white/40 text-xs mt-1">Total Points</p>
+          </div>
+          <div className="bg-white/5 rounded-xl p-4 text-center">
+            <p className="text-2xl">{rank.icon}</p>
+            <p className={`font-bold text-sm ${rank.color}`}>{rank.name}</p>
+          </div>
+          <div className="bg-white/5 rounded-xl p-4 text-center">
+            <p className="text-3xl font-black text-blue-400">{stats.totalPlays}</p>
+            <p className="text-white/40 text-xs mt-1">Tracks Played</p>
+          </div>
+          <div className="bg-white/5 rounded-xl p-4 text-center">
+            <p className="text-3xl font-black text-orange-400">{stats.currentStreak}</p>
+            <p className="text-white/40 text-xs mt-1">Day Streak</p>
+          </div>
+        </div>
+
+        {/* Vault Unlock Tiers */}
+        <div className="space-y-4">
+          <h3 className="text-white font-bold flex items-center gap-2">
+            <Lock size={16} className="text-red-400" /> Vault Access Tiers
+          </h3>
+
+          {/* Tier 1: 300 points = Pick 3 */}
+          <div className={`rounded-xl border p-5 ${vaultPreview ? 'bg-green-500/10 border-green-500/30' : 'bg-white/5 border-white/10'}`}>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">🔓</span>
+                <div>
+                  <p className="text-white font-bold">Vault Preview</p>
+                  <p className="text-white/40 text-sm">Pick 3 vault songs to stream</p>
+                </div>
+              </div>
+              <div className="text-right">
+                {vaultPreview ? (
+                  <span className="px-3 py-1 bg-green-500/20 text-green-400 text-xs font-bold rounded-full">UNLOCKED</span>
+                ) : (
+                  <span className="text-purple-400 font-bold">{(300 - points).toLocaleString()} pts to go</span>
+                )}
+              </div>
+            </div>
+            {!vaultPreview && (
+              <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full transition-all duration-1000" style={{ width: `${Math.min((points / 300) * 100, 100)}%` }} />
+              </div>
+            )}
+          </div>
+
+          {/* Tier 2: 12,345 points = Full Access */}
+          <div className={`rounded-xl border p-5 ${vaultFull ? 'bg-amber-500/10 border-amber-500/30' : 'bg-white/5 border-white/10'}`}>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">🏆</span>
+                <div>
+                  <p className="text-white font-bold">Full Vault Access</p>
+                  <p className="text-white/40 text-sm">Unlimited streaming of all vault tracks</p>
+                </div>
+              </div>
+              <div className="text-right">
+                {vaultFull ? (
+                  <span className="px-3 py-1 bg-amber-500/20 text-amber-400 text-xs font-bold rounded-full">UNLOCKED</span>
+                ) : (
+                  <span className="text-purple-400 font-bold">{(12345 - points).toLocaleString()} pts to go</span>
+                )}
+              </div>
+            </div>
+            {!vaultFull && (
+              <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-amber-500 to-yellow-500 rounded-full transition-all duration-1000" style={{ width: `${Math.min((points / 12345) * 100, 100)}%` }} />
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* How to Earn Points */}
+        <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-3">
+          {[
+            { action: 'Play a track', pts: POINTS.play, icon: Music },
+            { action: 'Daily login', pts: POINTS.dailyLogin, icon: Zap },
+            { action: 'Share a song', pts: POINTS.share, icon: ArrowRight },
+            { action: 'Buy merch', pts: POINTS.purchase, icon: Trophy },
+          ].map((item) => (
+            <div key={item.action} className="bg-white/5 rounded-lg p-3 text-center">
+              <item.icon size={16} className="text-purple-400 mx-auto mb-1" />
+              <p className="text-white text-xs font-medium">{item.action}</p>
+              <p className="text-purple-400 font-bold text-sm">+{item.pts} pts</p>
+            </div>
+          ))}
+        </div>
+
+        {/* CTA to Vault */}
+        {vaultPreview && (
+          <Link
+            href="/vault"
+            className="mt-6 w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-xl text-white font-bold hover:shadow-lg hover:shadow-purple-500/30 transition"
+          >
+            <Lock size={16} /> Enter The Vault
+          </Link>
+        )}
+      </div>
+    </section>
   );
 }
 

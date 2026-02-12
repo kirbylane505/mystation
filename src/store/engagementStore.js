@@ -95,6 +95,9 @@ export const useEngagementStore = create(
       // Leaderboard position
       leaderboardPosition: null,
 
+      // Vault picks (track IDs user selected at 300pt tier)
+      vaultPicks: [],
+
       // Record a play
       recordPlay: (trackId, albumId) => {
         const state = get();
@@ -314,6 +317,19 @@ export const useEngagementStore = create(
         }));
       },
 
+      // Vault pick management
+      addVaultPick: (trackId) => {
+        const state = get();
+        if (state.vaultPicks.includes(trackId)) return;
+        set({ vaultPicks: [...state.vaultPicks, trackId] });
+      },
+
+      removeVaultPick: (trackId) => {
+        set(state => ({ vaultPicks: state.vaultPicks.filter(id => id !== trackId) }));
+      },
+
+      clearVaultPicks: () => set({ vaultPicks: [] }),
+
       // Reset for testing
       resetEngagement: () => {
         set({
@@ -332,11 +348,13 @@ export const useEngagementStore = create(
           lastSpinDate: null,
           spinHistory: [],
           activityFeed: [],
+          vaultPicks: [],
         });
       },
     }),
     {
       name: 'mystation-engagement',
+      version: 2,
     }
   )
 );
@@ -356,6 +374,12 @@ export const POINTS = {
   badge: 75,          // Per badge earned
   albumComplete: 250, // Completing full album
 };
+
+// Vault access tiers (points-based)
+export const VAULT_TIERS = [
+  { name: 'Vault Preview', minPoints: 300, picks: 3, icon: '🔓', description: 'Pick 3 vault songs to stream' },
+  { name: 'Full Vault Access', minPoints: 12345, picks: Infinity, icon: '🏆', description: 'Unlimited vault streaming' },
+];
 
 // Calculate total points from stats
 export const calculatePoints = (stats) => {
@@ -388,6 +412,13 @@ export const getFanRank = (points) => {
     if (points >= r.minPoints) rank = r;
   }
   return rank;
+};
+
+// Get vault access level based on points
+export const getVaultAccess = (points) => {
+  if (points >= 12345) return { level: 'full', picks: Infinity, tier: VAULT_TIERS[1] };
+  if (points >= 300) return { level: 'preview', picks: 3, tier: VAULT_TIERS[0] };
+  return { level: 'locked', picks: 0, tier: null };
 };
 
 // Fake leaderboard data with points
