@@ -220,6 +220,21 @@ export const tracks = [
     genre: 'R&B',
     producer: 'The Cubist & Mike Page'
   },
+  {
+    id: 144,
+    title: "Please Don't (Freestyle)",
+    artist: "Mike Page",
+    album: "Coming Soon",
+    year: 2026,
+    duration: "5:02",
+    trackNumber: 14,
+    albumId: 'singles-2026',
+    audioFile: '/audio/Mike Page - Please Dont_MASTERED.mp3',
+    isNew: true,
+    hitScore: 89,
+    genre: 'R&B',
+    producer: 'Mike Page (Loop Killa)'
+  },
   // ========================================
   // GRAMMY NIGHTS VOL. 1 - VB & MP (PRIVATE)
   // Access: MP2026 (Mike Page), VB2026 (Vincent Berry)
