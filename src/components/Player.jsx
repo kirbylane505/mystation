@@ -11,9 +11,10 @@ import { usePlayerStore, useUserStore } from '@/store/playerStore';
 import {
   Play, Pause, SkipBack, SkipForward,
   Volume2, VolumeX, Shuffle, Repeat,
-  Heart, Share2, Music, Sparkles, ChevronUp, X, Crown, AlarmClock, Loader2
+  Heart, Share2, Music, Sparkles, ChevronUp, X, Crown, AlarmClock, Moon, Loader2
 } from 'lucide-react';
 import AlarmClockModal from './AlarmClock';
+import SleepTimer from './SleepTimer';
 import VoiceCommand from './VoiceCommand';
 import { shareMP3 } from '@/lib/shareAudio';
 import { albums } from '@/data/tracks';
@@ -35,6 +36,7 @@ export default function Player() {
   const [expanded, setExpanded] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [showAlarmModal, setShowAlarmModal] = useState(false);
+  const [showSleepTimer, setShowSleepTimer] = useState(false);
   const [mp3Loading, setMp3Loading] = useState(false);
   const {
     currentTrack,
@@ -317,18 +319,29 @@ export default function Player() {
             <button onClick={() => shareTrack('copy')} className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center text-xl hover:bg-white/20">🔗</button>
           </div>
 
-          {/* Wake Up Alarm Button */}
-          <button
-            onClick={() => setShowAlarmModal(true)}
-            className="mt-6 mx-auto flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/30 rounded-full text-yellow-400 hover:bg-yellow-500/30 transition-colors"
-          >
-            <AlarmClock size={20} />
-            <span className="font-medium">Wake Up to This Song</span>
-          </button>
+          {/* Wake Up & Sleep Buttons */}
+          <div className="mt-6 flex flex-col items-center gap-3">
+            <button
+              onClick={() => setShowAlarmModal(true)}
+              className="flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/30 rounded-full text-yellow-400 hover:bg-yellow-500/30 transition-colors"
+            >
+              <AlarmClock size={20} />
+              <span className="font-medium">Wake Up to This Song</span>
+            </button>
+            <button
+              onClick={() => setShowSleepTimer(true)}
+              className="flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 border border-indigo-500/30 rounded-full text-indigo-400 hover:bg-indigo-500/30 transition-colors"
+            >
+              <Moon size={20} />
+              <span className="font-medium">Sleep Timer</span>
+            </button>
+          </div>
         </div>
 
         {/* Alarm Modal */}
         <AlarmClockModal isOpen={showAlarmModal} onClose={() => setShowAlarmModal(false)} />
+        {/* Sleep Timer Modal */}
+        <SleepTimer isOpen={showSleepTimer} onClose={() => setShowSleepTimer(false)} />
       </div>
     );
   }
@@ -516,6 +529,16 @@ export default function Player() {
             >
               <AlarmClock size={18} />
             </button>
+            <button
+              onClick={() => setShowSleepTimer(true)}
+              className="text-white/40 hover:text-indigo-400 transition"
+              title="Sleep Timer"
+            >
+              <Moon size={18} />
+            </button>
+
+            {/* Sleep Timer Badge (shows countdown when active) */}
+            <SleepTimer isOpen={false} onClose={() => setShowSleepTimer(true)} />
 
             {/* Voice Command */}
             <VoiceCommand />
@@ -561,6 +584,8 @@ export default function Player() {
 
       {/* Alarm Clock Modal */}
       <AlarmClockModal isOpen={showAlarmModal} onClose={() => setShowAlarmModal(false)} />
+      {/* Sleep Timer Modal */}
+      <SleepTimer isOpen={showSleepTimer} onClose={() => setShowSleepTimer(false)} />
     </>
   );
 }
