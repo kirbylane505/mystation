@@ -265,6 +265,21 @@ export const tracks = [
     genre: 'Alternative Rap',
     producer: 'The Cubist'
   },
+  {
+    id: 147,
+    title: "I'm Not Just A Man",
+    artist: "Mike Page",
+    album: "Coming Soon",
+    year: 2026,
+    duration: "4:03",
+    trackNumber: 17,
+    albumId: 'singles-2026',
+    audioFile: '/audio/Mike Page - Im Not Just A Man_MASTERED.mp3',
+    isNew: true,
+    hitScore: 91,
+    genre: 'Alternative Rap',
+    producer: 'Mike Page & The Cubist'
+  },
   // ========================================
   // GRAMMY NIGHTS VOL. 1 - VB & MP (PRIVATE)
   // Access: MP2026 (Mike Page), VB2026 (Vincent Berry)
