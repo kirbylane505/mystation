@@ -1,7 +1,7 @@
 /**
  * MYSTATION - Subscription Validation API
- * Server-side enforcement of 4-song free limit
- * First 26 subscribers get free first month
+ * Server-side enforcement of 24-hour free trial
+ * After 24 hours from first visit, must subscribe
  */
 
 import { NextResponse } from 'next/server';
@@ -28,51 +28,47 @@ export async function POST(request) {
       }
     }
 
-    // Non-subscriber: check play count from server-side tracking
-    // We use IP + session fingerprint to prevent bypass
+    // Non-subscriber: 24-hour free trial based on IP session
     const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
     const key = `${ip}:${sessionId || 'anon'}`;
 
-    // Get or create play tracking for this session
-    if (!global._playTracking) global._playTracking = new Map();
-    const tracking = global._playTracking;
+    if (!global._trialTracking) global._trialTracking = new Map();
+    const tracking = global._trialTracking;
 
     let session = tracking.get(key);
     if (!session) {
-      session = { plays: new Set(), createdAt: Date.now() };
+      session = { firstPlay: Date.now(), plays: new Set() };
       tracking.set(key, session);
     }
 
-    // Clean old sessions (>24h)
+    // Clean old sessions (>48h)
     const now = Date.now();
     for (const [k, v] of tracking) {
-      if (now - v.createdAt > 24 * 60 * 60 * 1000) tracking.delete(k);
+      if (now - v.firstPlay > 48 * 60 * 60 * 1000) tracking.delete(k);
     }
 
-    // Already played this track? Allow replay
-    if (session.plays.has(trackId)) {
-      return NextResponse.json({ canPlay: true, isSubscribed: false, reason: 'replay' });
-    }
+    // Check 24-hour trial
+    const elapsed = now - session.firstPlay;
+    const trialMs = 24 * 60 * 60 * 1000;
 
-    // Check limit (4 unique plays)
-    if (session.plays.size >= 4) {
+    if (elapsed >= trialMs) {
       return NextResponse.json({
         canPlay: false,
         isSubscribed: false,
-        reason: 'limit_reached',
-        playCount: session.plays.size,
-        limit: 4,
+        reason: 'trial_expired',
+        trialStart: session.firstPlay,
+        elapsed,
       });
     }
 
-    // Allow and track
+    // Within trial — allow play and track
     session.plays.add(trackId);
     return NextResponse.json({
       canPlay: true,
       isSubscribed: false,
-      reason: 'free_play',
+      reason: 'free_trial',
+      trialRemaining: trialMs - elapsed,
       playCount: session.plays.size,
-      limit: 4,
     });
   } catch (err) {
     console.error('Subscription validate error:', err);

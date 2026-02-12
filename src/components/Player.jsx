@@ -56,17 +56,31 @@ export default function Player() {
     toggleShuffle,
     toggleRepeat,
     openSubscribeModal,
+    getTrialRemaining,
   } = usePlayerStore();
 
   const { isSubscribed } = useUserStore();
 
-  // 4 free songs, then subscription wall
-  const freePlaysRemaining = Math.max(0, 4 - playCount);
-  const showFreePlaysBadge = mounted && !isSubscribed && freePlaysRemaining > 0;
+  // 24-hour free trial countdown
+  const [trialRemaining, setTrialRemaining] = useState(24 * 60 * 60 * 1000);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Update trial countdown every minute
+  useEffect(() => {
+    if (isSubscribed || !mounted) return;
+    const update = () => setTrialRemaining(getTrialRemaining());
+    update();
+    const interval = setInterval(update, 60000);
+    return () => clearInterval(interval);
+  }, [isSubscribed, mounted, getTrialRemaining]);
+
+  const trialHours = Math.floor(trialRemaining / (1000 * 60 * 60));
+  const trialMinutes = Math.floor((trialRemaining % (1000 * 60 * 60)) / (1000 * 60));
+  const trialExpired = trialRemaining <= 0;
+  const showTrialBadge = mounted && !isSubscribed && !trialExpired;
 
   // Close expanded view on escape
   useEffect(() => {
@@ -323,14 +337,14 @@ export default function Player() {
   return (
     <>
       {/* Mobile Subscribe Banner */}
-      {mounted && !isSubscribed && freePlaysRemaining === 0 && (
+      {mounted && !isSubscribed && trialExpired && (
         <a
           href="https://buy.stripe.com/eVq5kEcWS8VW8z10xs73G04"
           className="md:hidden fixed bottom-[72px] left-0 right-0 bg-gradient-to-r from-yellow-500/90 to-orange-500/90 backdrop-blur-xl z-40"
         >
           <div className="w-full flex items-center justify-center gap-2 py-2 text-white font-semibold text-sm">
             <Crown size={16} />
-            Subscribe $4.99/mo for Unlimited
+            Join the MyStation Family — $4.99/mo
           </div>
         </a>
       )}
@@ -384,11 +398,11 @@ export default function Player() {
 
       {/* Desktop Player */}
       <div className="hidden md:block fixed bottom-0 left-0 right-0 h-28 bg-mystation-navy/95 backdrop-blur-xl border-t border-white/5 z-40">
-        {showFreePlaysBadge && (
-          <div className="absolute -top-10 left-1/2 -translate-x-1/2 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full shadow-lg flex items-center gap-2 animate-bounce">
+        {showTrialBadge && (
+          <div className="absolute -top-10 left-1/2 -translate-x-1/2 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full shadow-lg flex items-center gap-2">
             <Sparkles size={14} className="text-yellow-300" />
-            <span className="text-white text-sm font-medium">{freePlaysRemaining} free {freePlaysRemaining === 1 ? 'song' : 'songs'} left</span>
-            <a href="https://buy.stripe.com/eVq5kEcWS8VW8z10xs73G04" className="ml-2 px-2 py-0.5 bg-white/20 hover:bg-white/30 rounded text-xs text-white font-semibold transition">Unlock All</a>
+            <span className="text-white text-sm font-medium">Free trial: {trialHours}h {trialMinutes}m left</span>
+            <a href="https://buy.stripe.com/eVq5kEcWS8VW8z10xs73G04" className="ml-2 px-2 py-0.5 bg-white/20 hover:bg-white/30 rounded text-xs text-white font-semibold transition">Subscribe</a>
           </div>
         )}
 

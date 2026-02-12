@@ -34,6 +34,7 @@ export const usePlayerStore = create(
   lastPlayedTrack: null,
   showSubscribeModal: false,
   pendingTrack: null, // Track waiting to play after subscription
+  firstVisitTime: null, // 24-hour free trial start timestamp
 
   // Actions
   setTrack: (track) => set({
@@ -62,10 +63,9 @@ export const usePlayerStore = create(
     isMuted: !state.isMuted
   })),
 
-  // Play count management for subscription wall
+  // Play count management for analytics
   incrementPlayCount: (trackId) => {
     const { uniquePlaysThisSession } = get();
-    // Only count unique track plays
     if (!uniquePlaysThisSession.includes(trackId)) {
       set((state) => ({
         playCount: state.playCount + 1,
@@ -74,7 +74,36 @@ export const usePlayerStore = create(
     }
   },
 
-  // Check if can play (4 free songs, then subscription wall)
+  // Initialize first visit timestamp (called on first play)
+  initTrial: () => {
+    const { firstVisitTime } = get();
+    if (!firstVisitTime) {
+      const now = Date.now();
+      set({ firstVisitTime: now });
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('mystation-trial-start', String(now));
+      }
+    }
+  },
+
+  // Get trial time remaining in ms (0 = expired)
+  getTrialRemaining: () => {
+    let start = get().firstVisitTime;
+    // Fallback to localStorage
+    if (!start && typeof window !== 'undefined') {
+      const stored = localStorage.getItem('mystation-trial-start');
+      if (stored) {
+        start = parseInt(stored, 10);
+        set({ firstVisitTime: start });
+      }
+    }
+    if (!start) return 24 * 60 * 60 * 1000; // Full 24h if never visited
+    const elapsed = Date.now() - start;
+    const total = 24 * 60 * 60 * 1000; // 24 hours
+    return Math.max(0, total - elapsed);
+  },
+
+  // Check if can play (24-hour free trial, then subscription wall)
   canPlay: (trackId) => {
     const { isSubscribed } = useUserStore.getState();
     if (isSubscribed) return true;
@@ -84,11 +113,9 @@ export const usePlayerStore = create(
       return true;
     }
 
-    const { playCount, uniquePlaysThisSession } = get();
-    // Allow replay of already-played tracks
-    if (uniquePlaysThisSession.includes(trackId)) return true;
-    // Block after 4 unique plays
-    return playCount < 4;
+    // 24-hour free trial check
+    const remaining = get().getTrialRemaining();
+    return remaining > 0;
   },
 
   // Show subscribe modal

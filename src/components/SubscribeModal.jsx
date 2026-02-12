@@ -1,6 +1,6 @@
 /**
  * MYSTATION - Subscribe Modal
- * Shows after 4 free songs - $4.99/month subscription
+ * Shows after 24-hour free trial expires - $4.99/month subscription
  * Unlocks unlimited streaming
  */
 
@@ -122,14 +122,14 @@ export default function SubscribeModal() {
 
             {success ? (
               <>
-                <h2 className="text-2xl font-bold text-white mb-2">Welcome to MyStation!</h2>
+                <h2 className="text-2xl font-bold text-white mb-2">Welcome to the Family!</h2>
                 <p className="text-white/60">Unlimited streaming unlocked</p>
               </>
             ) : (
               <>
-                <h2 className="text-2xl font-bold text-white mb-2">You're Loving It!</h2>
+                <h2 className="text-2xl font-bold text-white mb-2">We'd Love to Have You Join the MyStation Family</h2>
                 <p className="text-white/60">
-                  You've played {playCount} free songs. Subscribe to keep the music going!
+                  Your free trial has ended. Subscribe to keep the music going — unlimited streaming, new releases, and more!
                 </p>
               </>
             )}

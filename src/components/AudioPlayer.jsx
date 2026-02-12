@@ -117,6 +117,7 @@ export default function AudioPlayer() {
     repeat,
     incrementPlayCount,
     openSubscribeModal,
+    initTrial,
     pause,
     play,
   } = usePlayerStore();
@@ -124,7 +125,7 @@ export default function AudioPlayer() {
   // Keep refs always fresh
   storeActionsRef.current = {
     setProgress, setDuration, nextTrack, prevTrack,
-    incrementPlayCount, openSubscribeModal, pause, play,
+    incrementPlayCount, openSubscribeModal, initTrial, pause, play,
   };
   repeatRef.current = repeat;
 
@@ -282,8 +283,9 @@ export default function AudioPlayer() {
       return;
     }
 
-    // Subscription wall check
+    // Subscription wall check (24-hour free trial)
     if (playing) {
+      initTrial(); // Start 24h clock on first play
       if (!checkCanPlay(currentTrack.id)) {
         audio.pause();
         pause();
@@ -360,7 +362,7 @@ export default function AudioPlayer() {
         }, 5000);
       }
     })();
-  }, [currentTrack?.id, getAudioUrl, checkCanPlay, incrementPlayCount, openSubscribeModal, pause, isVaultTrack]);
+  }, [currentTrack?.id, getAudioUrl, checkCanPlay, incrementPlayCount, openSubscribeModal, initTrial, pause, isVaultTrack]);
 
   // ─── Handle play/pause state changes ───
   useEffect(() => {
