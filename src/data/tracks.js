@@ -235,6 +235,21 @@ export const tracks = [
     genre: 'R&B',
     producer: 'Mike Page (Loop Killa)'
   },
+  {
+    id: 145,
+    title: "Naturally",
+    artist: "Mike Page",
+    album: "Coming Soon",
+    year: 2026,
+    duration: "4:07",
+    trackNumber: 15,
+    albumId: 'singles-2026',
+    audioFile: '/audio/Mike Page - Naturally_MASTERED.mp3',
+    isNew: true,
+    hitScore: 91,
+    genre: 'R&B',
+    producer: 'The Cubist'
+  },
   // ========================================
   // GRAMMY NIGHTS VOL. 1 - VB & MP (PRIVATE)
   // Access: MP2026 (Mike Page), VB2026 (Vincent Berry)
