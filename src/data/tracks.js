@@ -155,6 +155,21 @@ export const tracks = [
     hitScore: 91,
     producer: 'Jack Thomas & The Cubist'
   },
+  {
+    id: 140,
+    title: "We Goin Up Now",
+    artist: "Mike Page",
+    album: "Coming Soon",
+    year: 2026,
+    duration: "4:40",
+    trackNumber: 10,
+    albumId: 'singles-2026',
+    audioFile: '/audio/Mike Page - We Goin Up Now_MASTERED.mp3',
+    isNew: true,
+    hitScore: 90,
+    genre: 'R&B',
+    producer: 'The Cubist'
+  },
   // ========================================
   // GRAMMY NIGHTS VOL. 1 - VB & MP (PRIVATE)
   // Access: MP2026 (Mike Page), VB2026 (Vincent Berry)
