@@ -507,7 +507,7 @@ export default function MerchPage() {
     if (n.includes('tee') || n.includes('t-shirt')) return 'tees';
     if (n.includes('tank') || n.includes('crop')) return 'tops';
     if (n.includes('legging') || n.includes('jogger') || n.includes('short') || n.includes('bra') || n.includes('pant')) return 'activewear';
-    if (n.includes('hat') || n.includes('bucket') || n.includes('cap') || n.includes('headband')) return 'headwear';
+    if (n.includes('hat') || n.includes('bucket') || n.includes('cap') || n.includes('headband') || n.includes('beanie') || n.includes('skully')) return 'headwear';
     if (n.includes('bag') || n.includes('backpack') || n.includes('tote') || n.includes('fanny') || n.includes('drawstring')) return 'bags';
     if (n.includes('sock') || n.includes('bottle') || n.includes('towel') || n.includes('mat')) return 'essentials';
     return 'other';
