@@ -310,6 +310,21 @@ export const tracks = [
     genre: 'Pop',
     producer: 'The Cubist'
   },
+  {
+    id: 150,
+    title: "In The City",
+    artist: "Mike Page",
+    album: "Coming Soon",
+    year: 2026,
+    duration: "4:05",
+    trackNumber: 20,
+    albumId: 'singles-2026',
+    audioFile: '/audio/Mike Page - In The City_MASTERED.mp3',
+    isNew: true,
+    hitScore: 90,
+    genre: 'Pop',
+    producer: 'The Art Teacher'
+  },
   // ========================================
   // GRAMMY NIGHTS VOL. 1 - VB & MP (PRIVATE)
   // Access: MP2026 (Mike Page), VB2026 (Vincent Berry)
