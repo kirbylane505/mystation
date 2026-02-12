@@ -1,5 +1,5 @@
 export const metadata = {
-  title: 'Videos — MyStation',
+  title: 'Videos',
   description: 'Watch official Mike Page music videos, behind-the-scenes footage, and exclusive content from IDMG.',
   openGraph: {
     title: 'Mike Page Videos — Official Music Videos & Exclusives',

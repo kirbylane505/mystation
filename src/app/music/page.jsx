@@ -22,7 +22,7 @@ export async function generateMetadata({ searchParams }) {
       const imageUrl = album?.coverImage || '/images/albums/cindys-son.jpg';
 
       return {
-        title: `${track.title} - Mike Page | MyStation`,
+        title: `${track.title} - Mike Page`,
         description: `Listen to "${track.title}" by Mike Page. Stream free on MyStation - all donations support the Mike Page Foundation.`,
         openGraph: {
           title: `🎵 ${track.title} - Mike Page`,
@@ -50,7 +50,7 @@ export async function generateMetadata({ searchParams }) {
 
   // Default metadata
   return {
-    title: 'Browse Music | MyStation',
+    title: 'Browse Music',
     description: 'Stream Mike Page music for free. All donations support the Mike Page Foundation.',
     openGraph: {
       title: 'MyStation - Mike Page Music',

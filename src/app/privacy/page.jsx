@@ -3,7 +3,7 @@
  */
 
 export const metadata = {
-  title: 'Privacy Policy | MyStation',
+  title: 'Privacy Policy',
   description: 'Privacy Policy for MyStation music streaming platform',
 };
 

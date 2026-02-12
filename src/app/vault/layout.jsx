@@ -1,5 +1,5 @@
 export const metadata = {
-  title: 'The Vault — MyStation',
+  title: 'The Vault',
   description: 'Access The Vault. Exclusive unreleased Mike Page tracks, rare content, and behind-the-scenes material. PIN required.',
   openGraph: {
     title: 'THE VAULT — Exclusive Unreleased Music',

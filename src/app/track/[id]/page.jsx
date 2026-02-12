@@ -14,7 +14,7 @@ export async function generateMetadata({ params }) {
   const track = tracks.find(t => t.id === parseInt(id));
 
   if (!track) {
-    return { title: 'Track Not Found | MyStation' };
+    return { title: 'Track Not Found' };
   }
 
   const album = albums.find(a => a.id === track.albumId);

@@ -10,7 +10,7 @@ export const metadata = {
   title: 'News & Updates',
   description: 'Latest news from Mike Page, IDMG, Love on the Lawn Festival, and the Mike Page Foundation. New music, events, and community updates.',
   openGraph: {
-    title: 'News & Updates | MyStation',
+    title: 'News & Updates',
     description: 'Latest from Mike Page, Love on the Lawn Festival, and the Mike Page Foundation.',
   },
 };

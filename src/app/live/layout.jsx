@@ -1,5 +1,5 @@
 export const metadata = {
-  title: 'Go Live — MyStation',
+  title: 'Go Live',
   description: 'Go live on MyStation. Stream, perform, and connect with fans in real-time.',
   openGraph: {
     title: 'Go Live on MyStation — Stream & Connect',

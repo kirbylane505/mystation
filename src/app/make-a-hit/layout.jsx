@@ -1,5 +1,5 @@
 export const metadata = {
-  title: 'Make A Hit — MyStation',
+  title: 'Make A Hit',
   description: 'Preview exclusive beats by The Cubist. Pick your favorite, lay your verse, and make the next hit with IDMG.',
   openGraph: {
     title: 'Make A Hit — Pick A Beat, Make A Classic',

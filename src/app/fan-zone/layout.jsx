@@ -1,5 +1,5 @@
 export const metadata = {
-  title: 'Fan Zone — MyStation',
+  title: 'Fan Zone',
   description: 'Join the MyStation Fan Zone. Connect with the community, earn loyalty points, and get exclusive access to Mike Page content.',
   openGraph: {
     title: 'MyStation Fan Zone — Join The Movement',
