@@ -122,7 +122,7 @@ export const tracks = [
     producer: 'Shawn Hibbler & The Cubist'
   },
   // ========================================
-  // NEW RELEASE - I Want This One (Single from Grammy Nights)
+  // NEW RELEASES
   // ========================================
   {
     id: 138,
@@ -140,6 +140,20 @@ export const tracks = [
     key: 'B Minor',
     hitScore: 92,
     producer: 'The Cubist'
+  },
+  {
+    id: 139,
+    title: "I Need Her",
+    artist: "Mike Page",
+    album: "Singles",
+    year: 2026,
+    duration: "3:30",
+    trackNumber: 1,
+    albumId: 'singles-2026',
+    audioFile: '/audio/i-need-her.mp3',
+    isNew: true,
+    hitScore: 91,
+    producer: 'Jack Thomas & The Cubist'
   },
   // ========================================
   // GRAMMY NIGHTS VOL. 1 - VB & MP (PRIVATE)
