@@ -1,14 +1,15 @@
 /**
  * MYSTATION - Subscribe Modal
- * Shows after 24-hour free trial expires - $4.99/month subscription
- * Unlocks unlimited streaming
+ * 24-hour free trial → hard paywall after expiry
+ * "Add Card Now" or "Later" during trial
+ * After 24hrs: MUST subscribe — no skip, no close
  */
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { usePlayerStore, useUserStore } from '@/store/playerStore';
-import { X, Music, Sparkles, Heart, Check, CreditCard, Zap, Crown, ShoppingBag, Gift } from 'lucide-react';
+import { X, Music, Sparkles, Heart, Check, CreditCard, Zap, Crown, ShoppingBag, Clock } from 'lucide-react';
 import Link from 'next/link';
 
 export default function SubscribeModal() {
@@ -19,41 +20,32 @@ export default function SubscribeModal() {
   const [codeError, setCodeError] = useState('');
   const [codeLoading, setCodeLoading] = useState(false);
 
-  const { showSubscribeModal, closeSubscribeModal, pendingTrack, setTrack, playCount } = usePlayerStore();
+  const { showSubscribeModal, closeSubscribeModal, pendingTrack, setTrack, getTrialRemaining } = usePlayerStore();
   const { subscribe, isSubscribed } = useUserStore();
+
+  // Check if trial is expired (hard wall mode)
+  const [trialExpired, setTrialExpired] = useState(false);
+
+  useEffect(() => {
+    if (showSubscribeModal) {
+      const remaining = getTrialRemaining();
+      setTrialExpired(remaining <= 0);
+    }
+  }, [showSubscribeModal, getTrialRemaining]);
 
   if (!showSubscribeModal) return null;
 
   const handleSubscribe = async () => {
     setLoading(true);
-
     try {
-      // Save pending track to localStorage so we can play it after subscription
       if (pendingTrack) {
         localStorage.setItem('mystation-pending-track', JSON.stringify(pendingTrack));
       }
-
-      // Redirect to Stripe payment link - $4.99/month subscription
-      // Success URL configured in Stripe Dashboard: https://mystationlive.com/subscribe/success
       window.location.href = 'https://buy.stripe.com/eVq5kEcWS8VW8z10xs73G04';
     } catch (err) {
       console.error('Subscription error:', err);
       setLoading(false);
     }
-  };
-
-  // Demo subscribe (remove in production)
-  const handleDemoSubscribe = () => {
-    subscribe('subscriber@mystation.com');
-    setSuccess(true);
-
-    setTimeout(() => {
-      closeSubscribeModal();
-      if (pendingTrack) {
-        setTrack(pendingTrack);
-      }
-      setSuccess(false);
-    }, 1500);
   };
 
   const handleAccessCode = async () => {
@@ -89,8 +81,11 @@ export default function SubscribeModal() {
     }
   };
 
-  const handleSkip = () => {
-    closeSubscribeModal();
+  const handleLater = () => {
+    // Only allow dismissing during trial period
+    if (!trialExpired) {
+      closeSubscribeModal();
+    }
   };
 
   return (
@@ -99,13 +94,15 @@ export default function SubscribeModal() {
         className="relative w-full max-w-md max-h-[90vh] overflow-y-auto bg-gradient-to-b from-mystation-navy to-mystation-navyDark rounded-3xl border border-white/10 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Close button */}
-        <button
-          onClick={handleSkip}
-          className="absolute top-4 right-4 w-8 h-8 bg-white/10 rounded-full flex items-center justify-center text-white/60 hover:text-white hover:bg-white/20 transition z-10"
-        >
-          <X size={18} />
-        </button>
+        {/* Close button — only during trial */}
+        {!trialExpired && (
+          <button
+            onClick={handleLater}
+            className="absolute top-4 right-4 w-8 h-8 bg-white/10 rounded-full flex items-center justify-center text-white/60 hover:text-white hover:bg-white/20 transition z-10"
+          >
+            <X size={18} />
+          </button>
+        )}
 
         {/* Header */}
         <div className="pt-10 pb-6 px-8 text-center relative">
@@ -115,8 +112,10 @@ export default function SubscribeModal() {
             <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/30">
               {success ? (
                 <Check size={40} className="text-white animate-bounce" />
-              ) : (
+              ) : trialExpired ? (
                 <Crown size={40} className="text-white" />
+              ) : (
+                <Clock size={40} className="text-white" />
               )}
             </div>
 
@@ -125,11 +124,18 @@ export default function SubscribeModal() {
                 <h2 className="text-2xl font-bold text-white mb-2">Welcome to the Family!</h2>
                 <p className="text-white/60">Unlimited streaming unlocked</p>
               </>
-            ) : (
+            ) : trialExpired ? (
               <>
                 <h2 className="text-2xl font-bold text-white mb-2">We'd Love to Have You Join the MyStation Family</h2>
                 <p className="text-white/60">
-                  Your free trial has ended. Subscribe to keep the music going — unlimited streaming, new releases, and more!
+                  Your 24-hour free trial has ended. Subscribe to continue streaming, access new releases, and support the music!
+                </p>
+              </>
+            ) : (
+              <>
+                <h2 className="text-2xl font-bold text-white mb-2">You're in Your Free Trial!</h2>
+                <p className="text-white/60">
+                  Add your card now to lock in unlimited streaming, or keep listening free for the rest of your trial.
                 </p>
               </>
             )}
@@ -141,9 +147,16 @@ export default function SubscribeModal() {
             {/* Pricing Card */}
             <div className="px-8 pb-6">
               <div className="bg-gradient-to-br from-blue-500/20 to-indigo-500/20 rounded-2xl border border-blue-500/30 p-6 text-center relative overflow-hidden">
-                <div className="absolute top-3 right-3 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                  BEST VALUE
-                </div>
+                {trialExpired && (
+                  <div className="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                    TRIAL ENDED
+                  </div>
+                )}
+                {!trialExpired && (
+                  <div className="absolute top-3 right-3 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                    BEST VALUE
+                  </div>
+                )}
 
                 <div className="mb-4">
                   <span className="text-5xl font-black text-white">$4.99</span>
@@ -164,7 +177,7 @@ export default function SubscribeModal() {
                   ) : (
                     <>
                       <CreditCard size={18} />
-                      Subscribe Now
+                      Add Card Now
                     </>
                   )}
                 </button>
@@ -210,11 +223,11 @@ export default function SubscribeModal() {
               </div>
             )}
 
-            {/* Merch CTA */}
+            {/* Merch CTA — always available */}
             <div className="px-8 pb-4">
               <Link
                 href="/merch"
-                onClick={handleSkip}
+                onClick={() => closeSubscribeModal()}
                 className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-orange-500/20 to-amber-500/20 border border-orange-500/30 text-orange-300 font-semibold rounded-xl hover:bg-orange-500/30 transition text-sm"
               >
                 <ShoppingBag size={16} />
@@ -259,15 +272,23 @@ export default function SubscribeModal() {
               )}
             </div>
 
-            {/* Skip option */}
-            <div className="px-8 pb-8 flex flex-col items-center">
-              <button
-                onClick={handleSkip}
-                className="text-white/60 text-sm hover:text-white/80 transition py-2 px-4"
-              >
-                Maybe later
-              </button>
-            </div>
+            {/* Later option — ONLY during trial. After 24hrs: hard wall, no skip */}
+            {!trialExpired ? (
+              <div className="px-8 pb-8 flex flex-col items-center">
+                <button
+                  onClick={handleLater}
+                  className="text-white/60 text-sm hover:text-white/80 transition py-2 px-4"
+                >
+                  Later
+                </button>
+              </div>
+            ) : (
+              <div className="px-8 pb-8 text-center">
+                <p className="text-white/30 text-xs">
+                  Subscribe to continue using MyStation
+                </p>
+              </div>
+            )}
           </>
         )}
       </div>
