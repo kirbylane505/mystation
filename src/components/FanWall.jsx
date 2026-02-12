@@ -67,7 +67,7 @@ export default function FanWall() {
     setPosting(true);
     try {
       const body = { username, content: newPost.trim(), avatar: '🎤' };
-      if (isOwner) body.ownerSecret = 'mikepage2026';
+      if (isOwner) body.ownerSecret = localStorage.getItem('mystation-fan-wall-token');
 
       const res = await fetch('/api/fan-wall', {
         method: 'POST',
@@ -94,7 +94,7 @@ export default function FanWall() {
 
     try {
       const body = { username, content: replyText.trim(), avatar: '💬', parentId };
-      if (isOwner) body.ownerSecret = 'mikepage2026';
+      if (isOwner) body.ownerSecret = localStorage.getItem('mystation-fan-wall-token');
 
       const res = await fetch('/api/fan-wall', {
         method: 'POST',
@@ -119,7 +119,7 @@ export default function FanWall() {
       await fetch('/api/fan-wall', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: postId, reaction: emoji, ownerSecret: 'mikepage2026' }),
+        body: JSON.stringify({ id: postId, reaction: emoji, ownerSecret: localStorage.getItem('mystation-fan-wall-token') }),
       });
       await fetchPosts();
     } catch {}
@@ -148,14 +148,24 @@ export default function FanWall() {
     } catch {}
   };
 
-  const toggleOwner = () => {
+  const toggleOwner = async () => {
     const secret = prompt('Enter owner code:');
-    if (secret === 'mikepage2026') {
-      setIsOwner(true);
-      setUsername('Mike Page');
-      localStorage.setItem('mystation-fan-wall-owner', 'true');
-      localStorage.setItem('mystation-fan-username', 'Mike Page');
-    }
+    if (!secret) return;
+    try {
+      const res = await fetch('/api/fan-wall', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ verifyOwner: true, ownerSecret: secret }),
+      });
+      const data = await res.json();
+      if (data.isOwner) {
+        setIsOwner(true);
+        setUsername('Mike Page');
+        localStorage.setItem('mystation-fan-wall-owner', 'true');
+        localStorage.setItem('mystation-fan-wall-token', secret);
+        localStorage.setItem('mystation-fan-username', 'Mike Page');
+      }
+    } catch {}
   };
 
   const formatDate = (dateStr) => {

@@ -33,20 +33,22 @@ export async function POST(request) {
     let event;
 
     // Verify webhook signature
-    if (webhookSecret && webhookSecret !== 'whsec_REPLACE_WITH_YOUR_WEBHOOK_SECRET') {
-      try {
-        event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
-      } catch (err) {
-        console.error('Webhook signature verification failed:', err.message);
-        return NextResponse.json(
-          { error: 'Webhook signature verification failed' },
-          { status: 400 }
-        );
-      }
-    } else {
-      // No webhook secret configured - parse event directly (not recommended for production)
-      event = JSON.parse(body);
-      console.warn('WARNING: Webhook signature verification is disabled');
+    if (!webhookSecret || webhookSecret === 'whsec_REPLACE_WITH_YOUR_WEBHOOK_SECRET') {
+      console.error('FATAL: STRIPE_WEBHOOK_SECRET is not configured');
+      return NextResponse.json(
+        { error: 'Webhook not configured' },
+        { status: 500 }
+      );
+    }
+
+    try {
+      event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+    } catch (err) {
+      console.error('Webhook signature verification failed:', err.message);
+      return NextResponse.json(
+        { error: 'Webhook signature verification failed' },
+        { status: 400 }
+      );
     }
 
     // Handle the event

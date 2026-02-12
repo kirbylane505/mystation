@@ -9,9 +9,13 @@
  */
 
 import { NextResponse } from 'next/server';
+import crypto from 'crypto';
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
 
-const OWNER_SECRET = process.env.FAN_WALL_OWNER_SECRET || 'mikepage2026';
+const OWNER_SECRET = process.env.FAN_WALL_OWNER_SECRET;
+if (!OWNER_SECRET) {
+  console.error('WARNING: FAN_WALL_OWNER_SECRET env var is not set');
+}
 
 // Rate limit
 const rateLimits = new Map();
@@ -93,7 +97,15 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Too many posts. Try again later.' }, { status: 429 });
     }
 
-    const { username, content, avatar, parentId, ownerSecret } = await request.json();
+    const body = await request.json();
+    const { username, content, avatar, parentId, ownerSecret, verifyOwner } = body;
+
+    // Owner verification endpoint — just checks if the secret is valid
+    if (verifyOwner) {
+      const isValid = ownerSecret && ownerSecret.length === OWNER_SECRET.length &&
+        crypto.timingSafeEqual(Buffer.from(ownerSecret), Buffer.from(OWNER_SECRET));
+      return NextResponse.json({ isOwner: isValid });
+    }
 
     if (!username?.trim() || !content?.trim()) {
       return NextResponse.json({ error: 'Username and content required' }, { status: 400 });
@@ -114,7 +126,8 @@ export async function POST(request) {
       tier = `reply:${parentId}`;
     }
     // Owner gets special tier
-    if (ownerSecret === OWNER_SECRET) {
+    if (ownerSecret && ownerSecret.length === OWNER_SECRET.length &&
+        crypto.timingSafeEqual(Buffer.from(ownerSecret), Buffer.from(OWNER_SECRET))) {
       tier = parentId ? `reply:${parentId}` : 'vip';
     }
 
@@ -154,7 +167,8 @@ export async function PATCH(request) {
     }
 
     // Owner reaction (emoji on a post)
-    if (reaction && ownerSecret === OWNER_SECRET) {
+    if (reaction && OWNER_SECRET && ownerSecret && ownerSecret.length === OWNER_SECRET.length &&
+        crypto.timingSafeEqual(Buffer.from(ownerSecret), Buffer.from(OWNER_SECRET))) {
       const { data, error } = await supabase
         .from('fan_wall')
         .insert({

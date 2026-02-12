@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 
-const AUDIO_SECRET = process.env.AUDIO_SECRET || 'ms-audio-2026-idmg';
+const AUDIO_SECRET = process.env.AUDIO_SECRET;
+if (!AUDIO_SECRET) {
+  console.error('FATAL: AUDIO_SECRET env var is not set');
+}
 
 // Use Web Crypto API (same as middleware) for HMAC signing — ensures token compatibility
 async function signToken(payload) {
@@ -11,7 +14,7 @@ async function signToken(payload) {
   );
   const sigBuf = await crypto.subtle.sign('HMAC', key, encoder.encode(payload));
   const hex = Array.from(new Uint8Array(sigBuf)).map(b => b.toString(16).padStart(2, '0')).join('');
-  return hex.slice(0, 16);
+  return hex.slice(0, 32);
 }
 
 export async function POST(request) {

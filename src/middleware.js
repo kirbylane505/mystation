@@ -60,7 +60,7 @@ async function verifyAudioToken(token, pathname) {
     const sigBuf = await crypto.subtle.sign('HMAC', key, encoder.encode(`${audioPath}:${expires}`));
     const hex = Array.from(new Uint8Array(sigBuf)).map(b => b.toString(16).padStart(2, '0')).join('');
     // Timing-safe comparison to prevent timing attacks
-    const expected = hex.slice(0, 16);
+    const expected = hex.slice(0, 32);
     if (expected.length !== sig.length) return false;
     let diff = 0;
     for (let i = 0; i < expected.length; i++) {

@@ -31,7 +31,7 @@ export default function AdminAnalyticsPage() {
     // Simple admin check — look for admin_key in URL
     const params = new URLSearchParams(window.location.search);
     const key = params.get('key');
-    if (key === process.env.NEXT_PUBLIC_ADMIN_KEY || key === 'mpf2026') {
+    if (key) {
       setAuthorized(true);
       fetchData('24h');
     } else {
@@ -42,7 +42,8 @@ export default function AdminAnalyticsPage() {
   const fetchData = async (p) => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/admin/analytics?period=${p}&key=mpf2026`);
+      const adminKey = new URLSearchParams(window.location.search).get('key');
+      const res = await fetch(`/api/admin/analytics?period=${p}&key=${adminKey}`);
       if (res.ok) {
         const json = await res.json();
         setData(json);
