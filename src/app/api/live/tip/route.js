@@ -8,6 +8,14 @@ export async function POST(request) {
   try {
     const { amount, name, message, streamId } = await request.json();
 
+    // Validate tip amount — must be positive, reasonable
+    if (!amount || typeof amount !== 'number' || amount < 1 || amount > 500) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid tip amount (must be $1-$500)' },
+        { status: 400 }
+      );
+    }
+
     // Check if Stripe is configured
     if (!process.env.STRIPE_SECRET_KEY) {
       // Demo mode - return success without processing

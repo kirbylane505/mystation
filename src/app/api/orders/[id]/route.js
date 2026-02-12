@@ -1,10 +1,19 @@
 import { printful } from '@/lib/printful';
 
+// Admin auth check
+function isAuthorized(request) {
+  const key = request.headers.get('x-admin-key') || new URL(request.url).searchParams.get('key');
+  return process.env.ADMIN_KEY && key === process.env.ADMIN_KEY;
+}
+
 /**
  * GET /api/orders/[id]
- * Get single order details
+ * Get single order details (admin only)
  */
 export async function GET(request, { params }) {
+  if (!isAuthorized(request)) {
+    return Response.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+  }
   try {
     const { id } = params;
 
@@ -28,6 +37,9 @@ export async function GET(request, { params }) {
  * Confirm a draft order for fulfillment
  */
 export async function POST(request, { params }) {
+  if (!isAuthorized(request)) {
+    return Response.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+  }
   try {
     const { id } = params;
 
@@ -57,6 +69,9 @@ export async function POST(request, { params }) {
  * Cancel an order
  */
 export async function DELETE(request, { params }) {
+  if (!isAuthorized(request)) {
+    return Response.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+  }
   try {
     const { id } = params;
 

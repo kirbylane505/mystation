@@ -16,6 +16,28 @@ export async function POST(request) {
       );
     }
 
+    // Server-side price validation — reject manipulated prices
+    for (const item of items) {
+      if (!item.price || typeof item.price !== 'number' || item.price < 1 || item.price > 500) {
+        return NextResponse.json(
+          { success: false, error: 'Invalid item price' },
+          { status: 400 }
+        );
+      }
+      if (!item.name || typeof item.name !== 'string') {
+        return NextResponse.json(
+          { success: false, error: 'Invalid item name' },
+          { status: 400 }
+        );
+      }
+      if (!item.quantity || item.quantity < 1 || item.quantity > 20) {
+        return NextResponse.json(
+          { success: false, error: 'Invalid quantity' },
+          { status: 400 }
+        );
+      }
+    }
+
     // Check if Stripe is configured
     const stripeKey = process.env.STRIPE_SECRET_KEY;
     if (!stripeKey) {
@@ -33,6 +55,64 @@ export async function POST(request) {
     const stripe = new Stripe(stripeKey, {
       apiVersion: '2023-10-16',
     });
+
+    // Server-side price validation — verify prices against provider catalogs
+    // Prevents price manipulation attacks where client sends $0.01 for a $50 item
+    for (const item of items) {
+      if (!item.price || typeof item.price !== 'number' || item.price < 1) {
+        return NextResponse.json(
+          { success: false, error: 'Invalid item price' },
+          { status: 400 }
+        );
+      }
+      if (!item.name || typeof item.name !== 'string') {
+        return NextResponse.json(
+          { success: false, error: 'Invalid item name' },
+          { status: 400 }
+        );
+      }
+      if (!item.quantity || item.quantity < 1 || item.quantity > 50) {
+        return NextResponse.json(
+          { success: false, error: 'Invalid quantity' },
+          { status: 400 }
+        );
+      }
+      // Price ceiling — no single merch item should exceed $500
+      if (item.price > 500) {
+        return NextResponse.json(
+          { success: false, error: 'Price exceeds maximum' },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Verify prices against Printify/Printful catalog when variant IDs are provided
+    if (items.some(item => item.printifyProductId && item.printifyVariantId)) {
+      try {
+        const { printify } = await import('@/lib/printify');
+        for (const item of items) {
+          if (!item.printifyProductId || !item.printifyVariantId) continue;
+          const product = await printify.getStoreProduct(item.printifyProductId);
+          if (product?.variants) {
+            const variant = product.variants.find(v => v.id === item.printifyVariantId);
+            if (variant) {
+              // Server price is in cents, client price is in dollars
+              const serverPrice = variant.price / 100;
+              if (Math.abs(item.price - serverPrice) > 0.01) {
+                console.error(`Price mismatch: client=${item.price}, server=${serverPrice}, product=${item.name}`);
+                return NextResponse.json(
+                  { success: false, error: 'Price verification failed. Please refresh and try again.' },
+                  { status: 400 }
+                );
+              }
+            }
+          }
+        }
+      } catch (e) {
+        console.error('Price verification warning:', e.message);
+        // Continue — don't block checkout if catalog lookup fails
+      }
+    }
 
     // Calculate bundle discount based on total item count
     const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);

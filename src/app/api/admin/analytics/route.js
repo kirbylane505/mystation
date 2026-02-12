@@ -11,9 +11,10 @@ export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const period = searchParams.get('period') || '24h';
 
-  // Simple admin check via query param or header
+  // Admin check via env var only — no hardcoded keys
   const key = searchParams.get('key') || request.headers.get('x-admin-key');
-  if (key !== 'mpf2026' && key !== process.env.ADMIN_KEY) {
+  const adminKey = process.env.ADMIN_KEY;
+  if (!adminKey || key !== adminKey) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

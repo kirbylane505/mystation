@@ -2,11 +2,21 @@ import { printful } from '@/lib/printful';
 
 export const dynamic = 'force-dynamic';
 
+// Admin auth check — protects order creation and listing
+function isAuthorized(request) {
+  const key = request.headers.get('x-admin-key') || new URL(request.url).searchParams.get('key');
+  return process.env.ADMIN_KEY && key === process.env.ADMIN_KEY;
+}
+
 /**
  * POST /api/orders
- * Create a new order in Printful
+ * Create a new order in Printful (admin only — webhook handles customer orders)
  */
 export async function POST(request) {
+  if (!isAuthorized(request)) {
+    return Response.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const { items, shipping, customer, confirm = false } = await request.json();
 
@@ -101,6 +111,10 @@ export async function POST(request) {
  * Get all orders or single order by ID
  */
 export async function GET(request) {
+  if (!isAuthorized(request)) {
+    return Response.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const { searchParams } = new URL(request.url);
     const orderId = searchParams.get('id');

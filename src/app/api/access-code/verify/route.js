@@ -16,8 +16,14 @@ export async function POST(request) {
       );
     }
 
-    // Access code from env or default
-    const validCode = process.env.FRIEND_ACCESS_CODE || 'MPFAMILY';
+    // Access code from env — no hardcoded fallback
+    const validCode = process.env.FRIEND_ACCESS_CODE;
+    if (!validCode) {
+      return NextResponse.json(
+        { success: false, error: 'Access codes not configured' },
+        { status: 503 }
+      );
+    }
 
     if (code.toUpperCase().trim() === validCode.toUpperCase()) {
       return NextResponse.json({ success: true, message: 'Welcome to the family!' });

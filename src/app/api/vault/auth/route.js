@@ -52,7 +52,13 @@ export async function POST(request) {
       // Success — clear attempts and set vault session cookie
       attempts.delete(ip);
 
-      const vaultSecret = process.env.VAULT_SECRET || 'fallback-vault-secret';
+      const vaultSecret = process.env.VAULT_SECRET;
+      if (!vaultSecret) {
+        return NextResponse.json(
+          { success: false, error: 'Vault not fully configured' },
+          { status: 503 }
+        );
+      }
       const timestamp = Date.now().toString();
       const signature = crypto
         .createHmac('sha256', vaultSecret)

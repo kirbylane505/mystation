@@ -4,6 +4,12 @@
 import { NextResponse } from 'next/server';
 
 export async function POST(request) {
+  // Admin only — only Mike Page can create live streams
+  const adminKey = request.headers.get('x-admin-key');
+  if (!process.env.ADMIN_KEY || adminKey !== process.env.ADMIN_KEY) {
+    return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const { title } = await request.json();
 
