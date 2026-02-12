@@ -229,7 +229,7 @@ export const useUserStore = create(
       user: null,
       isLoggedIn: false,
       isSubscribed: false,
-      supporterTier: 'free', // 'free', 'supporter', 'vip', 'foundation'
+      supporterTier: 'free', // 'free', 'regular', 'premium', 'diamond'
       favorites: [],
       email: '',
       sessionToken: null,
@@ -242,12 +242,12 @@ export const useUserStore = create(
         supporterTier: user?.tier || 'free'
       }),
 
-      subscribe: (email) => set({
+      subscribe: (email, tier = 'regular') => set({
         isSubscribed: true,
         isLoggedIn: true,
         email,
-        supporterTier: 'supporter',
-        user: { email, isSubscribed: true, tier: 'supporter' }
+        supporterTier: tier,
+        user: { email, isSubscribed: true, tier }
       }),
 
       logout: () => {

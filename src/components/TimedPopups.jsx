@@ -10,7 +10,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { X, Heart, CreditCard, Crown, ShoppingBag, Sparkles, Ticket, Package, Gift, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
-import { useUserStore } from '@/store/playerStore';
+import { useUserStore, usePlayerStore } from '@/store/playerStore';
 
 // ============ DONATE / SUBSCRIBE POPUP (every 7 min) ============
 function DonatePopup({ onClose }) {
@@ -62,13 +62,13 @@ function DonatePopup({ onClose }) {
 
         <div className="px-8 pb-4 space-y-3">
           {/* Subscribe */}
-          <a
-            href="https://buy.stripe.com/eVq5kEcWS8VW8z10xs73G04"
+          <button
+            onClick={() => { onClose(); usePlayerStore.getState().openSubscribeModal(); }}
             className="w-full flex items-center justify-center gap-2 py-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold rounded-xl hover:opacity-90 transition shadow-lg shadow-blue-500/30"
           >
             <Crown size={18} />
-            Subscribe — $4.99/mo
-          </a>
+            Subscribe — Plans from $4.99/mo
+          </button>
 
           {/* Donate */}
           <Link

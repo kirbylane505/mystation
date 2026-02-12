@@ -351,15 +351,15 @@ export default function Player() {
     <>
       {/* Mobile Subscribe Banner */}
       {mounted && !isSubscribed && trialExpired && (
-        <a
-          href="https://buy.stripe.com/eVq5kEcWS8VW8z10xs73G04"
+        <button
+          onClick={() => openSubscribeModal()}
           className="md:hidden fixed bottom-[72px] left-0 right-0 bg-gradient-to-r from-yellow-500/90 to-orange-500/90 backdrop-blur-xl z-40"
         >
           <div className="w-full flex items-center justify-center gap-2 py-2 text-white font-semibold text-sm">
             <Crown size={16} />
-            Join the MyStation Family — $4.99/mo
+            Join the MyStation Family — Plans from $4.99/mo
           </div>
-        </a>
+        </button>
       )}
 
       {/* Mobile Mini Player */}
@@ -415,7 +415,7 @@ export default function Player() {
           <div className="absolute -top-10 left-1/2 -translate-x-1/2 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full shadow-lg flex items-center gap-2">
             <Sparkles size={14} className="text-yellow-300" />
             <span className="text-white text-sm font-medium">Free trial: {trialHours}h {trialMinutes}m left</span>
-            <a href="https://buy.stripe.com/eVq5kEcWS8VW8z10xs73G04" className="ml-2 px-2 py-0.5 bg-white/20 hover:bg-white/30 rounded text-xs text-white font-semibold transition">Subscribe</a>
+            <button onClick={() => openSubscribeModal()} className="ml-2 px-2 py-0.5 bg-white/20 hover:bg-white/30 rounded text-xs text-white font-semibold transition">Subscribe</button>
           </div>
         )}
 

@@ -18,6 +18,7 @@ import TrackingPixels from '@/components/TrackingPixels';
 import SessionGuard from '@/components/SessionGuard';
 import ExtensionBridge from '@/components/ExtensionBridge';
 import SharePage from '@/components/SharePage';
+import IDMGBadge from '@/components/IDMGBadge';
 import Script from 'next/script';
 
 export const metadata = {
@@ -93,6 +94,7 @@ export default function RootLayout({ children }) {
           <ExtensionBridge />
           <PageTracker />
           <SharePage />
+          <IDMGBadge />
         </ClientProviders>
         <Script id="register-sw" strategy="afterInteractive">
           {`

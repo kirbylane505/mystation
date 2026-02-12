@@ -6,12 +6,12 @@
 'use client';
 
 import { useState } from 'react';
-import { useUserStore } from '@/store/playerStore';
+import { useUserStore, usePlayerStore } from '@/store/playerStore';
 import { CreditCard, Crown, Music, ExternalLink, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
 export default function AccountPage() {
-  const { isSubscribed } = useUserStore();
+  const { isSubscribed, supporterTier } = useUserStore();
   const [loading, setLoading] = useState(false);
 
   const handleManageSubscription = async () => {
@@ -61,11 +61,11 @@ export default function AccountPage() {
             </div>
             <div>
               <h2 className="text-xl font-bold text-white">
-                {isSubscribed ? 'MyStation Premium' : 'Free Plan'}
+                {isSubscribed ? `MyStation ${supporterTier === 'diamond' ? 'Diamond' : supporterTier === 'premium' ? 'Premium' : 'Regular'}` : 'Free Plan'}
               </h2>
               <p className="text-white/50 text-sm">
                 {isSubscribed
-                  ? '$4.99/month — Unlimited streaming'
+                  ? `${supporterTier === 'diamond' ? '$14.99' : supporterTier === 'premium' ? '$9.99' : '$4.99'}/month — Unlimited streaming`
                   : '4 free songs per session'
                 }
               </p>
@@ -100,12 +100,12 @@ export default function AccountPage() {
               )}
             </button>
           ) : (
-            <a
-              href="https://buy.stripe.com/eVq5kEcWS8VW8z10xs73G04"
+            <button
+              onClick={() => usePlayerStore.getState().openSubscribeModal()}
               className="w-full flex items-center justify-center gap-2 py-3.5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl font-bold hover:shadow-lg hover:shadow-indigo-500/30 transition"
             >
-              <Crown size={18} /> Subscribe — $4.99/mo
-            </a>
+              <Crown size={18} /> Subscribe — Plans from $4.99/mo
+            </button>
           )}
         </div>
 

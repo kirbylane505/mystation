@@ -1,19 +1,27 @@
 /**
- * MYSTATION - Subscribe Modal
+ * MYSTATION - Subscribe Modal (3-Tier System)
+ * Regular $4.99 | Premium $9.99 | Diamond $14.99
  * 24-hour free trial → hard paywall after expiry
- * "Add Card Now" or "Later" during trial
- * After 24hrs: MUST subscribe — no skip, no close
  */
 
 'use client';
 
 import { useState, useEffect } from 'react';
 import { usePlayerStore, useUserStore } from '@/store/playerStore';
-import { X, Music, Sparkles, Heart, Check, CreditCard, Zap, Crown, ShoppingBag, Clock } from 'lucide-react';
+import { X, Music, Sparkles, Heart, Check, CreditCard, Zap, Crown, ShoppingBag, Clock, Gem, Star, Headphones, Radio, Shirt, Lock, Users } from 'lucide-react';
 import Link from 'next/link';
+
+// Stripe checkout links per tier
+// TODO: Create $9.99 and $14.99 products in Stripe Dashboard → Payment Links
+const STRIPE_LINKS = {
+  regular: 'https://buy.stripe.com/eVq5kEcWS8VW8z10xs73G04',
+  premium: 'https://buy.stripe.com/eVq5kEcWS8VW8z10xs73G04',  // UPDATE with $9.99 link
+  diamond: 'https://buy.stripe.com/eVq5kEcWS8VW8z10xs73G04',  // UPDATE with $14.99 link
+};
 
 export default function SubscribeModal() {
   const [loading, setLoading] = useState(false);
+  const [selectedTier, setSelectedTier] = useState('premium'); // default highlight
   const [success, setSuccess] = useState(false);
   const [showCodeInput, setShowCodeInput] = useState(false);
   const [accessCode, setAccessCode] = useState('');
@@ -23,7 +31,6 @@ export default function SubscribeModal() {
   const { showSubscribeModal, closeSubscribeModal, pendingTrack, setTrack, getTrialRemaining } = usePlayerStore();
   const { subscribe, isSubscribed } = useUserStore();
 
-  // Check if trial is expired (hard wall mode)
   const [trialExpired, setTrialExpired] = useState(false);
 
   useEffect(() => {
@@ -35,13 +42,14 @@ export default function SubscribeModal() {
 
   if (!showSubscribeModal) return null;
 
-  const handleSubscribe = async () => {
+  const handleSubscribe = async (tier) => {
     setLoading(true);
     try {
       if (pendingTrack) {
         localStorage.setItem('mystation-pending-track', JSON.stringify(pendingTrack));
       }
-      window.location.href = 'https://buy.stripe.com/eVq5kEcWS8VW8z10xs73G04';
+      localStorage.setItem('mystation-selected-tier', tier);
+      window.location.href = STRIPE_LINKS[tier];
     } catch (err) {
       console.error('Subscription error:', err);
       setLoading(false);
@@ -82,16 +90,72 @@ export default function SubscribeModal() {
   };
 
   const handleLater = () => {
-    // Only allow dismissing during trial period
     if (!trialExpired) {
       closeSubscribeModal();
     }
   };
 
+  const tiers = [
+    {
+      id: 'regular',
+      name: 'Regular',
+      price: '4.99',
+      icon: <Headphones size={22} className="text-blue-400" />,
+      color: 'blue',
+      gradient: 'from-blue-500/20 to-blue-600/10',
+      border: 'border-blue-500/30',
+      btnGradient: 'from-blue-500 to-blue-600',
+      shadow: 'shadow-blue-500/20',
+      features: [
+        'Unlimited streaming',
+        'Background playback',
+        'Support the Foundation',
+      ],
+    },
+    {
+      id: 'premium',
+      name: 'Premium',
+      price: '9.99',
+      icon: <Star size={22} className="text-purple-400" />,
+      color: 'purple',
+      gradient: 'from-purple-500/20 to-indigo-600/10',
+      border: 'border-purple-500/40',
+      btnGradient: 'from-purple-500 to-indigo-600',
+      shadow: 'shadow-purple-500/30',
+      popular: true,
+      features: [
+        'Everything in Regular',
+        'Early access to new drops',
+        'Full Fan Zone access',
+        'DJ Turntables unlocked',
+        'Priority Fan Wall posting',
+      ],
+    },
+    {
+      id: 'diamond',
+      name: 'Diamond',
+      price: '14.99',
+      icon: <Gem size={22} className="text-amber-400" />,
+      color: 'amber',
+      gradient: 'from-amber-500/20 to-yellow-600/10',
+      border: 'border-amber-500/40',
+      btnGradient: 'from-amber-500 to-yellow-500',
+      shadow: 'shadow-amber-500/30',
+      features: [
+        'Everything in Premium',
+        'Add songs to catalog',
+        '10% off all merch',
+        'Full Vault access',
+        'Grammy Nights access',
+        'Diamond badge everywhere',
+      ],
+    },
+  ];
+
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm animate-fadeIn">
       <div
-        className="relative w-full max-w-md max-h-[90vh] overflow-y-auto bg-gradient-to-b from-mystation-navy to-mystation-navyDark rounded-3xl border border-white/10 shadow-2xl"
+        className="relative w-full max-w-3xl max-h-[92vh] overflow-y-auto bg-gradient-to-b from-mystation-navy to-mystation-navyDark rounded-3xl border border-white/10 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close button — only during trial */}
@@ -105,38 +169,33 @@ export default function SubscribeModal() {
         )}
 
         {/* Header */}
-        <div className="pt-10 pb-6 px-8 text-center relative">
-          <div className="absolute inset-0 bg-gradient-to-b from-blue-500/10 to-transparent" />
-
+        <div className="pt-8 pb-4 px-8 text-center relative">
+          <div className="absolute inset-0 bg-gradient-to-b from-indigo-500/10 to-transparent" />
           <div className="relative">
-            <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/30">
+            <div className="w-16 h-16 mx-auto mb-3 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/30">
               {success ? (
-                <Check size={40} className="text-white animate-bounce" />
+                <Check size={36} className="text-white animate-bounce" />
               ) : trialExpired ? (
-                <Crown size={40} className="text-white" />
+                <Crown size={36} className="text-white" />
               ) : (
-                <Clock size={40} className="text-white" />
+                <Clock size={36} className="text-white" />
               )}
             </div>
 
             {success ? (
               <>
-                <h2 className="text-2xl font-bold text-white mb-2">Welcome to the Family!</h2>
-                <p className="text-white/60">Unlimited streaming unlocked</p>
+                <h2 className="text-2xl font-bold text-white mb-1">Welcome to the Family!</h2>
+                <p className="text-white/60 text-sm">Unlimited streaming unlocked</p>
               </>
             ) : trialExpired ? (
               <>
-                <h2 className="text-2xl font-bold text-white mb-2">We'd Love to Have You Join the MyStation Family</h2>
-                <p className="text-white/60">
-                  Your 24-hour free trial has ended. Subscribe to continue streaming, access new releases, and support the music!
-                </p>
+                <h2 className="text-xl font-bold text-white mb-1">Join the MyStation Family</h2>
+                <p className="text-white/60 text-sm">Your free trial has ended. Pick your plan to keep streaming.</p>
               </>
             ) : (
               <>
-                <h2 className="text-2xl font-bold text-white mb-2">You're in Your Free Trial!</h2>
-                <p className="text-white/60">
-                  Add your card now to lock in unlimited streaming, or keep listening free for the rest of your trial.
-                </p>
+                <h2 className="text-xl font-bold text-white mb-1">You're in Your Free Trial!</h2>
+                <p className="text-white/60 text-sm">Lock in your plan now, or keep listening free for the rest of your trial.</p>
               </>
             )}
           </div>
@@ -144,109 +203,111 @@ export default function SubscribeModal() {
 
         {!success && (
           <>
-            {/* Pricing Card */}
-            <div className="px-8 pb-6">
-              <div className="bg-gradient-to-br from-blue-500/20 to-indigo-500/20 rounded-2xl border border-blue-500/30 p-6 text-center relative overflow-hidden">
-                {trialExpired && (
-                  <div className="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                    TRIAL ENDED
-                  </div>
-                )}
-                {!trialExpired && (
-                  <div className="absolute top-3 right-3 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                    BEST VALUE
-                  </div>
-                )}
+            {/* 3-Tier Pricing Cards */}
+            <div className="px-6 pb-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {tiers.map((tier) => {
+                  const isSelected = selectedTier === tier.id;
+                  return (
+                    <button
+                      key={tier.id}
+                      onClick={() => setSelectedTier(tier.id)}
+                      className={`relative text-left rounded-2xl p-4 border-2 transition-all duration-200 ${
+                        isSelected
+                          ? `bg-gradient-to-b ${tier.gradient} ${tier.border} scale-[1.02]`
+                          : 'bg-white/5 border-white/10 hover:border-white/20'
+                      }`}
+                    >
+                      {tier.popular && (
+                        <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-purple-500 to-indigo-500 text-white text-[10px] font-bold px-3 py-0.5 rounded-full uppercase tracking-wider">
+                          Most Popular
+                        </div>
+                      )}
 
-                <div className="mb-4">
-                  <span className="text-5xl font-black text-white">$4.99</span>
-                  <span className="text-white/60 text-lg">/month</span>
-                </div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isSelected ? `bg-${tier.color}-500/20` : 'bg-white/10'}`}>
+                          {tier.icon}
+                        </div>
+                        <span className={`font-bold text-sm ${isSelected ? 'text-white' : 'text-white/70'}`}>{tier.name}</span>
+                      </div>
 
-                <p className="text-white/70 text-sm mb-4">
-                  Cancel anytime. Your support helps build youth and community programs worldwide.
-                </p>
+                      <div className="mb-3">
+                        <span className={`text-3xl font-black ${isSelected ? 'text-white' : 'text-white/60'}`}>${tier.price}</span>
+                        <span className="text-white/40 text-sm">/mo</span>
+                      </div>
 
-                <button
-                  onClick={handleSubscribe}
-                  disabled={loading}
-                  className="w-full py-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold rounded-xl hover:opacity-90 transition disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30"
-                >
-                  {loading ? (
-                    <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  ) : (
-                    <>
-                      <CreditCard size={18} />
-                      Add Card Now
-                    </>
-                  )}
-                </button>
+                      <ul className="space-y-1.5">
+                        {tier.features.map((f, i) => (
+                          <li key={i} className="flex items-start gap-2 text-xs">
+                            <Check size={12} className={`mt-0.5 shrink-0 ${isSelected ? `text-${tier.color}-400` : 'text-white/30'}`} />
+                            <span className={isSelected ? 'text-white/90' : 'text-white/50'}>{f}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
-            {/* Benefits */}
-            <div className="px-8 pb-6">
-              <div className="space-y-3">
-                <div className="flex items-center gap-3 text-sm">
-                  <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center shrink-0">
-                    <Zap size={16} className="text-blue-400" />
-                  </div>
-                  <span className="text-white/80">Unlimited streaming - all 30+ songs</span>
-                </div>
-                <div className="flex items-center gap-3 text-sm">
-                  <div className="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center shrink-0">
-                    <Sparkles size={16} className="text-purple-400" />
-                  </div>
-                  <span className="text-white/80">Early access to new releases</span>
-                </div>
-                <div className="flex items-center gap-3 text-sm">
-                  <div className="w-8 h-8 bg-pink-500/20 rounded-lg flex items-center justify-center shrink-0">
-                    <Heart size={16} className="text-pink-400" />
-                  </div>
-                  <span className="text-white/80">Support youth music programs</span>
-                </div>
-              </div>
+            {/* Subscribe Button */}
+            <div className="px-6 pb-4">
+              <button
+                onClick={() => handleSubscribe(selectedTier)}
+                disabled={loading}
+                className={`w-full py-4 bg-gradient-to-r ${tiers.find(t => t.id === selectedTier)?.btnGradient} text-white font-bold rounded-xl hover:opacity-90 transition disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg ${tiers.find(t => t.id === selectedTier)?.shadow}`}
+              >
+                {loading ? (
+                  <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <CreditCard size={18} />
+                    Subscribe — ${tiers.find(t => t.id === selectedTier)?.price}/mo
+                  </>
+                )}
+              </button>
+              <p className="text-white/30 text-xs text-center mt-2">Cancel anytime. All proceeds support youth & community programs.</p>
             </div>
 
             {/* Pending track preview */}
             {pendingTrack && (
-              <div className="px-8 pb-6">
+              <div className="px-6 pb-4">
                 <div className="flex items-center gap-3 p-3 bg-blue-500/10 rounded-xl border border-blue-500/20">
-                  <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center shrink-0">
-                    <Music size={20} className="text-blue-400" />
+                  <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center shrink-0">
+                    <Music size={18} className="text-blue-400" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-white/40 text-xs mb-0.5">Ready to play:</p>
-                    <p className="text-white font-medium truncate">{pendingTrack.title}</p>
+                    <p className="text-white/40 text-[10px] mb-0.5">Ready to play:</p>
+                    <p className="text-white font-medium text-sm truncate">{pendingTrack.title}</p>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* Merch CTA — always available */}
-            <div className="px-8 pb-4">
+            {/* Merch CTA */}
+            <div className="px-6 pb-3">
               <Link
                 href="/merch"
                 onClick={() => closeSubscribeModal()}
-                className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-orange-500/20 to-amber-500/20 border border-orange-500/30 text-orange-300 font-semibold rounded-xl hover:bg-orange-500/30 transition text-sm"
+                className="w-full flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-orange-500/20 to-amber-500/20 border border-orange-500/30 text-orange-300 font-semibold rounded-xl hover:bg-orange-500/30 transition text-sm"
               >
-                <ShoppingBag size={16} />
+                <ShoppingBag size={15} />
                 Shop Official Merch
               </Link>
             </div>
 
             {/* Access Code */}
-            <div className="px-8 pb-4">
+            <div className="px-6 pb-3">
               {!showCodeInput ? (
                 <button
                   onClick={() => setShowCodeInput(true)}
-                  className="w-full text-center text-blue-400/70 text-sm hover:text-blue-400 transition"
+                  className="w-full text-center text-blue-400/70 text-xs hover:text-blue-400 transition"
                 >
                   Have an access code?
                 </button>
               ) : (
-                <div className="bg-white/5 rounded-xl border border-white/10 p-4">
-                  <p className="text-white/60 text-xs mb-3 text-center">Enter your access code for free unlimited streaming</p>
+                <div className="bg-white/5 rounded-xl border border-white/10 p-3">
+                  <p className="text-white/60 text-xs mb-2 text-center">Enter your access code for free unlimited streaming</p>
                   <div className="flex gap-2">
                     <input
                       type="text"
@@ -254,13 +315,13 @@ export default function SubscribeModal() {
                       onChange={(e) => { setAccessCode(e.target.value); setCodeError(''); }}
                       onKeyDown={(e) => e.key === 'Enter' && handleAccessCode()}
                       placeholder="Enter code"
-                      className="flex-1 px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/30 text-sm focus:outline-none focus:border-blue-500 uppercase tracking-wider"
+                      className="flex-1 px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/30 text-sm focus:outline-none focus:border-blue-500 uppercase tracking-wider"
                       autoFocus
                     />
                     <button
                       onClick={handleAccessCode}
                       disabled={codeLoading || !accessCode.trim()}
-                      className="px-5 py-3 bg-green-500 text-white font-bold rounded-xl hover:bg-green-400 transition disabled:opacity-50 text-sm"
+                      className="px-5 py-2.5 bg-green-500 text-white font-bold rounded-xl hover:bg-green-400 transition disabled:opacity-50 text-sm"
                     >
                       {codeLoading ? '...' : 'Go'}
                     </button>
@@ -272,9 +333,9 @@ export default function SubscribeModal() {
               )}
             </div>
 
-            {/* Later option — ONLY during trial. After 24hrs: hard wall, no skip */}
+            {/* Later option — ONLY during trial */}
             {!trialExpired ? (
-              <div className="px-8 pb-8 flex flex-col items-center">
+              <div className="px-6 pb-6 flex flex-col items-center">
                 <button
                   onClick={handleLater}
                   className="text-white/60 text-sm hover:text-white/80 transition py-2 px-4"
@@ -283,7 +344,7 @@ export default function SubscribeModal() {
                 </button>
               </div>
             ) : (
-              <div className="px-8 pb-8 text-center">
+              <div className="px-6 pb-6 text-center">
                 <p className="text-white/30 text-xs">
                   Subscribe to continue using MyStation
                 </p>
