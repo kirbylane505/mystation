@@ -280,6 +280,21 @@ export const tracks = [
     genre: 'Alternative Rap',
     producer: 'Mike Page & The Cubist'
   },
+  {
+    id: 148,
+    title: "F@$K Dat Money (I'm Free)",
+    artist: "Mike Page",
+    album: "Coming Soon",
+    year: 2026,
+    duration: "3:01",
+    trackNumber: 18,
+    albumId: 'singles-2026',
+    audioFile: '/audio/Mike Page - Fk Dat Money_MASTERED.mp3',
+    isNew: true,
+    hitScore: 90,
+    genre: 'Alternative Rap',
+    producer: 'The Cubist & Mike Page'
+  },
   // ========================================
   // GRAMMY NIGHTS VOL. 1 - VB & MP (PRIVATE)
   // Access: MP2026 (Mike Page), VB2026 (Vincent Berry)
