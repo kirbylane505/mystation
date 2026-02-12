@@ -295,6 +295,21 @@ export const tracks = [
     genre: 'Alternative Rap',
     producer: 'The Cubist & Mike Page'
   },
+  {
+    id: 149,
+    title: "I Gotta Go",
+    artist: "Mike Page",
+    album: "Coming Soon",
+    year: 2026,
+    duration: "3:48",
+    trackNumber: 19,
+    albumId: 'singles-2026',
+    audioFile: '/audio/Mike Page - I Gotta Go_MASTERED.mp3',
+    isNew: true,
+    hitScore: 90,
+    genre: 'Pop',
+    producer: 'The Cubist'
+  },
   // ========================================
   // GRAMMY NIGHTS VOL. 1 - VB & MP (PRIVATE)
   // Access: MP2026 (Mike Page), VB2026 (Vincent Berry)
