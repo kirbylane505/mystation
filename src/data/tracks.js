@@ -205,6 +205,21 @@ export const tracks = [
     genre: 'R&B',
     producer: 'The Cubist'
   },
+  {
+    id: 143,
+    title: "Nun Of Dat",
+    artist: "Mike Page",
+    album: "Coming Soon",
+    year: 2026,
+    duration: "3:20",
+    trackNumber: 13,
+    albumId: 'singles-2026',
+    audioFile: '/audio/Mike Page - Nun Of Dat_MASTERED.mp3',
+    isNew: true,
+    hitScore: 90,
+    genre: 'R&B',
+    producer: 'The Cubist & Mike Page'
+  },
   // ========================================
   // GRAMMY NIGHTS VOL. 1 - VB & MP (PRIVATE)
   // Access: MP2026 (Mike Page), VB2026 (Vincent Berry)
