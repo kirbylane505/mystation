@@ -325,6 +325,21 @@ export const tracks = [
     genre: 'Pop',
     producer: 'The Art Teacher'
   },
+  {
+    id: 151,
+    title: "How That Feel (Freestyle)",
+    artist: "Mike Page",
+    album: "Coming Soon",
+    year: 2026,
+    duration: "2:46",
+    trackNumber: 21,
+    albumId: 'singles-2026',
+    audioFile: '/audio/Mike Page - How That Feel_MASTERED.mp3',
+    isNew: true,
+    hitScore: 89,
+    genre: 'Pop',
+    producer: 'Mike Page'
+  },
   // ========================================
   // GRAMMY NIGHTS VOL. 1 - VB & MP (PRIVATE)
   // Access: MP2026 (Mike Page), VB2026 (Vincent Berry)
