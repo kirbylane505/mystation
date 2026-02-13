@@ -31,13 +31,17 @@ export default function SubscribeModal() {
   const { subscribe, isSubscribed } = useUserStore();
 
   const [trialExpired, setTrialExpired] = useState(false);
+  const [isGuest, setIsGuest] = useState(false);
 
   useEffect(() => {
     if (showSubscribeModal) {
       const remaining = getTrialRemaining();
       setTrialExpired(remaining <= 0);
+      // Check if user is a guest (no email stored)
+      const hasEmail = typeof window !== 'undefined' && localStorage.getItem('mystation_email');
+      setIsGuest(!hasEmail && !isSubscribed);
     }
-  }, [showSubscribeModal, getTrialRemaining]);
+  }, [showSubscribeModal, getTrialRemaining, isSubscribed]);
 
   if (!showSubscribeModal) return null;
 

@@ -105,14 +105,36 @@ export const usePlayerStore = create(
 
   // Check if can play (client-side hint only — real enforcement is server-side in /api/audio/token)
   canPlay: (trackId) => {
-    const { isSubscribed } = useUserStore.getState();
+    const { isSubscribed, email } = useUserStore.getState();
     if (isSubscribed) return true;
-    // NOTE: No localStorage fallback — subscription is enforced server-side via httpOnly cookie
-    // The audio token endpoint (/api/audio/token) validates subscription + trial server-side
 
-    // 24-hour free trial check (client-side hint — server also enforces)
-    const remaining = get().getTrialRemaining();
-    return remaining > 0;
+    // Signed-in user with email: 24-hour free trial
+    const hasEmail = email || (typeof window !== 'undefined' && localStorage.getItem('mystation_email'));
+    if (hasEmail) {
+      const remaining = get().getTrialRemaining();
+      return remaining > 0;
+    }
+
+    // Guest mode: 4 free unique songs
+    if (typeof window !== 'undefined') {
+      const played = JSON.parse(localStorage.getItem('mystation_guest_plays') || '[]');
+      if (played.includes(trackId)) return true; // Already played this one
+      return played.length < 4;
+    }
+
+    return false;
+  },
+
+  // Track a guest play (call after successful play start)
+  trackGuestPlay: (trackId) => {
+    if (typeof window === 'undefined') return;
+    const hasEmail = localStorage.getItem('mystation_email');
+    if (hasEmail) return; // Not a guest
+    const played = JSON.parse(localStorage.getItem('mystation_guest_plays') || '[]');
+    if (!played.includes(trackId)) {
+      played.push(trackId);
+      localStorage.setItem('mystation_guest_plays', JSON.stringify(played));
+    }
   },
 
   // Show subscribe modal

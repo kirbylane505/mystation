@@ -20,8 +20,12 @@ import { useEngagementStore } from '@/store/engagementStore';
 // Global audio element - persists across page navigation
 let globalAudio = null;
 let isAudioInitialized = false;
+let audioUnlocked = false;
 let lastSkipTime = 0;
 let consecutiveErrors = 0;
+
+// Tiny silent WAV — used to unlock iOS audio on first touch
+const SILENCE_DATA_URL = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';
 
 function getGlobalAudio() {
   if (typeof window === 'undefined') return null;
@@ -34,6 +38,30 @@ function getGlobalAudio() {
     globalAudio.setAttribute('webkit-playsinline', '');
   }
   return globalAudio;
+}
+
+// iOS Safari requires audio.play() in the same call stack as a user gesture.
+// This unlocks the audio element on first touch so future programmatic play() works.
+function setupIOSAudioUnlock() {
+  if (typeof document === 'undefined' || audioUnlocked) return;
+
+  const unlock = () => {
+    if (audioUnlocked) return;
+    audioUnlocked = true;
+    const audio = getGlobalAudio();
+    if (audio) {
+      audio.src = SILENCE_DATA_URL;
+      const p = audio.play();
+      if (p) p.then(() => { audio.pause(); audio.currentTime = 0; audio.src = ''; }).catch(() => { audio.src = ''; });
+    }
+    document.removeEventListener('touchstart', unlock, true);
+    document.removeEventListener('touchend', unlock, true);
+    document.removeEventListener('click', unlock, true);
+  };
+
+  document.addEventListener('touchstart', unlock, true);
+  document.addEventListener('touchend', unlock, true);
+  document.addEventListener('click', unlock, true);
 }
 
 // Retry audio.play() with backoff — mobile browsers reject play() after suspension
@@ -118,6 +146,7 @@ export default function AudioPlayer() {
     prevTrack,
     repeat,
     incrementPlayCount,
+    trackGuestPlay,
     openSubscribeModal,
     initTrial,
     pause,
@@ -127,7 +156,7 @@ export default function AudioPlayer() {
   // Keep refs always fresh
   storeActionsRef.current = {
     setProgress, setDuration, nextTrack, prevTrack,
-    incrementPlayCount, openSubscribeModal, initTrial, pause, play,
+    incrementPlayCount, trackGuestPlay, openSubscribeModal, initTrial, pause, play,
   };
   repeatRef.current = repeat;
 
@@ -152,8 +181,9 @@ export default function AudioPlayer() {
       if (!resp.ok) {
         const errData = await resp.json().catch(() => ({}));
         if (errData.needsEmail) {
-          // Server has no trial cookie — sync client state and show email gate
+          // Server has no trial cookie — sync client state and re-show email gate
           localStorage.removeItem('mystation_email');
+          localStorage.removeItem('mystation_guest');
           const userStore = useUserStore.getState();
           userStore.setEmail('');
           userStore.setTrialStatus('none');
@@ -186,6 +216,9 @@ export default function AudioPlayer() {
     const audio = getGlobalAudio();
     if (!audio || isAudioInitialized) return;
     isAudioInitialized = true;
+
+    // Unlock iOS audio on first user touch/click
+    setupIOSAudioUnlock();
 
     // TIME UPDATE — uses ref so never stale
     const onTimeUpdate = () => {
@@ -329,6 +362,7 @@ export default function AudioPlayer() {
         return;
       }
       incrementPlayCount(currentTrack.id);
+      trackGuestPlay(currentTrack.id);
     }
 
     lastTrackIdRef.current = currentTrack.id;
@@ -378,13 +412,17 @@ export default function AudioPlayer() {
         audio.load();
 
         // Use both canplay and canplaythrough for maximum compatibility
-        const onReady = () => {
+        const onReady = async () => {
           audio.removeEventListener('canplay', onReady);
           audio.removeEventListener('canplaythrough', onReady);
           canPlayListenerRef.current = null;
           isLoadingRef.current = false;
           if (usePlayerStore.getState().isPlaying) {
-            safePlay(audio);
+            const played = await safePlay(audio);
+            if (!played) {
+              // iOS blocked playback — sync store state so UI isn't stuck
+              storeActionsRef.current.pause();
+            }
           }
         };
         canPlayListenerRef.current = onReady;
@@ -392,17 +430,18 @@ export default function AudioPlayer() {
         audio.addEventListener('canplaythrough', onReady);
 
         // Fallback: if canplay doesn't fire within 5s (cached audio edge case), force play
-        setTimeout(() => {
+        setTimeout(async () => {
           if (isLoadingRef.current && audio.readyState >= 2) {
             isLoadingRef.current = false;
             if (usePlayerStore.getState().isPlaying) {
-              safePlay(audio);
+              const played = await safePlay(audio);
+              if (!played) storeActionsRef.current.pause();
             }
           }
         }, 5000);
       }
     })();
-  }, [currentTrack?.id, getAudioUrl, checkCanPlay, incrementPlayCount, openSubscribeModal, initTrial, pause, isVaultTrack]);
+  }, [currentTrack?.id, getAudioUrl, checkCanPlay, incrementPlayCount, trackGuestPlay, openSubscribeModal, initTrial, pause, isVaultTrack]);
 
   // ─── Handle play/pause state changes ───
   useEffect(() => {
@@ -425,7 +464,9 @@ export default function AudioPlayer() {
       }
       // Only call play if audio is actually paused (prevent double-play race)
       if (audio.paused && audio.readyState >= 2) {
-        safePlay(audio);
+        safePlay(audio).then(played => {
+          if (!played) storeActionsRef.current.pause();
+        });
       }
     } else {
       audio.pause();
