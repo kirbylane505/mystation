@@ -66,6 +66,20 @@ export default function ShareTrack({ track }) {
     window.open(`mailto:?subject=${subject}&body=${body}`, '_blank');
   };
 
+  // Share to Instagram (copies link + opens app)
+  const shareToInstagram = async () => {
+    try {
+      await navigator.clipboard.writeText(trackUrl);
+    } catch {}
+    window.open('instagram://story-camera', '_blank');
+    setTimeout(() => { window.open('https://instagram.com', '_blank'); }, 1500);
+  };
+
+  // Share to Snapchat
+  const shareToSnapchat = () => {
+    window.open(`https://www.snapchat.com/scan?attachmentUrl=${encodeURIComponent(trackUrl)}`, '_blank');
+  };
+
   // Send via SMS (mobile)
   const sendSMS = () => {
     const body = encodeURIComponent(`${shareText}\n\n🎧 ${trackUrl}`);
@@ -122,6 +136,34 @@ export default function ShareTrack({ track }) {
                     {mp3Loading ? 'Preparing audio...' : 'Send MP3'}
                   </p>
                   <p className="text-sm text-white/50">Share the actual audio file</p>
+                </div>
+              </button>
+
+              {/* Instagram Stories */}
+              <button
+                onClick={shareToInstagram}
+                className="w-full flex items-center gap-4 p-4 bg-pink-500/10 hover:bg-pink-500/20 rounded-xl border border-pink-500/30 transition"
+              >
+                <div className="w-12 h-12 bg-gradient-to-br from-[#f09433]/20 via-[#dc2743]/20 to-[#bc1888]/20 rounded-full flex items-center justify-center">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="#E4405F"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                </div>
+                <div className="text-left">
+                  <p className="font-bold text-white">Share to Instagram</p>
+                  <p className="text-sm text-white/50">Post to your Story or DM</p>
+                </div>
+              </button>
+
+              {/* Snapchat */}
+              <button
+                onClick={shareToSnapchat}
+                className="w-full flex items-center gap-4 p-4 bg-yellow-500/10 hover:bg-yellow-500/20 rounded-xl border border-yellow-500/30 transition"
+              >
+                <div className="w-12 h-12 bg-yellow-500/20 rounded-full flex items-center justify-center">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="#FFFC00"><path d="M12.206.793c.99 0 4.347.276 5.93 3.821.529 1.193.403 3.219.299 4.847l-.003.06c-.012.18-.022.345-.03.51.075.045.203.09.401.09.3-.016.659-.12.962-.252a.848.848 0 01.466-.053c.393.09.592.39.585.645-.006.216-.132.45-.363.563-.06.03-.396.18-.81.315-.636.21-1.2.45-1.365.57-.12.09-.186.18-.196.271-.018.18.066.33.106.405.24.45.57.87.93 1.275.705.81 1.65 1.515 2.1 1.74.345.165.345.435.345.525 0 .15-.075.33-.225.465-.3.27-.825.465-1.56.615-.18.03-.36.09-.495.15-.18.09-.21.21-.24.33l-.015.06c-.06.21-.12.39-.48.555-.42.195-1.065.27-1.89.36l-.24.03c-.12.015-.24.03-.36.06-.27.06-.48.24-.72.45-.39.36-.84.765-1.65.765h-.06c-.81 0-1.26-.405-1.65-.765-.24-.21-.45-.39-.72-.45-.12-.03-.24-.045-.36-.06l-.24-.03c-.78-.09-1.41-.15-1.83-.345-.39-.18-.45-.39-.51-.6l-.015-.06c-.03-.12-.06-.24-.24-.33-.135-.06-.315-.12-.495-.15-.735-.15-1.26-.345-1.56-.615-.15-.135-.225-.315-.225-.465 0-.09 0-.36.345-.525.45-.225 1.395-.93 2.1-1.74.36-.405.69-.825.93-1.275.04-.075.123-.225.105-.405-.01-.091-.075-.181-.195-.27-.165-.12-.73-.36-1.365-.57a7.39 7.39 0 01-.81-.315c-.24-.12-.36-.345-.36-.57 0-.255.21-.555.585-.645a.87.87 0 01.465.054c.3.12.66.24.96.252.21 0 .33-.045.405-.09a9.14 9.14 0 01-.03-.51l-.003-.06c-.105-1.628-.23-3.654.3-4.847C7.86 1.069 11.216.793 12.206.793z"/></svg>
+                </div>
+                <div className="text-left">
+                  <p className="font-bold text-white">Share to Snapchat</p>
+                  <p className="text-sm text-white/50">Snap it to your friends</p>
                 </div>
               </button>
 

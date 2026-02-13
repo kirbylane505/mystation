@@ -12,11 +12,10 @@ import { X, Music, Sparkles, Heart, Check, CreditCard, Zap, Crown, ShoppingBag, 
 import Link from 'next/link';
 
 // Stripe checkout links per tier
-// TODO: Create $9.99 and $14.99 products in Stripe Dashboard → Payment Links
 const STRIPE_LINKS = {
   regular: 'https://buy.stripe.com/eVq5kEcWS8VW8z10xs73G04',
-  premium: 'https://buy.stripe.com/eVq5kEcWS8VW8z10xs73G04',  // UPDATE with $9.99 link
-  diamond: 'https://buy.stripe.com/eVq5kEcWS8VW8z10xs73G04',  // UPDATE with $14.99 link
+  premium: 'https://buy.stripe.com/4gM9AU5uq8VWg1t7ZU73G09',
+  diamond: 'https://buy.stripe.com/14AdRa4qm5JK8z1gwq73G0a',
 };
 
 export default function SubscribeModal() {

@@ -30,6 +30,8 @@ export async function POST(request) {
         isFree: false,
         message: 'Redirecting to payment',
         stripeUrl: 'https://buy.stripe.com/eVq5kEcWS8VW8z10xs73G04',
+      premiumUrl: 'https://buy.stripe.com/4gM9AU5uq8VWg1t7ZU73G09',
+      diamondUrl: 'https://buy.stripe.com/14AdRa4qm5JK8z1gwq73G0a',
       });
     }
 
@@ -89,6 +91,8 @@ export async function POST(request) {
       subscriberNumber,
       message: 'Free slots filled. Subscribe for $4.99/mo.',
       stripeUrl: 'https://buy.stripe.com/eVq5kEcWS8VW8z10xs73G04',
+      premiumUrl: 'https://buy.stripe.com/4gM9AU5uq8VWg1t7ZU73G09',
+      diamondUrl: 'https://buy.stripe.com/14AdRa4qm5JK8z1gwq73G0a',
     });
   } catch (err) {
     console.error('Subscribe error:', err);
