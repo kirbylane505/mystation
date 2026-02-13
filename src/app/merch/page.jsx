@@ -64,9 +64,7 @@ function parseVariantGroups(variants) {
   const colorsBySize = {};
   const variantMap = {};
   (variants || []).forEach(v => {
-    const parts = (v.name || '').split(' / ');
-    const size = parts[0]?.trim() || v.name;
-    const color = parts.length >= 2 ? parts[1]?.trim() : null;
+    const { size, color } = parseVariantTitle(v.name || '');
     if (!sizes.includes(size)) sizes.push(size);
     if (color) {
       if (!colorsBySize[size]) colorsBySize[size] = [];
@@ -74,7 +72,10 @@ function parseVariantGroups(variants) {
     }
     variantMap[color ? `${size}::${color}` : size] = v;
   });
-  return { sizes, colorsBySize, variantMap, hasColors: Object.keys(colorsBySize).length > 0 };
+  // Sort sizes in standard order
+  const ordered = SIZE_ORDER.filter(s => sizes.includes(s));
+  const extra = sizes.filter(s => !SIZE_ORDER.includes(s));
+  return { sizes: [...ordered, ...extra], colorsBySize, variantMap, hasColors: Object.keys(colorsBySize).length > 0 };
 }
 
 function ProductSkeleton() {
@@ -164,7 +165,7 @@ function ProductCard({ item, idx, onQuickView }) {
             {item.startingPrice ? `$${item.startingPrice.toFixed(2)}` : '---'}
           </span>
           <span className="px-3 py-1 bg-blue-500 text-white text-xs font-bold rounded-full group-hover:bg-blue-400 transition-colors duration-300">
-            {(item.uniqueSizes || item.synced) > 1 ? `${item.uniqueSizes || item.synced} sizes` : 'Buy Now'}
+            {item.sizeCount > 1 ? `${item.sizeCount} sizes` : item.colorCount > 1 ? `${item.colorCount} colors` : item.synced > 1 ? `${item.synced} options` : 'Buy Now'}
           </span>
         </div>
       </div>
@@ -345,20 +346,15 @@ export default function MerchPage() {
             const defaultImg = (p.images || []).find(img => img.is_default);
             const firstImg = (p.images || [])[0];
             const image = defaultImg?.src || firstImg?.src || null;
-            const name = p.title || 'Printify Product';
+            const rawName = p.title || 'Printify Product';
+            const name = PRINTIFY_NAME_FIX[rawName] || rawName;
 
             // Strip HTML tags from Printify descriptions
             const rawDesc = (p.description || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
             const cleanDesc = rawDesc.length > 120 ? rawDesc.slice(0, 120) + '...' : rawDesc;
 
-            // Count unique sizes (not total size×color combos)
-            const sizeSet = new Set();
-            const colorSet = new Set();
-            enabledVariants.forEach(v => {
-              const parts = (v.title || '').split(' / ');
-              sizeSet.add(parts[0]?.trim() || v.title);
-              if (parts.length >= 2) colorSet.add(parts[1]?.trim());
-            });
+            // Parse variants properly — handles both "Size / Color" and "Color / Size" formats
+            const varInfo = getVariantInfo(enabledVariants);
 
             return {
               id: `printify_${p.id}`,
@@ -370,8 +366,8 @@ export default function MerchPage() {
               printfulImage: null,
               variants: enabledVariants,
               synced: enabledVariants.length,
-              uniqueSizes: sizeSet.size,
-              uniqueColors: colorSet.size,
+              sizeCount: varInfo.sizes.length,
+              colorCount: varInfo.colors.length,
               badge: getBadge(name) || 'NEW',
               startingPrice,
               provider: 'printify',
@@ -514,7 +510,9 @@ export default function MerchPage() {
             })),
             provider: 'printify',
           });
-          if (enabledVariants.length > 0) {
+          // Only auto-select for single-option products; multi-color products use Color → Size flow
+          const varInfo = getVariantInfo(enabledVariants);
+          if (varInfo.colors.length <= 1 && enabledVariants.length > 0) {
             const first = enabledVariants[0];
             setSelectedVariant({
               id: first.id,
