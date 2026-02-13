@@ -66,41 +66,21 @@ function SearchPageInner() {
       }));
   }, []);
 
-  // Search Spotify via our API — separate calls for tracks and artists (avoids comma encoding issues)
-  const searchSpotify = useCallback(async (q) => {
-    const fetchType = async (type, limit) => {
-      for (let attempt = 0; attempt < 3; attempt++) {
-        try {
-          const res = await fetch(`/api/spotify/search?q=${encodeURIComponent(q)}&type=${type}&limit=${limit}&_t=${Date.now()}`, { cache: 'no-store' });
-          if (!res.ok) {
-            if (attempt < 2) { await new Promise(r => setTimeout(r, 500)); continue; }
-            return {};
-          }
-          const data = await res.json();
-          if (data.error) {
-            if (attempt < 2) { await new Promise(r => setTimeout(r, 500)); continue; }
-            return {};
-          }
-          return data;
-        } catch {
-          if (attempt < 2) { await new Promise(r => setTimeout(r, 500)); continue; }
-          return {};
-        }
+  // Unified search — Spotify + Deezer + local in parallel
+  const searchGlobal = useCallback(async (q) => {
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const res = await fetch(`/api/search/unified?q=${encodeURIComponent(q)}&limit=20&_t=${Date.now()}`, { cache: 'no-store' });
+        if (!res.ok) { if (attempt < 1) continue; return { tracks: [], artists: [], deezerOnly: [] }; }
+        const data = await res.json();
+        if (data.error) { if (attempt < 1) continue; return { tracks: [], artists: [], deezerOnly: [] }; }
+        return data;
+      } catch {
+        if (attempt < 1) continue;
+        return { tracks: [], artists: [], deezerOnly: [] };
       }
-      return {};
-    };
-
-    // Fire both requests in parallel — no commas in URLs
-    // Spotify client credentials caps track search at 10
-    const [trackData, artistData] = await Promise.all([
-      fetchType('track', 10),
-      fetchType('artist', 5),
-    ]);
-
-    return {
-      tracks: trackData.tracks || [],
-      artists: artistData.artists || [],
-    };
+    }
+    return { tracks: [], artists: [], deezerOnly: [] };
   }, []);
 
   // Debounced search
@@ -116,16 +96,14 @@ function SearchPageInner() {
         setLoading(true);
         setSearched(true);
         const local = searchMyStation(q);
-        let spotifyTracks = [];
-        if (hasSpotifyAccess) {
-          const spotify = await searchSpotify(q);
-          spotifyTracks = spotify.tracks || [];
-        }
-        setResults({ mystation: local, spotify: spotifyTracks });
+        const global = await searchGlobal(q);
+        // Merge: unified tracks (Spotify + Deezer previews) + any Deezer-only tracks
+        const allGlobal = [...(global.tracks || []), ...(global.deezerOnly || [])];
+        setResults({ mystation: local, spotify: allGlobal });
         setLoading(false);
       }, 300);
     },
-    [searchMyStation, searchSpotify, hasSpotifyAccess]
+    [searchMyStation, searchGlobal]
   );
 
   useEffect(() => {
@@ -142,25 +120,26 @@ function SearchPageInner() {
     }
   };
 
-  // Play a Spotify preview
-  const playSpotifyPreview = (track) => {
+  // Play a global preview (Spotify or Deezer)
+  const playGlobalPreview = (track) => {
     if (!track.previewUrl) return;
-    const spotifyTrack = {
-      id: `spotify_${track.spotifyId}`,
+    const trackId = track.spotifyId ? `spotify_${track.spotifyId}` : `deezer_${track.deezerId}`;
+    const globalTrack = {
+      id: trackId,
       title: track.title,
       artist: track.artist,
       album: track.album,
       audioFile: track.previewUrl,
       albumArt: track.albumArt,
       duration: track.durationFormatted,
-      source: 'spotify',
+      source: track.source || 'spotify',
       spotifyUrl: track.spotifyUrl,
       isPreview: true,
     };
-    if (currentTrack?.id === spotifyTrack.id) {
+    if (currentTrack?.id === globalTrack.id) {
       togglePlay();
     } else {
-      setTrack(spotifyTrack);
+      setTrack(globalTrack);
     }
   };
 
@@ -205,8 +184,11 @@ function SearchPageInner() {
   };
 
   const isTrackPlaying = (track) => {
-    if (track.source === 'spotify') {
+    if (track.spotifyId) {
       return currentTrack?.id === `spotify_${track.spotifyId}` && isPlaying;
+    }
+    if (track.deezerId) {
+      return currentTrack?.id === `deezer_${track.deezerId}` && isPlaying;
     }
     return currentTrack?.id === track.id && isPlaying;
   };
@@ -339,11 +321,9 @@ function SearchPageInner() {
         {results.spotify.length > 0 && (
           <div className="mb-8 relative">
             <div className="flex items-center gap-2 mb-4">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="#1DB954">
-                <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z" />
-              </svg>
-              <h2 className="text-lg font-bold text-white">Spotify</h2>
-              <span className="text-xs text-green-400 bg-green-500/20 px-2 py-0.5 rounded-full">100M+ Songs</span>
+              <Disc3 size={24} className="text-purple-400" />
+              <h2 className="text-lg font-bold text-white">Global Results</h2>
+              <span className="text-xs text-purple-400 bg-purple-500/20 px-2 py-0.5 rounded-full">Spotify + Deezer</span>
               {!canUseSpotifyResults && (
                 <span className="text-xs text-yellow-400 bg-yellow-500/20 px-2 py-0.5 rounded-full ml-auto">Subscribe to Unlock</span>
               )}
@@ -415,7 +395,7 @@ function SearchPageInner() {
                     key={`sp-${track.spotifyId}`}
                     track={track}
                     isPlaying={isTrackPlaying(track)}
-                    onPlay={() => playSpotifyPreview(track)}
+                    onPlay={() => playGlobalPreview(track)}
                     onAddToPlaylist={() => setShowPlaylistPicker(track.spotifyId)}
                     showPlaylistPicker={showPlaylistPicker === track.spotifyId}
                     playlists={playlists}
@@ -572,8 +552,8 @@ function TrackRow({
 
         {/* Source Badge */}
         {spotify && (
-          <span className="text-[10px] text-green-400/60 hidden sm:block">
-            {hasPreview ? '30s preview' : 'Spotify only'}
+          <span className={`text-[10px] hidden sm:block ${hasPreview ? 'text-green-400/60' : 'text-white/30'}`}>
+            {hasPreview ? (track.previewSource === 'deezer' || track.source === 'deezer' ? 'Deezer 30s' : '30s preview') : 'No preview'}
           </span>
         )}
         {!spotify && (
