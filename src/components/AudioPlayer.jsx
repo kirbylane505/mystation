@@ -138,6 +138,8 @@ export default function AudioPlayer() {
   const getAudioUrl = useCallback(async (track) => {
     if (!track) return null;
     if (!track.audioFile) return null;
+    // External URLs (Spotify previews, etc) — use directly, no token needed
+    if (track.audioFile.startsWith('http')) return track.audioFile;
     try {
       // Get signed token from server
       const resp = await fetch('/api/audio/token', {

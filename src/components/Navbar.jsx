@@ -13,7 +13,7 @@ import { CartButton } from './Cart';
 import { useUserStore, usePlayerStore } from '@/store/playerStore';
 import {
   Home, Music, Flame, Heart, Users, ShoppingBag,
-  Search, User, LogOut, X, Play, Menu, Lock, Mail, Calendar, Crown, Newspaper, Download, Gift, Zap
+  Search, User, LogOut, X, Play, Menu, Lock, Mail, Calendar, Crown, Newspaper, Download, Gift, Zap, ListMusic
 } from 'lucide-react';
 import { useEngagementStore } from '@/store/engagementStore';
 import { useStationStore } from '@/store/stationStore';
@@ -44,6 +44,8 @@ export default function Navbar() {
     { href: '/lotl', icon: Calendar, label: 'LOTL' },
     { href: '/rewards', icon: Gift, label: 'Rewards', hidden: true },
     { href: '/news', icon: Newspaper, label: 'News' },
+    { href: '/search', icon: Search, label: 'Search', highlight: true },
+    { href: '/playlists', icon: ListMusic, label: 'Playlists' },
     { href: '/contact', icon: Mail, label: 'Contact' },
     { href: '/vault', icon: Lock, label: 'Vault', hidden: true },
   ];
@@ -252,8 +254,21 @@ export default function Navbar() {
                     ))}
                   </div>
                 )}
+                {/* Global search link */}
+                {searchQuery.length > 1 && (
+                  <div className="border-t border-white/10 p-2">
+                    <Link
+                      href={`/search?q=${encodeURIComponent(searchQuery)}`}
+                      onClick={() => { setSearchOpen(false); setSearchQuery(''); }}
+                      className="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-sm font-medium transition"
+                    >
+                      <Search size={14} />
+                      Search all music for "{searchQuery}"
+                    </Link>
+                  </div>
+                )}
                 {searchQuery.length > 1 && searchResults.length === 0 && (
-                  <div className="p-4 text-center text-white/50 text-sm">No songs found</div>
+                  <div className="p-4 text-center text-white/50 text-sm">No MyStation songs found — try global search</div>
                 )}
               </div>
             )}

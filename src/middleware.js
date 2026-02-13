@@ -147,7 +147,7 @@ export async function middleware(request) {
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "img-src 'self' data: blob: https:",
     "font-src 'self' https://fonts.gstatic.com",
-    "connect-src 'self' https://api.stripe.com https://*.supabase.co https://vercel.live wss:",
+    "connect-src 'self' https://api.stripe.com https://*.supabase.co https://vercel.live https://p.scdn.co wss:",
     "frame-src https://js.stripe.com https://hooks.stripe.com https://www.youtube.com",
     "media-src 'self' blob: https:",
     "object-src 'none'",
