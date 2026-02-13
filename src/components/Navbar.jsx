@@ -10,6 +10,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import AuthModal from './AuthModal';
 import { CartButton } from './Cart';
+import { useCartStore } from '@/stores/cartStore';
 import { useUserStore, usePlayerStore } from '@/store/playerStore';
 import {
   Home, Music, Flame, Heart, Users, ShoppingBag,
@@ -377,6 +378,20 @@ export default function Navbar() {
                 </Link>
               );
             })}
+
+            {/* My Cart - Mobile */}
+            <button
+              onClick={() => { setMobileMenuOpen(false); useCartStore.getState().openCart(); }}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-500/10 border border-blue-500/20 hover:bg-blue-500/20 transition mb-2"
+            >
+              <ShoppingBag size={20} className="text-blue-400" />
+              <span className="text-white font-medium">My Cart</span>
+              {useCartStore.getState().getItemCount() > 0 && (
+                <span className="ml-auto bg-blue-500 text-white text-xs px-2.5 py-0.5 rounded-full font-bold">
+                  {useCartStore.getState().getItemCount()}
+                </span>
+              )}
+            </button>
 
             {/* Create Station / Dashboard Button - Mobile */}
             {isCreator ? (
