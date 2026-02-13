@@ -204,7 +204,7 @@ function SearchPageInner() {
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search any artist, song, or album..."
+              placeholder="Search for Kendrick Lamar, Drake, Mike Page..."
               className="w-full pl-12 pr-12 py-4 bg-white/10 border border-white/20 rounded-2xl text-white placeholder-white/30 text-lg focus:outline-none focus:border-blue-500 focus:bg-white/15 transition"
               autoFocus
             />
@@ -230,8 +230,8 @@ function SearchPageInner() {
             <div className="w-20 h-20 mx-auto mb-4 bg-white/5 rounded-full flex items-center justify-center">
               <Search size={36} className="text-white/20" />
             </div>
-            <p className="text-white/30 text-lg mb-1">Search 100 million+ songs</p>
-            <p className="text-white/20 text-sm mb-8">Find any artist, song, or album in the world</p>
+            <p className="text-white/30 text-lg mb-1">Search for Kendrick Lamar, Drake, Mike Page</p>
+            <p className="text-white/20 text-sm mb-8">100 million+ songs from every artist in the world</p>
 
             {/* Trending Searches */}
             <div className="max-w-lg mx-auto">
