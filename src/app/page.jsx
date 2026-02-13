@@ -14,7 +14,7 @@ import SocialEmbeds from '@/components/SocialEmbeds';
 import ReferralProgram from '@/components/ReferralProgram';
 import { tracks, albums, getOfficialTracks, getNonVaultTracks } from '@/data/tracks';
 import { usePlayerStore } from '@/store/playerStore';
-import { Play, Pause, Heart, ExternalLink, Music, Headphones, ChevronLeft, Shuffle } from 'lucide-react';
+import { Play, Pause, Heart, ExternalLink, Music, Headphones, ChevronLeft, Shuffle, Search, ListMusic, Globe } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -78,6 +78,41 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Discover Music — Global Search CTA */}
+      <section className="max-w-screen-xl mx-auto px-6 py-16">
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600/20 via-purple-600/20 to-pink-600/20 border border-white/10 p-8 md:p-12">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-500/10 rounded-full blur-3xl" />
+          <div className="relative z-10">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl flex items-center justify-center">
+                <Globe size={20} className="text-white" />
+              </div>
+              <h2 className="text-3xl font-bold text-white">Discover Music</h2>
+            </div>
+            <p className="text-white/50 mb-8 max-w-lg">
+              Search 100M+ songs from every artist in the world. Create playlists mixing Mike Page with your favorites.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Link
+                href="/search"
+                className="flex items-center gap-3 px-8 py-4 bg-white/10 hover:bg-white/15 border border-white/10 rounded-full text-white font-medium transition group"
+              >
+                <Search size={20} className="text-blue-400 group-hover:text-blue-300" />
+                Search all music...
+              </Link>
+              <Link
+                href="/playlists"
+                className="flex items-center gap-3 px-8 py-4 bg-blue-600 hover:bg-blue-500 rounded-full text-white font-bold transition"
+              >
+                <ListMusic size={20} />
+                My Playlists
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Albums Grid */}
       <section className="max-w-screen-xl mx-auto px-6 py-20">
         <div className="flex items-center justify-between mb-10">
@@ -90,7 +125,7 @@ export default function HomePage() {
           </Link>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
           {albums.map(album => (
             <div
               key={album.id}
@@ -368,7 +403,8 @@ export default function HomePage() {
               <h4 className="font-semibold text-white mb-5 text-sm uppercase tracking-wider">Listen</h4>
               <ul className="space-y-3 text-white/40 text-sm">
                 <li><Link href="/music" className="hover:text-blue-400 transition">Browse Music</Link></li>
-                <li><Link href="/music" className="hover:text-blue-400 transition">Albums</Link></li>
+                <li><Link href="/search" className="hover:text-blue-400 transition">Search All Music</Link></li>
+                <li><Link href="/playlists" className="hover:text-blue-400 transition">My Playlists</Link></li>
                 <li><Link href="/live" className="hover:text-blue-400 transition">Live Streams</Link></li>
               </ul>
             </div>

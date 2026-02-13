@@ -536,10 +536,10 @@ input[type="range"]:active::-moz-range-thumb {
 }
 
 .album-3d:hover .album-3d-inner {
-  transform: rotateY(-8deg) rotateX(5deg) scale(1.02);
+  transform: rotateY(-3deg) rotateX(2deg) scale(1.01);
   box-shadow:
-    20px 20px 60px rgba(0, 0, 0, 0.4),
-    0 0 40px rgba(59, 130, 246, 0.2);
+    10px 10px 40px rgba(0, 0, 0, 0.3),
+    0 0 30px rgba(59, 130, 246, 0.15);
 }
 
 .album-3d::before {
@@ -763,4 +763,58 @@ img {
   opacity: 0;
   animation: floatNote 10s ease-in-out infinite;
 }
-/* Force rebuild Sun Feb  1 01:30:35 EST 2026 */
+/* ==========================================
+   HERO FLOATING ORBS
+   ========================================== */
+
+@keyframes floatSlow {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(20px, -20px) scale(1.05); }
+  50% { transform: translate(-10px, 15px) scale(0.95); }
+  75% { transform: translate(15px, 10px) scale(1.02); }
+}
+
+.animate-float-slow {
+  animation: floatSlow 15s ease-in-out infinite;
+}
+
+/* ==========================================
+   ENHANCED TRACK HOVER
+   ========================================== */
+
+.track-item:hover .track-play-icon {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.track-play-icon {
+  opacity: 0;
+  transform: scale(0.8);
+  transition: all 0.2s ease;
+}
+
+/* ==========================================
+   TRENDING SEARCH CHIPS
+   ========================================== */
+
+.trending-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.trending-chip:hover {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.3);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Force rebuild Wed Feb 12 22:30:00 EST 2026 */

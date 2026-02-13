@@ -6,7 +6,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Play, Pause, Trash2, Music, Plus, ListPlus, Search, Clock, Disc3, X, Edit3, Check, GripVertical } from 'lucide-react';
+import { Play, Pause, Trash2, Music, Plus, ListPlus, Search, Clock, Disc3, X, Edit3, Check, GripVertical, Shuffle } from 'lucide-react';
 import { usePlayerStore } from '@/store/playerStore';
 import usePlaylistStore from '@/store/playlistStore';
 import Link from 'next/link';
@@ -39,8 +39,8 @@ export default function PlaylistsPage() {
     setEditingId(null);
   };
 
-  const playPlaylist = (playlist, startIndex = 0) => {
-    const playable = playlist.tracks
+  const playPlaylist = (playlist, startIndex = 0, shuffle = false) => {
+    let playable = playlist.tracks
       .filter((t) => t.source === 'mystation' || t.previewUrl)
       .map((t) => ({
         id: t.source === 'spotify' ? `spotify_${t.spotifyId}` : t.id,
@@ -54,7 +54,13 @@ export default function PlaylistsPage() {
         isPreview: t.source === 'spotify',
       }));
     if (playable.length === 0) return;
-    setQueue(playable, Math.min(startIndex, playable.length - 1));
+    if (shuffle) {
+      for (let i = playable.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [playable[i], playable[j]] = [playable[j], playable[i]];
+      }
+    }
+    setQueue(playable, shuffle ? 0 : Math.min(startIndex, playable.length - 1));
   };
 
   const playTrack = (track) => {
@@ -252,6 +258,14 @@ export default function PlaylistsPage() {
               >
                 <Play size={18} fill="white" />
                 Play All
+              </button>
+              <button
+                onClick={() => playPlaylist(openPlaylist, 0, true)}
+                disabled={openPlaylist.tracks.length === 0}
+                className="flex items-center gap-2 px-5 py-3 bg-white/10 text-white/70 hover:text-white rounded-full hover:bg-white/20 transition text-sm font-medium disabled:opacity-40"
+              >
+                <Shuffle size={16} />
+                Shuffle
               </button>
               <Link
                 href="/search"

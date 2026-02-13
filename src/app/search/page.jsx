@@ -226,19 +226,47 @@ function SearchPageInner() {
 
         {/* Results */}
         {!searched && !loading && (
-          <div className="text-center py-16">
+          <div className="text-center py-12">
             <div className="w-20 h-20 mx-auto mb-4 bg-white/5 rounded-full flex items-center justify-center">
               <Search size={36} className="text-white/20" />
             </div>
-            <p className="text-white/30 text-lg">Search for Drake, Kendrick, Future, or any artist</p>
-            <p className="text-white/20 text-sm mt-1">100 million+ songs available</p>
+            <p className="text-white/30 text-lg mb-1">Search 100 million+ songs</p>
+            <p className="text-white/20 text-sm mb-8">Find any artist, song, or album in the world</p>
+
+            {/* Trending Searches */}
+            <div className="max-w-lg mx-auto">
+              <p className="text-white/20 text-xs uppercase tracking-wider mb-3">Trending</p>
+              <div className="flex flex-wrap justify-center gap-2">
+                {['Mike Page', 'Drake', 'Kendrick Lamar', 'Future', 'The Weeknd', 'Tyler, The Creator', 'SZA', 'Metro Boomin'].map((artist) => (
+                  <button
+                    key={artist}
+                    onClick={() => setQuery(artist)}
+                    className="trending-chip"
+                  >
+                    <Sparkles size={12} />
+                    {artist}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         )}
 
         {searched && !loading && results.mystation.length === 0 && results.spotify.length === 0 && (
           <div className="text-center py-16">
-            <p className="text-white/40 text-lg">No results for "{query}"</p>
-            <p className="text-white/20 text-sm mt-1">Try a different search</p>
+            <p className="text-white/40 text-lg">No results for &ldquo;{query}&rdquo;</p>
+            <p className="text-white/20 text-sm mt-2 mb-6">Try a different search</p>
+            <div className="flex flex-wrap justify-center gap-2">
+              {['Mike Page', 'Drake', 'Kendrick Lamar', 'Future'].map((artist) => (
+                <button
+                  key={artist}
+                  onClick={() => setQuery(artist)}
+                  className="trending-chip"
+                >
+                  {artist}
+                </button>
+              ))}
+            </div>
           </div>
         )}
 

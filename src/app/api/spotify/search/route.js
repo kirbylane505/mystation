@@ -9,6 +9,11 @@ import { NextResponse } from 'next/server';
 let cachedToken = null;
 let tokenExpiry = 0;
 
+// Search result cache — 5 min TTL, max 100 entries
+const searchCache = new Map();
+const CACHE_TTL = 5 * 60 * 1000;
+const CACHE_MAX = 100;
+
 async function getSpotifyToken() {
   if (cachedToken && Date.now() < tokenExpiry) return cachedToken;
 
@@ -44,8 +49,16 @@ export async function GET(request) {
     const limit = Math.min(parseInt(searchParams.get('limit') || '20'), 50);
     const offset = parseInt(searchParams.get('offset') || '0');
 
-    if (!q || q.trim().length < 1) {
+    const trimmed = (q || '').trim();
+    if (trimmed.length < 1) {
       return NextResponse.json({ error: 'Search query required' }, { status: 400 });
+    }
+
+    // Check cache
+    const cacheKey = `${trimmed.toLowerCase()}:${type}:${limit}:${offset}`;
+    const cached = searchCache.get(cacheKey);
+    if (cached && Date.now() - cached.ts < CACHE_TTL) {
+      return NextResponse.json(cached.data);
     }
 
     const token = await getSpotifyToken();
@@ -114,7 +127,7 @@ export async function GET(request) {
       source: 'spotify',
     }));
 
-    return NextResponse.json({
+    const result = {
       tracks,
       artists,
       albums,
@@ -126,7 +139,16 @@ export async function GET(request) {
       query: q,
       offset,
       limit,
-    });
+    };
+
+    // Store in cache (evict oldest if full)
+    if (searchCache.size >= CACHE_MAX) {
+      const oldest = searchCache.keys().next().value;
+      searchCache.delete(oldest);
+    }
+    searchCache.set(cacheKey, { data: result, ts: Date.now() });
+
+    return NextResponse.json(result);
   } catch (error) {
     console.error('Spotify search error:', error.message);
     return NextResponse.json(
