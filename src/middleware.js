@@ -5,16 +5,10 @@ import { NextResponse } from 'next/server';
  * Protects against common web attacks + token-gated audio streaming
  */
 
-const AUDIO_SECRET = process.env.AUDIO_SECRET || 'ms-audio-2026-idmg';
-if (!process.env.AUDIO_SECRET && process.env.NODE_ENV === 'production') {
+const AUDIO_SECRET = process.env.AUDIO_SECRET;
+if (!AUDIO_SECRET && process.env.NODE_ENV === 'production') {
   console.error('FATAL: AUDIO_SECRET env var is not set');
 }
-
-// Routes that require subscription after trial expires
-const LOCKED_ROUTES = [
-  '/music', '/search', '/playlists', '/fan-zone', '/lounge',
-  '/make-a-hit', '/news', '/rewards', '/artists', '/station', '/vault',
-];
 
 // Rate limiting store (in-memory, resets on deploy)
 const rateLimitStore = new Map();
@@ -40,6 +34,7 @@ function checkRateLimit(ip) {
 
 // Verify audio token using Web Crypto API (Edge-compatible HMAC-SHA256)
 async function verifyAudioToken(token, pathname) {
+  if (!AUDIO_SECRET) return false;
   try {
     const base64 = token.replace(/-/g, '+').replace(/_/g, '/');
     const pad = base64.length % 4 === 0 ? '' : '='.repeat(4 - (base64.length % 4));
@@ -116,77 +111,9 @@ export async function middleware(request) {
   }
 
   // ─── PAGE ACCESS GATING ───
-  // Check if this is a locked route that requires active trial or subscription
-  const isLockedRoute = LOCKED_ROUTES.some(r => pathname === r || pathname.startsWith(r + '/'));
-  if (isLockedRoute) {
-    const cookies = request.headers.get('cookie') || '';
-
-    // 1. Check subscription cookie
-    let hasAccess = false;
-    const subMatch = cookies.match(/mystation-sub=([^;]+)/);
-    if (subMatch) {
-      try {
-        const [ts, sig] = subMatch[1].split('.');
-        if (ts && sig) {
-          const encoder = new TextEncoder();
-          const key = await crypto.subtle.importKey(
-            'raw', encoder.encode(AUDIO_SECRET),
-            { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
-          );
-          const sigBuf = await crypto.subtle.sign('HMAC', key, encoder.encode(`sub:${ts}`));
-          const hex = Array.from(new Uint8Array(sigBuf)).map(b => b.toString(16).padStart(2, '0')).join('');
-          const expected = hex.slice(0, 32);
-          if (expected.length === sig.length) {
-            let diff = 0;
-            for (let i = 0; i < expected.length; i++) diff |= expected.charCodeAt(i) ^ sig.charCodeAt(i);
-            if (diff === 0 && (Date.now() - parseInt(ts, 10)) < 30 * 24 * 60 * 60 * 1000) {
-              hasAccess = true;
-            }
-          }
-        }
-      } catch {}
-    }
-
-    // 2. Check trial cookie (email:timestamp:hmac) — must be <24hr
-    if (!hasAccess) {
-      const trialMatch = cookies.match(/mystation-trial=([^;]+)/);
-      if (trialMatch) {
-        try {
-          const decoded = decodeURIComponent(trialMatch[1]);
-          const parts = decoded.split(':');
-          if (parts.length >= 3) {
-            const sig = parts[parts.length - 1];
-            const timestamp = parts[parts.length - 2];
-            const email = parts.slice(0, parts.length - 2).join(':');
-            const payload = `${email}:${timestamp}`;
-
-            const encoder = new TextEncoder();
-            const key = await crypto.subtle.importKey(
-              'raw', encoder.encode(AUDIO_SECRET),
-              { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
-            );
-            const sigBuf = await crypto.subtle.sign('HMAC', key, encoder.encode(`trial:${payload}`));
-            const hex = Array.from(new Uint8Array(sigBuf)).map(b => b.toString(16).padStart(2, '0')).join('');
-            const expected = hex.slice(0, 32);
-            if (expected.length === sig.length) {
-              let diff = 0;
-              for (let i = 0; i < expected.length; i++) diff |= expected.charCodeAt(i) ^ sig.charCodeAt(i);
-              const ts = parseInt(timestamp, 10);
-              // Valid signature AND within 24hr window
-              if (diff === 0 && !isNaN(ts) && (Date.now() - ts) < 24 * 60 * 60 * 1000) {
-                hasAccess = true;
-              }
-            }
-          }
-        } catch {}
-      }
-    }
-
-    // No valid access — redirect to home with locked flag
-    if (!hasAccess) {
-      return NextResponse.redirect(new URL('/?locked=1', request.url));
-    }
-  }
+  // Locked routes are handled client-side by EmailGate + AccessGuard components.
+  // Middleware only protects audio files (above) — pages always render so the
+  // client-side overlays can show the email gate or subscribe prompt.
 
   const response = NextResponse.next();
   const ip = request.ip || request.headers.get('x-forwarded-for') || 'unknown';

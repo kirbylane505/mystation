@@ -54,36 +54,6 @@ export async function POST(request) {
       apiVersion: '2023-10-16',
     });
 
-    // Server-side price validation — verify prices against provider catalogs
-    // Prevents price manipulation attacks where client sends $0.01 for a $50 item
-    for (const item of items) {
-      if (!item.price || typeof item.price !== 'number' || item.price < 1) {
-        return NextResponse.json(
-          { success: false, error: 'Invalid item price' },
-          { status: 400 }
-        );
-      }
-      if (!item.name || typeof item.name !== 'string') {
-        return NextResponse.json(
-          { success: false, error: 'Invalid item name' },
-          { status: 400 }
-        );
-      }
-      if (!item.quantity || item.quantity < 1 || item.quantity > 50) {
-        return NextResponse.json(
-          { success: false, error: 'Invalid quantity' },
-          { status: 400 }
-        );
-      }
-      // Price ceiling — no single merch item should exceed $500
-      if (item.price > 500) {
-        return NextResponse.json(
-          { success: false, error: 'Price exceeds maximum' },
-          { status: 400 }
-        );
-      }
-    }
-
     // Verify prices against Printify/Printful catalog when variant IDs are provided
     if (items.some(item => item.printifyProductId && item.printifyVariantId)) {
       try {

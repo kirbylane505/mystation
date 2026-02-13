@@ -18,7 +18,7 @@ export async function POST(request) {
       return NextResponse.json({ error: 'event_type required' }, { status: 400 });
     }
 
-    const headersList = headers();
+    const headersList = await headers();
 
     // Geo data from Vercel edge headers
     const city = headersList.get('x-vercel-ip-city') || null;

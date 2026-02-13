@@ -102,9 +102,9 @@ export async function POST(request) {
 
     // Owner verification endpoint — just checks if the secret is valid
     if (verifyOwner) {
-      const isValid = ownerSecret && ownerSecret.length === OWNER_SECRET.length &&
+      const isValid = OWNER_SECRET && ownerSecret && ownerSecret.length === OWNER_SECRET.length &&
         crypto.timingSafeEqual(Buffer.from(ownerSecret), Buffer.from(OWNER_SECRET));
-      return NextResponse.json({ isOwner: isValid });
+      return NextResponse.json({ isOwner: !!isValid });
     }
 
     if (!username?.trim() || !content?.trim()) {
@@ -126,7 +126,7 @@ export async function POST(request) {
       tier = `reply:${parentId}`;
     }
     // Owner gets special tier
-    if (ownerSecret && ownerSecret.length === OWNER_SECRET.length &&
+    if (OWNER_SECRET && ownerSecret && ownerSecret.length === OWNER_SECRET.length &&
         crypto.timingSafeEqual(Buffer.from(ownerSecret), Buffer.from(OWNER_SECRET))) {
       tier = parentId ? `reply:${parentId}` : 'vip';
     }
@@ -167,7 +167,8 @@ export async function PATCH(request) {
     }
 
     // Owner reaction (emoji on a post)
-    if (reaction && OWNER_SECRET && ownerSecret && ownerSecret.length === OWNER_SECRET.length &&
+    if (reaction && OWNER_SECRET && ownerSecret &&
+        ownerSecret.length === OWNER_SECRET.length &&
         crypto.timingSafeEqual(Buffer.from(ownerSecret), Buffer.from(OWNER_SECRET))) {
       const { data, error } = await supabase
         .from('fan_wall')

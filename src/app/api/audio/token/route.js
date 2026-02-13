@@ -31,7 +31,8 @@ function verifyTrialCookie(request) {
     const timestamp = parts[parts.length - 2];
     const email = parts.slice(0, parts.length - 2).join(':');
     const payload = `${email}:${timestamp}`;
-    const secret = process.env.AUDIO_SECRET || 'ms-audio-2026-idmg';
+    const secret = process.env.AUDIO_SECRET;
+    if (!secret) return null;
     const expected = createHmac('sha256', secret).update(`trial:${payload}`).digest('hex').slice(0, 32);
     if (expected.length !== sig.length) return null;
     let diff = 0;
@@ -53,7 +54,8 @@ function verifySubscriptionCookie(request) {
   try {
     const [timestamp, sig] = match[1].split('.');
     if (!timestamp || !sig) return false;
-    const secret = process.env.AUDIO_SECRET || 'ms-audio-2026-idmg';
+    const secret = process.env.AUDIO_SECRET;
+    if (!secret) return false;
     const expected = createHmac('sha256', secret).update(`sub:${timestamp}`).digest('hex').slice(0, 32);
     // Timing-safe comparison
     if (expected.length !== sig.length) return false;
