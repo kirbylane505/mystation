@@ -12,6 +12,15 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'mystation.vercel.app',
       },
+      // Spotify album art CDN
+      {
+        protocol: 'https',
+        hostname: 'i.scdn.co',
+      },
+      {
+        protocol: 'https',
+        hostname: 'mosaic.scdn.co',
+      },
       // Merch image CDNs
       {
         protocol: 'https',
