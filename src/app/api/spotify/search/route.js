@@ -71,7 +71,15 @@ export async function GET(request) {
       return NextResponse.json(cached.data);
     }
 
-    let token = await getSpotifyToken();
+    let token;
+    try {
+      token = await getSpotifyToken();
+    } catch (tokenErr) {
+      // Force clear and retry once
+      cachedToken = null;
+      tokenExpiry = 0;
+      token = await getSpotifyToken(1);
+    }
 
     const spotifyUrl = new URL('https://api.spotify.com/v1/search');
     spotifyUrl.searchParams.set('q', q.trim());
@@ -168,9 +176,12 @@ export async function GET(request) {
       headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' },
     });
   } catch (error) {
-    console.error('Spotify search error:', error.message);
+    console.error('Spotify search error:', error.message, error.stack);
+    // Clear token cache so next request gets a fresh one
+    cachedToken = null;
+    tokenExpiry = 0;
     return NextResponse.json(
-      { error: 'Search temporarily unavailable' },
+      { error: 'Search temporarily unavailable', detail: error.message },
       { status: 500, headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' } }
     );
   }
