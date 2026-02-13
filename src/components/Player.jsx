@@ -178,9 +178,12 @@ export default function Player() {
           <X size={20} className="text-white" />
         </button>
 
+        {/* Scrollable Content */}
+        <div className="flex-1 overflow-y-auto pt-2 pb-safe" style={{ WebkitOverflowScrolling: 'touch' }}>
+
         {/* Album Art */}
-        <div className="flex-1 flex items-center justify-center p-8">
-          <div className="w-72 h-72 md:w-80 md:h-80 bg-gradient-to-br from-blue-600/30 to-blue-900/50 rounded-2xl flex items-center justify-center border border-white/10 shadow-2xl relative overflow-hidden">
+        <div className="flex items-center justify-center p-6 pt-8">
+          <div className="w-56 h-56 sm:w-64 sm:h-64 md:w-80 md:h-80 bg-gradient-to-br from-blue-600/30 to-blue-900/50 rounded-2xl flex items-center justify-center border border-white/10 shadow-2xl relative overflow-hidden">
             {getAlbumArt(currentTrack) ? (
               <Image src={getAlbumArt(currentTrack)} alt={currentTrack.album || currentTrack.title} fill className="object-cover" />
             ) : (
@@ -197,7 +200,7 @@ export default function Player() {
         </div>
 
         {/* Track Info */}
-        <div className="px-8 mb-6 text-center">
+        <div className="px-8 mb-4 text-center">
           <h2 className="text-2xl font-bold text-white mb-1">{currentTrack.title}</h2>
           <p className="text-white/50">Mike Page {currentTrack.featured && `ft. ${currentTrack.featured}`}</p>
           {currentTrack.producer && (
@@ -209,7 +212,7 @@ export default function Player() {
         </div>
 
         {/* Progress */}
-        <div className="px-8 mb-6">
+        <div className="px-8 mb-4">
           <div className="progress-bar h-2 rounded-full" onClick={handleProgressClick}>
             <div className="progress-bar-fill h-full rounded-full" style={{ width: `${(progress / duration) * 100 || 0}%` }} />
           </div>
@@ -220,8 +223,8 @@ export default function Player() {
         </div>
 
         {/* Controls */}
-        <div className="px-8 pb-12">
-          <div className="flex items-center justify-center gap-8 mb-8">
+        <div className="px-8 pb-16">
+          <div className="flex items-center justify-center gap-8 mb-6">
             <button onClick={toggleShuffle} className={shuffle ? 'text-blue-400' : 'text-white/40'}>
               <Shuffle size={22} />
             </button>
@@ -337,6 +340,8 @@ export default function Player() {
             </button>
           </div>
         </div>
+
+        </div>{/* End Scrollable Content */}
 
         {/* Alarm Modal */}
         <AlarmClockModal isOpen={showAlarmModal} onClose={() => setShowAlarmModal(false)} />

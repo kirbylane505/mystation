@@ -817,4 +817,9 @@ img {
   color: rgba(255, 255, 255, 0.9);
 }
 
-/* Force rebuild Wed Feb 12 22:30:00 EST 2026 */
+/* iPhone safe area bottom padding */
+.pb-safe {
+  padding-bottom: max(4rem, env(safe-area-inset-bottom, 1rem));
+}
+
+/* Force rebuild Thu Feb 13 00:00:00 EST 2026 */
