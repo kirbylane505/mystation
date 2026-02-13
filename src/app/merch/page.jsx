@@ -58,6 +58,25 @@ function ProductImage({ src, fallbackSrc, alt, className = '' }) {
   );
 }
 
+// Parse Printify variant titles ("S / Black") into grouped size/color structure
+function parseVariantGroups(variants) {
+  const sizes = [];
+  const colorsBySize = {};
+  const variantMap = {};
+  (variants || []).forEach(v => {
+    const parts = (v.name || '').split(' / ');
+    const size = parts[0]?.trim() || v.name;
+    const color = parts.length >= 2 ? parts[1]?.trim() : null;
+    if (!sizes.includes(size)) sizes.push(size);
+    if (color) {
+      if (!colorsBySize[size]) colorsBySize[size] = [];
+      if (!colorsBySize[size].includes(color)) colorsBySize[size].push(color);
+    }
+    variantMap[color ? `${size}::${color}` : size] = v;
+  });
+  return { sizes, colorsBySize, variantMap, hasColors: Object.keys(colorsBySize).length > 0 };
+}
+
 function ProductSkeleton() {
   return (
     <div className="glass rounded-2xl overflow-hidden animate-pulse">
@@ -145,7 +164,7 @@ function ProductCard({ item, idx, onQuickView }) {
             {item.startingPrice ? `$${item.startingPrice.toFixed(2)}` : '---'}
           </span>
           <span className="px-3 py-1 bg-blue-500 text-white text-xs font-bold rounded-full group-hover:bg-blue-400 transition-colors duration-300">
-            {item.synced > 1 ? `${item.synced} sizes` : 'Buy Now'}
+            {(item.uniqueSizes || item.synced) > 1 ? `${item.uniqueSizes || item.synced} sizes` : 'Buy Now'}
           </span>
         </div>
       </div>
@@ -175,6 +194,42 @@ function KidsCard({ item, idx }) {
   );
 }
 
+// Parse Printify variant titles into size/color — handles "Size / Color" and "Color / Size" formats
+const KNOWN_SIZES = new Set(['XXS', 'XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL', '5XL', 'One size', 'OS']);
+const SIZE_ORDER = ['XXS', 'XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL', '5XL'];
+
+function parseVariantTitle(title) {
+  const parts = (title || '').split(' / ').map(p => p.trim());
+  let size = null;
+  const colorParts = [];
+  for (const part of parts) {
+    if (KNOWN_SIZES.has(part) || /^\d+["″']\s*[×x]\s*\d+/.test(part)) {
+      size = part;
+    } else {
+      colorParts.push(part);
+    }
+  }
+  if (!size && parts.length === 1) size = parts[0];
+  return { size: size || parts[0], color: colorParts.length > 0 ? colorParts.join(' / ') : null };
+}
+
+function getVariantInfo(variants) {
+  const sizes = new Set();
+  const colors = new Set();
+  for (const v of variants) {
+    const { size, color } = parseVariantTitle(v.title || v.name);
+    if (size) sizes.add(size);
+    if (color) colors.add(color);
+  }
+  const orderedSizes = SIZE_ORDER.filter(s => sizes.has(s));
+  const extraSizes = [...sizes].filter(s => !SIZE_ORDER.includes(s)).sort();
+  return { sizes: [...orderedSizes, ...extraSizes], colors: [...colors].sort() };
+}
+
+const PRINTIFY_NAME_FIX = {
+  'IDMG Festival Crop Top': 'IDMG Crop Top',
+};
+
 export default function MerchPage() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -185,6 +240,8 @@ export default function MerchPage() {
   const [productDetails, setProductDetails] = useState(null);
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [addedToCart, setAddedToCart] = useState(false);
+  const [selectedSize, setSelectedSize] = useState(null);
+  const [selectedColor, setSelectedColor] = useState(null);
   const { addItem } = useCartStore();
   const { queue, setQueue } = usePlayerStore();
 
@@ -277,7 +334,7 @@ export default function MerchPage() {
 
         // === PRINTIFY PRODUCTS ===
         if (printifyData.success && !printifyData.demo) {
-          const HIDDEN_PRINTIFY = ['jogger', 'sweatpant', 'track pant', 'bike short', 'legging'];
+          const HIDDEN_PRINTIFY = ['jogger', 'sweatpant', 'track pant', 'bike short', 'legging', 'copy of'];
           const printifyProducts = printifyData.products.filter((p) => {
             const lower = (p.title || '').toLowerCase();
             return !HIDDEN_PRINTIFY.some(ex => lower.includes(ex));
@@ -294,6 +351,15 @@ export default function MerchPage() {
             const rawDesc = (p.description || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
             const cleanDesc = rawDesc.length > 120 ? rawDesc.slice(0, 120) + '...' : rawDesc;
 
+            // Count unique sizes (not total size×color combos)
+            const sizeSet = new Set();
+            const colorSet = new Set();
+            enabledVariants.forEach(v => {
+              const parts = (v.title || '').split(' / ');
+              sizeSet.add(parts[0]?.trim() || v.title);
+              if (parts.length >= 2) colorSet.add(parts[1]?.trim());
+            });
+
             return {
               id: `printify_${p.id}`,
               printifyId: p.id,
@@ -304,6 +370,8 @@ export default function MerchPage() {
               printfulImage: null,
               variants: enabledVariants,
               synced: enabledVariants.length,
+              uniqueSizes: sizeSet.size,
+              uniqueColors: colorSet.size,
               badge: getBadge(name) || 'NEW',
               startingPrice,
               provider: 'printify',
@@ -425,6 +493,8 @@ export default function MerchPage() {
     setLoadingDetails(true);
     setProductDetails(null);
     setSelectedVariant(null);
+    setSelectedSize(null);
+    setSelectedColor(null);
     try {
       if (item.isPrintify) {
         // Printify: fetch product details
@@ -928,18 +998,78 @@ export default function MerchPage() {
                   <>
                     <p className="text-3xl font-black text-white mb-6">${selectedVariant ? getPrice(selectedVariant).toFixed(2) : '---'}</p>
                     <div className="mb-6">
-                      <label className="text-white/60 text-sm mb-3 block">Select Size ({productDetails.sync_variants?.length || 0} available)</label>
-                      <div className="max-h-48 overflow-y-auto space-y-2 pr-2">
-                        {productDetails.sync_variants?.map((variant) => (
-                          <button key={variant.id} onClick={() => setSelectedVariant(variant)}
-                            className={`w-full text-left px-4 py-3 rounded-lg text-sm transition ${selectedVariant?.id === variant.id ? 'bg-blue-500 text-white' : 'bg-white/10 text-white/60 hover:bg-white/20 hover:text-white'}`}>
-                            <div className="flex justify-between items-center">
-                              <span>{variant.name}</span>
-                              <span className="font-bold">${getPrice(variant).toFixed(2)}</span>
+                      {(() => {
+                        const variants = productDetails.sync_variants || [];
+                        const { sizes, colorsBySize, variantMap, hasColors } = parseVariantGroups(variants);
+
+                        // Simple flat list for products with few variants or no color dimension
+                        if (variants.length <= 12 || !hasColors) {
+                          return (
+                            <>
+                              <label className="text-white/60 text-sm mb-3 block">Select Option ({variants.length} available)</label>
+                              <div className="max-h-48 overflow-y-auto space-y-2 pr-2">
+                                {variants.map((variant) => (
+                                  <button key={variant.id} onClick={() => setSelectedVariant(variant)}
+                                    className={`w-full text-left px-4 py-3 rounded-lg text-sm transition ${selectedVariant?.id === variant.id ? 'bg-blue-500 text-white' : 'bg-white/10 text-white/60 hover:bg-white/20 hover:text-white'}`}>
+                                    <div className="flex justify-between items-center">
+                                      <span>{variant.name}</span>
+                                      <span className="font-bold">${getPrice(variant).toFixed(2)}</span>
+                                    </div>
+                                  </button>
+                                ))}
+                              </div>
+                            </>
+                          );
+                        }
+
+                        // Grouped size + color selector for products with many variants
+                        const currentColors = selectedSize ? (colorsBySize[selectedSize] || []) : [];
+
+                        return (
+                          <>
+                            <label className="text-white/60 text-sm mb-3 block">Size ({sizes.length} available)</label>
+                            <div className="flex flex-wrap gap-2 mb-4">
+                              {sizes.map(size => (
+                                <button key={size} onClick={() => {
+                                  setSelectedSize(size);
+                                  const colors = colorsBySize[size] || [];
+                                  if (colors.length === 1) {
+                                    setSelectedColor(colors[0]);
+                                    setSelectedVariant(variantMap[`${size}::${colors[0]}`]);
+                                  } else {
+                                    setSelectedColor(null);
+                                    setSelectedVariant(null);
+                                  }
+                                }}
+                                className={`px-4 py-2.5 rounded-lg text-sm font-bold transition ${
+                                  selectedSize === size ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/30' : 'bg-white/10 text-white/60 hover:bg-white/20 hover:text-white'
+                                }`}>
+                                  {size}
+                                </button>
+                              ))}
                             </div>
-                          </button>
-                        ))}
-                      </div>
+
+                            {selectedSize && currentColors.length > 0 && (
+                              <>
+                                <label className="text-white/60 text-sm mb-3 block">Color ({currentColors.length} available)</label>
+                                <div className="flex flex-wrap gap-2 mb-4">
+                                  {currentColors.map(color => (
+                                    <button key={color} onClick={() => {
+                                      setSelectedColor(color);
+                                      setSelectedVariant(variantMap[`${selectedSize}::${color}`]);
+                                    }}
+                                    className={`px-4 py-2.5 rounded-lg text-sm font-medium transition ${
+                                      selectedColor === color ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/30' : 'bg-white/10 text-white/60 hover:bg-white/20 hover:text-white'
+                                    }`}>
+                                      {color}
+                                    </button>
+                                  ))}
+                                </div>
+                              </>
+                            )}
+                          </>
+                        );
+                      })()}
                     </div>
                     <button onClick={handleAddToCart} disabled={!selectedVariant || addedToCart}
                       className={`w-full flex items-center justify-center gap-2 py-4 rounded-xl font-bold transition ${addedToCart ? 'bg-green-500 text-white' : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:shadow-lg hover:shadow-blue-500/30'}`}>
