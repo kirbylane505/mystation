@@ -65,19 +65,23 @@ function SearchPageInner() {
       }));
   }, []);
 
-  // Search Spotify via our API (with retry on failure)
+  // Search Spotify via our API (with retry + cache bust)
   const searchSpotify = useCallback(async (q) => {
-    for (let attempt = 0; attempt < 2; attempt++) {
+    for (let attempt = 0; attempt < 3; attempt++) {
       try {
-        const res = await fetch(`/api/spotify/search?q=${encodeURIComponent(q)}&type=track,artist&limit=20`, { cache: 'no-store' });
+        const res = await fetch(`/api/spotify/search?q=${encodeURIComponent(q)}&type=track,artist&limit=20&_t=${Date.now()}`, { cache: 'no-store' });
         if (!res.ok) {
-          if (attempt === 0) continue; // retry once
+          if (attempt < 2) { await new Promise(r => setTimeout(r, 500)); continue; }
           return { tracks: [], artists: [] };
         }
         const data = await res.json();
+        if (data.error) {
+          if (attempt < 2) { await new Promise(r => setTimeout(r, 500)); continue; }
+          return { tracks: [], artists: [] };
+        }
         return data;
       } catch {
-        if (attempt === 0) continue;
+        if (attempt < 2) { await new Promise(r => setTimeout(r, 500)); continue; }
         return { tracks: [], artists: [] };
       }
     }
