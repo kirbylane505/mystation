@@ -14,7 +14,7 @@ const searchCache = new Map();
 const CACHE_TTL = 5 * 60 * 1000;
 const CACHE_MAX = 100;
 
-async function getSpotifyToken() {
+async function getSpotifyToken(retries = 2) {
   if (cachedToken && Date.now() < tokenExpiry) return cachedToken;
 
   const clientId = (process.env.SPOTIFY_CLIENT_ID || '').trim();
@@ -24,21 +24,31 @@ async function getSpotifyToken() {
     throw new Error('Spotify credentials not configured');
   }
 
-  const res = await fetch('https://accounts.spotify.com/api/token', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      Authorization: `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString('base64')}`,
-    },
-    body: 'grant_type=client_credentials',
-  });
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const res = await fetch('https://accounts.spotify.com/api/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          Authorization: `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString('base64')}`,
+        },
+        body: 'grant_type=client_credentials',
+      });
 
-  if (!res.ok) throw new Error('Failed to get Spotify token');
+      if (!res.ok) {
+        if (attempt < retries) continue;
+        throw new Error(`Spotify token error: ${res.status}`);
+      }
 
-  const data = await res.json();
-  cachedToken = data.access_token;
-  tokenExpiry = Date.now() + (data.expires_in - 60) * 1000;
-  return cachedToken;
+      const data = await res.json();
+      cachedToken = data.access_token;
+      tokenExpiry = Date.now() + (data.expires_in - 60) * 1000;
+      return cachedToken;
+    } catch (err) {
+      if (attempt < retries) continue;
+      throw err;
+    }
+  }
 }
 
 export async function GET(request) {
@@ -61,7 +71,7 @@ export async function GET(request) {
       return NextResponse.json(cached.data);
     }
 
-    const token = await getSpotifyToken();
+    let token = await getSpotifyToken();
 
     const spotifyUrl = new URL('https://api.spotify.com/v1/search');
     spotifyUrl.searchParams.set('q', q.trim());
@@ -70,15 +80,21 @@ export async function GET(request) {
     spotifyUrl.searchParams.set('offset', offset.toString());
     spotifyUrl.searchParams.set('market', 'US');
 
-    const res = await fetch(spotifyUrl.toString(), {
+    let res = await fetch(spotifyUrl.toString(), {
       headers: { Authorization: `Bearer ${token}` },
     });
 
+    // Retry once on 401 with a fresh token
+    if (res.status === 401) {
+      cachedToken = null;
+      tokenExpiry = 0;
+      token = await getSpotifyToken();
+      res = await fetch(spotifyUrl.toString(), {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+    }
+
     if (!res.ok) {
-      if (res.status === 401) {
-        cachedToken = null;
-        tokenExpiry = 0;
-      }
       throw new Error(`Spotify API error: ${res.status}`);
     }
 

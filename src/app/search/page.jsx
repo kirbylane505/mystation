@@ -65,16 +65,23 @@ function SearchPageInner() {
       }));
   }, []);
 
-  // Search Spotify via our API
+  // Search Spotify via our API (with retry on failure)
   const searchSpotify = useCallback(async (q) => {
-    try {
-      const res = await fetch(`/api/spotify/search?q=${encodeURIComponent(q)}&type=track,artist&limit=20`, { cache: 'no-store' });
-      if (!res.ok) return { tracks: [], artists: [] };
-      const data = await res.json();
-      return data;
-    } catch {
-      return { tracks: [], artists: [] };
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const res = await fetch(`/api/spotify/search?q=${encodeURIComponent(q)}&type=track,artist&limit=20`, { cache: 'no-store' });
+        if (!res.ok) {
+          if (attempt === 0) continue; // retry once
+          return { tracks: [], artists: [] };
+        }
+        const data = await res.json();
+        return data;
+      } catch {
+        if (attempt === 0) continue;
+        return { tracks: [], artists: [] };
+      }
     }
+    return { tracks: [], artists: [] };
   }, []);
 
   // Debounced search
