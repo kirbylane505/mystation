@@ -36,7 +36,36 @@ const getDefaultTracks = () => {
 
 // Vault PIN is now server-side only (env: VAULT_PIN)
 
+// ═══════════════════════════════════════════════════════
+// VAULT IS COMPLETELY LOCKED — NO ACCESS FOR ANYONE
+// ═══════════════════════════════════════════════════════
+const VAULT_LOCKED = true;
+
 export default function VaultPage() {
+  // HARD LOCKDOWN — return locked screen immediately
+  if (VAULT_LOCKED) {
+    return (
+      <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-red-900/20 via-mystation-darker to-mystation-black" />
+        <div className="relative text-center px-6 max-w-md">
+          <div className="w-24 h-24 mx-auto mb-6 bg-red-500/10 border-2 border-red-500/30 rounded-full flex items-center justify-center">
+            <Lock size={40} className="text-red-400" />
+          </div>
+          <h1 className="text-3xl font-black text-white mb-3">Vault Locked</h1>
+          <p className="text-white/40 text-sm mb-8">
+            The Vault is currently sealed. No access available at this time.
+          </p>
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-white/10 text-white/60 rounded-xl hover:bg-white/15 transition font-medium"
+          >
+            Back to MyStation
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   const [isUnlocked, setIsUnlockedState] = useState(false);
   const { setVaultUnlocked } = usePlayerStore();
 

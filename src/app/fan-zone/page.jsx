@@ -188,22 +188,15 @@ export default function FanZonePage() {
               <PointRow icon={<Music size={16} className="text-indigo-400" />} label="Complete an album" points={POINTS.albumComplete} />
             </div>
 
-            {/* Vault Access Tiers */}
+            {/* Vault Access — LOCKED */}
             <div className="mt-6 pt-4 border-t border-white/10">
-              <h4 className="text-sm font-bold text-white mb-3 flex items-center gap-2">
-                <Lock size={14} className="text-amber-400" />
-                Vault Access (Points Unlock)
+              <h4 className="text-sm font-bold text-red-400 mb-3 flex items-center gap-2">
+                <Lock size={14} className="text-red-400" />
+                Vault Sealed
               </h4>
-              {VAULT_TIERS.map((tier) => (
-                <div key={tier.name} className={`flex items-center gap-3 px-3 py-2 rounded-lg mb-2 ${userPoints >= tier.minPoints ? 'bg-amber-500/10 border border-amber-500/20' : 'bg-white/5'}`}>
-                  <span className="text-lg">{tier.icon}</span>
-                  <div className="flex-1">
-                    <p className={`text-sm font-medium ${userPoints >= tier.minPoints ? 'text-amber-400' : 'text-white/60'}`}>{tier.name}</p>
-                    <p className="text-xs text-white/30">{tier.description}</p>
-                  </div>
-                  <span className="text-xs text-white/40">{tier.minPoints.toLocaleString()} pts</span>
-                </div>
-              ))}
+              <div className="bg-red-500/5 border border-red-500/10 rounded-lg p-4 text-center">
+                <p className="text-white/30 text-sm">The Vault is currently locked. No access available.</p>
+              </div>
             </div>
           </div>
         </div>

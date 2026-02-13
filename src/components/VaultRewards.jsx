@@ -22,6 +22,9 @@ const iconMap = {
 };
 
 export default function VaultRewards() {
+  // ═══ VAULT HARD LOCKDOWN — COMPONENT DISABLED ═══
+  return null;
+
   const [mounted, setMounted] = useState(false);
   const { currentStreak, isTop100, canAccessVault } = useLoyaltyStore();
 

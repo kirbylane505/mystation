@@ -13,6 +13,12 @@ const MAX_ATTEMPTS = 5;
 const LOCKOUT_MS = 15 * 60 * 1000; // 15 minutes
 
 export async function POST(request) {
+  // ═══ VAULT HARD LOCKDOWN — ALL ACCESS DENIED ═══
+  return NextResponse.json(
+    { success: false, error: 'Vault is sealed. No access available.' },
+    { status: 403 }
+  );
+
   const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
 
   // Check lockout

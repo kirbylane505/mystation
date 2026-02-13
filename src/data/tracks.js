@@ -1184,8 +1184,9 @@ export const albums = [
     coverEmoji: "🔒",
     isNew: true,
     isExclusive: true,
+    isLocked: true,
     trackIds: vaultTrackIds,
-    description: "Exclusive for die-hard fans. Stream 26 days straight or spend $100+ to unlock The Vault."
+    description: "The Vault is currently sealed. Check back for updates."
   },
   {
     id: 'grammy-nights',

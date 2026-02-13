@@ -12,6 +12,15 @@ import { vaultTracks } from '@/data/vaultTracks';
 import { usePlayerStore } from '@/store/playerStore';
 
 export default function VaultPreview() {
+  // ═══ VAULT HARD LOCKDOWN — COMPONENT DISABLED ═══
+  return (
+    <div className="p-6 rounded-2xl bg-red-500/5 border border-red-500/10 text-center">
+      <Lock size={32} className="text-red-400/60 mx-auto mb-3" />
+      <p className="text-white/30 text-sm font-medium">Vault Sealed</p>
+      <p className="text-white/20 text-xs mt-1">No access available at this time</p>
+    </div>
+  );
+
   const [mounted, setMounted] = useState(false);
   const { currentStreak, isTop100, canAccessVault, getProgress } = useLoyaltyStore();
   const { setTrack, currentTrack, isPlaying } = usePlayerStore();

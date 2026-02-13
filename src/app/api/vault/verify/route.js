@@ -7,6 +7,9 @@ import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 
 export async function GET(request) {
+  // ═══ VAULT HARD LOCKDOWN — ALL SESSIONS INVALIDATED ═══
+  return NextResponse.json({ valid: false });
+
   const vaultSecret = process.env.VAULT_SECRET;
   if (!vaultSecret) {
     return NextResponse.json({ valid: false });
