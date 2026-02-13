@@ -239,6 +239,7 @@ export default function AudioPlayer() {
     audio.addEventListener('ended', onEnded);
     audio.addEventListener('error', onError);
     audio.addEventListener('stalled', onStalled);
+    audio.addEventListener('waiting', onStalled);
 
     // VISIBILITY CHANGE — resume audio after screen unlock / tab return
     const onVisibilityChange = () => {
@@ -272,6 +273,7 @@ export default function AudioPlayer() {
       audio.removeEventListener('ended', onEnded);
       audio.removeEventListener('error', onError);
       audio.removeEventListener('stalled', onStalled);
+      audio.removeEventListener('waiting', onStalled);
       document.removeEventListener('visibilitychange', onVisibilityChange);
     };
   }, []);
@@ -405,7 +407,7 @@ export default function AudioPlayer() {
     } else {
       audio.pause();
     }
-  }, [isPlaying]);
+  }, [isPlaying, currentTrack?.id]);
 
   // ─── Volume ───
   useEffect(() => {
