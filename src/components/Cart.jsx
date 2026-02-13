@@ -99,9 +99,15 @@ export default function Cart() {
                     <h3 className="text-white font-medium truncate">
                       {item.name}
                     </h3>
-                    <p className="text-white/40 text-sm truncate">
-                      {item.variantName}
-                    </p>
+                    {item.variantName && (
+                      <div className="flex flex-wrap gap-1.5 mt-1">
+                        {item.variantName.split(/\s*[\/\-]\s*/).map((part, i) => (
+                          <span key={i} className="inline-block px-2 py-0.5 bg-white/10 text-white/70 text-xs rounded-md font-medium">
+                            {part.trim()}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                     <p className="text-blue-400 font-bold mt-1">
                       ${item.price.toFixed(2)}
                     </p>
