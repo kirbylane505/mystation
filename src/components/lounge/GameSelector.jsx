@@ -1,6 +1,6 @@
 /**
  * KICKBACK LOUNGE — Game Selector Grid
- * 6-game grid on the lobby page with icons and descriptions
+ * 2-game grid: Spades & 8-Ball Pool
  */
 
 'use client';
@@ -8,11 +8,11 @@
 import { GAME_TYPES } from '@/lib/games/constants';
 import { Lock } from 'lucide-react';
 
-const gameOrder = ['blackjack', 'slidesLadders', 'spades', 'dominos', 'poker', 'pool'];
+const gameOrder = ['spades', 'pool'];
 
 export default function GameSelector({ onSelect }) {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+    <div className="grid grid-cols-2 gap-4">
       {gameOrder.map((key) => {
         const game = GAME_TYPES[key];
         return (

@@ -206,15 +206,17 @@ export const usePlayerStore = create(
 }),
     {
       name: 'mystation-player',
-      version: 2, // Bump to clear cached player state for all users
+      version: 3, // v3: persist track + queue so music resumes on return
       partialize: (state) => ({
         volume: state.volume,
         isMuted: state.isMuted,
         shuffle: state.shuffle,
         repeat: state.repeat,
-        // Track/queue NOT persisted — fresh auto-play queue on every visit
-        // This prevents stale tracks from replaying on return visits
-      })
+        // Persist current track and queue so music resumes on return/refresh
+        currentTrack: state.currentTrack,
+        queue: state.queue,
+        queueIndex: state.queueIndex,
+      }),
     }
   )
 );

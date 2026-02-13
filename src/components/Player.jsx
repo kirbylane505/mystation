@@ -157,7 +157,7 @@ export default function Player() {
 
   if (!currentTrack) {
     return (
-      <div className="fixed bottom-0 left-0 right-0 h-16 md:h-24 bg-mystation-navyDark/95 backdrop-blur-xl border-t border-white/5 flex items-center justify-center">
+      <div className="fixed bottom-0 left-0 right-0 h-16 md:h-24 bg-mystation-navyDark/95 backdrop-blur-xl border-t border-white/5 flex items-center justify-center z-40">
         <p className="text-white/30 flex items-center gap-3 text-sm md:text-base">
           <Music size={18} />
           Select a track to play
