@@ -21,6 +21,19 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'mosaic.scdn.co',
       },
+      // Deezer album art CDN
+      {
+        protocol: 'https',
+        hostname: 'e-cdns-images.dzcdn.net',
+      },
+      {
+        protocol: 'https',
+        hostname: 'cdns-images.dzcdn.net',
+      },
+      {
+        protocol: 'https',
+        hostname: 'api.deezer.com',
+      },
       // Merch image CDNs
       {
         protocol: 'https',
