@@ -14,6 +14,8 @@ import SubscribeModal from '@/components/SubscribeModal';
 import ClientProviders from '@/components/ClientProviders';
 import Cart from '@/components/Cart';
 import SessionGuard from '@/components/SessionGuard';
+import { Suspense } from 'react';
+import ReferralDetector from '@/components/ReferralDetector';
 import Script from 'next/script';
 
 // Lazy-loaded utilities — code-split into separate chunks (loaded async after hydration)
@@ -99,6 +101,7 @@ export default function RootLayout({ children }) {
           <SubscribeModal />
           <Cart />
           <SessionGuard />
+          <Suspense><ReferralDetector /></Suspense>
           <LazyUtilities />
         </ClientProviders>
         <Script id="register-sw" strategy="afterInteractive">

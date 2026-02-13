@@ -11,6 +11,10 @@ export const useCartStore = create(
     (set, get) => ({
       items: [],
       isOpen: false,
+      referralCode: null,
+
+      // Set referral discount (from ?ref= link)
+      setReferralCode: (code) => set({ referralCode: code }),
 
       // Add item to cart (supports 'printful' and 'printify' providers)
       addItem: (product, variant, provider = 'printful') => {
@@ -107,11 +111,20 @@ export const useCartStore = create(
         return get().items.reduce((count, item) => count + item.quantity, 0);
       },
 
-      // Bundle discount tiers
+      // Bundle discount tiers + referral
       getDiscount: () => {
         const itemCount = get().getItemCount();
-        if (itemCount >= 5) return { percent: 15, label: '15% OFF — 5+ items' };
-        if (itemCount >= 2) return { percent: 10, label: '10% OFF — 2+ items' };
+        const hasReferral = !!get().referralCode;
+        let bundlePercent = 0;
+        if (itemCount >= 5) bundlePercent = 15;
+        else if (itemCount >= 2) bundlePercent = 10;
+        const referralPercent = hasReferral ? 15 : 0;
+        const percent = Math.max(bundlePercent, referralPercent);
+        if (percent === referralPercent && hasReferral && referralPercent > bundlePercent) {
+          return { percent, label: '15% OFF — Referral Discount' };
+        }
+        if (bundlePercent >= 15) return { percent, label: '15% OFF — 5+ items' };
+        if (bundlePercent >= 10) return { percent, label: '10% OFF — 2+ items' };
         return { percent: 0, label: null };
       },
 

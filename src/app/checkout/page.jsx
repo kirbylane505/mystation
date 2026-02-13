@@ -23,7 +23,7 @@ import Link from 'next/link';
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { items, getSubtotal, getDiscount, getDiscountedTotal, removeItem, updateQuantity, clearCart } = useCartStore();
+  const { items, getSubtotal, getDiscount, getDiscountedTotal, removeItem, updateQuantity, clearCart, referralCode } = useCartStore();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [email, setEmail] = useState('');
@@ -67,6 +67,7 @@ export default function CheckoutPage() {
             printifyVariantId: item.printifyVariantId,
           })),
           email,
+          discountCode: referralCode || localStorage.getItem('mystation_referral_discount') || undefined,
         }),
       });
 
