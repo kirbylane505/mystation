@@ -97,9 +97,7 @@ function SearchPageInner() {
         setSearched(true);
         const local = searchMyStation(q);
         const global = await searchGlobal(q);
-        // Merge: unified tracks (Spotify + Deezer previews) + any Deezer-only tracks
-        const allGlobal = [...(global.tracks || []), ...(global.deezerOnly || [])];
-        setResults({ mystation: local, spotify: allGlobal });
+        setResults({ mystation: local, spotify: global.tracks || [] });
         setLoading(false);
       }, 300);
     },
@@ -145,32 +143,37 @@ function SearchPageInner() {
 
   // Add track to playlist
   const handleAddToPlaylist = (playlistId, track) => {
-    const formatted = track.source === 'spotify'
-      ? {
-          spotifyId: track.spotifyId,
-          title: track.title,
-          artist: track.artist,
-          album: track.album,
-          albumArt: track.albumArt,
-          previewUrl: track.previewUrl,
-          spotifyUrl: track.spotifyUrl,
-          duration: track.durationFormatted || track.duration,
-          source: 'spotify',
-        }
-      : {
-          id: track.id,
-          title: track.title,
-          artist: track.artist || (track.featured ? `Mike Page ft. ${track.featured}` : 'Mike Page'),
-          album: track.album,
-          albumArt: null,
-          audioSrc: track.audioFile,
-          duration: track.duration,
-          source: 'mystation',
-        };
+    let formatted;
+    if (track.source === 'mystation') {
+      formatted = {
+        id: track.id,
+        title: track.title,
+        artist: track.artist || (track.featured ? `Mike Page ft. ${track.featured}` : 'Mike Page'),
+        album: track.album,
+        albumArt: null,
+        audioSrc: track.audioFile,
+        duration: track.duration,
+        source: 'mystation',
+      };
+    } else {
+      // Spotify, Deezer, or merged track
+      formatted = {
+        spotifyId: track.spotifyId || null,
+        deezerId: track.deezerId || null,
+        title: track.title,
+        artist: track.artist,
+        album: track.album,
+        albumArt: track.albumArt,
+        previewUrl: track.previewUrl,
+        spotifyUrl: track.spotifyUrl || null,
+        duration: track.durationFormatted || track.duration,
+        source: track.source || 'spotify',
+      };
+    }
 
     addTrack(playlistId, formatted);
     setShowPlaylistPicker(null);
-    setAddedFeedback(track.spotifyId || track.id);
+    setAddedFeedback(track.spotifyId || track.deezerId || track.id);
     setTimeout(() => setAddedFeedback(null), 1500);
   };
 
@@ -336,7 +339,7 @@ function SearchPageInner() {
                 <div className="space-y-2 mb-2">
                   {results.spotify.slice(0, 2).map((track) => (
                     <TrackRow
-                      key={`sp-${track.spotifyId}`}
+                      key={`sp-${track.spotifyId || track.deezerId}`}
                       track={track}
                       isPlaying={false}
                       onPlay={() => usePlayerStore.getState().openSubscribeModal()}
@@ -356,7 +359,7 @@ function SearchPageInner() {
                   <div className="blur-sm pointer-events-none opacity-40 space-y-2">
                     {results.spotify.slice(2, 6).map((track) => (
                       <TrackRow
-                        key={`sp-blur-${track.spotifyId}`}
+                        key={`sp-blur-${track.spotifyId || track.deezerId}`}
                         track={track}
                         isPlaying={false}
                         onPlay={() => {}}
@@ -392,17 +395,17 @@ function SearchPageInner() {
               <div className="space-y-2">
                 {results.spotify.map((track) => (
                   <TrackRow
-                    key={`sp-${track.spotifyId}`}
+                    key={`sp-${track.spotifyId || track.deezerId}`}
                     track={track}
                     isPlaying={isTrackPlaying(track)}
                     onPlay={() => playGlobalPreview(track)}
-                    onAddToPlaylist={() => setShowPlaylistPicker(track.spotifyId)}
-                    showPlaylistPicker={showPlaylistPicker === track.spotifyId}
+                    onAddToPlaylist={() => setShowPlaylistPicker(track.spotifyId || track.deezerId)}
+                    showPlaylistPicker={showPlaylistPicker === (track.spotifyId || track.deezerId)}
                     playlists={playlists}
                     onSelectPlaylist={(plId) => handleAddToPlaylist(plId, track)}
                     onClosePlaylistPicker={() => setShowPlaylistPicker(null)}
                     onCreatePlaylist={() => setShowCreatePlaylist(true)}
-                    addedFeedback={addedFeedback === track.spotifyId}
+                    addedFeedback={addedFeedback === (track.spotifyId || track.deezerId)}
                     spotify
                   />
                 ))}

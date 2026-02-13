@@ -59,9 +59,10 @@ export async function GET(request) {
     }
 
     // ─── PARALLEL SEARCH: Spotify + Deezer ───
+    // Fetch more from Deezer (all have 30s previews) to maximize playable results
     const [spotifyResult, deezerResult] = await Promise.allSettled([
-      searchSpotify(q, limit),
-      searchDeezer(q, limit),
+      searchSpotify(q, Math.min(limit, 10)), // Spotify client credentials caps at 10
+      searchDeezer(q, Math.min(limit + 10, 25)), // Deezer has no cap, get extras for matching
     ]);
 
     const spotify = spotifyResult.status === 'fulfilled' ? spotifyResult.value : { tracks: [], artists: [] };
@@ -70,12 +71,22 @@ export async function GET(request) {
     // ─── MERGE: Enrich Spotify tracks with Deezer previews ───
     const enrichedTracks = mergeResults(spotify.tracks, deezer.tracks);
 
+    // Unmatched Deezer tracks (all have 30s previews)
+    const usedDeezerIds = new Set(enrichedTracks.filter(t => t.deezerId).map(t => t.deezerId));
+    const deezerOnly = deezer.tracks.filter(dt => !usedDeezerIds.has(dt.deezerId));
+
+    // Combine all tracks and sort: playable first, then by source quality
+    const allTracks = [...enrichedTracks, ...deezerOnly];
+    allTracks.sort((a, b) => {
+      const aPlayable = a.previewUrl ? 1 : 0;
+      const bPlayable = b.previewUrl ? 1 : 0;
+      if (bPlayable !== aPlayable) return bPlayable - aPlayable; // playable first
+      return (b.popularity || b.rank || 0) - (a.popularity || a.rank || 0); // then by popularity
+    });
+
     const result = {
-      tracks: enrichedTracks,
+      tracks: allTracks.slice(0, limit),
       artists: spotify.artists || [],
-      deezerOnly: deezer.tracks.filter(dt =>
-        !enrichedTracks.some(et => et.deezerId === dt.deezerId)
-      ).slice(0, 5),
       query: q,
       sources: {
         spotify: spotifyResult.status === 'fulfilled',
