@@ -72,15 +72,27 @@ export default function ContactPage() {
               <h3 className="text-lg font-bold text-white mb-4">Quick Contact</h3>
               <div className="space-y-4">
                 <a
-                  href="mailto:idmgatl@gmail.com"
+                  href="mailto:mystationlive@gmail.com"
                   className="flex items-center gap-3 text-white/60 hover:text-white transition"
                 >
                   <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
                     <Mail size={18} className="text-blue-400" />
                   </div>
                   <div>
-                    <p className="text-white font-medium">Email</p>
-                    <p className="text-sm">idmgatl@gmail.com</p>
+                    <p className="text-white font-medium">General / Become a Streamer</p>
+                    <p className="text-sm">mystationlive@gmail.com</p>
+                  </div>
+                </a>
+                <a
+                  href="mailto:contact@lotlfest.com"
+                  className="flex items-center gap-3 text-white/60 hover:text-white transition"
+                >
+                  <div className="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center">
+                    <Mail size={18} className="text-green-400" />
+                  </div>
+                  <div>
+                    <p className="text-white font-medium">Love on the Lawn Festival</p>
+                    <p className="text-sm">contact@lotlfest.com</p>
                   </div>
                 </a>
                 <a
@@ -121,7 +133,7 @@ export default function ContactPage() {
                 <p className="text-white font-medium">IDMG - Impossible Dreamz Music Group</p>
                 <p className="text-white/50 text-sm">For all official inquiries</p>
                 <a
-                  href="mailto:idmgatl@gmail.com"
+                  href="mailto:mystationlive@gmail.com"
                   className="inline-block mt-2 px-4 py-2 bg-blue-500/10 text-blue-400 text-sm font-medium rounded-lg hover:bg-blue-500/20 transition"
                 >
                   Contact Management

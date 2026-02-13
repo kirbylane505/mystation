@@ -373,6 +373,13 @@ export const POINTS = {
   referral: 300,      // Per referral signup
   badge: 75,          // Per badge earned
   albumComplete: 250, // Completing full album
+  // Kickback Lounge game points
+  gameWin: 50,
+  gameLoss: 10,
+  dailyGame: 25,
+  winStreak3: 100,
+  winStreak5: 250,
+  perfectBlackjack: 100,
 };
 
 // Vault access tiers (points-based)

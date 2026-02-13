@@ -8,7 +8,7 @@ import { useUserStore } from '@/store/playerStore';
 import { STATION_CATEGORIES } from '@/lib/stationCategories';
 import {
   ArrowRight, ArrowLeft, Check, Sparkles, Music, ShoppingBag,
-  ListMusic, User, Link as LinkIcon, DollarSign, Palette,
+  ListMusic, User, Link as LinkIcon, DollarSign, Palette, Mail,
   Instagram, Twitter, Youtube, Globe, Crown, Heart, Shield,
   Upload, BarChart3, Users, Zap, CheckCircle
 } from 'lucide-react';
@@ -115,6 +115,39 @@ export default function CreateStationPage() {
   // LANDING / HERO (Step 0)
   const HeroSection = () => (
     <div className="min-h-screen">
+      {/* Excited Stream at LOTL CTA */}
+      <section className="relative py-6 overflow-hidden">
+        <div className="max-w-4xl mx-auto px-6">
+          <div className="relative bg-gradient-to-r from-green-600/30 via-emerald-500/20 to-green-600/30 rounded-2xl border border-green-500/30 p-6 md:p-8 text-center overflow-hidden">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.15),transparent_70%)]" />
+            <div className="relative">
+              <span className="text-3xl mb-2 block">🎪🔥🎶</span>
+              <h2 className="text-2xl md:text-3xl font-black text-white mb-2">
+                Stream at <span className="text-green-400">Love on the Lawn!</span>
+              </h2>
+              <p className="text-white/70 text-sm md:text-base mb-4 max-w-xl mx-auto">
+                Become a streamer on MyStation and get a chance to perform or stream LIVE at the Love on the Lawn Festival! 10,000+ attendees, major sponsors, real exposure.
+              </p>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                <a
+                  href="mailto:mystationlive@gmail.com?subject=I%20Want%20to%20Stream%20at%20LOTL!"
+                  className="px-6 py-3 bg-green-500 hover:bg-green-600 text-white font-bold rounded-xl transition flex items-center gap-2"
+                >
+                  <Mail size={18} />
+                  Apply Now — mystationlive@gmail.com
+                </a>
+                <Link
+                  href="/lotl"
+                  className="px-6 py-3 bg-white/10 hover:bg-white/15 text-white font-medium rounded-xl transition"
+                >
+                  Learn About LOTL
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Hero */}
       <section className="relative py-20 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 via-transparent to-purple-600/20" />

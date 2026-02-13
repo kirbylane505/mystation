@@ -13,7 +13,7 @@ import { CartButton } from './Cart';
 import { useUserStore, usePlayerStore } from '@/store/playerStore';
 import {
   Home, Music, Flame, Heart, Users, ShoppingBag,
-  Search, User, LogOut, X, Play, Menu, Lock, Mail, Calendar, Crown, Newspaper, Download, Gift, Zap, ListMusic
+  Search, User, LogOut, X, Play, Menu, Lock, Mail, Calendar, Crown, Newspaper, Download, Gift, Zap, ListMusic, Gamepad2
 } from 'lucide-react';
 import { useEngagementStore } from '@/store/engagementStore';
 import { useStationStore } from '@/store/stationStore';
@@ -34,21 +34,26 @@ export default function Navbar() {
   const { isCreator, stationData } = useStationStore();
 
   // Nav items with icons
+  // Mobile order: LOTL first, then Merch, Fan Zone, Foundation, then the rest
   const navItems = [
-    { href: '/', icon: Home, label: 'Home' },
-    { href: '/music', icon: Music, label: 'Music' },
-    { href: '/make-a-hit', icon: Flame, label: 'Make A Hit', highlight: true },
-    { href: '/about', icon: Heart, label: 'Foundation' },
-    { href: '/fan-zone', icon: Zap, label: 'Fan Zone' },
-    { href: '/merch', icon: ShoppingBag, label: 'Merch' },
-    { href: '/lotl', icon: Calendar, label: 'LOTL' },
-    { href: '/rewards', icon: Gift, label: 'Rewards', hidden: true },
-    { href: '/news', icon: Newspaper, label: 'News' },
-    { href: '/search', icon: Search, label: 'Search', highlight: true },
-    { href: '/playlists', icon: ListMusic, label: 'Playlists' },
-    { href: '/contact', icon: Mail, label: 'Contact' },
-    { href: '/vault', icon: Lock, label: 'Vault', hidden: true },
+    { href: '/', icon: Home, label: 'Home', mobileOrder: 99 },
+    { href: '/music', icon: Music, label: 'Music', mobileOrder: 5 },
+    { href: '/lotl', icon: Calendar, label: 'LOTL', mobileOrder: 1 },
+    { href: '/merch', icon: ShoppingBag, label: 'Merch', mobileOrder: 2 },
+    { href: '/fan-zone', icon: Zap, label: 'Fan Zone', mobileOrder: 3 },
+    { href: '/about', icon: Heart, label: 'Foundation', mobileOrder: 4 },
+    { href: '/lounge', icon: Gamepad2, label: 'Lounge', highlight: true, mobileOrder: 6 },
+    { href: '/make-a-hit', icon: Flame, label: 'Make A Hit', highlight: true, mobileOrder: 7 },
+    { href: '/rewards', icon: Gift, label: 'Rewards', hidden: true, mobileOrder: 99 },
+    { href: '/news', icon: Newspaper, label: 'News', mobileOrder: 8 },
+    { href: '/search', icon: Search, label: 'Search', highlight: true, mobileOrder: 9 },
+    { href: '/playlists', icon: ListMusic, label: 'Playlists', mobileOrder: 10 },
+    { href: '/contact', icon: Mail, label: 'Contact', mobileOrder: 11 },
+    { href: '/vault', icon: Lock, label: 'Vault', hidden: true, mobileOrder: 99 },
   ];
+
+  // Sorted for mobile menu
+  const mobileNavItems = [...navItems].sort((a, b) => (a.mobileOrder || 99) - (b.mobileOrder || 99));
 
   // Filter tracks based on search
   const searchResults = searchQuery.length > 1
@@ -333,7 +338,7 @@ export default function Navbar() {
         {/* Mobile Menu Dropdown */}
         {mobileMenuOpen && (
           <div className="absolute top-16 left-0 right-0 bg-mystation-navy/95 backdrop-blur-xl border-b border-white/10 p-4 space-y-2">
-            {navItems.filter(item => !item.hidden).map((item) => {
+            {mobileNavItems.filter(item => !item.hidden).map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;
 
