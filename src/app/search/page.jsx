@@ -64,7 +64,7 @@ function SearchPageInner() {
   // Search Spotify via our API
   const searchSpotify = useCallback(async (q) => {
     try {
-      const res = await fetch(`/api/spotify/search?q=${encodeURIComponent(q)}&type=track,artist&limit=20`);
+      const res = await fetch(`/api/spotify/search?q=${encodeURIComponent(q)}&type=track,artist&limit=20`, { cache: 'no-store' });
       if (!res.ok) return { tracks: [], artists: [] };
       const data = await res.json();
       return data;

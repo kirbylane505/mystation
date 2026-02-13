@@ -148,12 +148,14 @@ export async function GET(request) {
     }
     searchCache.set(cacheKey, { data: result, ts: Date.now() });
 
-    return NextResponse.json(result);
+    return NextResponse.json(result, {
+      headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' },
+    });
   } catch (error) {
     console.error('Spotify search error:', error.message);
     return NextResponse.json(
       { error: 'Search temporarily unavailable' },
-      { status: 500 }
+      { status: 500, headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' } }
     );
   }
 }
