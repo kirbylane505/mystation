@@ -1,6 +1,6 @@
 /**
  * MYSTATION - Root Layout
- * Premium music streaming for Mike Page Foundation
+ * Premium music streaming by IDMG
  */
 
 import { Montserrat, Inter } from 'next/font/google';
@@ -36,10 +36,10 @@ const inter = Inter({
 export const metadata = {
   metadataBase: new URL('https://mystationlive.com'),
   title: {
-    default: 'MyStation - Mike Page Foundation',
+    default: 'MyStation - IDMG',
     template: '%s | MyStation',
   },
-  description: 'Stream Mike Page music for free. All donations support youth music programs through the Mike Page Foundation.',
+  description: 'Stream Mike Page music for free. All proceeds support youth music programs through IDMG.',
   keywords: 'Mike Page, IDMG, hip-hop, music streaming, donation, foundation',
 
   // Open Graph - Shows when sharing on social media/iMessage

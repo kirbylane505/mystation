@@ -395,8 +395,8 @@ export default function HomePage() {
                 </span>
               </Link>
               <p className="text-white/40 text-sm leading-relaxed">
-                Free music streaming platform by Mike Page Foundation.
-                Revenue helps build youth and community programs worldwide.
+                Free music streaming by IDMG.
+                Revenue supports youth and community programs worldwide.
               </p>
             </div>
             <div>
@@ -409,7 +409,7 @@ export default function HomePage() {
               </ul>
             </div>
             <div>
-              <h4 className="font-semibold text-white mb-5 text-sm uppercase tracking-wider">Foundation</h4>
+              <h4 className="font-semibold text-white mb-5 text-sm uppercase tracking-wider">IDMG</h4>
               <ul className="space-y-3 text-white/40 text-sm">
                 <li><Link href="/about" className="hover:text-blue-400 transition">About Us</Link></li>
                 <li><Link href="/about" className="hover:text-blue-400 transition">Programs</Link></li>
@@ -438,7 +438,7 @@ export default function HomePage() {
 
           <div className="border-t border-white/5 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-white/30 text-sm">
-              © 2026 MyStation. A Mike Page Foundation 501(c)(3) Initiative.
+              © 2026 MyStation. An IDMG Initiative.
             </p>
             <div className="flex items-center gap-4">
               <Link href="/privacy" className="text-white/30 text-sm hover:text-white/50 transition">Privacy</Link>
