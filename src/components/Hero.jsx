@@ -3,24 +3,10 @@
  * Animated entrance, floating orbs, premium feel
  */
 
-'use client';
-
-import { Play, Shuffle } from 'lucide-react';
 import { getOfficialTracks } from '@/data/tracks';
-import { usePlayerStore } from '@/store/playerStore';
 
 export default function Hero() {
-  const { setQueue } = usePlayerStore();
   const officialTracks = getOfficialTracks();
-
-  const handlePlayAll = () => {
-    setQueue(officialTracks, 0);
-  };
-
-  const handleShuffle = () => {
-    const shuffled = [...officialTracks].sort(() => Math.random() - 0.5);
-    setQueue(shuffled, 0);
-  };
 
   return (
     <div className="relative min-h-[85vh] flex items-center justify-center overflow-hidden" style={{ background: '#0a1628' }}>
@@ -51,26 +37,8 @@ export default function Hero() {
           Stream the entire catalog. Every play gives back.
         </p>
 
-        {/* Dual CTAs */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 hero-stats">
-          <button
-            onClick={handlePlayAll}
-            className="inline-flex items-center gap-3 px-10 py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm uppercase tracking-widest rounded-full transition-all duration-200 shadow-lg shadow-blue-600/30 hover:shadow-blue-500/40"
-          >
-            <Play size={18} fill="white" />
-            Play Now
-          </button>
-          <button
-            onClick={handleShuffle}
-            className="inline-flex items-center gap-3 px-8 py-4 bg-white/8 hover:bg-white/12 border border-white/10 text-white/80 hover:text-white font-medium text-sm uppercase tracking-widest rounded-full transition-all duration-200"
-          >
-            <Shuffle size={16} />
-            Shuffle
-          </button>
-        </div>
-
         {/* Stats bar */}
-        <div className="mt-12 flex items-center justify-center gap-8 text-white/30 text-xs uppercase tracking-wider hero-stats">
+        <div className="mt-4 flex items-center justify-center gap-8 text-white/30 text-xs uppercase tracking-wider hero-stats">
           <span>{officialTracks.length} Tracks</span>
           <span className="w-1 h-1 bg-white/20 rounded-full" />
           <span>100% Free</span>

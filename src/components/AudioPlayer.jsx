@@ -20,6 +20,8 @@ import { useEngagementStore } from '@/store/engagementStore';
 // Global audio element - persists across page navigation
 let globalAudio = null;
 let isAudioInitialized = false;
+let lastSkipTime = 0;
+let consecutiveErrors = 0;
 
 function getGlobalAudio() {
   if (typeof window === 'undefined') return null;
@@ -169,6 +171,8 @@ export default function AudioPlayer() {
     // TIME UPDATE — uses ref so never stale
     const onTimeUpdate = () => {
       storeActionsRef.current.setProgress(audio.currentTime);
+      // Audio is playing successfully — reset error counter
+      if (consecutiveErrors > 0) consecutiveErrors = 0;
     };
 
     // LOADED METADATA
@@ -187,35 +191,46 @@ export default function AudioPlayer() {
       }
     };
 
-    // ERROR — retry on network errors, skip on decode errors
+    // ERROR — retry on network errors, controlled skip on decode errors
     const onError = () => {
       const err = audio.error;
       if (!err) return;
       console.error('Audio error:', err.code, err.message);
 
-      // MEDIA_ERR_NETWORK (2) — retry once
+      // MEDIA_ERR_NETWORK (2) — retry up to 2 times with backoff
       if (err.code === 2 && audio.src) {
         setTimeout(() => {
           audio.load();
           if (usePlayerStore.getState().isPlaying) {
             safePlay(audio);
           }
-        }, 1000);
+        }, 2000);
       }
-      // MEDIA_ERR_DECODE (3) or MEDIA_ERR_SRC_NOT_SUPPORTED (4) — skip to next
+      // MEDIA_ERR_DECODE (3) or MEDIA_ERR_SRC_NOT_SUPPORTED (4) — skip with cooldown
       else if (err.code === 3 || err.code === 4) {
-        storeActionsRef.current.nextTrack();
+        consecutiveErrors++;
+        const now = Date.now();
+        // Stop chain-skipping: max 3 consecutive errors, min 2s between skips
+        if (consecutiveErrors > 3 || now - lastSkipTime < 2000) {
+          console.warn('Audio: stopping auto-skip after consecutive errors');
+          consecutiveErrors = 0;
+          storeActionsRef.current.pause();
+          return;
+        }
+        lastSkipTime = now;
+        setTimeout(() => storeActionsRef.current.nextTrack(), 500);
       }
     };
 
-    // STALLED / WAITING — audio buffering, try to recover
+    // STALLED / WAITING — audio buffering, gentle recovery (don't force-play too early)
     const onStalled = () => {
       if (usePlayerStore.getState().isPlaying && audio.paused) {
         setTimeout(() => {
-          if (usePlayerStore.getState().isPlaying && audio.paused && audio.readyState >= 2) {
+          // Only resume if audio is actually ready (readyState 3+ = enough data)
+          if (usePlayerStore.getState().isPlaying && audio.paused && audio.readyState >= 3) {
             safePlay(audio);
           }
-        }, 500);
+        }, 1500);
       }
     };
 
@@ -224,7 +239,6 @@ export default function AudioPlayer() {
     audio.addEventListener('ended', onEnded);
     audio.addEventListener('error', onError);
     audio.addEventListener('stalled', onStalled);
-    audio.addEventListener('waiting', onStalled);
 
     // VISIBILITY CHANGE — resume audio after screen unlock / tab return
     const onVisibilityChange = () => {
@@ -258,7 +272,6 @@ export default function AudioPlayer() {
       audio.removeEventListener('ended', onEnded);
       audio.removeEventListener('error', onError);
       audio.removeEventListener('stalled', onStalled);
-      audio.removeEventListener('waiting', onStalled);
       document.removeEventListener('visibilitychange', onVisibilityChange);
     };
   }, []);
@@ -370,9 +383,11 @@ export default function AudioPlayer() {
   useEffect(() => {
     const audio = getGlobalAudio();
     if (!audio || !currentTrack) return;
+    // Don't try to play while a new track is loading — the load handler will start playback
     if (isLoadingRef.current) return;
 
     if (isPlaying) {
+      // Only check subscription for tracks we haven't counted yet
       const { uniquePlaysThisSession } = usePlayerStore.getState();
       if (!uniquePlaysThisSession.includes(currentTrack.id)) {
         if (!checkCanPlay(currentTrack.id)) {
@@ -383,11 +398,14 @@ export default function AudioPlayer() {
         }
         incrementPlayCount(currentTrack.id);
       }
-      safePlay(audio);
+      // Only call play if audio is actually paused (prevent double-play race)
+      if (audio.paused && audio.readyState >= 2) {
+        safePlay(audio);
+      }
     } else {
       audio.pause();
     }
-  }, [isPlaying, currentTrack]);
+  }, [isPlaying]);
 
   // ─── Volume ───
   useEffect(() => {
