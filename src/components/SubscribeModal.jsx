@@ -124,10 +124,10 @@ export default function SubscribeModal() {
       popular: true,
       features: [
         'Everything in Regular',
+        'Global Spotify Search (100M+ songs)',
         'Early access to new drops',
         'Full Fan Zone access',
         'DJ Turntables unlocked',
-        'Priority Fan Wall posting',
       ],
     },
     {
