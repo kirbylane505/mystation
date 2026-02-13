@@ -36,9 +36,9 @@ export default function Navbar() {
   // Nav items with icons
   // Mobile order: LOTL first, then Merch, Fan Zone, Foundation, then the rest
   const navItems = [
-    { href: '/lotl', icon: Home, label: 'LOTL Tickets', mobileOrder: 0 },
+    { href: '/', icon: Home, label: 'Home', mobileOrder: 0 },
+    { href: '/lotl', icon: Calendar, label: 'LOTL Tickets', mobileOrder: 1 },
     { href: '/music', icon: Music, label: 'Music', mobileOrder: 5 },
-    { href: '/lotl', icon: Calendar, label: 'LOTL', mobileOrder: 1, hidden: true },
     { href: '/merch', icon: ShoppingBag, label: 'Merch', mobileOrder: 2 },
     { href: '/fan-zone', icon: Zap, label: 'Fan Zone', mobileOrder: 3 },
     { href: '/about', icon: Heart, label: 'Foundation', mobileOrder: 4 },
