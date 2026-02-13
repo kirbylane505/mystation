@@ -414,15 +414,6 @@ export default function Navbar() {
               </Link>
             )}
 
-            {/* Add to Home Screen - Mobile */}
-            <button
-              onClick={handleInstall}
-              className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl text-white font-bold mb-2"
-            >
-              <Download size={18} />
-              Add to Home Screen
-            </button>
-
             {/* Subscribe Button - Mobile */}
             {!isSubscribed && (
               <button
