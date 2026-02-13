@@ -190,20 +190,29 @@ async function searchDeezer(q, limit) {
 
 // ─── MERGE: Match Spotify tracks with Deezer previews ───
 function mergeResults(spotifyTracks, deezerTracks) {
-  // Build a lookup of Deezer tracks by normalized title+artist
-  const deezerMap = new Map();
+  // Build lookups by normalized title AND by title+first-artist
+  const deezerByTitle = new Map();
+  const deezerByTitleArtist = new Map();
   for (const dt of deezerTracks) {
-    const key = normalize(`${dt.title} ${dt.artist}`);
-    deezerMap.set(key, dt);
+    const titleKey = normalize(dt.title);
+    const titleArtistKey = normalize(`${dt.title} ${dt.artist.split(',')[0]}`);
+    if (!deezerByTitle.has(titleKey)) deezerByTitle.set(titleKey, dt);
+    if (!deezerByTitleArtist.has(titleArtistKey)) deezerByTitleArtist.set(titleArtistKey, dt);
   }
 
-  // Enrich Spotify tracks with Deezer preview URLs where Spotify preview is null
-  const merged = spotifyTracks.map(st => {
-    const key = normalize(`${st.title} ${st.artist}`);
-    const deezerMatch = deezerMap.get(key);
+  const usedDeezerIds = new Set();
 
-    if (deezerMatch) {
-      deezerMap.delete(key); // Remove so it doesn't appear in deezerOnly
+  // Enrich Spotify tracks with Deezer preview URLs
+  const merged = spotifyTracks.map(st => {
+    const titleKey = normalize(st.title);
+    const firstArtist = st.artist.split(',')[0].trim();
+    const titleArtistKey = normalize(`${st.title} ${firstArtist}`);
+
+    // Try title+artist match first, then title-only
+    const deezerMatch = deezerByTitleArtist.get(titleArtistKey) || deezerByTitle.get(titleKey);
+
+    if (deezerMatch && !usedDeezerIds.has(deezerMatch.deezerId)) {
+      usedDeezerIds.add(deezerMatch.deezerId);
       return {
         ...st,
         previewUrl: st.previewUrl || deezerMatch.previewUrl,
@@ -221,6 +230,10 @@ function mergeResults(spotifyTracks, deezerTracks) {
 function normalize(str) {
   return str
     .toLowerCase()
+    .replace(/\(.*?\)/g, '') // Remove parenthetical (feat. X)
+    .replace(/\[.*?\]/g, '') // Remove bracket content
+    .replace(/feat\.?/gi, '')
+    .replace(/ft\.?/gi, '')
     .replace(/[^a-z0-9\s]/g, '')
     .replace(/\s+/g, ' ')
     .trim();
