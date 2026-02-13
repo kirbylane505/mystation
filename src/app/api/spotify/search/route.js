@@ -17,8 +17,8 @@ const CACHE_MAX = 100;
 async function getSpotifyToken() {
   if (cachedToken && Date.now() < tokenExpiry) return cachedToken;
 
-  const clientId = process.env.SPOTIFY_CLIENT_ID;
-  const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
+  const clientId = (process.env.SPOTIFY_CLIENT_ID || '').trim();
+  const clientSecret = (process.env.SPOTIFY_CLIENT_SECRET || '').trim();
 
   if (!clientId || !clientSecret) {
     throw new Error('Spotify credentials not configured');
@@ -152,7 +152,7 @@ export async function GET(request) {
   } catch (error) {
     console.error('Spotify search error:', error.message);
     return NextResponse.json(
-      { error: 'Search temporarily unavailable', debug: error.message },
+      { error: 'Search temporarily unavailable' },
       { status: 500 }
     );
   }
