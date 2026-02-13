@@ -59,6 +59,9 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Track not found' }, { status: 404 });
     }
 
+    // DJ mode bypasses trial/subscription — DJ Turntables is a free fan feature
+    const isDJMode = request.headers.get('x-dj-mode') === '1';
+
     // SERVER-SIDE SUBSCRIPTION/TRIAL CHECK
     // 1. Check for valid subscription cookie
     const isSubscribed = verifySubscriptionCookie(request);
@@ -71,8 +74,8 @@ export async function POST(request) {
     // 3. Check friend/access code cookie
     const hasFriendAccess = cookieStr.includes('mystation-friend=');
 
-    // 4. If not subscribed, check 24-hour trial
-    if (!isSubscribed && !hasFriendAccess) {
+    // 4. If not subscribed, check 24-hour trial (DJ mode skips this)
+    if (!isSubscribed && !hasFriendAccess && !isDJMode) {
       // Vault tracks need vault access, not subscription
       if (isVaultTrack && !hasVaultAccess) {
         return NextResponse.json({ error: 'Vault access required' }, { status: 403 });

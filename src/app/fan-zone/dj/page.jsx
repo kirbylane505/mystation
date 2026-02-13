@@ -2,13 +2,20 @@
  * MYSTATION - DJ Turntable (Fan Zone)
  * Serato-style dual-deck mixer where fans can blend Mike Page songs
  * Web Audio API powered — crossfader, EQ, speed control, effects
+ *
+ * FIXES (Feb 12 2026):
+ * 1. AudioContext created lazily on first user tap (iOS Safari fix)
+ * 2. DJ bypasses subscription/trial gate (sends x-dj-mode header)
+ * 3. Error UI when track fails to load
+ * 4. Search filter in dropdown (129 tracks was too many to scroll)
+ * 5. Mobile touch improvements
  */
 
 'use client';
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { tracks as allTracks } from '@/data/tracks';
-import { Music2, Play, Pause, SkipBack, Volume2, VolumeX, HelpCircle, X, Disc3, ChevronDown } from 'lucide-react';
+import { Music2, Play, Pause, SkipBack, HelpCircle, X, Disc3, ChevronDown, AlertCircle, Search } from 'lucide-react';
 import Link from 'next/link';
 
 // Get only public (non-private) tracks with audio
@@ -55,15 +62,17 @@ class DeckEngine {
   async loadTrack(url) {
     try {
       const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const arrayBuf = await res.arrayBuffer();
+      if (!arrayBuf || arrayBuf.byteLength === 0) throw new Error('Empty audio data');
       this.buffer = await this.ctx.decodeAudioData(arrayBuf);
       this.duration = this.buffer.duration;
       this.pauseOffset = 0;
       if (this.isPlaying) this.stop();
-      return true;
+      return { ok: true };
     } catch (e) {
       console.error('Failed to load track:', e);
-      return false;
+      return { ok: false, error: e.message || 'Failed to load audio' };
     }
   }
 
@@ -86,7 +95,7 @@ class DeckEngine {
 
   pause() {
     if (!this.isPlaying) return;
-    this.source.stop();
+    try { this.source.stop(); } catch(e) {}
     this.pauseOffset = this.ctx.currentTime - this.startTime;
     this.isPlaying = false;
   }
@@ -173,7 +182,7 @@ function Tutorial({ onClose }) {
 // ============ TURNTABLE VISUAL ============
 function Turntable({ isPlaying, speed, trackTitle }) {
   return (
-    <div className="relative w-36 h-36 sm:w-44 sm:h-44 mx-auto">
+    <div className="relative w-32 h-32 sm:w-44 sm:h-44 mx-auto">
       {/* Platter */}
       <div
         className={`w-full h-full rounded-full border-2 border-zinc-700 bg-zinc-900 flex items-center justify-center ${isPlaying ? 'animate-spin-vinyl' : ''}`}
@@ -185,8 +194,8 @@ function Turntable({ isPlaying, speed, trackTitle }) {
         <div className="absolute inset-9 rounded-full border border-zinc-800" />
         <div className="absolute inset-12 rounded-full border border-zinc-700" />
         {/* Label */}
-        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-br from-amber-600 to-amber-900 flex items-center justify-center z-10 border-2 border-amber-500/50">
-          <Disc3 size={20} className="text-black" />
+        <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gradient-to-br from-amber-600 to-amber-900 flex items-center justify-center z-10 border-2 border-amber-500/50">
+          <Disc3 size={18} className="text-black" />
         </div>
       </div>
       {/* Tonearm */}
@@ -207,8 +216,7 @@ function Turntable({ isPlaying, speed, trackTitle }) {
 }
 
 // ============ EQ KNOB ============
-function EQKnob({ label, value, onChange, color = 'amber' }) {
-  const knobRef = useRef(null);
+function EQKnob({ label, value, onChange }) {
   const dragging = useRef(false);
   const startY = useRef(0);
   const startVal = useRef(0);
@@ -231,7 +239,7 @@ function EQKnob({ label, value, onChange, color = 'amber' }) {
     const handleEnd = () => { dragging.current = false; };
     window.addEventListener('mousemove', handleMove);
     window.addEventListener('mouseup', handleEnd);
-    window.addEventListener('touchmove', handleMove);
+    window.addEventListener('touchmove', handleMove, { passive: false });
     window.addEventListener('touchend', handleEnd);
     return () => {
       window.removeEventListener('mousemove', handleMove);
@@ -241,19 +249,17 @@ function EQKnob({ label, value, onChange, color = 'amber' }) {
     };
   }, [onChange, value]);
 
-  const rotation = (value / 12) * 135; // -135 to +135 degrees
+  const rotation = (value / 12) * 135;
 
   return (
     <div className="flex flex-col items-center gap-1">
       <div
-        ref={knobRef}
-        className="w-10 h-10 rounded-full bg-zinc-800 border-2 border-zinc-600 cursor-grab active:cursor-grabbing relative select-none"
+        className="w-10 h-10 rounded-full bg-zinc-800 border-2 border-zinc-600 cursor-grab active:cursor-grabbing relative select-none touch-none"
         onMouseDown={handleStart}
         onTouchStart={handleStart}
         onDoubleClick={() => onChange(0)}
         title="Double-click to reset"
       >
-        {/* Indicator line */}
         <div
           className="absolute top-1 left-1/2 w-0.5 h-3 bg-amber-400 rounded-full origin-bottom"
           style={{ transform: `translateX(-50%) rotate(${rotation}deg)`, transformOrigin: '50% 200%' }}
@@ -266,10 +272,11 @@ function EQKnob({ label, value, onChange, color = 'amber' }) {
 }
 
 // ============ DECK COMPONENT ============
-function Deck({ label, deckColor, engine, audioCtx, tracks }) {
+function Deck({ label, deckColor, engine, initAudio, tracks }) {
   const [selectedTrack, setSelectedTrack] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [speed, setSpeed] = useState(1.0);
@@ -277,7 +284,14 @@ function Deck({ label, deckColor, engine, audioCtx, tracks }) {
   const [eqMid, setEqMid] = useState(0);
   const [eqHigh, setEqHigh] = useState(0);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const animRef = useRef(null);
+  const searchRef = useRef(null);
+
+  const filteredTracks = searchQuery
+    ? tracks.filter(t => t.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (t.artist && t.artist.toLowerCase().includes(searchQuery.toLowerCase())))
+    : tracks;
 
   const updateProgress = useCallback(() => {
     if (engine.current && engine.current.isPlaying) {
@@ -296,39 +310,67 @@ function Deck({ label, deckColor, engine, audioCtx, tracks }) {
     return () => cancelAnimationFrame(animRef.current);
   }, [updateProgress]);
 
+  // Auto-focus search when dropdown opens
+  useEffect(() => {
+    if (showDropdown && searchRef.current) {
+      setTimeout(() => searchRef.current?.focus(), 100);
+    }
+    if (!showDropdown) setSearchQuery('');
+  }, [showDropdown]);
+
   const loadTrack = async (track) => {
     setShowDropdown(false);
+    setSearchQuery('');
     setLoading(true);
+    setError(null);
     setSelectedTrack(track);
 
-    if (audioCtx.current.state === 'suspended') {
-      await audioCtx.current.resume();
+    // Initialize AudioContext on first user gesture (iOS Safari fix)
+    const audioReady = await initAudio();
+    if (!audioReady) {
+      setError('Could not start audio. Tap and try again.');
+      setLoading(false);
+      return;
     }
 
-    // Fetch token then load
+    // Fetch token with DJ bypass header
     try {
       const tokenRes = await fetch('/api/audio/token', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-dj-mode': '1',
+        },
         body: JSON.stringify({ trackId: track.id }),
       });
+
+      if (!tokenRes.ok) {
+        const errData = await tokenRes.json().catch(() => ({}));
+        throw new Error(errData.error || `Server error (${tokenRes.status})`);
+      }
+
       const { token } = await tokenRes.json();
       const audioUrl = `${track.audioFile}?_t=${token}`;
-      const ok = await engine.current.loadTrack(audioUrl);
-      if (ok) {
+      const result = await engine.current.loadTrack(audioUrl);
+
+      if (result.ok) {
         setDuration(engine.current.duration);
         setProgress(0);
         setIsPlaying(false);
+      } else {
+        setError(result.error || 'Could not decode audio');
       }
     } catch (e) {
       console.error('Failed to load:', e);
+      setError(e.message || 'Failed to load song');
     }
     setLoading(false);
   };
 
   const togglePlay = async () => {
     if (!engine.current || !engine.current.buffer) return;
-    if (audioCtx.current.state === 'suspended') await audioCtx.current.resume();
+    const audioReady = await initAudio();
+    if (!audioReady) return;
     if (isPlaying) {
       engine.current.pause();
       setIsPlaying(false);
@@ -380,7 +422,7 @@ function Deck({ label, deckColor, engine, audioCtx, tracks }) {
   const accentBg = deckColor === 'blue' ? 'from-blue-600/10' : 'from-red-600/10';
 
   return (
-    <div className={`bg-gradient-to-b ${accentBg} to-zinc-900/50 border ${borderColor} rounded-2xl p-4 sm:p-5`}>
+    <div className={`bg-gradient-to-b ${accentBg} to-zinc-900/50 border ${borderColor} rounded-2xl p-3 sm:p-5`}>
       {/* Deck Label */}
       <div className="flex items-center justify-between mb-3">
         <span className={`text-sm font-bold ${labelColor} tracking-widest`}>{label}</span>
@@ -392,30 +434,62 @@ function Deck({ label, deckColor, engine, audioCtx, tracks }) {
       {/* Turntable */}
       <Turntable isPlaying={isPlaying} speed={speed} trackTitle={selectedTrack?.title} />
 
-      {/* Song Selector */}
-      <div className="relative mt-4">
+      {/* Error message */}
+      {error && (
+        <div className="mt-3 flex items-center gap-2 text-red-400 text-xs bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
+          <AlertCircle size={14} className="flex-shrink-0" />
+          <span>{error}</span>
+          <button onClick={() => setError(null)} className="ml-auto text-red-300 hover:text-white">
+            <X size={12} />
+          </button>
+        </div>
+      )}
+
+      {/* Song Selector with Search */}
+      <div className="relative mt-3">
         <button
           onClick={() => setShowDropdown(!showDropdown)}
           className="w-full py-2.5 px-3 bg-zinc-800 border border-zinc-700 rounded-xl text-sm text-left flex items-center justify-between hover:border-zinc-500 transition"
         >
-          <span className={selectedTrack ? 'text-white' : 'text-zinc-500'}>
+          <span className={selectedTrack ? 'text-white truncate' : 'text-zinc-500'}>
             {loading ? 'Loading...' : selectedTrack ? selectedTrack.title : 'Select a song...'}
           </span>
-          <ChevronDown size={16} className="text-zinc-500" />
+          <ChevronDown size={16} className={`text-zinc-500 transition-transform flex-shrink-0 ${showDropdown ? 'rotate-180' : ''}`} />
         </button>
         {showDropdown && (
-          <div className="absolute top-full left-0 right-0 mt-1 bg-zinc-800 border border-zinc-700 rounded-xl max-h-48 overflow-y-auto z-30 shadow-xl">
-            {tracks.map((t) => (
-              <button
-                key={t.id}
-                onClick={() => loadTrack(t)}
-                className="w-full text-left px-3 py-2 text-sm hover:bg-zinc-700 transition flex items-center gap-2"
-              >
-                <Music2 size={12} className="text-amber-400 flex-shrink-0" />
-                <span className="text-white truncate">{t.title}</span>
-                <span className="text-zinc-500 text-xs ml-auto flex-shrink-0">{t.duration}</span>
-              </button>
-            ))}
+          <div className="absolute top-full left-0 right-0 mt-1 bg-zinc-800 border border-zinc-700 rounded-xl z-30 shadow-xl overflow-hidden">
+            {/* Search input */}
+            <div className="p-2 border-b border-zinc-700">
+              <div className="relative">
+                <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-500" />
+                <input
+                  ref={searchRef}
+                  type="text"
+                  placeholder="Search songs..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-8 pr-3 py-2 bg-zinc-900 border border-zinc-700 rounded-lg text-sm text-white placeholder-zinc-500 outline-none focus:border-amber-500/50"
+                />
+              </div>
+            </div>
+            {/* Track list */}
+            <div className="max-h-48 overflow-y-auto">
+              {filteredTracks.length === 0 ? (
+                <div className="px-3 py-4 text-sm text-zinc-500 text-center">No songs found</div>
+              ) : (
+                filteredTracks.map((t) => (
+                  <button
+                    key={t.id}
+                    onClick={() => loadTrack(t)}
+                    className="w-full text-left px-3 py-2.5 text-sm hover:bg-zinc-700 active:bg-zinc-600 transition flex items-center gap-2"
+                  >
+                    <Music2 size={12} className="text-amber-400 flex-shrink-0" />
+                    <span className="text-white truncate">{t.title}</span>
+                    <span className="text-zinc-500 text-xs ml-auto flex-shrink-0">{t.duration}</span>
+                  </button>
+                ))
+              )}
+            </div>
           </div>
         )}
       </div>
@@ -439,15 +513,15 @@ function Deck({ label, deckColor, engine, audioCtx, tracks }) {
 
       {/* Transport Controls */}
       <div className="flex items-center justify-center gap-4 mt-2">
-        <button onClick={restart} className="text-zinc-400 hover:text-white transition" title="Restart">
+        <button onClick={restart} className="text-zinc-400 hover:text-white transition p-2" title="Restart">
           <SkipBack size={18} />
         </button>
         <button
           onClick={togglePlay}
           disabled={!selectedTrack || loading}
-          className={`w-12 h-12 rounded-full ${btnColor} text-white flex items-center justify-center transition disabled:opacity-30`}
+          className={`w-14 h-14 rounded-full ${btnColor} text-white flex items-center justify-center transition disabled:opacity-30`}
         >
-          {isPlaying ? <Pause size={20} /> : <Play size={20} className="ml-0.5" />}
+          {isPlaying ? <Pause size={22} /> : <Play size={22} className="ml-0.5" />}
         </button>
       </div>
 
@@ -490,26 +564,38 @@ function Deck({ label, deckColor, engine, audioCtx, tracks }) {
 export default function DJPage() {
   const [mounted, setMounted] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
-  const [crossfade, setCrossfade] = useState(0.5); // 0=A, 1=B
+  const [crossfade, setCrossfade] = useState(0.5);
   const audioCtxRef = useRef(null);
   const deckARef = useRef(null);
   const deckBRef = useRef(null);
 
   useEffect(() => {
     setMounted(true);
-    // Show tutorial on first visit
     const seen = localStorage.getItem('ms-dj-tutorial');
     if (!seen) setShowTutorial(true);
   }, []);
 
-  useEffect(() => {
-    if (!mounted) return;
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    audioCtxRef.current = ctx;
-    deckARef.current = new DeckEngine(ctx);
-    deckBRef.current = new DeckEngine(ctx);
-    return () => { ctx.close(); };
-  }, [mounted]);
+  // Lazy AudioContext init — MUST be called from a user gesture (tap/click)
+  // This is the iOS Safari fix: AudioContext created outside gesture = permanently suspended
+  const initAudio = useCallback(async () => {
+    if (audioCtxRef.current && audioCtxRef.current.state !== 'closed') {
+      if (audioCtxRef.current.state === 'suspended') {
+        await audioCtxRef.current.resume();
+      }
+      return true;
+    }
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      audioCtxRef.current = ctx;
+      deckARef.current = new DeckEngine(ctx);
+      deckBRef.current = new DeckEngine(ctx);
+      if (ctx.state === 'suspended') await ctx.resume();
+      return true;
+    } catch (e) {
+      console.error('AudioContext init failed:', e);
+      return false;
+    }
+  }, []);
 
   useEffect(() => {
     // Crossfader: 0 = all A, 0.5 = equal, 1 = all B
@@ -522,6 +608,15 @@ export default function DJPage() {
       deckBRef.current.setVolume(volB);
     }
   }, [crossfade]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (audioCtxRef.current && audioCtxRef.current.state !== 'closed') {
+        audioCtxRef.current.close();
+      }
+    };
+  }, []);
 
   const closeTutorial = () => {
     setShowTutorial(false);
@@ -577,14 +672,14 @@ export default function DJPage() {
             label="DECK A"
             deckColor="blue"
             engine={deckARef}
-            audioCtx={audioCtxRef}
+            initAudio={initAudio}
             tracks={djTracks}
           />
           <Deck
             label="DECK B"
             deckColor="red"
             engine={deckBRef}
-            audioCtx={audioCtxRef}
+            initAudio={initAudio}
             tracks={djTracks}
           />
         </div>
