@@ -8,10 +8,32 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShoppingBag, Heart, Truck, Shield, Package, X, Loader2, Check, Ticket, Sparkles } from 'lucide-react';
+import { ShoppingBag, Heart, Truck, Shield, Package, X, Loader2, Check, Ticket, Sparkles, Search, ChevronDown } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
 import { usePlayerStore } from '@/store/playerStore';
 import { getOfficialTracks } from '@/data/tracks';
+import { motion, AnimatePresence } from 'framer-motion';
+import Zoom from 'react-medium-image-zoom';
+import 'react-medium-image-zoom/dist/styles.css';
+
+// Color swatch hex map for visual color circles
+const COLOR_HEX = {
+  'Black': '#000000', 'White': '#FFFFFF', 'Navy': '#1B3A5C', 'Navy Blazer': '#1B3A5C',
+  'Red': '#DC2626', 'Royal Blue': '#2563EB', 'Blue': '#3B82F6', 'Forest Green': '#166534',
+  'Dark Green': '#166534', 'Green': '#22C55E', 'Heather Gray': '#9CA3AF', 'Sport Grey': '#9CA3AF',
+  'Gray': '#6B7280', 'Grey': '#6B7280', 'Charcoal': '#374151', 'Dark Heather': '#4B5563',
+  'Maroon': '#7F1D1D', 'Purple': '#7C3AED', 'Orange': '#F97316', 'Gold': '#EAB308',
+  'Yellow': '#FACC15', 'Pink': '#EC4899', 'Light Pink': '#F9A8D4', 'Brown': '#92400E',
+  'Sand': '#D2B48C', 'Tan': '#D2B48C', 'Olive': '#6B7B3A', 'Khaki': '#C3B091',
+  'Light Blue': '#93C5FD', 'Heather Navy': '#2D4A6F', 'Heather Red': '#C05050',
+  'Team Purple': '#6D28D9', 'Kelly Green': '#15803D', 'True Royal': '#1D4ED8',
+  'Dark Chocolate': '#3E2723', 'Military Green': '#4B5320', 'Ash': '#B0B0B0',
+  'Irish Green': '#009A44', 'Carolina Blue': '#56A0D3', 'Heliconia': '#E91E63',
+  'Safety Pink': '#FF69B4', 'Safety Green': '#00FF00', 'Safety Orange': '#FF6600',
+  'Sapphire': '#0F52BA', 'Indigo Blue': '#3F51B5', 'Antique Cherry Red': '#991B1B',
+  'Turf Green': '#006400', 'Mint Green': '#98FB98', 'Coral Silk': '#F88379',
+  'Orchid': '#DA70D6', 'Cardinal Red': '#C41E3A', 'Tropical Blue': '#00CED1',
+};
 
 // Scroll-triggered animation hook
 function useInView(options = {}) {
@@ -243,7 +265,10 @@ export default function MerchPage() {
   const [addedToCart, setAddedToCart] = useState(false);
   const [selectedSize, setSelectedSize] = useState(null);
   const [selectedColor, setSelectedColor] = useState(null);
-  const { addItem } = useCartStore();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState('featured');
+  const [toast, setToast] = useState(null);
+  const { addItem, openCart } = useCartStore();
   const { queue, setQueue } = usePlayerStore();
 
   // Auto-play music while shopping — queue new releases if nothing playing
@@ -561,7 +586,9 @@ export default function MerchPage() {
       provider
     );
     setAddedToCart(true);
-    setTimeout(() => setAddedToCart(false), 2000);
+    // Show toast notification
+    setToast({ name: selectedItem.name, image: getVariantImage(selectedVariant, selectedItem.image), price: getPrice(selectedVariant) });
+    setTimeout(() => { setAddedToCart(false); setToast(null); }, 3000);
   };
 
   // Separate adult products from kids
@@ -599,16 +626,40 @@ export default function MerchPage() {
     sectionedProducts[sec].push(item);
   });
 
+  // Apply search filter
+  const searchFiltered = searchQuery.trim()
+    ? allAdultItems.filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    : allAdultItems;
+
+  // Apply sort
+  const sortItems = (items) => {
+    const sorted = [...items];
+    switch (sortBy) {
+      case 'price-asc': return sorted.sort((a, b) => (a.startingPrice || 999) - (b.startingPrice || 999));
+      case 'price-desc': return sorted.sort((a, b) => (b.startingPrice || 0) - (a.startingPrice || 0));
+      case 'name-asc': return sorted.sort((a, b) => a.name.localeCompare(b.name));
+      default: return sorted; // 'featured' — keep original order
+    }
+  };
+
   const filteredItems = activeCategory === 'all'
-    ? allAdultItems
+    ? sortItems(searchFiltered)
     : activeCategory === 'kids'
     ? KIDS_ITEMS
-    : allAdultItems.filter(item => {
+    : sortItems(searchFiltered.filter(item => {
         if (activeCategory === 'apparel') return ['hoodies', 'tees', 'tops'].includes(getSection(item.name));
         if (activeCategory === 'activewear') return ['activewear'].includes(getSection(item.name));
         if (activeCategory === 'accessories') return ['headwear', 'bags', 'essentials', 'other'].includes(getSection(item.name));
         return true;
-      });
+      }));
+
+  // Also apply search to sectioned products
+  const searchedSectionProducts = {};
+  searchFiltered.forEach(item => {
+    const sec = getSection(item.name);
+    if (!searchedSectionProducts[sec]) searchedSectionProducts[sec] = [];
+    searchedSectionProducts[sec].push(item);
+  });
 
   const categories = [
     { id: 'all', label: 'All Items' },
@@ -640,6 +691,8 @@ export default function MerchPage() {
         .merch-card:hover { transform: translateY(-8px) scale(1.02) !important; }
         .merch-card:hover .merch-card-glow { opacity: 1; }
         .merch-shimmer { background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent); background-size: 200% 100%; animation: merch-shimmer 3s ease-in-out infinite; }
+        select option { background: #1a1a2e; color: #fff; }
+        [data-rmiz-modal-overlay] { background: rgba(0,0,0,0.85) !important; }
       `}</style>
 
       {/* ============ HERO ============ */}
@@ -756,45 +809,45 @@ export default function MerchPage() {
             <div className="glass rounded-2xl p-6 border border-green-500/20 hover:border-green-500/40 transition-all duration-300 hover:-translate-y-1">
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-2xl">👕</span>
-                <span className="px-2 py-0.5 bg-green-500/20 text-green-400 text-xs font-bold rounded-full">SAVE $4</span>
+                <span className="px-2 py-0.5 bg-green-500/20 text-green-400 text-xs font-bold rounded-full">SAVE $5</span>
               </div>
               <h3 className="text-lg font-black text-white mb-1">2 Tanks</h3>
               <p className="text-white/40 text-sm mb-3">Any 2 tank tops — mix IDMG, LOTL, or MPF</p>
               <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-black text-green-400">$35.98</span>
-                <span className="text-white/30 line-through text-sm">$39.98</span>
+                <span className="text-2xl font-black text-green-400">$44.98</span>
+                <span className="text-white/30 line-through text-sm">$49.98</span>
               </div>
-              <p className="text-white/30 text-xs mt-1">$19.99 each × 2 with 10% off</p>
+              <p className="text-white/30 text-xs mt-1">$24.99 each × 2 with 10% off</p>
             </div>
 
             {/* Deal 2: 2 Crop Tops */}
             <div className="glass rounded-2xl p-6 border border-green-500/20 hover:border-green-500/40 transition-all duration-300 hover:-translate-y-1">
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-2xl">👚</span>
-                <span className="px-2 py-0.5 bg-green-500/20 text-green-400 text-xs font-bold rounded-full">SAVE $4</span>
+                <span className="px-2 py-0.5 bg-green-500/20 text-green-400 text-xs font-bold rounded-full">SAVE $5</span>
               </div>
               <h3 className="text-lg font-black text-white mb-1">2 Crop Tops</h3>
               <p className="text-white/40 text-sm mb-3">Any 2 crop tops — IDMG or LOTL Festival</p>
               <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-black text-green-400">$35.98</span>
-                <span className="text-white/30 line-through text-sm">$39.98</span>
+                <span className="text-2xl font-black text-green-400">$44.98</span>
+                <span className="text-white/30 line-through text-sm">$49.98</span>
               </div>
-              <p className="text-white/30 text-xs mt-1">$19.99 each × 2 with 10% off</p>
+              <p className="text-white/30 text-xs mt-1">$24.99 each × 2 with 10% off</p>
             </div>
 
             {/* Deal 3: Sock + Tote Duo */}
             <div className="glass rounded-2xl p-6 border border-green-500/20 hover:border-green-500/40 transition-all duration-300 hover:-translate-y-1">
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-2xl">🧦</span>
-                <span className="px-2 py-0.5 bg-green-500/20 text-green-400 text-xs font-bold rounded-full">SAVE $3</span>
+                <span className="px-2 py-0.5 bg-green-500/20 text-green-400 text-xs font-bold rounded-full">SAVE $5</span>
               </div>
               <h3 className="text-lg font-black text-white mb-1">Socks + Tote</h3>
               <p className="text-white/40 text-sm mb-3">Crew socks + tote bag combo</p>
               <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-black text-green-400">$26.98</span>
-                <span className="text-white/30 line-through text-sm">$29.98</span>
+                <span className="text-2xl font-black text-green-400">$44.98</span>
+                <span className="text-white/30 line-through text-sm">$49.98</span>
               </div>
-              <p className="text-white/30 text-xs mt-1">$14.99 each × 2 with 10% off</p>
+              <p className="text-white/30 text-xs mt-1">$24.99 each × 2 with 10% off</p>
             </div>
 
             {/* Deal 4: Festival Pack */}
@@ -806,8 +859,8 @@ export default function MerchPage() {
               <h3 className="text-lg font-black text-white mb-1">Festival Essentials</h3>
               <p className="text-white/40 text-sm mb-3">Bucket hat + fanny pack + socks + tote + water bottle</p>
               <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-black text-purple-400">$85.69</span>
-                <span className="text-white/30 line-through text-sm">$100.81</span>
+                <span className="text-2xl font-black text-purple-400">$106.21</span>
+                <span className="text-white/30 line-through text-sm">$124.95</span>
               </div>
               <p className="text-white/30 text-xs mt-1">5 items = 15% off everything</p>
             </div>
@@ -821,8 +874,8 @@ export default function MerchPage() {
               <h3 className="text-lg font-black text-white mb-1">Full Fit Pack</h3>
               <p className="text-white/40 text-sm mb-3">Tank + shorts + sports bra + socks + hat</p>
               <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-black text-pink-400">$103.53</span>
-                <span className="text-white/30 line-through text-sm">$121.80</span>
+                <span className="text-2xl font-black text-pink-400">$106.21</span>
+                <span className="text-white/30 line-through text-sm">$124.95</span>
               </div>
               <p className="text-white/30 text-xs mt-1">5 items = 15% off everything</p>
             </div>
@@ -865,12 +918,54 @@ export default function MerchPage() {
             </p>
           </div>
 
+          {/* Search + Sort + Category Filters */}
+          <div className="flex flex-col sm:flex-row items-center gap-4 mb-6">
+            {/* Search Bar */}
+            <div className="relative flex-1 max-w-md w-full">
+              <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" />
+              <input
+                type="text"
+                placeholder="Search products..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-11 pr-10 py-3 bg-white/5 border border-white/10 rounded-full text-white placeholder:text-white/30 focus:outline-none focus:border-blue-500/50 focus:bg-white/10 transition-all text-sm"
+              />
+              {searchQuery && (
+                <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center rounded-full bg-white/10 text-white/50 hover:text-white hover:bg-white/20 transition">
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+
+            {/* Sort Dropdown */}
+            <div className="relative">
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="appearance-none pl-4 pr-10 py-3 bg-white/5 border border-white/10 rounded-full text-white/60 text-sm focus:outline-none focus:border-blue-500/50 cursor-pointer hover:bg-white/10 transition-all"
+              >
+                <option value="featured">Featured</option>
+                <option value="price-asc">Price: Low to High</option>
+                <option value="price-desc">Price: High to Low</option>
+                <option value="name-asc">Name: A to Z</option>
+              </select>
+              <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none" />
+            </div>
+          </div>
+
+          {/* Result count when searching */}
+          {searchQuery && (
+            <div className="text-center mb-4">
+              <span className="text-white/40 text-sm">{filteredItems.length} item{filteredItems.length !== 1 ? 's' : ''} found for &ldquo;{searchQuery}&rdquo;</span>
+            </div>
+          )}
+
           {/* Category Filters */}
           <div className="flex flex-wrap items-center justify-center gap-3 mb-10">
             {categories.map((cat) => (
               <button
                 key={cat.id}
-                onClick={() => setActiveCategory(cat.id)}
+                onClick={() => { setActiveCategory(cat.id); setSearchQuery(''); }}
                 className={`px-6 py-3 rounded-full text-sm font-medium transition-all ${
                   activeCategory === cat.id
                     ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/30'
@@ -901,11 +996,11 @@ export default function MerchPage() {
                 <KidsCard key={item.id} item={item} idx={idx} />
               ))}
             </div>
-          ) : activeCategory === 'all' ? (
-            /* All Items — organized sections + kids at bottom */
+          ) : activeCategory === 'all' && !searchQuery && sortBy === 'featured' ? (
+            /* All Items — organized sections + kids at bottom (only when not searching/sorting) */
             <>
               {sectionOrder.map(sec => {
-                const items = sectionedProducts[sec.id];
+                const items = searchedSectionProducts[sec.id];
                 if (!items || items.length === 0) return null;
                 return (
                   <div key={sec.id} className="mb-12">
@@ -938,12 +1033,18 @@ export default function MerchPage() {
                 </div>
               </div>
             </>
-          ) : (
-            /* Filtered category view */
+          ) : activeCategory === 'kids' ? null : (
+            /* Filtered/searched/sorted view — flat grid */
             <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredItems.map((item, idx) => (
+              {filteredItems.length > 0 ? filteredItems.map((item, idx) => (
                 <ProductCard key={item.id} item={item} idx={idx} onQuickView={handleQuickView} />
-              ))}
+              )) : (
+                <div className="col-span-full text-center py-16">
+                  <ShoppingBag size={48} className="text-white/10 mx-auto mb-4" />
+                  <p className="text-white/40 text-lg">No products found</p>
+                  <button onClick={() => { setSearchQuery(''); setSortBy('featured'); }} className="mt-4 text-blue-400 hover:text-blue-300 text-sm">Clear filters</button>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -973,12 +1074,35 @@ export default function MerchPage() {
       </section>
 
       {/* ============ QUICK VIEW MODAL ============ */}
+      <AnimatePresence>
       {selectedItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-[merch-fade-up_0.3s_ease-out]" onClick={() => { setSelectedItem(null); setProductDetails(null); setSelectedVariant(null); }}>
-          <div className="glass rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto" style={{ animation: 'merch-fade-scale 0.4s ease-out' }} onClick={(e) => e.stopPropagation()}>
+        <motion.div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+          onClick={() => { setSelectedItem(null); setProductDetails(null); setSelectedVariant(null); }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          <motion.div
+            className="glass rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+          >
             <div className="grid md:grid-cols-2 gap-0">
-              <div className="aspect-square relative bg-white">
-                <ProductImage src={getVariantImage(selectedVariant, selectedItem.image)} fallbackSrc={selectedItem.printfulImage} alt={selectedItem.name} />
+              <div className="aspect-square relative bg-white overflow-hidden">
+                <Zoom zoomMargin={40}>
+                  <img
+                    src={getVariantImage(selectedVariant, selectedItem.image) || selectedItem.printfulImage || '/images/merch/idmg-black-tee-real.jpg'}
+                    alt={selectedItem.name}
+                    className="w-full h-full object-cover"
+                    style={{ width: '100%', height: '100%' }}
+                  />
+                </Zoom>
+                <div className="absolute bottom-3 left-3 px-2 py-1 bg-black/50 rounded-md text-white/60 text-xs pointer-events-none">Click to zoom</div>
               </div>
               <div className="p-6 lg:p-8 relative">
                 <button onClick={() => { setSelectedItem(null); setProductDetails(null); setSelectedVariant(null); }} className="absolute top-4 right-4 w-10 h-10 bg-white/10 rounded-full flex items-center justify-center text-white/60 hover:text-white hover:bg-white/20 transition">
@@ -1020,51 +1144,85 @@ export default function MerchPage() {
                           );
                         }
 
-                        // Grouped size + color selector for products with many variants
-                        const currentColors = selectedSize ? (colorsBySize[selectedSize] || []) : [];
+                        // Grouped size + color selector with visual swatches
+                        // Get all unique colors across all sizes
+                        const allColors = [...new Set(Object.values(colorsBySize).flat())];
+                        const currentColors = selectedSize ? (colorsBySize[selectedSize] || []) : allColors;
 
                         return (
                           <>
-                            <label className="text-white/60 text-sm mb-3 block">Size ({sizes.length} available)</label>
-                            <div className="flex flex-wrap gap-2 mb-4">
-                              {sizes.map(size => (
-                                <button key={size} onClick={() => {
-                                  setSelectedSize(size);
-                                  const colors = colorsBySize[size] || [];
-                                  if (colors.length === 1) {
-                                    setSelectedColor(colors[0]);
-                                    setSelectedVariant(variantMap[`${size}::${colors[0]}`]);
-                                  } else {
-                                    setSelectedColor(null);
-                                    setSelectedVariant(null);
-                                  }
-                                }}
-                                className={`px-4 py-2.5 rounded-lg text-sm font-bold transition ${
-                                  selectedSize === size ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/30' : 'bg-white/10 text-white/60 hover:bg-white/20 hover:text-white'
-                                }`}>
-                                  {size}
-                                </button>
-                              ))}
-                            </div>
-
-                            {selectedSize && currentColors.length > 0 && (
+                            {/* Color Swatches — show first so user picks color, then size */}
+                            {allColors.length > 0 && (
                               <>
-                                <label className="text-white/60 text-sm mb-3 block">Color ({currentColors.length} available)</label>
-                                <div className="flex flex-wrap gap-2 mb-4">
-                                  {currentColors.map(color => (
-                                    <button key={color} onClick={() => {
-                                      setSelectedColor(color);
-                                      setSelectedVariant(variantMap[`${selectedSize}::${color}`]);
-                                    }}
-                                    className={`px-4 py-2.5 rounded-lg text-sm font-medium transition ${
-                                      selectedColor === color ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/30' : 'bg-white/10 text-white/60 hover:bg-white/20 hover:text-white'
-                                    }`}>
-                                      {color}
-                                    </button>
-                                  ))}
+                                <label className="text-white/60 text-sm mb-3 block">
+                                  Color{selectedColor ? `: ${selectedColor}` : ''} ({allColors.length} available)
+                                </label>
+                                <div className="flex flex-wrap gap-2.5 mb-5">
+                                  {allColors.map(color => {
+                                    const hex = COLOR_HEX[color] || COLOR_HEX[color.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')] || null;
+                                    const isAvailable = !selectedSize || (colorsBySize[selectedSize] || []).includes(color);
+                                    const isSelected = selectedColor === color;
+                                    return (
+                                      <button key={color} onClick={() => {
+                                        setSelectedColor(color);
+                                        if (selectedSize && variantMap[`${selectedSize}::${color}`]) {
+                                          setSelectedVariant(variantMap[`${selectedSize}::${color}`]);
+                                        } else if (!selectedSize) {
+                                          // Find first size with this color and auto-select
+                                          const firstSize = sizes.find(s => (colorsBySize[s] || []).includes(color));
+                                          if (firstSize) {
+                                            setSelectedSize(firstSize);
+                                            setSelectedVariant(variantMap[`${firstSize}::${color}`]);
+                                          }
+                                        }
+                                      }}
+                                      disabled={!isAvailable}
+                                      title={color}
+                                      className={`relative w-9 h-9 rounded-full transition-all ${isSelected ? 'ring-2 ring-blue-400 ring-offset-2 ring-offset-gray-900 scale-110' : 'hover:scale-110'} ${!isAvailable ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer'}`}>
+                                        {hex ? (
+                                          <span className="block w-full h-full rounded-full border-2 border-white/20" style={{ backgroundColor: hex }} />
+                                        ) : (
+                                          <span className="block w-full h-full rounded-full border-2 border-white/20 bg-gradient-to-br from-pink-400 via-purple-400 to-blue-400 text-[8px] text-white flex items-center justify-center font-bold">
+                                            {color.slice(0, 2)}
+                                          </span>
+                                        )}
+                                        {isSelected && <span className="absolute inset-0 flex items-center justify-center"><Check size={14} className={`${hex === '#FFFFFF' || hex === '#FACC15' || hex === '#EAB308' ? 'text-black' : 'text-white'} drop-shadow-md`} /></span>}
+                                      </button>
+                                    );
+                                  })}
                                 </div>
                               </>
                             )}
+
+                            {/* Size Grid */}
+                            <label className="text-white/60 text-sm mb-3 block">Size ({sizes.length} available)</label>
+                            <div className="flex flex-wrap gap-2 mb-4">
+                              {sizes.map(size => {
+                                const isAvailable = !selectedColor || (colorsBySize[size] || []).includes(selectedColor);
+                                return (
+                                  <button key={size} onClick={() => {
+                                    setSelectedSize(size);
+                                    if (selectedColor && variantMap[`${size}::${selectedColor}`]) {
+                                      setSelectedVariant(variantMap[`${size}::${selectedColor}`]);
+                                    } else {
+                                      const colors = colorsBySize[size] || [];
+                                      if (colors.length === 1) {
+                                        setSelectedColor(colors[0]);
+                                        setSelectedVariant(variantMap[`${size}::${colors[0]}`]);
+                                      }
+                                    }
+                                  }}
+                                  disabled={!isAvailable}
+                                  className={`px-4 py-2.5 rounded-lg text-sm font-bold transition ${
+                                    selectedSize === size ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/30' :
+                                    !isAvailable ? 'bg-white/5 text-white/20 cursor-not-allowed' :
+                                    'bg-white/10 text-white/60 hover:bg-white/20 hover:text-white'
+                                  }`}>
+                                    {size}
+                                  </button>
+                                );
+                              })}
+                            </div>
                           </>
                         );
                       })()}
@@ -1086,9 +1244,34 @@ export default function MerchPage() {
                 </div>
               </div>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
+      </AnimatePresence>
+
+      {/* ============ TOAST NOTIFICATION ============ */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            className="fixed bottom-6 right-6 z-[60] flex items-center gap-3 px-5 py-4 bg-gray-900 border border-green-500/30 rounded-2xl shadow-2xl shadow-green-500/10 max-w-sm"
+            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.9 }}
+            transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+          >
+            <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-white/10">
+              {toast.image && <img src={toast.image} alt="" className="w-full h-full object-cover" />}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-green-400 text-sm font-bold flex items-center gap-1"><Check size={14} /> Added to Cart</p>
+              <p className="text-white text-xs truncate">{toast.name}</p>
+            </div>
+            <button onClick={() => { setToast(null); openCart(); }} className="px-3 py-1.5 bg-blue-500 text-white text-xs font-bold rounded-full hover:bg-blue-400 transition flex-shrink-0">
+              View Cart
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
