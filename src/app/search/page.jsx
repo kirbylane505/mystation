@@ -91,8 +91,9 @@ function SearchPageInner() {
     };
 
     // Fire both requests in parallel — no commas in URLs
+    // Spotify client credentials caps track search at 10
     const [trackData, artistData] = await Promise.all([
-      fetchType('track', 20),
+      fetchType('track', 10),
       fetchType('artist', 5),
     ]);
 
