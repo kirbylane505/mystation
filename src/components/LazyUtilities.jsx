@@ -8,7 +8,7 @@
 
 import dynamic from 'next/dynamic';
 
-const InstallPWA = dynamic(() => import('@/components/InstallPWA'), { ssr: false });
+// InstallPWA popup disabled — too intrusive on every page
 const PageTracker = dynamic(() => import('@/components/PageTracker'), { ssr: false });
 const TimedPopups = dynamic(() => import('@/components/TimedPopups'), { ssr: false });
 const EmailCapturePopup = dynamic(() => import('@/components/EmailCapturePopup'), { ssr: false });
@@ -20,7 +20,7 @@ const IDMGBadge = dynamic(() => import('@/components/IDMGBadge'), { ssr: false }
 export default function LazyUtilities() {
   return (
     <>
-      <InstallPWA />
+      {/* InstallPWA removed — still available in mobile menu */}
       <TimedPopups />
       <EmailCapturePopup />
       <TrackingPixels />
