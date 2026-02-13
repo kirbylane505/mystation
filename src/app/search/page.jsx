@@ -222,6 +222,8 @@ function SearchPageInner() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search for Kendrick Lamar, Drake, Mike Page..."
+              autoComplete="off"
+              name="mystation-global-search"
               className="w-full pl-12 pr-12 py-4 bg-white/10 border border-white/20 rounded-2xl text-white placeholder-white/30 text-lg focus:outline-none focus:border-blue-500 focus:bg-white/15 transition"
               autoFocus
             />

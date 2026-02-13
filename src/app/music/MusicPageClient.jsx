@@ -53,7 +53,7 @@ export default function MusicPageClient({ initialTrackId, autoplay = false }) {
 
   // Get unique years and albums
   const years = [...new Set(officialTracks.map(t => t.year))].sort((a, b) => b - a);
-  const albumList = [...new Set(officialTracks.map(t => t.album).filter(Boolean))];
+  const albumList = [...new Set(officialTracks.filter(t => t.album !== 'Vault' && t.albumId !== 'vault').map(t => t.album).filter(Boolean))];
 
   // Filter tracks - EXCLUDE VAULT tracks (those are only on /vault page)
   let filteredTracks = officialTracks.filter(track => {
@@ -157,6 +157,8 @@ export default function MusicPageClient({ initialTrackId, autoplay = false }) {
                 placeholder="Search tracks, producers, features..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                autoComplete="off"
+                name="mystation-music-filter"
                 className="w-full bg-white/10 border border-white/20 rounded-xl py-3 pl-12 pr-4 text-white placeholder:text-white/40 focus:outline-none focus:border-blue-500"
               />
             </div>
