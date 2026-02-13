@@ -33,10 +33,10 @@ export default function Hero() {
         {/* Logo */}
         <div className="mb-6 flex justify-center hero-title">
           <img
-            src="/images/mpf-logo.png"
-            alt="Mike Page Foundation"
-            width={400}
-            height={400}
+            src="/images/idmg-logo-white.png"
+            alt="IDMG - Impossible Dreamz Music Group"
+            width={300}
+            height={300}
             className="drop-shadow-2xl"
           />
         </div>
