@@ -176,6 +176,24 @@ export default function CubistPage() {
             <p className="text-white/30 text-xs mt-1">From <em>Coke Wave 3.5: Narcos</em></p>
           </div>
 
+          {/* Pop The Half — Visual Clip */}
+          <div className="mb-10">
+            <div className="max-w-lg mx-auto">
+              <div className="aspect-square rounded-2xl overflow-hidden mb-4 bg-black">
+                <video
+                  src="/videos/pop-the-half-2.mp4"
+                  controls
+                  playsInline
+                  preload="metadata"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </div>
+            <h3 className="text-xl font-bold text-white text-center">Pop The Half</h3>
+            <p className="text-white/50 text-center">French Montana & Max B — Prod. The Cubist</p>
+            <p className="text-white/30 text-xs mt-1 text-center">Visual Clip</p>
+          </div>
+
           {/* YouTube Video - Free Shiest Life */}
           <div className="mb-10">
             <div className="aspect-video rounded-2xl overflow-hidden mb-4">
