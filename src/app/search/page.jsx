@@ -42,8 +42,8 @@ function SearchPageInner() {
   const { playlists, createPlaylist, addTrack } = usePlaylistStore();
   const { supporterTier } = useUserStore();
 
-  // Spotify access: Premium ($9.99) or Diamond ($14.99), OR within 24-hour free trial
-  const hasSpotifyAccess = supporterTier === 'premium' || supporterTier === 'diamond' || getTrialRemaining() > 0;
+  // Spotify access: open to ALL users — global search makes MyStation a real platform
+  const hasSpotifyAccess = true;
 
   // Search MyStation catalog locally
   const searchMyStation = useCallback((q) => {
