@@ -36,19 +36,19 @@ export default function Navbar() {
   // Nav items with icons
   // Mobile order: LOTL first, then Merch, Fan Zone, Foundation, then the rest
   const navItems = [
-    { href: '/', icon: Home, label: 'Home', mobileOrder: 0 },
-    { href: '/lotl', icon: Calendar, label: 'LOTL Tickets', mobileOrder: 1 },
-    { href: '/music', icon: Music, label: 'Music', mobileOrder: 5 },
-    { href: '/merch', icon: ShoppingBag, label: 'Merch', mobileOrder: 2 },
-    { href: '/fan-zone', icon: Zap, label: 'Fan Zone', mobileOrder: 3 },
-    { href: '/about', icon: Heart, label: 'Foundation', mobileOrder: 4 },
-    { href: '/lounge', icon: Gamepad2, label: 'Lounge', highlight: true, mobileOrder: 6 },
-    { href: '/make-a-hit', icon: Flame, label: 'Make A Hit', highlight: true, mobileOrder: 7 },
-    { href: '/rewards', icon: Gift, label: 'Rewards', hidden: true, mobileOrder: 99 },
-    { href: '/news', icon: Newspaper, label: 'News', mobileOrder: 8 },
-    { href: '/search', icon: Search, label: 'Search', highlight: true, mobileOrder: 9 },
+    { href: '/', icon: Home, label: 'Home', mobileOrder: 1 },
+    { href: '/lotl', icon: Calendar, label: 'LOTL Tickets', mobileOrder: 2 },
+    { href: '/music', icon: Music, label: 'Music', mobileOrder: 3 },
+    { href: '/merch', icon: ShoppingBag, label: 'Merch', mobileOrder: 4 },
+    { href: '/fan-zone', icon: Zap, label: 'Fan Zone', mobileOrder: 5 },
+    { href: '/about', icon: Heart, label: 'Foundation', mobileOrder: 6 },
+    { href: '/lounge', icon: Gamepad2, label: 'Lounge', highlight: true, mobileOrder: 7 },
+    { href: '/make-a-hit', icon: Flame, label: 'Make A Hit', highlight: true, mobileOrder: 8 },
+    { href: '/news', icon: Newspaper, label: 'News', mobileOrder: 9 },
     { href: '/playlists', icon: ListMusic, label: 'Playlists', mobileOrder: 10 },
-    { href: '/contact', icon: Mail, label: 'Contact', mobileOrder: 11 },
+    { href: '/search', icon: Search, label: 'Search', highlight: true, mobileOrder: 11 },
+    { href: '/contact', icon: Mail, label: 'Contact', mobileOrder: 12 },
+    { href: '/rewards', icon: Gift, label: 'Rewards', hidden: true, mobileOrder: 99 },
     { href: '/vault', icon: Lock, label: 'Vault', hidden: true, mobileOrder: 99 },
   ];
 
