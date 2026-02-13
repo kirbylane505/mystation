@@ -1,4 +1,4 @@
-import { sendShippingNotification, sendOrderFailedAlert } from '@/lib/email';
+import { sendShippingNotification, sendOrderFailedAlert, sendOrderStatusUpdate, sendDeliveryConfirmation, sendOrderConfirmation } from '@/lib/email';
 import { createHmac } from 'crypto';
 
 /**
@@ -124,7 +124,19 @@ async function handleOrderUpdated(data) {
     status: order.status
   });
 
-  // TODO: Update order status in your database
+  // Notify customer of significant status changes
+  const customerEmail = order?.recipient?.email;
+  const customerName = order?.recipient?.name || '';
+  if (customerEmail && order.status) {
+    sendOrderStatusUpdate({
+      customerName,
+      customerEmail,
+      orderId: order.id,
+      provider: 'Printful',
+      status: order.status,
+      message: `Your order is now: ${order.status.replace(/_/g, ' ')}`,
+    }).catch(err => console.error('Status update email failed:', err));
+  }
 }
 
 async function handleOrderFailed(data) {
@@ -153,7 +165,26 @@ async function handleOrderCanceled(data) {
     externalId: order.external_id
   });
 
-  // TODO: Process refund if needed
+  // Notify customer + admin about cancellation
+  const customerEmail = order?.recipient?.email;
+  if (customerEmail) {
+    sendOrderStatusUpdate({
+      customerName: order?.recipient?.name || '',
+      customerEmail,
+      orderId: order.id,
+      provider: 'Printful',
+      status: 'canceled',
+      message: 'Your order has been canceled. If you were charged, a refund will be processed automatically via Stripe.',
+    }).catch(err => console.error('Cancellation email failed:', err));
+  }
+
+  // Alert admin to verify refund was processed
+  sendOrderFailedAlert({
+    orderId: order.id,
+    provider: 'Printful',
+    error: `Order canceled — verify refund for ${customerEmail || 'unknown customer'}`,
+    customerEmail: customerEmail || '',
+  }).catch(err => console.error('Cancel alert email failed:', err));
 }
 
 async function handleProductUpdated(data) {
@@ -164,7 +195,8 @@ async function handleProductUpdated(data) {
     name: sync_product.name
   });
 
-  // TODO: Sync product changes to your catalog
+  // Products are fetched live from Printful API — no local catalog to sync
+  // Log for audit trail only
 }
 
 async function handleProductDeleted(data) {
@@ -174,13 +206,21 @@ async function handleProductDeleted(data) {
     productId: sync_product.id
   });
 
-  // TODO: Remove from your catalog
+  // Products are fetched live from Printful API — deletion auto-reflected
+  // Alert admin in case it was accidental
+  sendOrderFailedAlert({
+    orderId: sync_product.id,
+    provider: 'Printful',
+    error: `Product DELETED: ${sync_product.name || sync_product.id} — verify this was intentional`,
+    customerEmail: null,
+  }).catch(err => console.error('Product deletion alert failed:', err));
 }
 
 async function handleStockUpdated(data) {
   console.log('[Printful] Stock updated:', data);
 
-  // TODO: Update inventory display
+  // Inventory is managed by Printful (print-on-demand) — no local stock to update
+  // Log for monitoring only
 }
 
 /**

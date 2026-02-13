@@ -7,7 +7,7 @@
 
 import { useEffect, Suspense, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { useCartStore } from '@/stores/cartStore';
+import { useCartStore } from '@/store/cartStore';
 import { useUserStore } from '@/store/playerStore';
 import { CheckCircle, ShoppingBag, Music, Package, Loader2, Ticket, Gift, PartyPopper } from 'lucide-react';
 import Link from 'next/link';

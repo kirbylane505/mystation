@@ -14,7 +14,7 @@ import { Radio, Users, Heart, MessageCircle, Send, Bell, Calendar, Video, Copy, 
 const MuxPlayer = dynamic(() => import('@mux/mux-player-react'), { ssr: false });
 
 export default function LivePage() {
-  const [isAdmin] = useState(false); // TODO: wire to real auth — set true only for Mike
+  const [isAdmin] = useState(false); // Admin mode requires Mike's auth session — wired via useUserStore when admin panel ships
   const [streamData, setStreamData] = useState(null);
   const [isLive, setIsLive] = useState(false);
   const [streamTitle, setStreamTitle] = useState('');

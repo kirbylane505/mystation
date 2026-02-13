@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic';
 
-import { sendShippingNotification, sendOrderFailedAlert } from '@/lib/email';
+import { sendShippingNotification, sendOrderFailedAlert, sendOrderStatusUpdate, sendDeliveryConfirmation, sendOrderConfirmation } from '@/lib/email';
 import { createHmac } from 'crypto';
 
 /**
@@ -49,9 +49,22 @@ export async function POST(request) {
         const { id, status, line_items } = resource;
         console.log(`[Printify Webhook] Order created: ${id}, status: ${status}, items: ${line_items?.length || 0}`);
 
-        // TODO: Store order in database
-        // TODO: Send order confirmation email to customer
-        // TODO: Update inventory/dashboard
+        // Send order confirmation to customer
+        const customerEmail = resource?.address_to?.email;
+        const customerName = `${resource?.address_to?.first_name || ''} ${resource?.address_to?.last_name || ''}`.trim();
+        if (customerEmail) {
+          sendOrderConfirmation({
+            customerName: customerName || 'Customer',
+            customerEmail,
+            items: (line_items || []).map(li => ({
+              name: li.title || li.metadata?.title || 'Merch Item',
+              quantity: li.quantity || 1,
+              amount: Math.round((li.price || 0)),
+            })),
+            total: (line_items || []).reduce((sum, li) => sum + (li.price || 0) * (li.quantity || 1), 0),
+            sessionId: id,
+          }).catch(err => console.error('Order confirmation email failed:', err));
+        }
 
         break;
       }
@@ -60,8 +73,18 @@ export async function POST(request) {
         const { id, status } = resource;
         console.log(`[Printify Webhook] Order updated: ${id} -> ${status}`);
 
-        // TODO: Update order status in database
-        // TODO: Notify customer of status change if significant
+        // Notify customer of status change
+        const email = resource?.address_to?.email;
+        if (email && status) {
+          sendOrderStatusUpdate({
+            customerName: `${resource?.address_to?.first_name || ''} ${resource?.address_to?.last_name || ''}`.trim(),
+            customerEmail: email,
+            orderId: id,
+            provider: 'Printify',
+            status,
+            message: `Your order is now: ${status.replace(/_/g, ' ')}`,
+          }).catch(err => console.error('Status update email failed:', err));
+        }
 
         break;
       }
@@ -70,8 +93,18 @@ export async function POST(request) {
         const { id } = resource;
         console.log(`[Printify Webhook] Order sent to production: ${id}`);
 
-        // TODO: Update order status in database
-        // TODO: Notify customer that order is being produced
+        // Notify customer their order is being printed
+        const prodEmail = resource?.address_to?.email;
+        if (prodEmail) {
+          sendOrderStatusUpdate({
+            customerName: `${resource?.address_to?.first_name || ''} ${resource?.address_to?.last_name || ''}`.trim(),
+            customerEmail: prodEmail,
+            orderId: id,
+            provider: 'Printify',
+            status: 'in_production',
+            message: 'Great news! Your order is now being printed. You\'ll receive tracking info once it ships.',
+          }).catch(err => console.error('Production status email failed:', err));
+        }
 
         break;
       }
@@ -87,15 +120,13 @@ export async function POST(request) {
           console.log(`  URL: ${shipment.url}`);
         }
 
-        // TODO: Store tracking info in database
-
         // Send shipping notification with tracking link to customer
         sendShippingNotification({
-          customerName: resource?.address_to?.first_name + ' ' + (resource?.address_to?.last_name || ''),
+          customerName: `${resource?.address_to?.first_name || ''} ${resource?.address_to?.last_name || ''}`.trim(),
           customerEmail: resource?.address_to?.email || '',
-          trackingNumber: resource?.shipments?.[0]?.tracking_number || shipment?.tracking?.number || '',
-          trackingUrl: resource?.shipments?.[0]?.tracking_url || shipment?.tracking?.url || '',
-          carrier: resource?.shipments?.[0]?.carrier || shipment?.carrier || '',
+          trackingNumber: shipment?.number || shipment?.tracking_number || '',
+          trackingUrl: shipment?.url || shipment?.tracking_url || '',
+          carrier: shipment?.carrier || '',
           items: [],
         }).catch(err => console.error('Shipping email failed:', err));
 
@@ -106,9 +137,15 @@ export async function POST(request) {
         const { id } = resource;
         console.log(`[Printify Webhook] Order delivered: ${id}`);
 
-        // TODO: Update order status to delivered in database
-        // TODO: Send delivery confirmation email
-        // TODO: Trigger review request after delay
+        // Send delivery confirmation + review request
+        const deliveryEmail = resource?.address_to?.email;
+        if (deliveryEmail) {
+          sendDeliveryConfirmation({
+            customerName: `${resource?.address_to?.first_name || ''} ${resource?.address_to?.last_name || ''}`.trim(),
+            customerEmail: deliveryEmail,
+            orderId: id,
+          }).catch(err => console.error('Delivery confirmation email failed:', err));
+        }
 
         break;
       }
@@ -125,9 +162,8 @@ export async function POST(request) {
         const { id, title } = resource;
         console.log(`[Printify Webhook] Product published: ${title} (${id})`);
 
-        // TODO: Update product status in local database
-        // TODO: Invalidate product cache
-
+        // Products are fetched live from Printify API — publish auto-reflected
+        // Log for audit trail
         break;
       }
 

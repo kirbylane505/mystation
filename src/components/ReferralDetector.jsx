@@ -7,7 +7,7 @@
 
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { useCartStore } from '@/stores/cartStore';
+import { useCartStore } from '@/store/cartStore';
 import { Gift, X } from 'lucide-react';
 import Link from 'next/link';
 

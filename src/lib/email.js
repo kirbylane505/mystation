@@ -349,3 +349,92 @@ export async function sendOrderFailedAlert({ orderId, provider, error: orderErro
     return { success: false };
   }
 }
+
+/**
+ * Send order status update to customer
+ */
+export async function sendOrderStatusUpdate({ customerName, customerEmail, orderId, provider, status, message }) {
+  if (!resend) { console.warn('Resend not configured — skipping status update'); return { success: false }; }
+  try {
+    const statusColors = {
+      'in_production': '#f59e0b',
+      'sent_to_production': '#f59e0b',
+      'shipped': '#22c55e',
+      'delivered': '#22c55e',
+      'canceled': '#ef4444',
+      'failed': '#ef4444',
+    };
+    const color = statusColors[status] || '#3b82f6';
+
+    const { data, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: customerEmail,
+      subject: `Order Update — ${status.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}`,
+      html: `
+        <div style="font-family: -apple-system, sans-serif; max-width: 600px; margin: 0 auto; background: #0a0e1a; color: #fff; padding: 32px; border-radius: 16px;">
+          <div style="text-align: center; margin-bottom: 24px;">
+            <h1 style="color: #3b82f6; margin: 0; font-size: 24px;">MYSTATION</h1>
+            <p style="color: ${color}; font-size: 20px; font-weight: 700; margin: 12px 0;">Order ${status.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</p>
+          </div>
+          <p style="color: #e2e8f0;">Hey ${(customerName || '').split(' ')[0] || 'there'},</p>
+          <p style="color: #e2e8f0;">${message || `Your order status has been updated to: ${status}`}</p>
+          <div style="background: #1a1f36; padding: 20px; border-radius: 12px; margin: 16px 0;">
+            <p style="color: #94a3b8; margin: 4px 0;">Provider: <strong style="color: #e2e8f0;">${provider}</strong></p>
+            <p style="color: #94a3b8; margin: 4px 0;">Order: <strong style="color: #e2e8f0;">#${orderId}</strong></p>
+          </div>
+          <div style="text-align: center; margin-top: 24px;">
+            <a href="https://mystationlive.com" style="display: inline-block; background: #3b82f6; color: #fff; padding: 12px 28px; border-radius: 10px; text-decoration: none; font-weight: 600;">Visit MyStation</a>
+          </div>
+          <div style="text-align: center; margin-top: 20px; padding-top: 16px; border-top: 1px solid #2a2f46;">
+            <p style="color: #64748b; font-size: 12px;">MyStation Merch</p>
+          </div>
+        </div>
+      `,
+    });
+
+    if (error) { console.error('Failed to send status update:', error); return { success: false, error }; }
+    console.log('Order status update sent to:', customerEmail);
+    return { success: true, emailId: data?.id };
+  } catch (err) {
+    console.error('Email service error (status update):', err);
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * Send delivery confirmation + review request to customer
+ */
+export async function sendDeliveryConfirmation({ customerName, customerEmail, orderId }) {
+  if (!resend) { console.warn('Resend not configured — skipping delivery confirmation'); return { success: false }; }
+  try {
+    const { data, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: customerEmail,
+      subject: `Your MyStation order has been delivered!`,
+      html: `
+        <div style="font-family: -apple-system, sans-serif; max-width: 600px; margin: 0 auto; background: #0a0e1a; color: #fff; padding: 32px; border-radius: 16px;">
+          <div style="text-align: center; margin-bottom: 24px;">
+            <h1 style="color: #3b82f6; margin: 0; font-size: 24px;">MYSTATION</h1>
+            <p style="color: #22c55e; font-size: 20px; font-weight: 700; margin: 12px 0;">Package Delivered!</p>
+          </div>
+          <p style="color: #e2e8f0; margin-bottom: 20px;">Hey ${(customerName || '').split(' ')[0] || 'there'}, your order has arrived! We hope you love it.</p>
+          <div style="background: #1a1f36; padding: 20px; border-radius: 12px; margin-bottom: 16px; text-align: center;">
+            <p style="color: #94a3b8; margin: 0 0 12px;">How's your merch? Share it with us!</p>
+            <a href="https://mystationlive.com/merch" style="display: inline-block; background: #3b82f6; color: #fff; padding: 12px 28px; border-radius: 10px; text-decoration: none; font-weight: 600;">Shop More</a>
+          </div>
+          <div style="text-align: center; margin-top: 20px; padding-top: 16px; border-top: 1px solid #2a2f46;">
+            <p style="color: #64748b; font-size: 12px;">Order #${orderId || 'N/A'}</p>
+            <p style="color: #64748b; font-size: 12px;">Every purchase supports the Mike Page Foundation</p>
+          </div>
+        </div>
+      `,
+    });
+
+    if (error) { console.error('Failed to send delivery confirmation:', error); return { success: false, error }; }
+    console.log('Delivery confirmation sent to:', customerEmail);
+    return { success: true, emailId: data?.id };
+  } catch (err) {
+    console.error('Email service error (delivery):', err);
+    return { success: false, error: err.message };
+  }
+}
