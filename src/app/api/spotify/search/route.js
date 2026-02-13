@@ -152,7 +152,7 @@ export async function GET(request) {
   } catch (error) {
     console.error('Spotify search error:', error.message);
     return NextResponse.json(
-      { error: 'Search temporarily unavailable' },
+      { error: 'Search temporarily unavailable', debug: error.message },
       { status: 500 }
     );
   }
