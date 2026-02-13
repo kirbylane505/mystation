@@ -65,27 +65,40 @@ function SearchPageInner() {
       }));
   }, []);
 
-  // Search Spotify via our API (with retry + cache bust)
+  // Search Spotify via our API — separate calls for tracks and artists (avoids comma encoding issues)
   const searchSpotify = useCallback(async (q) => {
-    for (let attempt = 0; attempt < 3; attempt++) {
-      try {
-        const res = await fetch(`/api/spotify/search?q=${encodeURIComponent(q)}&type=track,artist&limit=20&_t=${Date.now()}`, { cache: 'no-store' });
-        if (!res.ok) {
+    const fetchType = async (type, limit) => {
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          const res = await fetch(`/api/spotify/search?q=${encodeURIComponent(q)}&type=${type}&limit=${limit}&_t=${Date.now()}`, { cache: 'no-store' });
+          if (!res.ok) {
+            if (attempt < 2) { await new Promise(r => setTimeout(r, 500)); continue; }
+            return {};
+          }
+          const data = await res.json();
+          if (data.error) {
+            if (attempt < 2) { await new Promise(r => setTimeout(r, 500)); continue; }
+            return {};
+          }
+          return data;
+        } catch {
           if (attempt < 2) { await new Promise(r => setTimeout(r, 500)); continue; }
-          return { tracks: [], artists: [] };
+          return {};
         }
-        const data = await res.json();
-        if (data.error) {
-          if (attempt < 2) { await new Promise(r => setTimeout(r, 500)); continue; }
-          return { tracks: [], artists: [] };
-        }
-        return data;
-      } catch {
-        if (attempt < 2) { await new Promise(r => setTimeout(r, 500)); continue; }
-        return { tracks: [], artists: [] };
       }
-    }
-    return { tracks: [], artists: [] };
+      return {};
+    };
+
+    // Fire both requests in parallel — no commas in URLs
+    const [trackData, artistData] = await Promise.all([
+      fetchType('track', 20),
+      fetchType('artist', 5),
+    ]);
+
+    return {
+      tracks: trackData.tracks || [],
+      artists: artistData.artists || [],
+    };
   }, []);
 
   // Debounced search
