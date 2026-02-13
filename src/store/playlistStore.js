@@ -45,15 +45,16 @@ const usePlaylistStore = create(
       },
 
       // Add a track to a playlist
-      // track shape: { id, spotifyId, title, artist, album, albumArt, previewUrl, audioSrc, source, duration }
+      // track shape: { id, spotifyId, deezerId, title, artist, album, albumArt, previewUrl, audioSrc, source, duration }
       addTrack: (playlistId, track) => {
         set((state) => ({
           playlists: state.playlists.map((p) => {
             if (p.id !== playlistId) return p;
-            // Prevent duplicates
-            const key = track.source === 'spotify' ? track.spotifyId : track.id;
+            // Prevent duplicates — use the right key per source
+            const key = track.spotifyId || track.deezerId || track.id;
+            if (!key) return p; // no valid key = skip
             const exists = p.tracks.some((t) =>
-              t.source === 'spotify' ? t.spotifyId === key : t.id === key
+              (t.spotifyId || t.deezerId || t.id) === key
             );
             if (exists) return p;
             const newTracks = [...p.tracks, { ...track, addedAt: new Date().toISOString() }];
