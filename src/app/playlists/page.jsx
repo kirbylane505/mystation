@@ -39,19 +39,25 @@ export default function PlaylistsPage() {
     setEditingId(null);
   };
 
+  const getTrackId = (t) => {
+    if (t.spotifyId) return `spotify_${t.spotifyId}`;
+    if (t.deezerId) return `deezer_${t.deezerId}`;
+    return t.id;
+  };
+
   const playPlaylist = (playlist, startIndex = 0, shuffle = false) => {
     let playable = playlist.tracks
       .filter((t) => t.source === 'mystation' || t.previewUrl)
       .map((t) => ({
-        id: t.source === 'spotify' ? `spotify_${t.spotifyId}` : t.id,
+        id: getTrackId(t),
         title: t.title,
         artist: t.artist,
         album: t.album,
-        audioFile: t.source === 'spotify' ? t.previewUrl : t.audioSrc,
+        audioFile: t.source === 'mystation' ? t.audioSrc : t.previewUrl,
         albumArt: t.albumArt,
         duration: t.duration,
         source: t.source,
-        isPreview: t.source === 'spotify',
+        isPreview: t.source !== 'mystation',
       }));
     if (playable.length === 0) return;
     if (shuffle) {
@@ -64,7 +70,7 @@ export default function PlaylistsPage() {
   };
 
   const playTrack = (track) => {
-    const id = track.source === 'spotify' ? `spotify_${track.spotifyId}` : track.id;
+    const id = getTrackId(track);
     if (currentTrack?.id === id) {
       togglePlay();
     } else {
@@ -73,17 +79,17 @@ export default function PlaylistsPage() {
         title: track.title,
         artist: track.artist,
         album: track.album,
-        audioFile: track.source === 'spotify' ? track.previewUrl : track.audioSrc,
+        audioFile: track.source === 'mystation' ? track.audioSrc : track.previewUrl,
         albumArt: track.albumArt,
         duration: track.duration,
         source: track.source,
-        isPreview: track.source === 'spotify',
+        isPreview: track.source !== 'mystation',
       });
     }
   };
 
   const isTrackPlaying = (track) => {
-    const id = track.source === 'spotify' ? `spotify_${track.spotifyId}` : track.id;
+    const id = getTrackId(track);
     return currentTrack?.id === id && isPlaying;
   };
 
@@ -356,8 +362,12 @@ export default function PlaylistsPage() {
                   </div>
 
                   {/* Source */}
-                  <span className={`text-[10px] px-2 py-0.5 rounded-full ${track.source === 'spotify' ? 'text-green-400/60 bg-green-500/10' : 'text-blue-400/60 bg-blue-500/10'}`}>
-                    {track.source === 'spotify' ? 'Spotify' : 'MyStation'}
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full ${
+                    track.source === 'deezer' ? 'text-purple-400/60 bg-purple-500/10' :
+                    track.source === 'spotify' ? 'text-green-400/60 bg-green-500/10' :
+                    'text-blue-400/60 bg-blue-500/10'
+                  }`}>
+                    {track.source === 'deezer' ? 'Deezer' : track.source === 'spotify' ? 'Spotify' : 'MyStation'}
                   </span>
 
                   {/* Duration */}

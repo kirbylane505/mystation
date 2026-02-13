@@ -206,10 +206,10 @@ function SearchPageInner() {
       <div className="relative max-w-4xl mx-auto px-4 sm:px-6 pt-8 pb-48">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl md:text-5xl font-black text-white mb-2">
-            Search <span className="text-blue-400">Music</span>
+          <h1 className="text-4xl md:text-5xl font-black text-white mb-2 tracking-tight">
+            Search <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Music</span>
           </h1>
-          <p className="text-white/50 text-sm">Find any song in the world. Build your perfect playlist.</p>
+          <p className="text-white/40 text-sm">100M+ songs. Playable previews. Build your perfect playlist.</p>
         </div>
 
         {/* Search Bar */}
@@ -292,13 +292,13 @@ function SearchPageInner() {
 
         {/* MyStation Results */}
         {results.mystation.length > 0 && (
-          <div className="mb-8">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-6 h-6 bg-blue-500 rounded-md flex items-center justify-center">
+          <div className="mb-10">
+            <div className="flex items-center gap-2.5 mb-4">
+              <div className="w-7 h-7 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center shadow-md shadow-blue-500/20">
                 <Music size={14} className="text-white" />
               </div>
-              <h2 className="text-lg font-bold text-white">MyStation</h2>
-              <span className="text-xs text-blue-400 bg-blue-500/20 px-2 py-0.5 rounded-full">Full Play</span>
+              <h2 className="text-base font-bold text-white tracking-wide uppercase">MyStation</h2>
+              <span className="text-[10px] text-blue-300 bg-blue-500/15 px-2 py-0.5 rounded-md font-medium">Full Tracks</span>
             </div>
             <div className="space-y-2">
               {results.mystation.map((track) => (
@@ -320,15 +320,17 @@ function SearchPageInner() {
           </div>
         )}
 
-        {/* Spotify Results */}
+        {/* Global Results */}
         {results.spotify.length > 0 && (
           <div className="mb-8 relative">
-            <div className="flex items-center gap-2 mb-4">
-              <Disc3 size={24} className="text-purple-400" />
-              <h2 className="text-lg font-bold text-white">Global Results</h2>
-              <span className="text-xs text-purple-400 bg-purple-500/20 px-2 py-0.5 rounded-full">Spotify + Deezer</span>
+            <div className="flex items-center gap-2.5 mb-4">
+              <div className="w-7 h-7 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center shadow-md shadow-purple-500/20">
+                <Disc3 size={14} className="text-white" />
+              </div>
+              <h2 className="text-base font-bold text-white tracking-wide uppercase">Global</h2>
+              <span className="text-[10px] text-purple-300 bg-purple-500/15 px-2 py-0.5 rounded-md font-medium">Spotify + Deezer</span>
               {!canUseSpotifyResults && (
-                <span className="text-xs text-yellow-400 bg-yellow-500/20 px-2 py-0.5 rounded-full ml-auto">Subscribe to Unlock</span>
+                <span className="text-[10px] text-yellow-300 bg-yellow-500/15 px-2.5 py-0.5 rounded-md font-medium ml-auto">Subscribe to Unlock</span>
               )}
             </div>
 
@@ -511,81 +513,114 @@ function TrackRow({
   spotify = false,
 }) {
   const hasPreview = spotify ? !!track.previewUrl : true;
+  const isDeezer = track.previewSource === 'deezer' || track.source === 'deezer';
 
   return (
     <div className="relative group">
-      <div className={`flex items-center gap-3 p-3 rounded-xl transition ${isPlaying ? 'bg-blue-500/15 border border-blue-500/30' : 'bg-white/5 hover:bg-white/10 border border-transparent'}`}>
+      <div className={`flex items-center gap-3 sm:gap-4 p-2.5 sm:p-3 rounded-xl transition-all duration-200 ${
+        isPlaying
+          ? 'bg-blue-500/15 border border-blue-500/30 shadow-lg shadow-blue-500/5'
+          : 'bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.06] hover:border-white/[0.12]'
+      }`}>
         {/* Album Art / Play Button */}
         <button
           onClick={onPlay}
           disabled={!hasPreview}
-          className="relative w-12 h-12 rounded-lg overflow-hidden shrink-0 group/play"
+          className={`relative w-12 h-12 sm:w-14 sm:h-14 rounded-lg overflow-hidden shrink-0 group/play shadow-md ${!hasPreview ? 'opacity-50' : ''}`}
         >
           {track.albumArt ? (
-            <Image src={track.albumArt} alt={track.title} fill className="object-cover" />
+            <img
+              src={track.albumArt}
+              alt=""
+              className="w-full h-full object-cover"
+              loading="lazy"
+            />
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-blue-600/40 to-purple-900/60 flex items-center justify-center">
-              <Music size={18} className="text-blue-400/60" />
+            <div className="w-full h-full bg-gradient-to-br from-indigo-600/60 to-purple-800/80 flex items-center justify-center">
+              <Music size={20} className="text-white/40" />
             </div>
           )}
-          <div className={`absolute inset-0 bg-black/40 flex items-center justify-center transition ${isPlaying ? 'opacity-100' : 'opacity-0 group-hover/play:opacity-100'}`}>
+          <div className={`absolute inset-0 bg-black/50 flex items-center justify-center transition-all duration-200 ${
+            isPlaying ? 'opacity-100' : 'opacity-0 group-hover/play:opacity-100'
+          }`}>
             {isPlaying ? (
-              <Pause size={18} className="text-white" fill="white" />
+              <Pause size={20} className="text-white drop-shadow-lg" fill="white" />
             ) : hasPreview ? (
-              <Play size={18} className="text-white ml-0.5" fill="white" />
+              <Play size={20} className="text-white ml-0.5 drop-shadow-lg" fill="white" />
             ) : (
               <ExternalLink size={14} className="text-white/60" />
             )}
           </div>
+          {/* Playable indicator dot */}
+          {hasPreview && !isPlaying && (
+            <div className="absolute bottom-1 right-1 w-2 h-2 rounded-full bg-green-400 shadow-sm shadow-green-400/50" />
+          )}
         </button>
 
         {/* Track Info */}
         <div className="flex-1 min-w-0">
-          <p className={`font-semibold text-sm truncate ${isPlaying ? 'text-blue-400' : 'text-white'}`}>
-            {track.title}
-            {track.explicit && <span className="ml-1 text-[10px] bg-white/20 text-white/60 px-1 rounded">E</span>}
+          <div className="flex items-center gap-1.5">
+            <p className={`font-semibold text-sm truncate ${isPlaying ? 'text-blue-400' : 'text-white'}`}>
+              {track.title}
+            </p>
+            {track.explicit && (
+              <span className="shrink-0 text-[9px] font-bold bg-white/15 text-white/50 w-4 h-4 rounded flex items-center justify-center leading-none">E</span>
+            )}
+          </div>
+          <p className="text-white/40 text-xs truncate mt-0.5">
+            {track.artist}
+            {track.album && <span className="text-white/20"> &middot; {track.album}</span>}
           </p>
-          <p className="text-white/50 text-xs truncate">{track.artist}</p>
         </div>
-
-        {/* Duration */}
-        <span className="text-white/30 text-xs hidden sm:block">
-          {track.durationFormatted || track.duration}
-        </span>
 
         {/* Source Badge */}
         {spotify && (
-          <span className={`text-[10px] hidden sm:block ${hasPreview ? 'text-green-400/60' : 'text-white/30'}`}>
-            {hasPreview ? (track.previewSource === 'deezer' || track.source === 'deezer' ? 'Deezer 30s' : '30s preview') : 'No preview'}
+          <span className={`hidden sm:inline-flex items-center gap-1 text-[10px] px-2 py-1 rounded-md shrink-0 ${
+            hasPreview
+              ? isDeezer
+                ? 'text-purple-300 bg-purple-500/15'
+                : 'text-green-300 bg-green-500/15'
+              : 'text-white/25 bg-white/5'
+          }`}>
+            {hasPreview && <span className="w-1.5 h-1.5 rounded-full bg-current" />}
+            {hasPreview ? (isDeezer ? '30s' : '30s') : 'No audio'}
           </span>
         )}
         {!spotify && (
-          <span className="text-[10px] text-blue-400/60 hidden sm:block">Full track</span>
+          <span className="hidden sm:inline-flex items-center gap-1 text-[10px] text-blue-300 bg-blue-500/15 px-2 py-1 rounded-md shrink-0">
+            <span className="w-1.5 h-1.5 rounded-full bg-current" />
+            Full
+          </span>
         )}
+
+        {/* Duration */}
+        <span className="text-white/25 text-xs tabular-nums hidden sm:block w-10 text-right shrink-0">
+          {track.durationFormatted || track.duration}
+        </span>
 
         {/* Add to Playlist */}
         <button
           onClick={onAddToPlaylist}
-          className={`w-9 h-9 rounded-full flex items-center justify-center transition shrink-0 ${
+          className={`w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center transition-all duration-200 shrink-0 ${
             addedFeedback
-              ? 'bg-green-500 text-white'
-              : 'bg-white/10 text-white/40 hover:bg-white/20 hover:text-white'
+              ? 'bg-green-500 text-white scale-110'
+              : 'bg-white/[0.06] text-white/30 hover:bg-white/15 hover:text-white'
           }`}
           title="Add to playlist"
         >
-          {addedFeedback ? <Check size={16} /> : <Plus size={16} />}
+          {addedFeedback ? <Check size={14} /> : <Plus size={14} />}
         </button>
 
-        {/* Spotify Link */}
+        {/* External Link */}
         {spotify && track.spotifyUrl && (
           <a
             href={track.spotifyUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center text-white/30 hover:text-green-400 hover:bg-green-500/10 transition shrink-0"
+            className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-white/[0.03] flex items-center justify-center text-white/20 hover:text-green-400 hover:bg-green-500/10 transition shrink-0"
             title="Open in Spotify"
           >
-            <ExternalLink size={14} />
+            <ExternalLink size={13} />
           </a>
         )}
       </div>
@@ -594,27 +629,27 @@ function TrackRow({
       {showPlaylistPicker && (
         <>
           <div className="fixed inset-0 z-40" onClick={onClosePlaylistPicker} />
-          <div className="absolute right-12 top-0 w-56 glass rounded-xl z-50 shadow-2xl overflow-hidden animate-fade-in">
-            <div className="p-2 border-b border-white/10">
-              <p className="text-white/60 text-xs px-2 py-1">Add to playlist</p>
+          <div className="absolute right-12 top-0 w-60 bg-[#1a1a2e]/95 backdrop-blur-xl rounded-xl z-50 shadow-2xl shadow-black/60 overflow-hidden animate-fade-in border border-white/10">
+            <div className="px-3 py-2.5 border-b border-white/[0.06]">
+              <p className="text-white/50 text-xs font-medium">Add to playlist</p>
             </div>
-            <div className="max-h-48 overflow-y-auto p-1">
+            <div className="max-h-48 overflow-y-auto p-1.5">
               {playlists.map((pl) => (
                 <button
                   key={pl.id}
                   onClick={() => onSelectPlaylist(pl.id)}
-                  className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/10 transition text-left"
+                  className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-white/[0.08] transition text-left"
                 >
-                  <ListPlus size={14} className="text-white/40 shrink-0" />
+                  <ListPlus size={14} className="text-white/30 shrink-0" />
                   <span className="text-white text-sm truncate">{pl.name}</span>
-                  <span className="text-white/20 text-xs ml-auto shrink-0">{pl.tracks.length}</span>
+                  <span className="text-white/15 text-xs ml-auto shrink-0">{pl.tracks.length}</span>
                 </button>
               ))}
             </div>
-            <div className="p-2 border-t border-white/10">
+            <div className="p-1.5 border-t border-white/[0.06]">
               <button
                 onClick={onCreatePlaylist}
-                className="w-full flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 transition text-blue-400 text-sm font-medium"
+                className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 transition text-blue-400 text-sm font-medium"
               >
                 <Plus size={14} />
                 New Playlist
