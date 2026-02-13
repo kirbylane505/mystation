@@ -229,6 +229,8 @@ export const useUserStore = create(
       supporterTier: 'free', // 'free', 'regular', 'premium', 'diamond'
       favorites: [],
       email: '',
+      accessStatus: 'none', // 'none' | 'trial' | 'subscribed' | 'expired'
+      trialExpiresAt: null,
       sessionToken: null,
       sessionKicked: false,
 
@@ -244,7 +246,16 @@ export const useUserStore = create(
         isLoggedIn: true,
         email,
         supporterTier: tier,
+        accessStatus: 'subscribed',
         user: { email, isSubscribed: true, tier }
+      }),
+
+      setEmail: (email) => set({ email }),
+
+      setTrialStatus: (status, expiresAt = null) => set({
+        accessStatus: status,
+        trialExpiresAt: expiresAt,
+        isSubscribed: status === 'subscribed',
       }),
 
       logout: () => {
@@ -316,6 +327,8 @@ export const useUserStore = create(
         email: state.email,
         favorites: state.favorites,
         supporterTier: state.supporterTier,
+        accessStatus: state.accessStatus,
+        trialExpiresAt: state.trialExpiresAt,
         sessionToken: state.sessionToken,
       })
     }

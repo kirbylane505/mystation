@@ -261,6 +261,44 @@ async function handleCheckoutCompleted(session, stripe) {
       }).catch(err => console.error('Order confirmation email failed:', err));
     }
 
+    // Auto-grant 1 month subscription on any purchase
+    if (customerEmail && totalAmount > 0) {
+      try {
+        const { getSupabaseAdmin } = await import('@/lib/supabaseAdmin');
+        const supabase = getSupabaseAdmin();
+        if (supabase) {
+          const email = customerEmail.toLowerCase();
+          const oneMonthFromNow = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+
+          const { data: existing } = await supabase
+            .from('user_trials')
+            .select('purchased_sub_until')
+            .eq('email', email)
+            .single();
+
+          if (existing) {
+            // Only extend if new date is later than existing expiry
+            const currentExpiry = existing.purchased_sub_until ? new Date(existing.purchased_sub_until) : new Date(0);
+            if (oneMonthFromNow > currentExpiry) {
+              await supabase
+                .from('user_trials')
+                .update({ purchased_sub_until: oneMonthFromNow.toISOString() })
+                .eq('email', email);
+            }
+          } else {
+            // Create new trial row with purchase sub
+            await supabase.from('user_trials').insert({
+              email,
+              trial_started_at: new Date().toISOString(),
+              purchased_sub_until: oneMonthFromNow.toISOString(),
+            });
+          }
+        }
+      } catch (e) {
+        console.error('Auto-subscribe on purchase error:', e);
+      }
+    }
+
     // Track purchase analytics + spending for rewards
     try {
       const { getSupabaseAdmin } = await import('@/lib/supabaseAdmin');

@@ -11,7 +11,7 @@ import dynamic from 'next/dynamic';
 // InstallPWA popup disabled — too intrusive on every page
 const PageTracker = dynamic(() => import('@/components/PageTracker'), { ssr: false });
 const TimedPopups = dynamic(() => import('@/components/TimedPopups'), { ssr: false });
-const EmailCapturePopup = dynamic(() => import('@/components/EmailCapturePopup'), { ssr: false });
+
 const TrackingPixels = dynamic(() => import('@/components/TrackingPixels'), { ssr: false });
 const ExtensionBridge = dynamic(() => import('@/components/ExtensionBridge'), { ssr: false });
 const SharePage = dynamic(() => import('@/components/SharePage'), { ssr: false });
@@ -22,7 +22,6 @@ export default function LazyUtilities() {
     <>
       {/* InstallPWA removed — still available in mobile menu */}
       <TimedPopups />
-      <EmailCapturePopup />
       <TrackingPixels />
       <ExtensionBridge />
       <PageTracker />

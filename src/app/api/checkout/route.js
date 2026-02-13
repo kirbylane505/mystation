@@ -198,7 +198,7 @@ export async function POST(request) {
         printify_items: JSON.stringify(printifyItems),
         source: 'mystation',
       },
-      success_url: 'https://mystationlive.com/checkout/success?session_id={CHECKOUT_SESSION_ID}',
+      success_url: `https://mystationlive.com/checkout/success?session_id={CHECKOUT_SESSION_ID}&auto_sub=1${email ? '&email=' + encodeURIComponent(email) : ''}`,
       cancel_url: 'https://mystationlive.com/checkout',
     });
 

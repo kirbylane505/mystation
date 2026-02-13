@@ -8,6 +8,7 @@
 import { useEffect, Suspense, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useCartStore } from '@/stores/cartStore';
+import { useUserStore } from '@/store/playerStore';
 import { CheckCircle, ShoppingBag, Music, Package, Loader2, Ticket, Gift, PartyPopper } from 'lucide-react';
 import Link from 'next/link';
 
@@ -107,15 +108,36 @@ function LOTLCoupon({ orderTotal }) {
 function SuccessContent() {
   const searchParams = useSearchParams();
   const { clearCart } = useCartStore();
+  const { setTrialStatus, setEmail: setStoreEmail } = useUserStore();
   const sessionId = searchParams.get('session_id');
   const orderId = searchParams.get('order_id');
   const isDemo = searchParams.get('demo') === 'true';
+  const autoSub = searchParams.get('auto_sub') === '1';
+  const customerEmail = searchParams.get('email') || '';
   const orderTotal = parseFloat(searchParams.get('total') || '30'); // Default to qualifying amount
 
-  // Clear cart on success
+  // Clear cart + activate subscription cookie on success
   useEffect(() => {
     clearCart();
-  }, [clearCart]);
+
+    // Activate subscription cookie (purchase grants 1 month free access)
+    if (autoSub || !isDemo) {
+      fetch('/api/subscription/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'activate' }),
+      }).then(() => {
+        setTrialStatus('subscribed', null);
+      }).catch(() => {});
+    }
+
+    // Store email if available
+    if (customerEmail) {
+      const clean = customerEmail.toLowerCase().trim();
+      localStorage.setItem('mystation_email', clean);
+      setStoreEmail(clean);
+    }
+  }, [clearCart, autoSub, isDemo, customerEmail, setTrialStatus, setStoreEmail]);
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 relative overflow-hidden">

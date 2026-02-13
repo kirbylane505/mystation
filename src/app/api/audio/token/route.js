@@ -18,8 +18,32 @@ async function signToken(payload) {
   return hex.slice(0, 32);
 }
 
-// In-memory trial tracking (backed by IP — resets on deploy but that's acceptable)
-if (!global._serverTrialTracking) global._serverTrialTracking = new Map();
+// Trial cookie verification (email:timestamp:hmac)
+function verifyTrialCookie(request) {
+  const cookies = request.headers.get('cookie') || '';
+  const match = cookies.match(/mystation-trial=([^;]+)/);
+  if (!match) return null;
+  try {
+    const decoded = decodeURIComponent(match[1]);
+    const parts = decoded.split(':');
+    if (parts.length < 3) return null;
+    const sig = parts[parts.length - 1];
+    const timestamp = parts[parts.length - 2];
+    const email = parts.slice(0, parts.length - 2).join(':');
+    const payload = `${email}:${timestamp}`;
+    const secret = process.env.AUDIO_SECRET || 'ms-audio-2026-idmg';
+    const expected = createHmac('sha256', secret).update(`trial:${payload}`).digest('hex').slice(0, 32);
+    if (expected.length !== sig.length) return null;
+    let diff = 0;
+    for (let i = 0; i < expected.length; i++) diff |= expected.charCodeAt(i) ^ sig.charCodeAt(i);
+    if (diff !== 0) return null;
+    const ts = parseInt(timestamp, 10);
+    if (isNaN(ts)) return null;
+    return { email, trialStartedAt: ts };
+  } catch {
+    return null;
+  }
+}
 
 // Verify subscription session cookie (HMAC-signed, httpOnly)
 function verifySubscriptionCookie(request) {
@@ -81,35 +105,51 @@ export async function POST(request) {
         return NextResponse.json({ error: 'Vault access required' }, { status: 403 });
       }
 
-      // Non-vault: check trial
+      // Non-vault: check email-based trial cookie
       if (!isVaultTrack) {
-        const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
-        const tracking = global._serverTrialTracking;
-        let session = tracking.get(ip);
-        const now = Date.now();
+        const trial = verifyTrialCookie(request);
 
-        if (!session) {
-          session = { firstPlay: now, playCount: 0 };
-          tracking.set(ip, session);
-        }
-
-        // Clean old entries (>48h)
-        for (const [k, v] of tracking) {
-          if (now - v.firstPlay > 48 * 60 * 60 * 1000) tracking.delete(k);
-        }
-
-        const elapsed = now - session.firstPlay;
-        const trialMs = 24 * 60 * 60 * 1000;
-
-        // Trial expired AND beyond free play limit
-        if (elapsed >= trialMs) {
+        if (!trial) {
+          // No valid trial cookie — need email gate first
           return NextResponse.json({
-            error: 'Trial expired — subscribe to continue',
-            trialExpired: true,
+            error: 'Enter your email to start listening',
+            needsEmail: true,
           }, { status: 403 });
         }
 
-        session.playCount++;
+        const elapsed = Date.now() - trial.trialStartedAt;
+        const trialMs = 24 * 60 * 60 * 1000;
+
+        if (elapsed >= trialMs) {
+          // Check Supabase for purchase-granted subscription
+          let hasPurchaseSub = false;
+          try {
+            const { getSupabaseAdmin } = await import('@/lib/supabaseAdmin');
+            const supabase = getSupabaseAdmin();
+            if (supabase) {
+              const { data } = await supabase
+                .from('user_trials')
+                .select('purchased_sub_until, stripe_sub_active')
+                .eq('email', trial.email)
+                .single();
+              if (data) {
+                if (data.purchased_sub_until && new Date(data.purchased_sub_until) > new Date()) {
+                  hasPurchaseSub = true;
+                }
+                if (data.stripe_sub_active) {
+                  hasPurchaseSub = true;
+                }
+              }
+            }
+          } catch {}
+
+          if (!hasPurchaseSub) {
+            return NextResponse.json({
+              error: 'Trial expired — subscribe to continue',
+              trialExpired: true,
+            }, { status: 403 });
+          }
+        }
       }
     }
 
