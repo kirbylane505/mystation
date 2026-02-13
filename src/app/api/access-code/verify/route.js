@@ -33,7 +33,16 @@ export async function POST(request) {
       timingSafeEqual(Buffer.from(inputNorm), Buffer.from(expectedNorm));
 
     if (isValid) {
-      return NextResponse.json({ success: true, message: 'Welcome to the family!' });
+      const response = NextResponse.json({ success: true, message: 'Welcome to the family!' });
+      // Set permanent friend access cookie (365 days, httpOnly)
+      response.cookies.set('mystation-friend', 'true', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 365 * 24 * 60 * 60, // 1 year
+        path: '/',
+      });
+      return response;
     }
 
     return NextResponse.json(

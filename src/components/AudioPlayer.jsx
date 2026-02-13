@@ -152,9 +152,11 @@ export default function AudioPlayer() {
       if (!resp.ok) {
         const errData = await resp.json().catch(() => ({}));
         if (errData.needsEmail) {
-          // No trial cookie — trigger email gate by clearing stored email
+          // Server has no trial cookie — sync client state and show email gate
           localStorage.removeItem('mystation_email');
-          useUserStore.getState().setEmail('');
+          const userStore = useUserStore.getState();
+          userStore.setEmail('');
+          userStore.setTrialStatus('none');
           storeActionsRef.current.pause();
           return null;
         }
@@ -350,7 +352,11 @@ export default function AudioPlayer() {
     // Async: get secure audio URL with token
     (async () => {
       const audioUrl = await getAudioUrl(currentTrack);
-      if (!audioUrl) return;
+      if (!audioUrl) {
+        // Reset so user can retry same track (e.g., after entering email)
+        lastTrackIdRef.current = null;
+        return;
+      }
 
       // Remove any stale canplay listener
       if (canPlayListenerRef.current) {
