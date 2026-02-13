@@ -149,12 +149,29 @@ export default function AudioPlayer() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ trackId: track.id })
       });
+      if (!resp.ok) {
+        const errData = await resp.json().catch(() => ({}));
+        if (errData.needsEmail) {
+          // No trial cookie — trigger email gate by clearing stored email
+          localStorage.removeItem('mystation_email');
+          useUserStore.getState().setEmail('');
+          storeActionsRef.current.pause();
+          return null;
+        }
+        if (errData.trialExpired) {
+          // Trial expired — show subscribe modal
+          storeActionsRef.current.pause();
+          storeActionsRef.current.openSubscribeModal(track);
+          return null;
+        }
+        return null; // Other errors — don't play with bad token
+      }
       const { token } = await resp.json();
+      if (!token) return null;
       // Direct CDN URL with token — middleware validates and serves static file
       return `${track.audioFile}?_t=${token}`;
     } catch {
-      // Fallback to direct URL if token fails
-      return track.audioFile;
+      return null; // Network error — don't fallback to unprotected URL
     }
   }, []);
 
