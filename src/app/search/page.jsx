@@ -40,10 +40,11 @@ function SearchPageInner() {
 
   const { currentTrack, isPlaying, setTrack, setQueue, togglePlay, getTrialRemaining } = usePlayerStore();
   const { playlists, createPlaylist, addTrack } = usePlaylistStore();
-  const { supporterTier } = useUserStore();
+  const { isSubscribed, supporterTier } = useUserStore();
 
-  // Spotify access: open to ALL users — global search makes MyStation a real platform
+  // Everyone can search Spotify — but interacting with results requires subscription
   const hasSpotifyAccess = true;
+  const canUseSpotifyResults = isSubscribed || supporterTier !== 'free';
 
   // Search MyStation catalog locally
   const searchMyStation = useCallback((q) => {
@@ -334,32 +335,97 @@ function SearchPageInner() {
 
         {/* Spotify Results */}
         {results.spotify.length > 0 && (
-          <div className="mb-8">
+          <div className="mb-8 relative">
             <div className="flex items-center gap-2 mb-4">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="#1DB954">
                 <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z" />
               </svg>
               <h2 className="text-lg font-bold text-white">Spotify</h2>
               <span className="text-xs text-green-400 bg-green-500/20 px-2 py-0.5 rounded-full">100M+ Songs</span>
+              {!canUseSpotifyResults && (
+                <span className="text-xs text-yellow-400 bg-yellow-500/20 px-2 py-0.5 rounded-full ml-auto">Subscribe to Unlock</span>
+              )}
             </div>
-            <div className="space-y-2">
-              {results.spotify.map((track) => (
-                <TrackRow
-                  key={`sp-${track.spotifyId}`}
-                  track={track}
-                  isPlaying={isTrackPlaying(track)}
-                  onPlay={() => playSpotifyPreview(track)}
-                  onAddToPlaylist={() => setShowPlaylistPicker(track.spotifyId)}
-                  showPlaylistPicker={showPlaylistPicker === track.spotifyId}
-                  playlists={playlists}
-                  onSelectPlaylist={(plId) => handleAddToPlaylist(plId, track)}
-                  onClosePlaylistPicker={() => setShowPlaylistPicker(null)}
-                  onCreatePlaylist={() => setShowCreatePlaylist(true)}
-                  addedFeedback={addedFeedback === track.spotifyId}
-                  spotify
-                />
-              ))}
-            </div>
+
+            {/* Subscription gate — show blurred results with subscribe CTA */}
+            {!canUseSpotifyResults && (
+              <div className="relative">
+                {/* Show first 2 results normally as a tease */}
+                <div className="space-y-2 mb-2">
+                  {results.spotify.slice(0, 2).map((track) => (
+                    <TrackRow
+                      key={`sp-${track.spotifyId}`}
+                      track={track}
+                      isPlaying={false}
+                      onPlay={() => usePlayerStore.getState().openSubscribeModal()}
+                      onAddToPlaylist={() => usePlayerStore.getState().openSubscribeModal()}
+                      showPlaylistPicker={false}
+                      playlists={[]}
+                      onSelectPlaylist={() => {}}
+                      onClosePlaylistPicker={() => {}}
+                      onCreatePlaylist={() => {}}
+                      addedFeedback={false}
+                      spotify
+                    />
+                  ))}
+                </div>
+                {/* Blurred remaining results + subscribe overlay */}
+                <div className="relative overflow-hidden rounded-xl">
+                  <div className="blur-sm pointer-events-none opacity-40 space-y-2">
+                    {results.spotify.slice(2, 6).map((track) => (
+                      <TrackRow
+                        key={`sp-blur-${track.spotifyId}`}
+                        track={track}
+                        isPlaying={false}
+                        onPlay={() => {}}
+                        onAddToPlaylist={() => {}}
+                        showPlaylistPicker={false}
+                        playlists={[]}
+                        onSelectPlaylist={() => {}}
+                        onClosePlaylistPicker={() => {}}
+                        onCreatePlaylist={() => {}}
+                        addedFeedback={false}
+                        spotify
+                      />
+                    ))}
+                  </div>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-t from-mystation-navy/95 via-mystation-navy/80 to-transparent">
+                    <div className="text-center p-6">
+                      <h3 className="text-xl font-bold text-white mb-2">Subscribe to MyStation</h3>
+                      <p className="text-white/60 text-sm mb-4">Get access to 100M+ songs from every artist in the world</p>
+                      <button
+                        onClick={() => usePlayerStore.getState().openSubscribeModal()}
+                        className="px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold rounded-full hover:opacity-90 transition"
+                      >
+                        Subscribe — Plans from $4.99/mo
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Full results for subscribers */}
+            {canUseSpotifyResults && (
+              <div className="space-y-2">
+                {results.spotify.map((track) => (
+                  <TrackRow
+                    key={`sp-${track.spotifyId}`}
+                    track={track}
+                    isPlaying={isTrackPlaying(track)}
+                    onPlay={() => playSpotifyPreview(track)}
+                    onAddToPlaylist={() => setShowPlaylistPicker(track.spotifyId)}
+                    showPlaylistPicker={showPlaylistPicker === track.spotifyId}
+                    playlists={playlists}
+                    onSelectPlaylist={(plId) => handleAddToPlaylist(plId, track)}
+                    onClosePlaylistPicker={() => setShowPlaylistPicker(null)}
+                    onCreatePlaylist={() => setShowCreatePlaylist(true)}
+                    addedFeedback={addedFeedback === track.spotifyId}
+                    spotify
+                  />
+                ))}
+              </div>
+            )}
           </div>
         )}
 
