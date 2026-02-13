@@ -81,14 +81,10 @@ export async function GET(request) {
       token = await getSpotifyToken(1);
     }
 
-    const spotifyUrl = new URL('https://api.spotify.com/v1/search');
-    spotifyUrl.searchParams.set('q', q.trim());
-    spotifyUrl.searchParams.set('type', type);
-    spotifyUrl.searchParams.set('limit', limit.toString());
-    spotifyUrl.searchParams.set('offset', offset.toString());
-    spotifyUrl.searchParams.set('market', 'US');
+    // Build URL manually — searchParams.set encodes commas as %2C which Spotify rejects
+    const spotifyUrl = `https://api.spotify.com/v1/search?q=${encodeURIComponent(q.trim())}&type=${encodeURIComponent(type).replace(/%2C/gi, ',')}&limit=${limit}&offset=${offset}&market=US`;
 
-    let res = await fetch(spotifyUrl.toString(), {
+    let res = await fetch(spotifyUrl, {
       headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -97,7 +93,7 @@ export async function GET(request) {
       cachedToken = null;
       tokenExpiry = 0;
       token = await getSpotifyToken();
-      res = await fetch(spotifyUrl.toString(), {
+      res = await fetch(spotifyUrl, {
         headers: { Authorization: `Bearer ${token}` },
       });
     }
