@@ -34,7 +34,7 @@ export default function Hero() {
 
         {/* Tagline */}
         <p className="text-base md:text-lg text-white/50 mb-8 max-w-md mx-auto hero-cta">
-          Independent music. Real impact. Stream free — every play funds youth.
+          Your Music. Your Station. No Limits.
         </p>
 
         {/* Featured Video — "Caught That" Official 4K Video */}
