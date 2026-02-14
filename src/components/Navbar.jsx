@@ -49,6 +49,7 @@ export default function Navbar() {
     { href: '/playlists', icon: ListMusic, label: 'Playlists', mobileOrder: 10 },
     { href: '/search', icon: Search, label: 'Search', highlight: true, mobileOrder: 11 },
     { href: '/contact', icon: Mail, label: 'Contact', mobileOrder: 12 },
+    { href: '/street-team', icon: Users, label: 'Street Team', mobileOrder: 13 },
     { href: '/rewards', icon: Gift, label: 'Rewards', hidden: true, mobileOrder: 99 },
     { href: '/vault', icon: Lock, label: 'Vault', hidden: true, mobileOrder: 99 },
   ];
