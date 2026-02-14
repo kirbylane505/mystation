@@ -6,7 +6,6 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { usePathname } from 'next/navigation';
 import { usePlayerStore, useUserStore } from '@/store/playerStore';
 import {
   Play, Pause, SkipBack, SkipForward,
@@ -29,8 +28,6 @@ function getAlbumArt(track) {
 }
 
 export default function Player() {
-  const pathname = usePathname();
-  const isSongPage = pathname?.startsWith('/song/');
   const audioRef = useRef(null);
   const [mounted, setMounted] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -133,9 +130,6 @@ export default function Player() {
       setShowShareMenu(false);
     }
   };
-
-  // Song page has its own full controls — hide bottom player there
-  if (isSongPage) return null;
 
   if (!currentTrack) {
     return (
