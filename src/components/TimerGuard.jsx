@@ -7,8 +7,12 @@
 'use client';
 
 import { useEffect, useRef, useCallback } from 'react';
+import { usePathname } from 'next/navigation';
 import { usePlayerStore, useUserStore } from '@/store/playerStore';
 import { Clock } from 'lucide-react';
+
+// Pages that bypass the timer (ticketing, admin)
+const OPEN_PATHS = ['/events', '/tickets', '/admin'];
 
 function formatTime(seconds) {
   if (seconds === null || seconds === undefined) return '';
@@ -18,8 +22,11 @@ function formatTime(seconds) {
 }
 
 export default function TimerGuard() {
+  const pathname = usePathname();
   const { isLoggedIn, isSubscribed, setFreeSignupSlots } = useUserStore();
   const { isLocked, lockSite, setBrowseTimeRemaining, browseTimeRemaining, currentTrack } = usePlayerStore();
+
+  const isOpenPath = OPEN_PATHS.some(p => pathname?.startsWith(p));
   const timerRef = useRef(null);
   const pollRef = useRef(null);
   const initializedRef = useRef(false);
@@ -112,7 +119,8 @@ export default function TimerGuard() {
     };
   }, [isLoggedIn, isSubscribed, isLocked, lockSite, setBrowseTimeRemaining]);
 
-  // Don't show timer for authenticated/subscribed users
+  // Don't show timer on ticketing/admin pages or for authenticated users
+  if (isOpenPath) return null;
   if (isLoggedIn || isSubscribed) return null;
   if (browseTimeRemaining === null) return null;
   if (isLocked) return null;

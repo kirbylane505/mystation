@@ -8,7 +8,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import { usePlayerStore, useUserStore } from '@/store/playerStore';
+
+// Pages that should NEVER be blocked by the account wall (ticketing, admin)
+const OPEN_PATHS = ['/events', '/tickets', '/admin'];
 import { Mail, Lock, User, Loader2, Headphones, Music, Clock, CreditCard } from 'lucide-react';
 
 // Stripe checkout links per tier
@@ -17,6 +21,7 @@ const STRIPE_LINKS = {
 };
 
 export default function AccountWall() {
+  const pathname = usePathname();
   const { isLocked, unlockSite, setShowAccountWall, showAccountWall, browseTimeRemaining } = usePlayerStore();
   const { isLoggedIn, isSubscribed, setUser, setEmail: setStoreEmail, subscribe, freeSignupSlotsRemaining, setFreeSignupSlots } = useUserStore();
 
@@ -42,6 +47,10 @@ export default function AccountWall() {
       })
       .catch(() => {});
   }, [setFreeSignupSlots]);
+
+  // Ticketing/admin pages are always open — no wall for ticket buyers
+  const isOpenPath = OPEN_PATHS.some(p => pathname?.startsWith(p));
+  if (isOpenPath) return null;
 
   // Show wall when: (locked AND not logged in) OR showAccountWall flag
   const shouldShow = (isLocked && !isLoggedIn && !isSubscribed) || showAccountWall;
