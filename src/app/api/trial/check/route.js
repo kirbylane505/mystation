@@ -105,9 +105,9 @@ export async function GET(request) {
         console.error('Supabase trial check error:', e);
       }
 
-      // 4. Check trial window (24hr from start)
+      // 4. Check trial window (26 min from start)
       const elapsed = Date.now() - trial.trialStartedAt;
-      const trialMs = 24 * 60 * 60 * 1000;
+      const trialMs = 26 * 60 * 1000;
 
       if (elapsed < trialMs) {
         return NextResponse.json({

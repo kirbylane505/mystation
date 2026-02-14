@@ -14,6 +14,7 @@ import { headers } from 'next/headers';
 import { printful } from '@/lib/printful';
 import { printify } from '@/lib/printify';
 import { sendSaleAlert, sendOrderConfirmation } from '@/lib/email';
+import { createHmac } from 'crypto';
 
 // Stripe webhook secret for signature verification
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -59,6 +60,18 @@ export async function POST(request) {
 
       case 'payment_intent.succeeded':
         console.log('Payment succeeded:', event.data.object.id);
+        break;
+
+      case 'invoice.paid':
+        await handleInvoicePaid(event.data.object);
+        break;
+
+      case 'customer.subscription.deleted':
+        await handleSubscriptionCanceled(event.data.object);
+        break;
+
+      case 'customer.subscription.updated':
+        await handleSubscriptionUpdated(event.data.object);
         break;
 
       default:
@@ -360,5 +373,138 @@ async function handleCheckoutCompleted(session, stripe) {
     console.error('Failed to create fulfillment order:', error);
     // Don't throw - we don't want to retry the webhook for fulfillment errors
     // The order is paid, we'll need to manually fulfill if this fails
+  }
+}
+
+/**
+ * Handle invoice.paid — auto-renewal success
+ * Extends subscription for another 30 days
+ */
+async function handleInvoicePaid(invoice) {
+  const customerEmail = invoice.customer_email;
+  if (!customerEmail) {
+    console.log('invoice.paid: No customer email, skipping');
+    return;
+  }
+
+  const email = customerEmail.toLowerCase();
+  console.log('Auto-renewal payment received for:', email);
+
+  try {
+    const { getSupabaseAdmin } = await import('@/lib/supabaseAdmin');
+    const supabase = getSupabaseAdmin();
+    if (!supabase) return;
+
+    // Extend subscription
+    const thirtyDaysFromNow = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+
+    // Update subscribers table
+    const { data: existing } = await supabase
+      .from('subscribers')
+      .select('id')
+      .eq('email', email)
+      .single();
+
+    if (existing) {
+      await supabase
+        .from('subscribers')
+        .update({
+          status: 'active',
+          free_until: thirtyDaysFromNow.toISOString(),
+        })
+        .eq('email', email);
+    } else {
+      await supabase.from('subscribers').insert({
+        email,
+        status: 'active',
+        tier: 'regular',
+        created_at: new Date().toISOString(),
+        free_until: thirtyDaysFromNow.toISOString(),
+      });
+    }
+
+    // Update user_trials table
+    await supabase
+      .from('user_trials')
+      .upsert({
+        email,
+        stripe_sub_active: true,
+        purchased_sub_until: thirtyDaysFromNow.toISOString(),
+      }, { onConflict: 'email' });
+
+    console.log('Subscription renewed for:', email, 'until', thirtyDaysFromNow.toISOString());
+  } catch (err) {
+    console.error('invoice.paid handler error:', err);
+  }
+}
+
+/**
+ * Handle customer.subscription.deleted — cancellation
+ * Marks subscription as canceled in Supabase
+ */
+async function handleSubscriptionCanceled(subscription) {
+  const customerEmail = subscription.metadata?.email;
+
+  // Try to get email from customer object if not in metadata
+  let email = customerEmail;
+  if (!email) {
+    console.log('subscription.deleted: No email in metadata, subscription:', subscription.id);
+    return;
+  }
+
+  email = email.toLowerCase();
+  console.log('Subscription canceled for:', email);
+
+  try {
+    const { getSupabaseAdmin } = await import('@/lib/supabaseAdmin');
+    const supabase = getSupabaseAdmin();
+    if (!supabase) return;
+
+    // Mark as canceled in subscribers
+    await supabase
+      .from('subscribers')
+      .update({ status: 'canceled' })
+      .eq('email', email);
+
+    // Mark stripe_sub_active = false in user_trials
+    await supabase
+      .from('user_trials')
+      .update({ stripe_sub_active: false })
+      .eq('email', email);
+
+    console.log('Subscription marked canceled for:', email);
+  } catch (err) {
+    console.error('subscription.deleted handler error:', err);
+  }
+}
+
+/**
+ * Handle customer.subscription.updated — status changes (past_due, active, etc.)
+ */
+async function handleSubscriptionUpdated(subscription) {
+  const customerEmail = subscription.metadata?.email;
+  if (!customerEmail) return;
+
+  const email = customerEmail.toLowerCase();
+  const isActive = subscription.status === 'active';
+
+  try {
+    const { getSupabaseAdmin } = await import('@/lib/supabaseAdmin');
+    const supabase = getSupabaseAdmin();
+    if (!supabase) return;
+
+    await supabase
+      .from('subscribers')
+      .update({ status: isActive ? 'active' : subscription.status })
+      .eq('email', email);
+
+    await supabase
+      .from('user_trials')
+      .update({ stripe_sub_active: isActive })
+      .eq('email', email);
+
+    console.log('Subscription updated for:', email, '→', subscription.status);
+  } catch (err) {
+    console.error('subscription.updated handler error:', err);
   }
 }

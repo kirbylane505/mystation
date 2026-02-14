@@ -822,4 +822,17 @@ img {
   padding-bottom: max(4rem, env(safe-area-inset-bottom, 1rem));
 }
 
+/* ==========================================
+   IDMG MARQUEE TICKER
+   ========================================== */
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  animation: marquee 60s linear infinite;
+}
+
 /* Force rebuild Thu Feb 13 00:00:00 EST 2026 */

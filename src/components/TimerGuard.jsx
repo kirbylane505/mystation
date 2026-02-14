@@ -1,17 +1,25 @@
 /**
  * MYSTATION - Timer Guard
- * Manages 10-minute browse timer, polls server, triggers lockout.
- * Invisible component — no UI except optional countdown in last 2 minutes.
+ * Manages 26-minute browse timer, polls server, triggers lockout.
+ * Shows visible countdown in last 5 minutes + persistent "26 min free" notice.
  */
 
 'use client';
 
 import { useEffect, useRef, useCallback } from 'react';
 import { usePlayerStore, useUserStore } from '@/store/playerStore';
+import { Clock } from 'lucide-react';
+
+function formatTime(seconds) {
+  if (seconds === null || seconds === undefined) return '';
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}:${s.toString().padStart(2, '0')}`;
+}
 
 export default function TimerGuard() {
   const { isLoggedIn, isSubscribed, setFreeSignupSlots } = useUserStore();
-  const { isLocked, lockSite, setBrowseTimeRemaining, currentTrack } = usePlayerStore();
+  const { isLocked, lockSite, setBrowseTimeRemaining, browseTimeRemaining, currentTrack } = usePlayerStore();
   const timerRef = useRef(null);
   const pollRef = useRef(null);
   const initializedRef = useRef(false);
@@ -104,6 +112,32 @@ export default function TimerGuard() {
     };
   }, [isLoggedIn, isSubscribed, isLocked, lockSite, setBrowseTimeRemaining]);
 
-  // No visible UI — AccountWall handles the lockout overlay
-  return null;
+  // Don't show timer for authenticated/subscribed users
+  if (isLoggedIn || isSubscribed) return null;
+  if (browseTimeRemaining === null) return null;
+  if (isLocked) return null;
+
+  // Show countdown in last 5 minutes (300 seconds), subtle notice otherwise
+  const isUrgent = browseTimeRemaining <= 300;
+  const isCritical = browseTimeRemaining <= 60;
+
+  return (
+    <div className={`fixed top-20 right-4 z-[150] transition-all duration-500 ${
+      isUrgent ? 'opacity-100 scale-100' : 'opacity-70 scale-95 hover:opacity-100 hover:scale-100'
+    }`}>
+      <div className={`flex items-center gap-2 px-3 py-2 rounded-full backdrop-blur-md border text-sm font-medium shadow-lg ${
+        isCritical
+          ? 'bg-red-500/20 border-red-500/40 text-red-400 animate-pulse'
+          : isUrgent
+            ? 'bg-amber-500/20 border-amber-500/30 text-amber-400'
+            : 'bg-white/5 border-white/10 text-white/50'
+      }`}>
+        <Clock size={14} />
+        <span>{formatTime(browseTimeRemaining)}</span>
+        {!isUrgent && <span className="text-xs opacity-60">free</span>}
+        {isUrgent && !isCritical && <span className="text-xs">remaining</span>}
+        {isCritical && <span className="text-xs font-bold">Subscribe now!</span>}
+      </div>
+    </div>
+  );
 }

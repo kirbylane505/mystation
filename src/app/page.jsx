@@ -453,6 +453,17 @@ export default function HomePage() {
         </div>
       )}
 
+      {/* Floating IDMG Marquee */}
+      <div className="w-full overflow-hidden py-8 border-t border-b border-white/5 bg-gradient-to-r from-transparent via-white/[0.02] to-transparent">
+        <div className="flex animate-marquee whitespace-nowrap">
+          {[...Array(8)].map((_, i) => (
+            <span key={i} className="mx-12 text-2xl md:text-3xl font-black tracking-[0.3em] text-white/[0.07] uppercase select-none">
+              IMPOSSIBLE DREAMZ MUSIC GROUP
+            </span>
+          ))}
+        </div>
+      </div>
+
       {/* Footer */}
       <footer className="border-t border-white/5 py-16 bg-mystation-black/50">
         <div className="max-w-screen-xl mx-auto px-6">

@@ -404,6 +404,69 @@ export async function sendOrderStatusUpdate({ customerName, customerEmail, order
 /**
  * Send delivery confirmation + review request to customer
  */
+/**
+ * Send welcome email to new subscriber with their password
+ */
+export async function sendWelcomeEmail({ customerName, customerEmail, password }) {
+  if (!resend) { console.warn('Resend not configured — skipping welcome email'); return { success: false }; }
+  try {
+    const firstName = (customerName || '').split(' ')[0] || 'there';
+    const { data, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: customerEmail,
+      subject: `Welcome to MyStation!`,
+      html: `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; background: #0a0e1a; color: #fff; padding: 32px; border-radius: 16px;">
+          <div style="text-align: center; margin-bottom: 24px;">
+            <h1 style="color: #3b82f6; margin: 0; font-size: 28px;">MYSTATION</h1>
+            <p style="color: #22c55e; font-size: 22px; font-weight: 700; margin: 12px 0;">Thank You for Joining Us!</p>
+          </div>
+
+          <p style="color: #e2e8f0; font-size: 16px; line-height: 1.6; margin-bottom: 20px;">Hey ${firstName},</p>
+
+          <div style="background: #1a1f36; padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+            <h3 style="color: #3b82f6; margin: 0 0 12px 0;">Your Account</h3>
+            <p style="margin: 6px 0; color: #e2e8f0;">Email: <strong>${customerEmail}</strong></p>
+            <p style="margin: 6px 0; color: #e2e8f0;">Password: <strong>${password}</strong></p>
+          </div>
+
+          <p style="color: #e2e8f0; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">
+            Please shop merch, stream music, and pass the word along.
+          </p>
+
+          <p style="color: #f59e0b; font-size: 18px; font-weight: 700; text-align: center; margin-bottom: 24px; font-style: italic;">
+            Independence lives in you.
+          </p>
+
+          <div style="display: flex; gap: 12px; justify-content: center; margin-bottom: 24px;">
+            <a href="https://mystationlive.com/merch" style="display: inline-block; background: #3b82f6; color: #fff; padding: 14px 28px; border-radius: 12px; text-decoration: none; font-weight: 700;">Shop Merch</a>
+            <a href="https://mystationlive.com/music" style="display: inline-block; background: #22c55e; color: #fff; padding: 14px 28px; border-radius: 12px; text-decoration: none; font-weight: 700;">Stream Music</a>
+          </div>
+
+          <div style="text-align: center; margin-top: 24px; padding-top: 16px; border-top: 1px solid #2a2f46;">
+            <p style="color: #64748b; font-size: 12px;">Every listen supports the Mike Page Foundation 501(c)(3)</p>
+            <p style="color: #64748b; font-size: 12px;">MyStation — by IDMG</p>
+          </div>
+        </div>
+      `,
+    });
+
+    if (error) {
+      console.error('Failed to send welcome email:', error);
+      return { success: false, error };
+    }
+
+    console.log('Welcome email sent to:', customerEmail);
+    return { success: true, emailId: data?.id };
+  } catch (err) {
+    console.error('Email service error (welcome):', err);
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * Send delivery confirmation + review request to customer
+ */
 export async function sendDeliveryConfirmation({ customerName, customerEmail, orderId }) {
   if (!resend) { console.warn('Resend not configured — skipping delivery confirmation'); return { success: false }; }
   try {

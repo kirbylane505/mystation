@@ -54,7 +54,7 @@ export async function POST(request) {
     const sig = createHmac('sha256', AUDIO_SECRET).update(`trial:${payload}`).digest('hex').slice(0, 32);
     const cookieValue = `${cleanEmail}:${timestamp}:${sig}`;
 
-    const trialExpiresAt = new Date(trialStartedAt.getTime() + 24 * 60 * 60 * 1000);
+    const trialExpiresAt = new Date(trialStartedAt.getTime() + 26 * 60 * 1000);
 
     const response = NextResponse.json({
       trial_started_at: trialStartedAt.toISOString(),
@@ -65,7 +65,7 @@ export async function POST(request) {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 24 * 60 * 60, // 24 hours
+      maxAge: 26 * 60, // 26 minutes
       path: '/',
     });
 

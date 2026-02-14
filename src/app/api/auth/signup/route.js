@@ -7,6 +7,7 @@
 import { NextResponse } from 'next/server';
 import { createHmac } from 'crypto';
 import { signUp } from '@/lib/supabase';
+import { sendWelcomeEmail } from '@/lib/email';
 
 const AUDIO_SECRET = process.env.AUDIO_SECRET || 'ms-audio-2026-idmg';
 
@@ -91,6 +92,13 @@ export async function POST(request) {
     } catch (err) {
       console.error('First-26 check error:', err);
     }
+
+    // Send welcome email with password (fire-and-forget)
+    sendWelcomeEmail({
+      customerName: name || cleanEmail.split('@')[0],
+      customerEmail: cleanEmail,
+      password,
+    }).catch(err => console.error('Welcome email failed:', err));
 
     const response = NextResponse.json({
       success: true,

@@ -1,7 +1,7 @@
 /**
  * MYSTATION - Subscription Validation API
- * Server-side enforcement of 24-hour free trial
- * After 24 hours from first visit, must subscribe
+ * Server-side enforcement of 26-minute free trial
+ * After 26 minutes from first visit, must subscribe
  */
 
 import { NextResponse } from 'next/server';
@@ -28,7 +28,7 @@ export async function POST(request) {
       }
     }
 
-    // Non-subscriber: 24-hour free trial based on IP session
+    // Non-subscriber: 26-minute free trial based on IP session
     const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
     const key = `${ip}:${sessionId || 'anon'}`;
 
@@ -41,15 +41,15 @@ export async function POST(request) {
       tracking.set(key, session);
     }
 
-    // Clean old sessions (>48h)
+    // Clean old sessions (>2h)
     const now = Date.now();
     for (const [k, v] of tracking) {
-      if (now - v.firstPlay > 48 * 60 * 60 * 1000) tracking.delete(k);
+      if (now - v.firstPlay > 2 * 60 * 60 * 1000) tracking.delete(k);
     }
 
-    // Check 24-hour trial
+    // Check 26-minute trial
     const elapsed = now - session.firstPlay;
-    const trialMs = 24 * 60 * 60 * 1000;
+    const trialMs = 26 * 60 * 1000;
 
     if (elapsed >= trialMs) {
       return NextResponse.json({

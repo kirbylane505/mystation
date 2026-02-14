@@ -9,7 +9,7 @@
 
 import { useState } from 'react';
 import { usePlayerStore, useUserStore } from '@/store/playerStore';
-import { Mail, Lock, User, Loader2, Headphones, Music } from 'lucide-react';
+import { Mail, Lock, User, Loader2, Headphones, Music, Clock, CreditCard } from 'lucide-react';
 
 // Stripe checkout links per tier
 const STRIPE_LINKS = {
@@ -17,7 +17,7 @@ const STRIPE_LINKS = {
 };
 
 export default function AccountWall() {
-  const { isLocked, unlockSite, setShowAccountWall, showAccountWall } = usePlayerStore();
+  const { isLocked, unlockSite, setShowAccountWall, showAccountWall, browseTimeRemaining } = usePlayerStore();
   const { isLoggedIn, isSubscribed, setUser, setEmail: setStoreEmail, subscribe, freeSignupSlotsRemaining, setFreeSignupSlots } = useUserStore();
 
   const [view, setView] = useState('signup'); // 'signup' | 'signin' | 'code'
@@ -206,8 +206,15 @@ export default function AccountWall() {
             {/* Header */}
             <div className="text-center mb-6">
               <h2 className="text-xl font-bold text-white mb-2">
-                {isLocked ? 'Make an account to enter' : 'Welcome Back'}
+                {isLocked ? 'Your 26 minutes are up!' : 'Welcome Back'}
               </h2>
+              {isLocked ? (
+                <p className="text-white/60 text-sm mb-3">
+                  Subscribe for $4.99/mo to unlock unlimited streaming, merch shopping, and more.
+                  <br />
+                  <span className="text-amber-400 font-medium">Auto-renews monthly. Cancel anytime.</span>
+                </p>
+              ) : null}
               {freeSignupSlotsRemaining > 0 ? (
                 <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-500/20 border border-green-500/30 rounded-full">
                   <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
@@ -345,6 +352,20 @@ export default function AccountWall() {
                   </button>
                 </div>
                 {errorMsg && <p className="text-red-400 text-sm text-center">{errorMsg}</p>}
+              </div>
+            )}
+
+            {/* Direct subscribe button (always visible as option) */}
+            {isLocked && view !== 'code' && (
+              <div className="mt-4">
+                <a
+                  href={STRIPE_LINKS.regular}
+                  className="flex items-center justify-center gap-2 w-full py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-xl hover:opacity-90 transition shadow-lg shadow-green-500/30"
+                >
+                  <CreditCard size={18} />
+                  Subscribe Now — $4.99/mo
+                </a>
+                <p className="text-white/30 text-xs text-center mt-2">Auto-renews monthly. Cancel anytime.</p>
               </div>
             )}
 

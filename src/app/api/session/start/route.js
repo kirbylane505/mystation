@@ -1,6 +1,6 @@
 /**
  * MYSTATION - Session Start API
- * Creates 10-minute browse cookie for new visitors.
+ * Creates 26-minute browse cookie for new visitors.
  * Returns timer status for authenticated/subscribed/friend users.
  */
 
@@ -8,7 +8,7 @@ import { NextResponse } from 'next/server';
 import { createHmac } from 'crypto';
 
 const AUDIO_SECRET = process.env.AUDIO_SECRET || 'ms-audio-2026-idmg';
-const BROWSE_DURATION_MS = 10 * 60 * 1000; // 10 minutes
+const BROWSE_DURATION_MS = 26 * 60 * 1000; // 26 minutes
 
 function hmacSign(prefix, payload) {
   return createHmac('sha256', AUDIO_SECRET).update(`${prefix}:${payload}`).digest('hex').slice(0, 32);

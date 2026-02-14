@@ -1,7 +1,7 @@
 /**
  * MYSTATION - Audio Player State Management
  * Using Zustand for simple, powerful state
- * v4: 10-minute browse timer + account wall (no more trial/guest logic)
+ * v5: 26-minute browse timer + account wall + locked song loops
  */
 
 import { create } from 'zustand';
@@ -28,10 +28,10 @@ export const usePlayerStore = create(
   vaultUnlocked: false,
   setVaultUnlocked: (val) => set({ vaultUnlocked: val }),
 
-  // Lock state (10-min timer system)
+  // Lock state (26-min timer system)
   isLocked: false,
-  lockedTrackId: null, // The track that was playing when lockout triggered — let it finish
-  browseTimeRemaining: 600, // seconds
+  lockedTrackId: null, // The track that was playing when lockout triggered — loops until subscribe
+  browseTimeRemaining: 1560, // 26 minutes in seconds
 
   // Engagement tracking
   playCount: 0,
@@ -148,11 +148,11 @@ export const usePlayerStore = create(
   }),
 
   nextTrack: () => {
-    const { queue, queueIndex, repeat, shuffle, isLocked } = get();
+    const { queue, queueIndex, repeat, shuffle, isLocked, currentTrack } = get();
 
-    // If locked, stop advancing — current song finishes, then done
+    // If locked, loop current song — don't advance queue
     if (isLocked) {
-      set({ isPlaying: false, lockedTrackId: null });
+      set({ progress: 0 }); // restart same track
       return;
     }
 
@@ -213,7 +213,7 @@ export const usePlayerStore = create(
 }),
     {
       name: 'mystation-player',
-      version: 4, // v4: 10-min timer system, clean state for all users
+      version: 5, // v5: 26-min timer, locked song loops
       partialize: (state) => ({
         volume: state.volume,
         isMuted: state.isMuted,
