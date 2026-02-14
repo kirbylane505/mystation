@@ -10,7 +10,6 @@ import { Play, Pause, Trash2, Music, Plus, ListPlus, Search, Clock, Disc3, X, Ed
 import { usePlayerStore } from '@/store/playerStore';
 import usePlaylistStore from '@/store/playlistStore';
 import Link from 'next/link';
-import Image from 'next/image';
 
 export default function PlaylistsPage() {
   const { playlists, createPlaylist, deletePlaylist, renamePlaylist, removeTrack } = usePlaylistStore();
@@ -171,8 +170,16 @@ export default function PlaylistsPage() {
                     {pl.tracks.length > 0 && pl.tracks.some(t => t.albumArt) ? (
                       <div className="grid grid-cols-2 w-full h-full">
                         {pl.tracks.filter(t => t.albumArt).slice(0, 4).map((t, i) => (
-                          <div key={i} className="relative">
-                            <Image src={t.albumArt} alt="" fill className="object-cover" />
+                          <div key={i} className="relative overflow-hidden">
+                            <img
+                              src={t.albumArt}
+                              alt=""
+                              className="absolute inset-0 w-full h-full object-cover"
+                              onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-br from-purple-600/20 to-blue-600/20 items-center justify-center" style={{ display: 'none' }}>
+                              <Music size={24} className="text-white/10" />
+                            </div>
                           </div>
                         ))}
                         {pl.tracks.filter(t => t.albumArt).length < 4 &&
@@ -243,7 +250,7 @@ export default function PlaylistsPage() {
           <div className="w-40 h-40 sm:w-48 sm:h-48 rounded-2xl overflow-hidden shrink-0 bg-gradient-to-br from-purple-600/30 to-blue-600/30">
             {openPlaylist.coverArt ? (
               <div className="relative w-full h-full">
-                <Image src={openPlaylist.coverArt} alt={openPlaylist.name} fill className="object-cover" />
+                <img src={openPlaylist.coverArt} alt={openPlaylist.name} className="w-full h-full object-cover" onError={(e) => { e.target.style.display = 'none'; }} />
               </div>
             ) : (
               <div className="w-full h-full flex items-center justify-center">
@@ -344,12 +351,11 @@ export default function PlaylistsPage() {
                     className="relative w-10 h-10 rounded-lg overflow-hidden shrink-0"
                   >
                     {track.albumArt ? (
-                      <Image src={track.albumArt} alt="" fill className="object-cover" />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-blue-600/40 to-purple-900/60 flex items-center justify-center">
-                        <Music size={14} className="text-blue-400/60" />
-                      </div>
-                    )}
+                      <img src={track.albumArt} alt="" className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.target.style.display = 'none'; }} />
+                    ) : null}
+                    <div className={`absolute inset-0 bg-gradient-to-br from-blue-600/40 to-purple-900/60 flex items-center justify-center ${track.albumArt ? '-z-10' : ''}`}>
+                      <Music size={14} className="text-blue-400/60" />
+                    </div>
                     <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
                       {playing ? <Pause size={14} className="text-white" fill="white" /> : <Play size={14} className="text-white ml-0.5" fill="white" />}
                     </div>
