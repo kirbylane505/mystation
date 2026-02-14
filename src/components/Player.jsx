@@ -11,7 +11,7 @@ import { usePlayerStore, useUserStore } from '@/store/playerStore';
 import {
   Play, Pause, SkipBack, SkipForward,
   Volume2, VolumeX, Shuffle, Repeat,
-  Heart, Share2, Music, Sparkles, ChevronUp, X, Crown, AlarmClock, Moon, Loader2
+  Heart, Share2, Music, ChevronUp, X, AlarmClock, Moon, Loader2
 } from 'lucide-react';
 import AlarmClockModal from './AlarmClock';
 import SleepTimer from './SleepTimer';
@@ -58,31 +58,13 @@ export default function Player() {
     toggleShuffle,
     toggleRepeat,
     openSubscribeModal,
-    getTrialRemaining,
   } = usePlayerStore();
 
   const { isSubscribed } = useUserStore();
 
-  // 24-hour free trial countdown
-  const [trialRemaining, setTrialRemaining] = useState(24 * 60 * 60 * 1000);
-
   useEffect(() => {
     setMounted(true);
   }, []);
-
-  // Update trial countdown every minute
-  useEffect(() => {
-    if (isSubscribed || !mounted) return;
-    const update = () => setTrialRemaining(getTrialRemaining());
-    update();
-    const interval = setInterval(update, 60000);
-    return () => clearInterval(interval);
-  }, [isSubscribed, mounted, getTrialRemaining]);
-
-  const trialHours = Math.floor(trialRemaining / (1000 * 60 * 60));
-  const trialMinutes = Math.floor((trialRemaining % (1000 * 60 * 60)) / (1000 * 60));
-  const trialExpired = trialRemaining <= 0;
-  const showTrialBadge = mounted && !isSubscribed && !trialExpired;
 
   // Close expanded view on escape
   useEffect(() => {
@@ -354,19 +336,6 @@ export default function Player() {
   // MOBILE MINI PLAYER (shows on small screens)
   return (
     <>
-      {/* Mobile Subscribe Banner */}
-      {mounted && !isSubscribed && trialExpired && (
-        <button
-          onClick={() => openSubscribeModal()}
-          className="md:hidden fixed bottom-[72px] left-0 right-0 bg-gradient-to-r from-yellow-500/90 to-orange-500/90 backdrop-blur-xl z-40"
-        >
-          <div className="w-full flex items-center justify-center gap-2 py-2 text-white font-semibold text-sm">
-            <Crown size={16} />
-            Join the MyStation Family — Plans from $4.99/mo
-          </div>
-        </button>
-      )}
-
       {/* Mobile Mini Player */}
       <div
         className="md:hidden fixed bottom-0 left-0 right-0 bg-mystation-navy/95 backdrop-blur-xl border-t border-white/5 z-40"
@@ -418,14 +387,6 @@ export default function Player() {
 
       {/* Desktop Player */}
       <div className="hidden md:block fixed bottom-0 left-0 right-0 h-28 bg-mystation-navy/95 backdrop-blur-xl border-t border-white/5 z-40">
-        {showTrialBadge && (
-          <div className="absolute -top-10 left-1/2 -translate-x-1/2 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full shadow-lg flex items-center gap-2">
-            <Sparkles size={14} className="text-yellow-300" />
-            <span className="text-white text-sm font-medium">Free trial: {trialHours}h {trialMinutes}m left</span>
-            <button onClick={() => openSubscribeModal()} className="ml-2 px-2 py-0.5 bg-white/20 hover:bg-white/30 rounded text-xs text-white font-semibold transition">Subscribe</button>
-          </div>
-        )}
-
         <div className="max-w-screen-2xl mx-auto h-full px-6 flex items-center justify-between gap-6">
           {/* Track Info */}
           <div className="flex items-center gap-4 w-80">

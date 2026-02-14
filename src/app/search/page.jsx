@@ -38,7 +38,7 @@ function SearchPageInner() {
   const searchRef = useRef(null);
   const debounceRef = useRef(null);
 
-  const { currentTrack, isPlaying, setTrack, setQueue, togglePlay, getTrialRemaining } = usePlayerStore();
+  const { currentTrack, isPlaying, setTrack, setQueue, togglePlay } = usePlayerStore();
   const { playlists, createPlaylist, addTrack } = usePlaylistStore();
   const { isSubscribed, supporterTier } = useUserStore();
 

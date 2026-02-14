@@ -1,3 +1,8 @@
+/**
+ * MYSTATION - Audio Token API
+ * Access hierarchy: sub > friend > vault > auth > browse(<10min) > DJ > denied
+ */
+
 import { NextResponse } from 'next/server';
 import { createHmac } from 'crypto';
 
@@ -5,6 +10,8 @@ const AUDIO_SECRET = process.env.AUDIO_SECRET;
 if (!AUDIO_SECRET) {
   console.error('FATAL: AUDIO_SECRET env var is not set');
 }
+
+const BROWSE_DURATION_MS = 10 * 60 * 1000; // 10 minutes
 
 // Use Web Crypto API (same as middleware) for HMAC signing — ensures token compatibility
 async function signToken(payload) {
@@ -18,57 +25,63 @@ async function signToken(payload) {
   return hex.slice(0, 32);
 }
 
-// Trial cookie verification (email:timestamp:hmac)
-function verifyTrialCookie(request) {
-  const cookies = request.headers.get('cookie') || '';
-  const match = cookies.match(/mystation-trial=([^;]+)/);
-  if (!match) return null;
-  try {
-    const decoded = decodeURIComponent(match[1]);
-    const parts = decoded.split(':');
-    if (parts.length < 3) return null;
-    const sig = parts[parts.length - 1];
-    const timestamp = parts[parts.length - 2];
-    const email = parts.slice(0, parts.length - 2).join(':');
-    const payload = `${email}:${timestamp}`;
-    const secret = process.env.AUDIO_SECRET;
-    if (!secret) return null;
-    const expected = createHmac('sha256', secret).update(`trial:${payload}`).digest('hex').slice(0, 32);
-    if (expected.length !== sig.length) return null;
-    let diff = 0;
-    for (let i = 0; i < expected.length; i++) diff |= expected.charCodeAt(i) ^ sig.charCodeAt(i);
-    if (diff !== 0) return null;
-    const ts = parseInt(timestamp, 10);
-    if (isNaN(ts)) return null;
-    return { email, trialStartedAt: ts };
-  } catch {
-    return null;
-  }
+function hmacSign(prefix, payload) {
+  return createHmac('sha256', AUDIO_SECRET).update(`${prefix}:${payload}`).digest('hex').slice(0, 32);
 }
 
-// Verify subscription session cookie (HMAC-signed, httpOnly)
-function verifySubscriptionCookie(request) {
-  const cookies = request.headers.get('cookie') || '';
-  const match = cookies.match(/mystation-sub=([^;]+)/);
-  if (!match) return false;
-  try {
-    const [timestamp, sig] = match[1].split('.');
-    if (!timestamp || !sig) return false;
-    const secret = process.env.AUDIO_SECRET;
-    if (!secret) return false;
-    const expected = createHmac('sha256', secret).update(`sub:${timestamp}`).digest('hex').slice(0, 32);
-    // Timing-safe comparison
-    if (expected.length !== sig.length) return false;
-    let diff = 0;
-    for (let i = 0; i < expected.length; i++) diff |= expected.charCodeAt(i) ^ sig.charCodeAt(i);
-    if (diff !== 0) return false;
-    // Check expiry (30 days)
-    const ts = parseInt(timestamp, 10);
-    if (isNaN(ts) || Date.now() - ts > 30 * 24 * 60 * 60 * 1000) return false;
-    return true;
-  } catch {
-    return false;
-  }
+function timingSafeEqual(a, b) {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
+}
+
+function parseCookie(cookieStr, name) {
+  const match = cookieStr.match(new RegExp(`${name}=([^;]+)`));
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
+// Verify subscription cookie (HMAC-signed, 30-day expiry)
+function verifySubscriptionCookie(cookieStr) {
+  const val = parseCookie(cookieStr, 'mystation-sub');
+  if (!val) return false;
+  const [timestamp, sig] = val.split('.');
+  if (!timestamp || !sig) return false;
+  const expected = hmacSign('sub', timestamp);
+  if (!timingSafeEqual(expected, sig)) return false;
+  const ts = parseInt(timestamp, 10);
+  if (isNaN(ts) || Date.now() - ts > 30 * 24 * 60 * 60 * 1000) return false;
+  return true;
+}
+
+// Verify auth cookie (email:timestamp:hmac, 30-day expiry)
+function verifyAuthCookie(cookieStr) {
+  const val = parseCookie(cookieStr, 'mystation-auth');
+  if (!val) return null;
+  const parts = val.split(':');
+  if (parts.length < 3) return null;
+  const sig = parts[parts.length - 1];
+  const timestamp = parts[parts.length - 2];
+  const email = parts.slice(0, parts.length - 2).join(':');
+  const expected = hmacSign('auth', `${email}:${timestamp}`);
+  if (!timingSafeEqual(expected, sig)) return null;
+  const ts = parseInt(timestamp, 10);
+  if (isNaN(ts) || Date.now() - ts > 30 * 24 * 60 * 60 * 1000) return null;
+  return { email, timestamp: ts };
+}
+
+// Verify browse cookie (timestamp:hmac, check 10-min window)
+function verifyBrowseCookie(cookieStr) {
+  const val = parseCookie(cookieStr, 'mystation-browse');
+  if (!val) return null;
+  const parts = val.split(':');
+  if (parts.length !== 2) return null;
+  const [timestamp, sig] = parts;
+  const expected = hmacSign('browse', timestamp);
+  if (!timingSafeEqual(expected, sig)) return null;
+  const ts = parseInt(timestamp, 10);
+  if (isNaN(ts)) return null;
+  return { timestamp: ts };
 }
 
 export async function POST(request) {
@@ -85,84 +98,71 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Track not found' }, { status: 404 });
     }
 
-    // DJ mode bypasses trial/subscription — DJ Turntables is a free fan feature
+    const cookieStr = request.headers.get('cookie') || '';
     const isDJMode = request.headers.get('x-dj-mode') === '1';
 
-    // SERVER-SIDE SUBSCRIPTION/TRIAL CHECK
-    // 1. Check for valid subscription cookie
-    const isSubscribed = verifySubscriptionCookie(request);
+    // --- ACCESS HIERARCHY ---
 
-    // 2. Check for valid vault cookie (vault tracks bypass subscription)
-    const isVaultTrack = track.isVault || track.album === 'grammy-nights';
-    const cookieStr = request.headers.get('cookie') || '';
-    const hasVaultAccess = cookieStr.includes('mystation_vault=');
-
-    // 3. Check friend/access code cookie
-    const hasFriendAccess = cookieStr.includes('mystation-friend=');
-
-    // 4. If not subscribed, check 24-hour trial (DJ mode skips this)
-    if (!isSubscribed && !hasFriendAccess && !isDJMode) {
-      // Vault tracks need vault access, not subscription
-      if (isVaultTrack && !hasVaultAccess) {
-        return NextResponse.json({ error: 'Vault access required' }, { status: 403 });
-      }
-
-      // Non-vault: check email-based trial cookie
-      if (!isVaultTrack) {
-        const trial = verifyTrialCookie(request);
-
-        if (!trial) {
-          // No valid trial cookie — need email gate first
-          return NextResponse.json({
-            error: 'Enter your email to start listening',
-            needsEmail: true,
-          }, { status: 403 });
-        }
-
-        const elapsed = Date.now() - trial.trialStartedAt;
-        const trialMs = 24 * 60 * 60 * 1000;
-
-        if (elapsed >= trialMs) {
-          // Check Supabase for purchase-granted subscription
-          let hasPurchaseSub = false;
-          try {
-            const { getSupabaseAdmin } = await import('@/lib/supabaseAdmin');
-            const supabase = getSupabaseAdmin();
-            if (supabase) {
-              const { data } = await supabase
-                .from('user_trials')
-                .select('purchased_sub_until, stripe_sub_active')
-                .eq('email', trial.email)
-                .single();
-              if (data) {
-                if (data.purchased_sub_until && new Date(data.purchased_sub_until) > new Date()) {
-                  hasPurchaseSub = true;
-                }
-                if (data.stripe_sub_active) {
-                  hasPurchaseSub = true;
-                }
-              }
-            }
-          } catch {}
-
-          if (!hasPurchaseSub) {
-            return NextResponse.json({
-              error: 'Trial expired — subscribe to continue',
-              trialExpired: true,
-            }, { status: 403 });
-          }
-        }
-      }
+    // 1. Subscription cookie → full access
+    if (verifySubscriptionCookie(cookieStr)) {
+      return grantToken(track);
     }
 
-    const expires = Date.now() + 30 * 60 * 1000; // 30 min
-    const payload = `${track.audioFile}:${expires}`;
-    const signature = await signToken(payload);
-    // base64url encode: audioPath:expires:signature
-    const token = btoa(`${payload}:${signature}`).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    // 2. Friend cookie → full access
+    if (cookieStr.includes('mystation-friend=')) {
+      return grantToken(track);
+    }
 
-    return NextResponse.json({ token, expires });
+    // 3. Vault tracks need vault access
+    const isVaultTrack = track.isVault || track.album === 'grammy-nights';
+    if (isVaultTrack) {
+      const hasVaultAccess = cookieStr.includes('mystation_vault=');
+      if (!hasVaultAccess) {
+        return NextResponse.json({ error: 'Vault access required' }, { status: 403 });
+      }
+      return grantToken(track);
+    }
+
+    // 4. Auth cookie → full access (authenticated user)
+    const auth = verifyAuthCookie(cookieStr);
+    if (auth) {
+      return grantToken(track);
+    }
+
+    // 5. Browse cookie + <10min → access
+    const browse = verifyBrowseCookie(cookieStr);
+    if (browse) {
+      const elapsed = Date.now() - browse.timestamp;
+      if (elapsed < BROWSE_DURATION_MS) {
+        return grantToken(track);
+      }
+      // Timer expired
+      return NextResponse.json({
+        error: 'Browse time expired — create an account to continue',
+        expired: true,
+        needsAccount: true,
+      }, { status: 403 });
+    }
+
+    // 6. DJ mode → grant (free feature)
+    if (isDJMode) {
+      return grantToken(track);
+    }
+
+    // 7. No cookies → denied
+    return NextResponse.json({
+      error: 'Create an account to listen',
+      needsAccount: true,
+    }, { status: 403 });
   } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
+}
+
+async function grantToken(track) {
+  const expires = Date.now() + 30 * 60 * 1000; // 30 min
+  const payload = `${track.audioFile}:${expires}`;
+  const signature = await signToken(payload);
+  const token = btoa(`${payload}:${signature}`).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  return NextResponse.json({ token, expires });
 }

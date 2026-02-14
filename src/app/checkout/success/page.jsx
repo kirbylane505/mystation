@@ -108,7 +108,7 @@ function LOTLCoupon({ orderTotal }) {
 function SuccessContent() {
   const searchParams = useSearchParams();
   const { clearCart } = useCartStore();
-  const { setTrialStatus, setEmail: setStoreEmail } = useUserStore();
+  const { subscribe, setEmail: setStoreEmail } = useUserStore();
   const sessionId = searchParams.get('session_id');
   const orderId = searchParams.get('order_id');
   const isDemo = searchParams.get('demo') === 'true';
@@ -127,7 +127,9 @@ function SuccessContent() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'activate' }),
       }).then(() => {
-        setTrialStatus('subscribed', null);
+        if (customerEmail) {
+          subscribe(customerEmail.toLowerCase().trim());
+        }
       }).catch(() => {});
     }
 
@@ -137,7 +139,7 @@ function SuccessContent() {
       localStorage.setItem('mystation_email', clean);
       setStoreEmail(clean);
     }
-  }, [clearCart, autoSub, isDemo, customerEmail, setTrialStatus, setStoreEmail]);
+  }, [clearCart, autoSub, isDemo, customerEmail, subscribe, setStoreEmail]);
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 relative overflow-hidden">

@@ -14,8 +14,8 @@ import SubscribeModal from '@/components/SubscribeModal';
 import ClientProviders from '@/components/ClientProviders';
 import Cart from '@/components/Cart';
 import SessionGuard from '@/components/SessionGuard';
-import EmailGate from '@/components/EmailGate';
-import AccessGuard from '@/components/AccessGuard';
+import TimerGuard from '@/components/TimerGuard';
+import AccountWall from '@/components/AccountWall';
 import { Suspense } from 'react';
 import ReferralDetector from '@/components/ReferralDetector';
 import Script from 'next/script';
@@ -117,8 +117,8 @@ export default function RootLayout({ children }) {
       </head>
       <body className="min-h-screen bg-mystation-darker">
         <ClientProviders>
-          <EmailGate />
-          <AccessGuard />
+          <TimerGuard />
+          <AccountWall />
           <Navbar />
           <main className="pt-20 md:pt-24 pb-28">
             {children}

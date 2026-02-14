@@ -8,7 +8,7 @@
 
 import { useState, useEffect } from 'react';
 import { usePlayerStore, useUserStore } from '@/store/playerStore';
-import { X, Music, Sparkles, Heart, Check, CreditCard, Zap, Crown, ShoppingBag, Clock, Gem, Star, Headphones, Radio, Shirt, Lock, Users } from 'lucide-react';
+import { X, Music, Check, CreditCard, Crown, ShoppingBag, Gem, Star, Headphones } from 'lucide-react';
 import Link from 'next/link';
 
 // Stripe checkout links per tier
@@ -27,21 +27,8 @@ export default function SubscribeModal() {
   const [codeError, setCodeError] = useState('');
   const [codeLoading, setCodeLoading] = useState(false);
 
-  const { showSubscribeModal, closeSubscribeModal, pendingTrack, setTrack, getTrialRemaining } = usePlayerStore();
+  const { showSubscribeModal, closeSubscribeModal, pendingTrack, setTrack } = usePlayerStore();
   const { subscribe, isSubscribed } = useUserStore();
-
-  const [trialExpired, setTrialExpired] = useState(false);
-  const [isGuest, setIsGuest] = useState(false);
-
-  useEffect(() => {
-    if (showSubscribeModal) {
-      const remaining = getTrialRemaining();
-      setTrialExpired(remaining <= 0);
-      // Check if user is a guest (no email stored)
-      const hasEmail = typeof window !== 'undefined' && localStorage.getItem('mystation_email');
-      setIsGuest(!hasEmail && !isSubscribed);
-    }
-  }, [showSubscribeModal, getTrialRemaining, isSubscribed]);
 
   if (!showSubscribeModal) return null;
 
@@ -93,9 +80,7 @@ export default function SubscribeModal() {
   };
 
   const handleLater = () => {
-    if (!trialExpired) {
-      closeSubscribeModal();
-    }
+    closeSubscribeModal();
   };
 
   const tiers = [
@@ -161,15 +146,13 @@ export default function SubscribeModal() {
         className="relative w-full max-w-3xl max-h-[92vh] overflow-y-auto bg-gradient-to-b from-mystation-navy to-mystation-navyDark rounded-3xl border border-white/10 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Close button — only during trial */}
-        {!trialExpired && (
-          <button
-            onClick={handleLater}
-            className="absolute top-4 right-4 w-8 h-8 bg-white/10 rounded-full flex items-center justify-center text-white/60 hover:text-white hover:bg-white/20 transition z-10"
-          >
-            <X size={18} />
-          </button>
-        )}
+        {/* Close button */}
+        <button
+          onClick={handleLater}
+          className="absolute top-4 right-4 w-8 h-8 bg-white/10 rounded-full flex items-center justify-center text-white/60 hover:text-white hover:bg-white/20 transition z-10"
+        >
+          <X size={18} />
+        </button>
 
         {/* Header */}
         <div className="pt-8 pb-4 px-8 text-center relative">
@@ -178,10 +161,8 @@ export default function SubscribeModal() {
             <div className="w-16 h-16 mx-auto mb-3 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/30">
               {success ? (
                 <Check size={36} className="text-white animate-bounce" />
-              ) : trialExpired ? (
-                <Crown size={36} className="text-white" />
               ) : (
-                <Clock size={36} className="text-white" />
+                <Crown size={36} className="text-white" />
               )}
             </div>
 
@@ -190,15 +171,10 @@ export default function SubscribeModal() {
                 <h2 className="text-2xl font-bold text-white mb-1">Welcome to the Family!</h2>
                 <p className="text-white/60 text-sm">Unlimited streaming unlocked</p>
               </>
-            ) : trialExpired ? (
-              <>
-                <h2 className="text-xl font-bold text-white mb-1">Join the MyStation Family</h2>
-                <p className="text-white/60 text-sm">Your free trial has ended. Pick your plan to keep streaming.</p>
-              </>
             ) : (
               <>
-                <h2 className="text-xl font-bold text-white mb-1">You're in Your Free Trial!</h2>
-                <p className="text-white/60 text-sm">Lock in your plan now, or keep listening free for the rest of your trial.</p>
+                <h2 className="text-xl font-bold text-white mb-1">Join the MyStation Family</h2>
+                <p className="text-white/60 text-sm">Pick your plan to unlock unlimited streaming.</p>
               </>
             )}
           </div>
@@ -336,23 +312,14 @@ export default function SubscribeModal() {
               )}
             </div>
 
-            {/* Later option — ONLY during trial */}
-            {!trialExpired ? (
-              <div className="px-6 pb-6 flex flex-col items-center">
-                <button
-                  onClick={handleLater}
-                  className="text-white/60 text-sm hover:text-white/80 transition py-2 px-4"
-                >
-                  Later
-                </button>
-              </div>
-            ) : (
-              <div className="px-6 pb-6 text-center">
-                <p className="text-white/30 text-xs">
-                  Subscribe to continue using MyStation
-                </p>
-              </div>
-            )}
+            <div className="px-6 pb-6 flex flex-col items-center">
+              <button
+                onClick={handleLater}
+                className="text-white/60 text-sm hover:text-white/80 transition py-2 px-4"
+              >
+                Later
+              </button>
+            </div>
           </>
         )}
       </div>

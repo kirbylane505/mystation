@@ -8,7 +8,6 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import AuthModal from './AuthModal';
 import { CartButton } from './Cart';
 import { useCartStore } from '@/store/cartStore';
 import { useUserStore, usePlayerStore } from '@/store/playerStore';
@@ -22,8 +21,6 @@ import { tracks } from '@/data/tracks';
 
 export default function Navbar() {
   const pathname = usePathname();
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const [authMode, setAuthMode] = useState('signup');
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -305,11 +302,11 @@ export default function Navbar() {
             </div>
           ) : (
             <button
-              onClick={() => { setAuthMode('signup'); setShowAuthModal(true); }}
+              onClick={() => usePlayerStore.getState().setShowAccountWall(true)}
               className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full hover:shadow-lg hover:shadow-blue-500/30 transition text-white font-medium text-sm"
             >
               <User size={16} />
-              Sign Up
+              Sign In
             </button>
           )}
         </div>
@@ -449,10 +446,10 @@ export default function Navbar() {
                 </div>
               ) : (
                 <button
-                  onClick={() => { setAuthMode('signup'); setShowAuthModal(true); setMobileMenuOpen(false); }}
+                  onClick={() => { setMobileMenuOpen(false); usePlayerStore.getState().setShowAccountWall(true); }}
                   className="w-full py-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl text-white font-bold"
                 >
-                  Sign Up Free
+                  Sign In
                 </button>
               )}
             </div>
@@ -460,12 +457,6 @@ export default function Navbar() {
         )}
       </nav>
 
-      {/* Auth Modal */}
-      <AuthModal
-        isOpen={showAuthModal}
-        onClose={() => setShowAuthModal(false)}
-        initialMode={authMode}
-      />
     </>
   );
 }

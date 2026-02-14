@@ -1,7 +1,7 @@
 /**
  * MYSTATION - Audio Player State Management
  * Using Zustand for simple, powerful state
- * Includes subscription & play tracking for engagement
+ * v4: 10-minute browse timer + account wall (no more trial/guest logic)
  */
 
 import { create } from 'zustand';
@@ -28,13 +28,20 @@ export const usePlayerStore = create(
   vaultUnlocked: false,
   setVaultUnlocked: (val) => set({ vaultUnlocked: val }),
 
+  // Lock state (10-min timer system)
+  isLocked: false,
+  lockedTrackId: null, // The track that was playing when lockout triggered — let it finish
+  browseTimeRemaining: 600, // seconds
+
   // Engagement tracking
   playCount: 0,
   uniquePlaysThisSession: [],
   lastPlayedTrack: null,
   showSubscribeModal: false,
   pendingTrack: null, // Track waiting to play after subscription
-  firstVisitTime: null, // 24-hour free trial start timestamp
+
+  // Show account wall (triggered from navbar sign-in button)
+  showAccountWall: false,
 
   // Actions
   setTrack: (track) => set({
@@ -74,67 +81,36 @@ export const usePlayerStore = create(
     }
   },
 
-  // Initialize first visit timestamp (called on first play)
-  initTrial: () => {
-    const { firstVisitTime } = get();
-    if (!firstVisitTime) {
-      const now = Date.now();
-      set({ firstVisitTime: now });
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('mystation-trial-start', String(now));
-      }
-    }
-  },
+  // Lock/unlock site (10-min timer system)
+  lockSite: (trackId = null) => set({
+    isLocked: true,
+    lockedTrackId: trackId || null,
+    browseTimeRemaining: 0,
+  }),
 
-  // Get trial time remaining in ms (0 = expired)
-  getTrialRemaining: () => {
-    let start = get().firstVisitTime;
-    // Fallback to localStorage
-    if (!start && typeof window !== 'undefined') {
-      const stored = localStorage.getItem('mystation-trial-start');
-      if (stored) {
-        start = parseInt(stored, 10);
-        set({ firstVisitTime: start });
-      }
-    }
-    if (!start) return 24 * 60 * 60 * 1000; // Full 24h if never visited
-    const elapsed = Date.now() - start;
-    const total = 24 * 60 * 60 * 1000; // 24 hours
-    return Math.max(0, total - elapsed);
-  },
+  unlockSite: () => set({
+    isLocked: false,
+    lockedTrackId: null,
+  }),
 
-  // Check if can play (client-side hint only — real enforcement is server-side in /api/audio/token)
+  setBrowseTimeRemaining: (seconds) => set({ browseTimeRemaining: seconds }),
+
+  // Check if can play (client-side hint — real enforcement is server-side)
   canPlay: (trackId) => {
-    const { isSubscribed, email } = useUserStore.getState();
-    if (isSubscribed) return true;
+    const { isLocked, lockedTrackId } = get();
+    const { isSubscribed, isLoggedIn } = useUserStore.getState();
 
-    // Signed-in user with email: 24-hour free trial
-    const hasEmail = email || (typeof window !== 'undefined' && localStorage.getItem('mystation_email'));
-    if (hasEmail) {
-      const remaining = get().getTrialRemaining();
-      return remaining > 0;
-    }
+    // Authenticated or subscribed = always can play
+    if (isSubscribed || isLoggedIn) return true;
 
-    // Guest mode: 4 free unique songs
-    if (typeof window !== 'undefined') {
-      const played = JSON.parse(localStorage.getItem('mystation_guest_plays') || '[]');
-      if (played.includes(trackId)) return true; // Already played this one
-      return played.length < 4;
-    }
+    // Locked but this is the track that was playing when lockout triggered
+    if (isLocked && trackId === lockedTrackId) return true;
 
-    return false;
-  },
+    // Locked = can't play anything new
+    if (isLocked) return false;
 
-  // Track a guest play (call after successful play start)
-  trackGuestPlay: (trackId) => {
-    if (typeof window === 'undefined') return;
-    const hasEmail = localStorage.getItem('mystation_email');
-    if (hasEmail) return; // Not a guest
-    const played = JSON.parse(localStorage.getItem('mystation_guest_plays') || '[]');
-    if (!played.includes(trackId)) {
-      played.push(trackId);
-      localStorage.setItem('mystation_guest_plays', JSON.stringify(played));
-    }
+    // Not locked = browse timer still active
+    return true;
   },
 
   // Show subscribe modal
@@ -147,6 +123,8 @@ export const usePlayerStore = create(
     showSubscribeModal: false,
     pendingTrack: null
   }),
+
+  setShowAccountWall: (show) => set({ showAccountWall: show }),
 
   // Return to last played track
   returnToLastPlayed: () => {
@@ -170,7 +148,14 @@ export const usePlayerStore = create(
   }),
 
   nextTrack: () => {
-    const { queue, queueIndex, repeat, shuffle } = get();
+    const { queue, queueIndex, repeat, shuffle, isLocked } = get();
+
+    // If locked, stop advancing — current song finishes, then done
+    if (isLocked) {
+      set({ isPlaying: false, lockedTrackId: null });
+      return;
+    }
+
     if (queue.length === 0) return;
 
     let nextIndex;
@@ -228,16 +213,16 @@ export const usePlayerStore = create(
 }),
     {
       name: 'mystation-player',
-      version: 3, // v3: persist track + queue so music resumes on return
+      version: 4, // v4: 10-min timer system, clean state for all users
       partialize: (state) => ({
         volume: state.volume,
         isMuted: state.isMuted,
         shuffle: state.shuffle,
         repeat: state.repeat,
-        // Persist current track and queue so music resumes on return/refresh
         currentTrack: state.currentTrack,
         queue: state.queue,
         queueIndex: state.queueIndex,
+        isLocked: state.isLocked,
       }),
     }
   )
@@ -253,34 +238,37 @@ export const useUserStore = create(
       supporterTier: 'free', // 'free', 'regular', 'premium', 'diamond'
       favorites: [],
       email: '',
-      accessStatus: 'none', // 'none' | 'trial' | 'subscribed' | 'expired'
-      trialExpiresAt: null,
+      freeSignupSlotsRemaining: 26,
       sessionToken: null,
       sessionKicked: false,
 
-      setUser: (user) => set({
-        user,
-        isLoggedIn: !!user,
-        isSubscribed: user?.isSubscribed || false,
-        supporterTier: user?.tier || 'free'
-      }),
+      setUser: (user) => {
+        set({
+          user,
+          isLoggedIn: !!user,
+          isSubscribed: user?.isSubscribed || false,
+          supporterTier: user?.tier || 'free'
+        });
+        // Unlock site when user logs in
+        if (user) {
+          usePlayerStore.getState().unlockSite();
+        }
+      },
 
-      subscribe: (email, tier = 'regular') => set({
-        isSubscribed: true,
-        isLoggedIn: true,
-        email,
-        supporterTier: tier,
-        accessStatus: 'subscribed',
-        user: { email, isSubscribed: true, tier }
-      }),
+      subscribe: (email, tier = 'regular') => {
+        set({
+          isSubscribed: true,
+          isLoggedIn: true,
+          email,
+          supporterTier: tier,
+          user: { email, isSubscribed: true, tier }
+        });
+        usePlayerStore.getState().unlockSite();
+      },
 
       setEmail: (email) => set({ email }),
 
-      setTrialStatus: (status, expiresAt = null) => set({
-        accessStatus: status,
-        trialExpiresAt: expiresAt,
-        isSubscribed: status === 'subscribed',
-      }),
+      setFreeSignupSlots: (n) => set({ freeSignupSlotsRemaining: n }),
 
       logout: () => {
         set({
@@ -292,6 +280,8 @@ export const useUserStore = create(
           sessionToken: null,
           sessionKicked: false,
         });
+        // Re-lock site on logout
+        usePlayerStore.getState().lockSite();
       },
 
       // Session heartbeat — call every 30s to enforce single device login
@@ -308,7 +298,6 @@ export const useUserStore = create(
           const data = await res.json();
 
           if (data.kicked) {
-            // Another device signed in — force logout
             set({ sessionKicked: true, isLoggedIn: false, isSubscribed: false });
             return;
           }
@@ -351,8 +340,6 @@ export const useUserStore = create(
         email: state.email,
         favorites: state.favorites,
         supporterTier: state.supporterTier,
-        accessStatus: state.accessStatus,
-        trialExpiresAt: state.trialExpiresAt,
         sessionToken: state.sessionToken,
       })
     }

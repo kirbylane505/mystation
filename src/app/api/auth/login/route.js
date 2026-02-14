@@ -1,10 +1,20 @@
 /**
  * MYSTATION - Login API Route
- * Authenticates user with Supabase Auth
+ * Authenticates user with Supabase Auth + sets mystation-auth cookie
  */
 
 import { NextResponse } from 'next/server';
+import { createHmac } from 'crypto';
 import { signIn } from '@/lib/supabase';
+
+const AUDIO_SECRET = process.env.AUDIO_SECRET || 'ms-audio-2026-idmg';
+
+function createAuthCookie(email) {
+  const timestamp = Date.now();
+  const payload = `${email}:${timestamp}`;
+  const sig = createHmac('sha256', AUDIO_SECRET).update(`auth:${payload}`).digest('hex').slice(0, 32);
+  return `${payload}:${sig}`;
+}
 
 export async function POST(request) {
   try {
@@ -26,16 +36,66 @@ export async function POST(request) {
       );
     }
 
+    // Check subscription status
+    let isSubscribed = false;
+    let tier = 'free';
+    try {
+      const { getSupabaseAdmin } = await import('@/lib/supabaseAdmin');
+      const supabase = getSupabaseAdmin();
+      if (supabase) {
+        const { data: sub } = await supabase
+          .from('subscribers')
+          .select('status, tier, free_until')
+          .eq('email', email.trim().toLowerCase())
+          .single();
+        if (sub) {
+          if (sub.status === 'active') {
+            isSubscribed = true;
+            tier = sub.tier || 'regular';
+          } else if (sub.free_until && new Date(sub.free_until) > new Date()) {
+            isSubscribed = true;
+            tier = sub.tier || 'free';
+          }
+        }
+      }
+    } catch {}
+
     // Format user data
+    const cleanEmail = email.trim().toLowerCase();
     const user = data?.user ? {
       id: data.user.id,
       email: data.user.email,
-      name: data.user.user_metadata?.name || email.split('@')[0],
-      tier: 'free',
+      name: data.user.user_metadata?.name || cleanEmail.split('@')[0],
+      tier,
+      isSubscribed,
       joinedAt: data.user.created_at,
     } : null;
 
-    return NextResponse.json({ success: true, user });
+    const response = NextResponse.json({ success: true, user, isSubscribed, tier });
+
+    // Set auth cookie
+    response.cookies.set('mystation-auth', createAuthCookie(cleanEmail), {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 30 * 24 * 60 * 60, // 30 days
+    });
+
+    // Set sub cookie if subscribed
+    if (isSubscribed) {
+      const subTs = Date.now();
+      const subSig = createHmac('sha256', AUDIO_SECRET).update(`sub:${subTs}`).digest('hex').slice(0, 32);
+      response.cookies.set('mystation-sub', `${subTs}.${subSig}`, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 30 * 24 * 60 * 60,
+      });
+    }
+
+    return response;
   } catch (err) {
     console.error('Login error:', err);
     return NextResponse.json(
