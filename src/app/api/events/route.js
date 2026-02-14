@@ -22,7 +22,7 @@ export async function GET(request) {
     let query = supabase
       .from('events')
       .select('*, ticket_types(*)')
-      .eq('status', 'active')
+      .eq('is_active', true)
       .order('date', { ascending: true });
 
     if (org) {
@@ -86,7 +86,7 @@ export async function POST(request) {
         zip: zip || null,
         organization: organization || null,
         cover_image_url: cover_image_url || null,
-        status: 'active',
+        is_active: true,
       })
       .select()
       .single();
