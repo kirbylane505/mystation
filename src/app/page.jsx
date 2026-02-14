@@ -28,9 +28,6 @@ export default function HomePage() {
   // New releases - official tracks marked as isNew
   const newReleases = officialTracks.filter(t => t.isNew).map(t => t.id);
 
-  // Featured - Cindy's Son highlights + singles
-  const featuredTracks = [1, 21, 22, 3, 7, 10];
-
   // Get track objects for an album
   const getAlbumTracks = (album) => {
     if (!album?.trackIds) return [];
@@ -317,14 +314,6 @@ export default function HomePage() {
               )}
             </div>
           ))}
-        </div>
-      </section>
-
-      {/* Featured Tracks */}
-      <section className="max-w-screen-xl mx-auto px-6 py-20">
-        <h2 className="text-3xl font-bold text-white mb-10">Featured Tracks</h2>
-        <div className="glass rounded-2xl p-2">
-          <TrackList trackIds={featuredTracks} />
         </div>
       </section>
 
