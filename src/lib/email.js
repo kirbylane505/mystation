@@ -545,3 +545,136 @@ export async function sendDeliveryConfirmation({ customerName, customerEmail, or
     return { success: false, error: err.message };
   }
 }
+
+/**
+ * Send ticket order confirmation (pending verification)
+ */
+export async function sendTicketOrderPending({ customerName, customerEmail, orderRef, eventName, ticketType, quantity, totalAmount, paymentMethod }) {
+  if (!resend) { console.warn('Resend not configured — skipping ticket order email'); return { success: false }; }
+  try {
+    const methodLabel = { cashapp: 'CashApp', zelle: 'Zelle', applepay: 'Apple Pay' }[paymentMethod] || paymentMethod;
+    const { data, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: customerEmail,
+      subject: `Order ${orderRef} — Payment Verification Pending`,
+      html: `<html><body style="margin:0;padding:0;background:#0a1628;font-family:Arial,sans-serif;">
+        <div style="max-width:600px;margin:0 auto;padding:40px 20px;">
+          <div style="text-align:center;margin-bottom:30px;">
+            <h1 style="color:#fff;font-size:28px;margin:0;">🎫 MyTicketsLive</h1>
+            <p style="color:#60a5fa;font-size:14px;margin:5px 0 0;">by IDMG</p>
+          </div>
+          <div style="background:rgba(10,22,40,0.8);border:1px solid rgba(59,130,246,0.3);border-radius:16px;padding:30px;">
+            <h2 style="color:#fff;margin:0 0 20px;">Order Received! ✅</h2>
+            <p style="color:rgba(255,255,255,0.7);margin:0 0 20px;">Hey ${customerName}, your order is being verified. Once we confirm your ${methodLabel} payment, your tickets + QR codes will be sent to this email.</p>
+            <div style="background:rgba(59,130,246,0.1);border-radius:12px;padding:20px;margin-bottom:20px;">
+              <table style="width:100%;color:#fff;font-size:14px;">
+                <tr><td style="padding:6px 0;color:rgba(255,255,255,0.5);">Order Ref</td><td style="padding:6px 0;text-align:right;font-weight:bold;font-size:18px;color:#60a5fa;">${orderRef}</td></tr>
+                <tr><td style="padding:6px 0;color:rgba(255,255,255,0.5);">Event</td><td style="padding:6px 0;text-align:right;">${eventName}</td></tr>
+                <tr><td style="padding:6px 0;color:rgba(255,255,255,0.5);">Ticket</td><td style="padding:6px 0;text-align:right;">${ticketType} × ${quantity}</td></tr>
+                <tr><td style="padding:6px 0;color:rgba(255,255,255,0.5);">Payment</td><td style="padding:6px 0;text-align:right;">${methodLabel}</td></tr>
+                <tr><td style="padding:6px 0;color:rgba(255,255,255,0.5);border-top:1px solid rgba(255,255,255,0.1);padding-top:12px;">Total</td><td style="padding:6px 0;text-align:right;font-weight:bold;font-size:20px;color:#34d399;border-top:1px solid rgba(255,255,255,0.1);padding-top:12px;">$${totalAmount.toFixed(2)}</td></tr>
+              </table>
+            </div>
+            <p style="color:rgba(255,255,255,0.5);font-size:12px;margin:0;">Verification typically takes less than 24 hours. If you have questions, reply to this email.</p>
+          </div>
+        </div>
+      </body></html>`,
+    });
+    if (error) { console.error('Ticket order email error:', error); return { success: false, error }; }
+    return { success: true, emailId: data?.id };
+  } catch (err) {
+    console.error('Ticket order email error:', err);
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * Send ticket confirmation with QR codes (after admin approval)
+ */
+export async function sendTicketConfirmation({ customerName, customerEmail, orderRef, eventName, eventDate, eventVenue, tickets }) {
+  if (!resend) { console.warn('Resend not configured — skipping ticket confirmation'); return { success: false }; }
+  try {
+    const ticketRows = tickets.map((t, i) => `
+      <div style="background:rgba(59,130,246,0.1);border-radius:12px;padding:20px;margin-bottom:12px;text-align:center;">
+        <p style="color:rgba(255,255,255,0.5);font-size:12px;margin:0 0 8px;">TICKET ${i + 1} of ${tickets.length}</p>
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(t.qr_code)}&bgcolor=0a1628&color=ffffff" alt="QR Code" style="width:200px;height:200px;border-radius:8px;margin-bottom:10px;" />
+        <p style="color:#60a5fa;font-weight:bold;font-size:16px;margin:5px 0;">${t.holder_name}</p>
+        <p style="color:rgba(255,255,255,0.5);font-size:12px;margin:0;">${t.ticket_type || 'General Admission'}</p>
+      </div>
+    `).join('');
+
+    const dateStr = eventDate ? new Date(eventDate).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }) : '';
+
+    const { data, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: customerEmail,
+      subject: `🎫 Your Tickets for ${eventName} — ${orderRef}`,
+      html: `<html><body style="margin:0;padding:0;background:#0a1628;font-family:Arial,sans-serif;">
+        <div style="max-width:600px;margin:0 auto;padding:40px 20px;">
+          <div style="text-align:center;margin-bottom:30px;">
+            <h1 style="color:#fff;font-size:28px;margin:0;">🎫 MyTicketsLive</h1>
+            <p style="color:#60a5fa;font-size:14px;margin:5px 0 0;">by IDMG</p>
+          </div>
+          <div style="background:rgba(10,22,40,0.8);border:1px solid rgba(52,211,153,0.3);border-radius:16px;padding:30px;">
+            <h2 style="color:#34d399;margin:0 0 5px;">Payment Verified! 🎉</h2>
+            <p style="color:rgba(255,255,255,0.7);margin:0 0 25px;">Your tickets are confirmed. Show the QR code(s) below at the gate.</p>
+            <div style="background:rgba(0,0,0,0.3);border-radius:12px;padding:20px;margin-bottom:20px;">
+              <h3 style="color:#fff;margin:0 0 8px;">${eventName}</h3>
+              <p style="color:rgba(255,255,255,0.6);margin:0 0 4px;">📅 ${dateStr}</p>
+              <p style="color:rgba(255,255,255,0.6);margin:0;">📍 ${eventVenue || ''}</p>
+            </div>
+            ${ticketRows}
+            <div style="text-align:center;margin-top:20px;">
+              <a href="https://mystationlive.com/tickets" style="display:inline-block;background:linear-gradient(135deg,#3b82f6,#1e40af);color:#fff;font-weight:bold;text-decoration:none;padding:14px 32px;border-radius:12px;font-size:16px;">View My Tickets</a>
+            </div>
+            <p style="color:rgba(255,255,255,0.4);font-size:11px;margin:20px 0 0;text-align:center;">Order ${orderRef} • Save this email — it's your ticket!</p>
+          </div>
+        </div>
+      </body></html>`,
+    });
+    if (error) { console.error('Ticket confirmation email error:', error); return { success: false, error }; }
+    return { success: true, emailId: data?.id };
+  } catch (err) {
+    console.error('Ticket confirmation email error:', err);
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * Send admin alert for new ticket order
+ */
+export async function sendTicketOrderAlert({ orderRef, eventName, customerName, customerEmail, quantity, totalAmount, paymentMethod }) {
+  if (!resend) { console.warn('Resend not configured'); return { success: false }; }
+  try {
+    const methodLabel = { cashapp: 'CashApp', zelle: 'Zelle', applepay: 'Apple Pay' }[paymentMethod] || paymentMethod;
+    const { data, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: ADMIN_EMAIL,
+      subject: `🎫 NEW TICKET ORDER — ${orderRef} — $${totalAmount.toFixed(2)} via ${methodLabel}`,
+      html: `<html><body style="margin:0;padding:0;background:#0a1628;font-family:Arial,sans-serif;">
+        <div style="max-width:500px;margin:0 auto;padding:30px 20px;">
+          <h2 style="color:#60a5fa;margin:0 0 20px;">New Ticket Order 🎫</h2>
+          <div style="background:rgba(10,22,40,0.8);border:1px solid rgba(59,130,246,0.3);border-radius:12px;padding:20px;">
+            <table style="width:100%;color:#fff;font-size:14px;">
+              <tr><td style="padding:6px 0;color:rgba(255,255,255,0.5);">Order</td><td style="text-align:right;font-weight:bold;color:#60a5fa;">${orderRef}</td></tr>
+              <tr><td style="padding:6px 0;color:rgba(255,255,255,0.5);">Event</td><td style="text-align:right;">${eventName}</td></tr>
+              <tr><td style="padding:6px 0;color:rgba(255,255,255,0.5);">Buyer</td><td style="text-align:right;">${customerName}</td></tr>
+              <tr><td style="padding:6px 0;color:rgba(255,255,255,0.5);">Email</td><td style="text-align:right;">${customerEmail}</td></tr>
+              <tr><td style="padding:6px 0;color:rgba(255,255,255,0.5);">Qty</td><td style="text-align:right;">${quantity}</td></tr>
+              <tr><td style="padding:6px 0;color:rgba(255,255,255,0.5);">Payment</td><td style="text-align:right;">${methodLabel}</td></tr>
+              <tr><td style="padding:6px 0;color:rgba(255,255,255,0.5);border-top:1px solid rgba(255,255,255,0.1);padding-top:10px;">Total</td><td style="text-align:right;font-weight:bold;font-size:20px;color:#34d399;border-top:1px solid rgba(255,255,255,0.1);padding-top:10px;">$${totalAmount.toFixed(2)}</td></tr>
+            </table>
+          </div>
+          <div style="text-align:center;margin-top:20px;">
+            <a href="https://mystationlive.com/admin/orders?key=${process.env.AUDIO_SECRET}" style="display:inline-block;background:#3b82f6;color:#fff;font-weight:bold;text-decoration:none;padding:12px 24px;border-radius:8px;">Review & Approve</a>
+          </div>
+        </div>
+      </body></html>`,
+    });
+    if (error) { console.error('Ticket order alert error:', error); return { success: false, error }; }
+    return { success: true, emailId: data?.id };
+  } catch (err) {
+    console.error('Ticket order alert error:', err);
+    return { success: false, error: err.message };
+  }
+}

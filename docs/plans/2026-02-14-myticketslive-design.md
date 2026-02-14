@@ -21,10 +21,10 @@ Add ticketing as a first-class feature of mystationlive.com alongside music and 
 
 ## Revenue Model
 
-- Platform fee: 3% + $1.50 per ticket (goes to IDMG)
-- Payment processing: 2.9% + $0.30 (Stripe, unavoidable)
-- On $50 ticket: customer pays $53.00, IDMG nets $51.16 after Stripe
-- On 10,000 tickets at $50 avg: **$511,600 net to IDMG**
+- **$0 payment processing** — CashApp, Zelle, Apple Pay direct to business account
+- No Stripe fees. No platform fees. 100% of ticket revenue stays with IDMG.
+- On $20 early bird x 10,000 tickets = **$200,000 net to IDMG ($0 lost to fees)**
+- Optional Stripe for credit card users: 2.9% + $0.30 per transaction
 
 ## Architecture
 
@@ -46,8 +46,8 @@ Add ticketing as a first-class feature of mystationlive.com alongside music and 
 ```
 /api/events                — GET list, POST create
 /api/events/[id]           — GET detail, PUT update, DELETE
-/api/tickets/purchase      — POST: create Stripe Checkout session
-/api/tickets/webhook       — Stripe webhook: create tickets on payment
+/api/tickets/purchase      — POST: create order + upload screenshot
+/api/tickets/approve       — POST: admin approves payment → issues ticket
 /api/tickets/verify        — POST: verify QR code at gate (mark used)
 /api/tickets/transfer      — POST: transfer ticket to another email
 /api/tickets/my            — GET: user's tickets
@@ -103,7 +103,7 @@ CREATE TABLE tickets (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   ticket_type_id UUID REFERENCES ticket_types(id),
   event_id UUID REFERENCES events(id),
-  order_id TEXT NOT NULL,       -- Stripe session ID
+  order_id TEXT NOT NULL,       -- Unique ref code (LOTL-7X4K)
   qr_code TEXT UNIQUE NOT NULL,
   status TEXT DEFAULT 'valid' CHECK (status IN ('valid','used','transferred','refunded','cancelled')),
   purchaser_name TEXT NOT NULL,
@@ -111,7 +111,10 @@ CREATE TABLE tickets (
   checked_in_at TIMESTAMPTZ,
   transferred_to_email TEXT,
   transferred_at TIMESTAMPTZ,
-  stripe_payment_id TEXT,
+  payment_method TEXT CHECK (payment_method IN ('cashapp','zelle','applepay')),
+  payment_screenshot_url TEXT,   -- Uploaded proof of payment
+  payment_verified_at TIMESTAMPTZ,
+  payment_verified_by TEXT,      -- Admin email who approved
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
@@ -154,17 +157,20 @@ CREATE TABLE contacts (
 - Ticket tier cards with phase pricing and urgency badges
 - Quantity selector per tier
 - Access code / discount code input
-- "GET TICKETS" CTA → Stripe Checkout
+- "GET TICKETS" CTA → payment method selection → screenshot upload
 - Organization branding (LOTL, IDMG, Foundation)
 - Share buttons (copy link, social)
 - Related merch cross-sell section
 
-**2. Checkout Flow (Stripe)**
-- Stripe Checkout hosted page (PCI compliant, no card handling)
-- Line items: ticket type x quantity + platform fee
-- Success → ticket confirmation page + email with QR code
-- Webhook creates ticket records in DB
-- Customer branded as "IDMG Checkout" via Stripe branding settings
+**2. Checkout Flow (Direct Payment + Screenshot)**
+- Buyer selects tickets → sees total
+- Chooses payment method: CashApp / Zelle / Apple Pay
+- App shows payment info ($RIDE4PAGEMUSIC847 for CashApp, etc.)
+- Buyer sends payment, uploads screenshot of confirmation
+- Order created as PENDING with screenshot stored in Supabase Storage
+- Admin reviews screenshot → clicks APPROVE → ticket + QR auto-generated
+- Buyer gets email with ticket + QR code
+- 24-hour auto-cancel on unverified orders (with notification email)
 
 **3. My Tickets (/tickets)**
 - List of all purchased tickets with QR codes
@@ -206,7 +212,7 @@ CREATE TABLE contacts (
 
 ### Integration Points
 
-- **Stripe:** Checkout Sessions, Webhooks, Payment Intents
+- **CashApp / Zelle / Apple Pay:** Direct payments, screenshot verification
 - **Resend:** Transactional emails (confirmations) + marketing campaigns
 - **Existing MyStation:** merch cross-sell, music discovery, user accounts
 - **lotlfest.com:** Embeddable ticket widget (iframe or link to /events/lotl-2026)
@@ -223,15 +229,15 @@ CREATE TABLE contacts (
 
 ### Cost Analysis
 
-| Item | Current (Universe) | New (MyStation) |
-|------|-------------------|-----------------|
+| Item | Current (Universe) | New (MyTicketsLive) |
+|------|-------------------|---------------------|
 | Platform fee per ticket | $1.99 + 2.5% | $0 (yours) |
-| Payment processing | 2.9% + $0.30 | 2.9% + $0.30 (Stripe) |
+| Payment processing | 2.9% + $0.30 | **$0** (CashApp/Zelle/Apple Pay) |
 | Hosting | $28/mo (Render) | $0 (Vercel free tier) |
 | Email | Not included | $0 (Resend free 3K/mo) |
-| On $35 ticket | You keep $30.81 | You keep $33.49 |
-| On 10K tickets | You keep $308,100 | You keep $334,900 |
-| **Annual savings** | — | **$26,800 + $336 hosting** |
+| On $20 early bird | You keep ~$17.50 | **You keep $20.00** |
+| On 10K tickets at $20 | You keep ~$175,000 | **You keep $200,000** |
+| **Savings per event** | — | **$25,000+ saved** |
 
 ### Timeline
 
@@ -241,32 +247,36 @@ CREATE TABLE contacts (
 - Phase 4: Email marketing + Universe data import (1 day)
 - Phase 5: Deploy + test + go live
 
-### Hybrid Payment System (Zelle + CashApp + Stripe)
+### Payment System — DIRECT TO BUSINESS (LOCKED IN)
 
-**STATUS: APPROVED — BUILD ON USER'S COMMAND**
+**STATUS: LOCKED IN — APPROVED**
 
-Three payment options at checkout:
-1. **Credit Card (Stripe)** — 2.9% + $0.30, instant ticket
-2. **Zelle** — $0 fees, manual admin verification, ticket after approval
-3. **CashApp** — $0 fees, manual admin verification, ticket after approval
+**Three payment options at checkout (priority order):**
+1. **CashApp** — $0 fees, $RIDE4PAGEMUSIC847, screenshot verification
+2. **Zelle** — $0 fees, direct to IDMG business bank, screenshot verification
+3. **Apple Pay** — $0 fees, direct to business account, screenshot verification
 
-Flow for Zelle/CashApp:
-- Customer selects payment method → sees IDMG Zelle email or CashApp $tag
-- Unique reference code per order (e.g., LOTL-7X4K)
-- Customer sends payment, clicks "I Sent It" → order goes PENDING
-- Admin verifies in bank/CashApp → clicks APPROVE in dashboard
-- Ticket + QR code auto-generated and emailed to buyer
-- 24-hour expiration on unverified orders (auto-cancel)
+**Verification Flow (Screenshot Upload):**
+1. Buyer selects tickets → sees total ($20 early bird)
+2. Chooses payment method (CashApp / Zelle / Apple Pay)
+3. App shows payment details ($tag, Zelle email, etc.) + unique order ref (LOTL-7X4K)
+4. Buyer sends payment via their app
+5. Buyer uploads screenshot of payment confirmation
+6. Order status: PENDING → admin reviews screenshot
+7. Admin clicks APPROVE → ticket + QR code auto-generated and emailed
+8. 24-hour expiration on unverified orders (auto-cancel + notify buyer)
 
-Revenue impact on 10K tickets at $50 avg:
-- All Stripe: $511,600 net (lose $18,400 to processing)
-- All Zelle/CashApp: $530,000 net ($0 processing)
-- 50/50 split: $520,800 net
+**Why screenshot upload:**
+- Proof of payment for every transaction — no disputes
+- Works with ALL payment methods universally
+- No fake tickets — nothing issues until money confirmed
+- Legal protection — screenshot is evidence
+- No complex API integrations needed
 
-Requirements:
-- IDMG business Zelle (through business bank account)
-- CashApp Business account ($MYSTATIONLIVE or similar)
-- Admin dashboard pending orders view with approve/deny
+**Revenue impact (10K tickets at $20 early bird):**
+- All direct payment: **$200,000 net ($0 processing fees)**
+- Compare Universe: ~$176,000 net (12% total fees eaten)
+- **Savings: $24,000+ per event**
 
 ### Success Criteria
 
