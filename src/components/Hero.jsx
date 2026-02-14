@@ -33,9 +33,25 @@ export default function Hero() {
         </h1>
 
         {/* Tagline */}
-        <p className="text-base md:text-lg text-white/50 mb-10 max-w-md mx-auto hero-cta">
-          Stream the entire catalog. Every play gives back.
+        <p className="text-base md:text-lg text-white/50 mb-8 max-w-md mx-auto hero-cta">
+          Independent music. Real impact. Stream free — every play funds youth.
         </p>
+
+        {/* Featured Video — "Caught That" Official 4K Video */}
+        <div className="w-full max-w-2xl mx-auto mb-8 hero-cta">
+          <div className="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl shadow-blue-500/10" style={{ paddingBottom: '56.25%' }}>
+            <iframe
+              className="absolute inset-0 w-full h-full"
+              src="https://www.youtube.com/embed/xqw4wV8Npzs?rel=0&modestbranding=1&color=white"
+              title="Mike Page - Caught That (Official 4K Video) prod. by The Cubist"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
+          <p className="text-white/30 text-xs mt-3 text-center uppercase tracking-wider">
+            "Caught That" — Official 4K Video • Prod. by The Cubist
+          </p>
+        </div>
 
         {/* Stats bar */}
         <div className="mt-4 flex items-center justify-center gap-8 text-white/30 text-xs uppercase tracking-wider hero-stats">

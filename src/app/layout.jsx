@@ -91,6 +91,29 @@ export default function RootLayout({ children }) {
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
         <meta name="theme-color" content="#6366f1" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              "name": "MyStation",
+              "alternateName": "IDMG - Impossible Dreamz Music Group",
+              "url": "https://mystationlive.com",
+              "logo": "https://mystationlive.com/images/idmg-logo-white.png",
+              "sameAs": [
+                "https://instagram.com/idmgatl",
+                "https://tiktok.com/@idmgatl"
+              ],
+              "description": "Stream music, shop merch, support youth — MyStation by Mike Page Foundation",
+              "foundingDate": "2026",
+              "founder": {
+                "@type": "Person",
+                "name": "Mike Page"
+              }
+            })
+          }}
+        />
       </head>
       <body className="min-h-screen bg-mystation-darker">
         <ClientProviders>

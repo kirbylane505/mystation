@@ -15,6 +15,7 @@ import TurnTimer from './TurnTimer';
 import GameResult from './GameResult';
 import BlackjackGame from './BlackjackGame';
 import SlidesLaddersGame from './SlidesLaddersGame';
+import PoolGame from './PoolGame';
 import { Users, Share2, Play, LogOut, Loader2 } from 'lucide-react';
 
 export default function GameRoom() {
@@ -61,7 +62,7 @@ export default function GameRoom() {
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="text-white font-bold text-xl">
-              {room.game_type === 'blackjack' ? '21 (Blackjack)' : 'Slides & Ladders'}
+              {room.game_type === 'blackjack' ? '21 (Blackjack)' : room.game_type === 'pool' ? '8-Ball Pool' : 'Slides & Ladders'}
             </h2>
             <p className="text-white/40 text-sm">Room #{room.code}</p>
           </div>
@@ -93,7 +94,7 @@ export default function GameRoom() {
             /* Waiting Room */
             <div className="text-center">
               <div className="text-6xl mb-4">
-                {room.game_type === 'blackjack' ? '🃏' : '🎲'}
+                {room.game_type === 'blackjack' ? '🃏' : room.game_type === 'pool' ? '🎱' : '🎲'}
               </div>
               <h3 className="text-white font-bold text-2xl mb-2">Waiting for players...</h3>
               <p className="text-white/40 mb-6">
@@ -143,6 +144,13 @@ export default function GameRoom() {
                 gameState={gameState}
                 myPlayerId={myPlayerId}
                 onRoll={() => submitMove('roll')}
+                players={players}
+              />
+            ) : room.game_type === 'pool' ? (
+              <PoolGame
+                gameState={gameState}
+                myPlayerId={myPlayerId}
+                onMove={submitMove}
                 players={players}
               />
             ) : (

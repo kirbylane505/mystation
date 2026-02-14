@@ -8,6 +8,7 @@ import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
 import { GAME_TYPES } from '@/lib/games/constants';
 import { initBlackjack, sanitizeBlackjackState } from '@/lib/games/blackjack';
 import { initSlidesLadders, sanitizeSlidesLaddersState } from '@/lib/games/slidesLadders';
+import { initPool, sanitizePoolState } from '@/lib/games/pool';
 
 export async function POST(request) {
   try {
@@ -67,6 +68,9 @@ export async function POST(request) {
       case 'slidesLadders':
         gameState = initSlidesLadders(playerIds);
         break;
+      case 'pool':
+        gameState = initPool(playerIds);
+        break;
       default:
         return NextResponse.json({ error: 'Game type not yet implemented' }, { status: 400 });
     }
@@ -96,6 +100,9 @@ export async function POST(request) {
         break;
       case 'slidesLadders':
         broadcastState = sanitizeSlidesLaddersState(gameState);
+        break;
+      case 'pool':
+        broadcastState = sanitizePoolState(gameState);
         break;
     }
 

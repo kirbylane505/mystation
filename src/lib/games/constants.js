@@ -100,13 +100,12 @@ export const GAME_TYPES = {
   pool: {
     id: 'pool',
     name: '8-Ball Pool',
-    description: '2-player billiards — Coming Soon',
+    description: 'Classic 2-player billiards — sink your balls then pocket the 8!',
     minPlayers: 2,
     maxPlayers: 2,
     icon: '🎱',
     color: '#6366f1',
     turnBased: true,
-    comingSoon: true,
   },
 };
 

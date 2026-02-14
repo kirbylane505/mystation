@@ -9,6 +9,7 @@ import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
 import { GAME_POINTS } from '@/lib/games/constants';
 import { applyBlackjackMove, sanitizeBlackjackState } from '@/lib/games/blackjack';
 import { applySlidesLaddersMove, sanitizeSlidesLaddersState } from '@/lib/games/slidesLadders';
+import { applyPoolMove, sanitizePoolState } from '@/lib/games/pool';
 
 export async function POST(request) {
   try {
@@ -55,6 +56,9 @@ export async function POST(request) {
         break;
       case 'slidesLadders':
         result = applySlidesLaddersMove(gameState, playerId);
+        break;
+      case 'pool':
+        result = applyPoolMove(gameState, playerId, action);
         break;
       default:
         return NextResponse.json({ error: 'Game type not supported' }, { status: 400 });
@@ -114,6 +118,9 @@ export async function POST(request) {
       case 'slidesLadders':
         broadcastState = sanitizeSlidesLaddersState(newState);
         break;
+      case 'pool':
+        broadcastState = sanitizePoolState(newState);
+        break;
     }
 
     const event = newState.phase === 'finished' ? 'game:end' : 'game:state';
@@ -155,7 +162,7 @@ async function awardGamePoints(supabase, room, gameState) {
             pointsEarned += GAME_POINTS.perfectBlackjack;
           }
         }
-      } else if (room.game_type === 'slidesLadders') {
+      } else if (room.game_type === 'slidesLadders' || room.game_type === 'pool') {
         if (gameState.winner === userId) {
           isWinner = true;
           pointsEarned = GAME_POINTS.gameWin;

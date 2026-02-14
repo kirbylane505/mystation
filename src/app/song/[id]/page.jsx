@@ -73,5 +73,40 @@ export default function SongPage({ params }) {
     );
   }
 
-  return <SongClient track={track} allTracks={tracks} albumArt={albumArt} />;
+  const songJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "MusicRecording",
+    "name": track.title,
+    "url": `https://mystationlive.com/song/${track.id}`,
+    "duration": track.duration || undefined,
+    "byArtist": {
+      "@type": "MusicGroup",
+      "name": "Mike Page",
+    },
+    "inAlbum": track.album ? {
+      "@type": "MusicAlbum",
+      "name": track.album,
+      "image": albumArt ? `https://mystationlive.com${albumArt}` : undefined,
+    } : undefined,
+    "datePublished": track.year || "2026",
+    "genre": "Hip-Hop",
+    ...(track.featured && { "contributor": { "@type": "Person", "name": track.featured } }),
+    ...(track.producer && { "producer": { "@type": "Person", "name": track.producer } }),
+    "isAccessibleForFree": true,
+    "publisher": {
+      "@type": "Organization",
+      "name": "IDMG - Impossible Dreamz Music Group",
+      "url": "https://mystationlive.com",
+    },
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(songJsonLd) }}
+      />
+      <SongClient track={track} allTracks={tracks} albumArt={albumArt} />
+    </>
+  );
 }

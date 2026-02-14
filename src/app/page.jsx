@@ -78,6 +78,54 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* About Mike Page */}
+      <section className="max-w-screen-xl mx-auto px-6 py-20">
+        <div className="glass rounded-2xl p-8 md:p-12">
+          <div className="grid md:grid-cols-2 gap-10 items-center">
+            <div>
+              <span className="text-blue-400 text-sm font-semibold uppercase tracking-wider mb-3 block">The Story</span>
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
+                Music That Gives Back
+              </h2>
+              <p className="text-white/60 text-lg leading-relaxed mb-4">
+                Mike Page built MyStation on a simple idea: every play should matter. As founder of the Mike Page Foundation, a 501(c)(3) nonprofit, he channels music into real impact — funding youth programs, community events, and the annual Love on the Lawn Festival.
+              </p>
+              <p className="text-white/60 text-lg leading-relaxed mb-6">
+                From Atlanta to the world, IDMG (Impossible Dreamz Music Group) represents independent artists who refuse to wait for permission. Stream the catalog. Wear the merch. Join the movement.
+              </p>
+              <div className="flex items-center gap-6">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-white">501(c)(3)</div>
+                  <div className="text-white/40 text-xs">Nonprofit</div>
+                </div>
+                <div className="w-px h-10 bg-white/10" />
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-white">10K+</div>
+                  <div className="text-white/40 text-xs">Festival Capacity</div>
+                </div>
+                <div className="w-px h-10 bg-white/10" />
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-white">50+</div>
+                  <div className="text-white/40 text-xs">Original Tracks</div>
+                </div>
+              </div>
+            </div>
+            <div className="relative">
+              <div className="aspect-square rounded-2xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-white/10 flex items-center justify-center overflow-hidden">
+                <img
+                  src="/images/idmg-logo-white.png"
+                  alt="Mike Page - IDMG"
+                  className="w-3/4 h-3/4 object-contain opacity-80"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Section Divider */}
+      <div className="section-divider" />
+
       {/* Discover Music — Global Search CTA */}
       <section className="max-w-screen-xl mx-auto px-6 py-16">
         <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600/20 via-purple-600/20 to-pink-600/20 border border-white/10 p-8 md:p-12">
@@ -419,8 +467,8 @@ export default function HomePage() {
                 </span>
               </Link>
               <p className="text-white/40 text-sm leading-relaxed">
-                Free music streaming by IDMG.
-                Revenue supports youth and community programs worldwide.
+                Independent music platform by IDMG.
+                Every stream supports youth programs, community events, and the Love on the Lawn Festival through the Mike Page Foundation.
               </p>
             </div>
             <div>
@@ -468,7 +516,7 @@ export default function HomePage() {
               <Link href="/privacy" className="text-white/30 text-sm hover:text-white/50 transition">Privacy</Link>
               <Link href="/terms" className="text-white/30 text-sm hover:text-white/50 transition">Terms</Link>
               <p className="text-white/30 text-sm">
-                Made with love for the culture
+                Built for the culture. Powered by the community.
               </p>
             </div>
           </div>

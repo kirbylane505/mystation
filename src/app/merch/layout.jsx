@@ -16,4 +16,49 @@ export const metadata = {
     images: ['/images/og-image.png'],
   },
 };
-export default function Layout({ children }) { return children; }
+
+const merchJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "name": "IDMG Official Merch",
+  "description": "Shop official IDMG & Mike Page merch. Hoodies, tees, snapbacks, joggers & more. Every purchase supports youth music programs.",
+  "url": "https://mystationlive.com/merch",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "MyStation",
+    "url": "https://mystationlive.com",
+  },
+  "provider": {
+    "@type": "Organization",
+    "name": "IDMG - Impossible Dreamz Music Group",
+    "url": "https://mystationlive.com",
+  },
+  "offers": {
+    "@type": "AggregateOffer",
+    "priceCurrency": "USD",
+    "lowPrice": "15.99",
+    "highPrice": "59.99",
+    "offerCount": "50+",
+    "availability": "https://schema.org/InStock",
+  },
+  "about": [
+    { "@type": "Thing", "name": "Hoodies" },
+    { "@type": "Thing", "name": "T-Shirts" },
+    { "@type": "Thing", "name": "Snapbacks" },
+    { "@type": "Thing", "name": "Activewear" },
+    { "@type": "Thing", "name": "Kids Clothing" },
+    { "@type": "Thing", "name": "Accessories" },
+  ],
+};
+
+export default function Layout({ children }) {
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(merchJsonLd) }}
+      />
+      {children}
+    </>
+  );
+}
