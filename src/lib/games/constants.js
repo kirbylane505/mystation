@@ -89,13 +89,12 @@ export const GAME_TYPES = {
   spades: {
     id: 'spades',
     name: 'Spades',
-    description: '2v2 trick-taking card game — Coming Soon',
-    minPlayers: 4,
+    description: '2v2 trick-taking card game with AI partners',
+    minPlayers: 1,
     maxPlayers: 4,
     icon: '♠️',
     color: '#3b82f6',
     turnBased: true,
-    comingSoon: true,
   },
   pool: {
     id: 'pool',
@@ -148,4 +147,5 @@ export const GAME_POINTS = {
   winStreak3: 100,
   winStreak5: 250,
   perfectBlackjack: 100, // natural 21
+  spadesNilMade: 50,
 };

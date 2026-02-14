@@ -10,6 +10,7 @@ import { GAME_POINTS } from '@/lib/games/constants';
 import { applyBlackjackMove, sanitizeBlackjackState } from '@/lib/games/blackjack';
 import { applySlidesLaddersMove, sanitizeSlidesLaddersState } from '@/lib/games/slidesLadders';
 import { applyPoolMove, sanitizePoolState } from '@/lib/games/pool';
+import { applySpadesMove, sanitizeSpadesState } from '@/lib/games/spades';
 
 export async function POST(request) {
   try {
@@ -59,6 +60,9 @@ export async function POST(request) {
         break;
       case 'pool':
         result = applyPoolMove(gameState, playerId, action);
+        break;
+      case 'spades':
+        result = applySpadesMove(gameState, playerId, action);
         break;
       default:
         return NextResponse.json({ error: 'Game type not supported' }, { status: 400 });
@@ -121,6 +125,9 @@ export async function POST(request) {
       case 'pool':
         broadcastState = sanitizePoolState(newState);
         break;
+      case 'spades':
+        broadcastState = sanitizeSpadesState(newState, '__broadcast__');
+        break;
     }
 
     const event = newState.phase === 'finished' ? 'game:end' : 'game:state';
@@ -161,6 +168,12 @@ async function awardGamePoints(supabase, room, gameState) {
           if (result.outcome === 'blackjack') {
             pointsEarned += GAME_POINTS.perfectBlackjack;
           }
+        }
+      } else if (room.game_type === 'spades' && gameState.results) {
+        const result = gameState.results[userId];
+        if (result?.outcome === 'win') {
+          isWinner = true;
+          pointsEarned = GAME_POINTS.gameWin;
         }
       } else if (room.game_type === 'slidesLadders' || room.game_type === 'pool') {
         if (gameState.winner === userId) {

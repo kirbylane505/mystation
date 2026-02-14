@@ -7,7 +7,7 @@
 import { NextResponse } from 'next/server';
 import { createHmac } from 'crypto';
 import { signUp } from '@/lib/supabase';
-import { sendWelcomeEmail } from '@/lib/email';
+import { sendWelcomeEmail, sendNewSignupAlert } from '@/lib/email';
 
 const AUDIO_SECRET = process.env.AUDIO_SECRET || 'ms-audio-2026-idmg';
 
@@ -64,6 +64,7 @@ export async function POST(request) {
           .select('*', { count: 'exact', head: true });
 
         const currentCount = count || 0;
+        subscriberNumber = currentCount + 1;
 
         if (currentCount < 26) {
           // Free slot available — auto-subscribe
@@ -81,7 +82,6 @@ export async function POST(request) {
           });
 
           isFreeSlot = true;
-          subscriberNumber = currentCount + 1;
           isSubscribed = true;
           if (user) {
             user.tier = 'regular';
@@ -99,6 +99,14 @@ export async function POST(request) {
       customerEmail: cleanEmail,
       password,
     }).catch(err => console.error('Welcome email failed:', err));
+
+    // Send admin signup alert (fire-and-forget)
+    sendNewSignupAlert({
+      customerName: name || cleanEmail.split('@')[0],
+      customerEmail: cleanEmail,
+      subscriberNumber,
+      isFreeSlot,
+    }).catch(err => console.error('Signup alert failed:', err));
 
     const response = NextResponse.json({
       success: true,

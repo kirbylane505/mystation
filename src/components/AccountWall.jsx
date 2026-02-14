@@ -7,7 +7,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { usePlayerStore, useUserStore } from '@/store/playerStore';
 import { Mail, Lock, User, Loader2, Headphones, Music, Clock, CreditCard } from 'lucide-react';
 
@@ -30,6 +30,18 @@ export default function AccountWall() {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [accessCode, setAccessCode] = useState('');
+
+  // Fetch real signup slot count from DB on mount
+  useEffect(() => {
+    fetch('/api/auth/signup-slots')
+      .then(r => r.json())
+      .then(data => {
+        if (typeof data.remaining === 'number') {
+          setFreeSignupSlots(data.remaining);
+        }
+      })
+      .catch(() => {});
+  }, [setFreeSignupSlots]);
 
   // Show wall when: (locked AND not logged in) OR showAccountWall flag
   const shouldShow = (isLocked && !isLoggedIn && !isSubscribed) || showAccountWall;

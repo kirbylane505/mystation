@@ -639,17 +639,68 @@ export default function MerchPage() {
     return fallback;
   }
 
+  // Get color-aware branded mockup for the modal — our mockups with logos always win over Printful blanks
+  function getModalImage(selectedVariant, item, productDetails) {
+    const name = (item?.name || '').toLowerCase();
+    const variantName = (selectedVariant?.name || '').toLowerCase();
+    // Detect color from variant name
+    const isLight = variantName.includes('white') || variantName.includes('sand') || variantName.includes('light') || variantName.includes('ash') || variantName.includes('sport grey') || variantName.includes('natural');
+    const isDark = variantName.includes('black') || variantName.includes('navy') || variantName.includes('dark') || variantName.includes('charcoal') || variantName.includes('forest');
+
+    // IDMG Hoodies (non-zip)
+    if (name.includes('idmg') && name.includes('hoodie') && !name.includes('zip')) {
+      if (isLight || name.includes('white')) return '/images/mockups/idmg-hoodie-white.jpg';
+      return '/images/mockups/idmg-hoodie-black.jpg';
+    }
+    // IDMG Tees
+    if (name.includes('idmg') && (name.includes('tee') || name.includes('t-shirt')) && !name.includes('label')) {
+      if (isLight || name.includes('white')) return '/images/mockups/idmg-tee-white.jpg';
+      return '/images/mockups/idmg-tee-black.jpg';
+    }
+    // LOTL Hoodie
+    if ((name.includes('lotl') || name.includes('love on the lawn')) && name.includes('hoodie')) {
+      return '/images/mockups/lotl-hoodie-black.jpg';
+    }
+    // For everything else, try variant-specific image from API, then item image
+    return getVariantImage(selectedVariant, item?.image, productDetails?.images) || item?.printfulImage || '/images/merch/idmg-black-tee-real.jpg';
+  }
+
+  // Clean up variant name — strip product name prefix, show just the meaningful part
+  function cleanVariantName(variantName, productName) {
+    if (!variantName || !productName) return variantName || '';
+    // Printful: "IDMG Hoodie - White / White / L" → strip "IDMG Hoodie - White" prefix
+    const dash = productName.lastIndexOf(' - ');
+    const baseName = dash > 0 ? productName.substring(0, dash) : productName;
+    let clean = variantName;
+    // Try stripping full product name first (exact), then base name
+    if (clean.toLowerCase().startsWith(productName.toLowerCase())) {
+      clean = clean.slice(productName.length);
+    } else if (clean.toLowerCase().startsWith(baseName.toLowerCase())) {
+      clean = clean.slice(baseName.length);
+    }
+    // Remove leading separators
+    clean = clean.replace(/^\s*[-–—/]\s*/, '').trim();
+    // If what's left repeats the color already in product name, strip it
+    if (dash > 0) {
+      const productColor = productName.substring(dash + 3).trim().toLowerCase();
+      const parts = clean.split(' / ').map(p => p.trim());
+      const filtered = parts.filter(p => p.toLowerCase() !== productColor);
+      if (filtered.length > 0) clean = filtered.join(' / ');
+    }
+    return clean || variantName;
+  }
+
   const handleAddToCart = () => {
     if (!selectedVariant || !selectedItem) return;
     const provider = productDetails?.provider || selectedItem.provider || 'printful';
     addItem(
-      { id: selectedItem.isPrintify ? selectedItem.printifyId : selectedItem.id, name: selectedItem.name, image: getVariantImage(selectedVariant, selectedItem.image, productDetails?.images) },
+      { id: selectedItem.isPrintify ? selectedItem.printifyId : selectedItem.id, name: selectedItem.name, image: getModalImage(selectedVariant, selectedItem, productDetails) },
       selectedVariant,
       provider
     );
     setAddedToCart(true);
     // Show toast notification
-    setToast({ name: selectedItem.name, image: getVariantImage(selectedVariant, selectedItem.image, productDetails?.images), price: getPrice(selectedVariant) });
+    setToast({ name: selectedItem.name, image: getModalImage(selectedVariant, selectedItem, productDetails), price: getPrice(selectedVariant) });
     setTimeout(() => { setAddedToCart(false); setToast(null); }, 3000);
   };
 
@@ -1158,7 +1209,7 @@ export default function MerchPage() {
               <div className="aspect-square relative bg-white overflow-hidden">
                 <Zoom zoomMargin={40}>
                   <img
-                    src={getVariantImage(selectedVariant, selectedItem.image, productDetails?.images) || selectedItem.printfulImage || '/images/merch/idmg-black-tee-real.jpg'}
+                    src={getModalImage(selectedVariant, selectedItem, productDetails)}
                     alt={selectedItem.name}
                     className="w-full h-full object-cover"
                     style={{ width: '100%', height: '100%' }}
@@ -1196,7 +1247,7 @@ export default function MerchPage() {
                                   <button key={variant.id} onClick={() => setSelectedVariant(variant)}
                                     className={`w-full text-left px-4 py-3 rounded-lg text-sm transition ${selectedVariant?.id === variant.id ? 'bg-blue-500 text-white' : 'bg-white/10 text-white/60 hover:bg-white/20 hover:text-white'}`}>
                                     <div className="flex justify-between items-center">
-                                      <span>{variant.name}</span>
+                                      <span>{cleanVariantName(variant.name, selectedItem?.name)}</span>
                                       <span className="font-bold">${getPrice(variant).toFixed(2)}</span>
                                     </div>
                                   </button>

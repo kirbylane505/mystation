@@ -16,6 +16,7 @@ import GameResult from './GameResult';
 import BlackjackGame from './BlackjackGame';
 import SlidesLaddersGame from './SlidesLaddersGame';
 import PoolGame from './PoolGame';
+import SpadesGame from './SpadesGame';
 import { Users, Share2, Play, LogOut, Loader2 } from 'lucide-react';
 
 export default function GameRoom() {
@@ -34,7 +35,7 @@ export default function GameRoom() {
 
   // Also re-fetch when gameState changes via broadcast (to get personal view)
   useEffect(() => {
-    if (gameState && room?.status === 'playing' && gameState.myHand === undefined && room.game_type === 'blackjack') {
+    if (gameState && room?.status === 'playing' && gameState.myHand === undefined && (room.game_type === 'blackjack' || room.game_type === 'spades')) {
       fetchGameState();
     }
   }, [gameState, room, fetchGameState]);
@@ -48,7 +49,7 @@ export default function GameRoom() {
   const isFinished = room.status === 'finished' || gameState?.phase === 'finished';
 
   // Get my result for the result modal
-  const myResult = isFinished && gameState?.results
+  const myResult = isFinished && gameState?.results?.[myPlayerId]
     ? gameState.results[myPlayerId]
     : isFinished && gameState?.winner
     ? { outcome: gameState.winner === myPlayerId ? 'win' : 'loss', reason: gameState.winner === myPlayerId ? 'You reached 100!' : 'Another player won' }
@@ -62,7 +63,7 @@ export default function GameRoom() {
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="text-white font-bold text-xl">
-              {room.game_type === 'blackjack' ? '21 (Blackjack)' : room.game_type === 'pool' ? '8-Ball Pool' : 'Slides & Ladders'}
+              {room.game_type === 'blackjack' ? '21 (Blackjack)' : room.game_type === 'pool' ? '8-Ball Pool' : room.game_type === 'spades' ? 'Spades' : 'Slides & Ladders'}
             </h2>
             <p className="text-white/40 text-sm">Room #{room.code}</p>
           </div>
@@ -94,7 +95,7 @@ export default function GameRoom() {
             /* Waiting Room */
             <div className="text-center">
               <div className="text-6xl mb-4">
-                {room.game_type === 'blackjack' ? '🃏' : room.game_type === 'pool' ? '🎱' : '🎲'}
+                {room.game_type === 'blackjack' ? '🃏' : room.game_type === 'pool' ? '🎱' : room.game_type === 'spades' ? '♠️' : '🎲'}
               </div>
               <h3 className="text-white font-bold text-2xl mb-2">Waiting for players...</h3>
               <p className="text-white/40 mb-6">
@@ -152,6 +153,12 @@ export default function GameRoom() {
                 myPlayerId={myPlayerId}
                 onMove={submitMove}
                 players={players}
+              />
+            ) : room.game_type === 'spades' ? (
+              <SpadesGame
+                gameState={gameState}
+                myPlayerId={myPlayerId}
+                onMove={submitMove}
               />
             ) : (
               <div className="text-white/50">Loading game...</div>

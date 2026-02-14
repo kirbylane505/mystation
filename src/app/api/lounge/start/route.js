@@ -9,6 +9,7 @@ import { GAME_TYPES } from '@/lib/games/constants';
 import { initBlackjack, sanitizeBlackjackState } from '@/lib/games/blackjack';
 import { initSlidesLadders, sanitizeSlidesLaddersState } from '@/lib/games/slidesLadders';
 import { initPool, sanitizePoolState } from '@/lib/games/pool';
+import { initSpades, sanitizeSpadesState } from '@/lib/games/spades';
 
 export async function POST(request) {
   try {
@@ -71,6 +72,17 @@ export async function POST(request) {
       case 'pool':
         gameState = initPool(playerIds);
         break;
+      case 'spades': {
+        // Fill with AI if fewer than 4 players
+        const spadesIds = [...playerIds];
+        let aiCount = 0;
+        while (spadesIds.length < 4) {
+          aiCount++;
+          spadesIds.push(`ai_bot${aiCount}`);
+        }
+        gameState = initSpades(spadesIds);
+        break;
+      }
       default:
         return NextResponse.json({ error: 'Game type not yet implemented' }, { status: 400 });
     }
@@ -103,6 +115,9 @@ export async function POST(request) {
         break;
       case 'pool':
         broadcastState = sanitizePoolState(gameState);
+        break;
+      case 'spades':
+        broadcastState = sanitizeSpadesState(gameState, '__broadcast__');
         break;
     }
 

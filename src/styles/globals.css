@@ -2,6 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+/* PERMANENT: Override Tailwind animate-pulse at utility layer — NO BLINKING EVER */
+@layer utilities {
+  .animate-pulse {
+    animation: none !important;
+    opacity: 1 !important;
+  }
+}
+
 :root {
   --navy: #0a1628;
   --navy-light: #1a2d4a;
@@ -486,14 +494,18 @@ input[type="range"]:active::-moz-range-thumb {
   animation: bounce 2s ease-in-out infinite;
 }
 
-/* Kill all blinking/pulsing — static opacity instead */
+/* PERMANENT: Kill ALL blinking/pulsing site-wide — NO EXCEPTIONS */
 .animate-pulse,
-[class*="animate-pulse"] {
+[class*="animate-pulse"],
+[class*="glow-pulse"],
+[class*="pulse-blue"] {
   animation: none !important;
+  opacity: 1 !important;
 }
 
-.animate-glow-pulse {
-  animation: none;
+@keyframes pulse {
+  /* Killed permanently — no blinking on this site */
+  0%, 50%, 100% { opacity: 1; }
 }
 
 .animate-shimmer {
