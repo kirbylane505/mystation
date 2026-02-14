@@ -38,6 +38,14 @@ export default function PlaylistsPage() {
     setEditingId(null);
   };
 
+  const DEFAULT_MP_ART = '/images/albums/cindys-son.jpg';
+
+  const getTrackArt = (t) => {
+    if (t.albumArt) return t.albumArt;
+    if (t.source === 'mystation') return DEFAULT_MP_ART;
+    return null;
+  };
+
   const getTrackId = (t) => {
     if (t.spotifyId) return `spotify_${t.spotifyId}`;
     if (t.deezerId) return `deezer_${t.deezerId}`;
@@ -53,7 +61,7 @@ export default function PlaylistsPage() {
         artist: t.artist,
         album: t.album,
         audioFile: t.source === 'mystation' ? t.audioSrc : t.previewUrl,
-        albumArt: t.albumArt,
+        albumArt: getTrackArt(t),
         duration: t.duration,
         source: t.source,
         isPreview: t.source !== 'mystation',
@@ -79,7 +87,7 @@ export default function PlaylistsPage() {
         artist: track.artist,
         album: track.album,
         audioFile: track.source === 'mystation' ? track.audioSrc : track.previewUrl,
-        albumArt: track.albumArt,
+        albumArt: getTrackArt(track),
         duration: track.duration,
         source: track.source,
         isPreview: track.source !== 'mystation',
@@ -167,23 +175,34 @@ export default function PlaylistsPage() {
                     onClick={() => setActivePlaylist(pl.id)}
                     className="relative aspect-square bg-gradient-to-br from-purple-600/30 to-blue-600/30"
                   >
-                    {pl.tracks.length > 0 && pl.tracks.some(t => t.albumArt) ? (
+                    {pl.tracks.length > 0 ? (
                       <div className="grid grid-cols-2 w-full h-full">
-                        {pl.tracks.filter(t => t.albumArt).slice(0, 4).map((t, i) => (
-                          <div key={i} className="relative overflow-hidden">
-                            <img
-                              src={t.albumArt}
-                              alt=""
-                              className="absolute inset-0 w-full h-full object-cover"
-                              onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-br from-purple-600/20 to-blue-600/20 items-center justify-center" style={{ display: 'none' }}>
-                              <Music size={24} className="text-white/10" />
+                        {pl.tracks.slice(0, 4).map((t, i) => {
+                          const art = getTrackArt(t);
+                          return (
+                            <div key={i} className="relative overflow-hidden">
+                              {art ? (
+                                <>
+                                  <img
+                                    src={art}
+                                    alt=""
+                                    className="absolute inset-0 w-full h-full object-cover"
+                                    onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
+                                  />
+                                  <div className="absolute inset-0 bg-gradient-to-br from-purple-600/20 to-blue-600/20 items-center justify-center" style={{ display: 'none' }}>
+                                    <Music size={24} className="text-white/10" />
+                                  </div>
+                                </>
+                              ) : (
+                                <div className="absolute inset-0 bg-gradient-to-br from-purple-600/20 to-blue-600/20 flex items-center justify-center">
+                                  <Music size={24} className="text-white/10" />
+                                </div>
+                              )}
                             </div>
-                          </div>
-                        ))}
-                        {pl.tracks.filter(t => t.albumArt).length < 4 &&
-                          Array.from({ length: 4 - Math.min(pl.tracks.filter(t => t.albumArt).length, 4) }).map((_, i) => (
+                          );
+                        })}
+                        {pl.tracks.length < 4 &&
+                          Array.from({ length: 4 - pl.tracks.length }).map((_, i) => (
                             <div key={`empty-${i}`} className="bg-gradient-to-br from-purple-600/20 to-blue-600/20 flex items-center justify-center">
                               <Music size={24} className="text-white/10" />
                             </div>
@@ -248,9 +267,9 @@ export default function PlaylistsPage() {
         <div className="flex items-start gap-6 mb-8">
           {/* Cover */}
           <div className="w-40 h-40 sm:w-48 sm:h-48 rounded-2xl overflow-hidden shrink-0 bg-gradient-to-br from-purple-600/30 to-blue-600/30">
-            {openPlaylist.coverArt ? (
+            {(openPlaylist.coverArt || (openPlaylist.tracks.length > 0 && getTrackArt(openPlaylist.tracks[0]))) ? (
               <div className="relative w-full h-full">
-                <img src={openPlaylist.coverArt} alt={openPlaylist.name} className="w-full h-full object-cover" onError={(e) => { e.target.style.display = 'none'; }} />
+                <img src={openPlaylist.coverArt || getTrackArt(openPlaylist.tracks[0])} alt={openPlaylist.name} className="w-full h-full object-cover" onError={(e) => { e.target.style.display = 'none'; }} />
               </div>
             ) : (
               <div className="w-full h-full flex items-center justify-center">
@@ -350,10 +369,10 @@ export default function PlaylistsPage() {
                     disabled={!hasAudio}
                     className="relative w-10 h-10 rounded-lg overflow-hidden shrink-0"
                   >
-                    {track.albumArt ? (
-                      <img src={track.albumArt} alt="" className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.target.style.display = 'none'; }} />
+                    {getTrackArt(track) ? (
+                      <img src={getTrackArt(track)} alt="" className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }} />
                     ) : null}
-                    <div className={`absolute inset-0 bg-gradient-to-br from-blue-600/40 to-purple-900/60 flex items-center justify-center ${track.albumArt ? '-z-10' : ''}`}>
+                    <div className={`absolute inset-0 bg-gradient-to-br from-blue-600/40 to-purple-900/60 flex items-center justify-center ${getTrackArt(track) ? 'hidden' : ''}`}>
                       <Music size={14} className="text-blue-400/60" />
                     </div>
                     <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
@@ -373,7 +392,7 @@ export default function PlaylistsPage() {
                     track.source === 'spotify' ? 'text-green-400/60 bg-green-500/10' :
                     'text-blue-400/60 bg-blue-500/10'
                   }`}>
-                    {track.source === 'deezer' ? 'Deezer' : track.source === 'spotify' ? 'Spotify' : 'MyStation'}
+                    {track.source === 'mystation' ? 'Full' : '30s Preview'}
                   </span>
 
                   {/* Duration */}

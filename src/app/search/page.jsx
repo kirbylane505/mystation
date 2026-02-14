@@ -150,7 +150,7 @@ function SearchPageInner() {
         title: track.title,
         artist: track.artist || (track.featured ? `Mike Page ft. ${track.featured}` : 'Mike Page'),
         album: track.album,
-        albumArt: null,
+        albumArt: '/images/albums/cindys-son.jpg',
         audioSrc: track.audioFile,
         duration: track.duration,
         source: 'mystation',
