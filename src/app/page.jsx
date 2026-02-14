@@ -59,11 +59,19 @@ export default function HomePage() {
       {/* Hero Section */}
       <Hero />
 
-      {/* Section Divider */}
-      <div className="section-divider" />
+      {/* Scrolling IDMG Marquee */}
+      <div className="w-full overflow-hidden py-6 border-t border-b border-white/5 bg-gradient-to-r from-transparent via-white/[0.02] to-transparent">
+        <div className="flex animate-marquee whitespace-nowrap">
+          {[...Array(8)].map((_, i) => (
+            <span key={i} className="mx-12 text-2xl md:text-3xl font-black tracking-[0.3em] text-white/15 uppercase select-none">
+              IMPOSSIBLE DREAMZ MUSIC GROUP
+            </span>
+          ))}
+        </div>
+      </div>
 
       {/* New Releases */}
-      <section className="max-w-screen-xl mx-auto px-6 py-20">
+      <section className="max-w-screen-xl mx-auto px-6 py-12">
         <div className="flex items-center justify-between mb-10">
           <div>
             <h2 className="text-3xl font-bold text-white mb-2">New Releases</h2>
@@ -452,17 +460,6 @@ export default function HomePage() {
           </div>
         </div>
       )}
-
-      {/* Floating IDMG Marquee */}
-      <div className="w-full overflow-hidden py-8 border-t border-b border-white/5 bg-gradient-to-r from-transparent via-white/[0.02] to-transparent">
-        <div className="flex animate-marquee whitespace-nowrap">
-          {[...Array(8)].map((_, i) => (
-            <span key={i} className="mx-12 text-2xl md:text-3xl font-black tracking-[0.3em] text-white/15 uppercase select-none">
-              IMPOSSIBLE DREAMZ MUSIC GROUP
-            </span>
-          ))}
-        </div>
-      </div>
 
       {/* Footer */}
       <footer className="border-t border-white/5 py-16 bg-mystation-black/50">
