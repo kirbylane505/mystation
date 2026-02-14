@@ -388,7 +388,7 @@ export default function PlaylistsPage() {
 
                   {/* Source */}
                   <span className={`text-[10px] px-2 py-0.5 rounded-full ${
-                    track.source === 'deezer' ? 'text-purple-400/60 bg-purple-500/10' :
+                    track.source === 'spotify' ? 'text-green-400/60 bg-green-500/10' :
                     track.source === 'spotify' ? 'text-green-400/60 bg-green-500/10' :
                     'text-blue-400/60 bg-blue-500/10'
                   }`}>

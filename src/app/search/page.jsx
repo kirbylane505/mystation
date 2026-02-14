@@ -66,7 +66,7 @@ function SearchPageInner() {
       }));
   }, []);
 
-  // Unified search — Spotify + Deezer + local in parallel
+  // Unified search — Spotify + local in parallel
   const searchGlobal = useCallback(async (q) => {
     for (let attempt = 0; attempt < 2; attempt++) {
       try {
@@ -118,7 +118,7 @@ function SearchPageInner() {
     }
   };
 
-  // Play a global preview (Spotify or Deezer)
+  // Play a global preview
   const playGlobalPreview = (track) => {
     if (!track.previewUrl) return;
     const trackId = track.spotifyId ? `spotify_${track.spotifyId}` : `deezer_${track.deezerId}`;
@@ -156,7 +156,7 @@ function SearchPageInner() {
         source: 'mystation',
       };
     } else {
-      // Spotify, Deezer, or merged track
+      // Spotify or merged track
       formatted = {
         spotifyId: track.spotifyId || null,
         deezerId: track.deezerId || null,
