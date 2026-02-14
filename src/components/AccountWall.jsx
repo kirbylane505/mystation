@@ -398,9 +398,6 @@ export default function AccountWall() {
           </div>
         )}
 
-        <p className="text-white/20 text-xs text-center mt-4">
-          All proceeds support youth music programs through IDMG.
-        </p>
       </div>
     </div>
   );
