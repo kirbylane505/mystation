@@ -148,6 +148,12 @@ export const useGameStore = create((set, get) => ({
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to start');
+
+      // Update room status locally (don't wait for broadcast)
+      set({ room: { ...get().room, status: 'playing' } });
+
+      // Fetch personalized game state
+      get().fetchGameState();
     } catch (err) {
       set({ error: err.message });
     }
@@ -173,8 +179,10 @@ export const useGameStore = create((set, get) => ({
       const result = await res.json();
       if (!res.ok) {
         set({ error: result.error });
+        return;
       }
-      // State update comes via realtime broadcast
+      // Fetch updated state directly (don't wait for broadcast)
+      get().fetchGameState();
     } catch (err) {
       console.error('Move error:', err);
     }
