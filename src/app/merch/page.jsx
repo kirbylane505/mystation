@@ -16,7 +16,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Zoom from 'react-medium-image-zoom';
 import 'react-medium-image-zoom/dist/styles.css';
 
-// Color swatch hex map for visual color circles
+// Color swatch hex map — exact matches for common color names
 const COLOR_HEX = {
   'Black': '#000000', 'White': '#FFFFFF', 'Navy': '#1B3A5C', 'Navy Blazer': '#1B3A5C',
   'Red': '#DC2626', 'Royal Blue': '#2563EB', 'Blue': '#3B82F6', 'Forest Green': '#166534',
@@ -33,7 +33,60 @@ const COLOR_HEX = {
   'Sapphire': '#0F52BA', 'Indigo Blue': '#3F51B5', 'Antique Cherry Red': '#991B1B',
   'Turf Green': '#006400', 'Mint Green': '#98FB98', 'Coral Silk': '#F88379',
   'Orchid': '#DA70D6', 'Cardinal Red': '#C41E3A', 'Tropical Blue': '#00CED1',
+  // Printify-specific / brand color names
+  'Core Black': '#000000', 'Core White': '#FFFFFF', 'Core Red': '#DC2626',
+  'Collegiate Navy': '#1B3A5C', 'Collegiate Royal': '#2563EB', 'Collegiate Green': '#166534',
+  'Collegiate Burgundy': '#800020', 'Collegiate Purple': '#6D28D9', 'Collegiate Orange': '#F97316',
+  'Grey Five': '#6B7280', 'Grey Three': '#9CA3AF', 'Grey Two': '#B0B0B0',
+  'Power Red': '#DC2626', 'Team Power Red': '#DC2626', 'Bold Blue': '#2563EB',
+  'Bliss Lilac': '#C8A2C8', 'Wonder White': '#FFFFFF', 'Semi Coral': '#F88379',
+  'Pulse Lime': '#84CC16', 'Acid Yellow': '#FACC15', 'Crew Navy': '#1B3A5C',
+  'Cloud White': '#F8F8FF', 'Almost Pink': '#FFD1DC', 'Preloved Ink': '#4B5563',
 };
+
+// Smart color hex resolver — fuzzy matches Printify/Printful color names via keyword extraction
+const COLOR_KEYWORDS = {
+  black: '#000000', white: '#FFFFFF', navy: '#1B3A5C', red: '#DC2626',
+  royal: '#2563EB', blue: '#3B82F6', green: '#22C55E', forest: '#166534',
+  gray: '#6B7280', grey: '#6B7280', charcoal: '#374151', heather: '#9CA3AF',
+  maroon: '#7F1D1D', burgundy: '#800020', purple: '#7C3AED', orange: '#F97316',
+  gold: '#EAB308', yellow: '#FACC15', pink: '#EC4899', brown: '#92400E',
+  sand: '#D2B48C', tan: '#D2B48C', olive: '#6B7B3A', khaki: '#C3B091',
+  coral: '#F88379', teal: '#14B8A6', indigo: '#3F51B5', violet: '#8B5CF6',
+  cream: '#FFF8DC', ivory: '#FFFFF0', silver: '#C0C0C0', ash: '#B0B0B0',
+  mint: '#98FB98', orchid: '#DA70D6', cardinal: '#C41E3A', crimson: '#DC143C',
+  sapphire: '#0F52BA', cherry: '#991B1B', cobalt: '#0047AB', aqua: '#00FFFF',
+  chocolate: '#3E2723', cocoa: '#D2691E', cinnamon: '#D2691E', caramel: '#FFD59A',
+  mauve: '#E0B0FF', lavender: '#E6E6FA', rose: '#FF007F', blush: '#DE5D83',
+  copper: '#B87333', bronze: '#CD7F32', rust: '#B7410E', wine: '#722F37',
+  plum: '#8E4585', lilac: '#C8A2C8', sage: '#B2AC88', moss: '#8A9A5B',
+  pewter: '#899499', steel: '#71797E', slate: '#708090', stone: '#938E86',
+  midnight: '#191970', onyx: '#353839', jet: '#343434', ink: '#4B5563',
+  lime: '#84CC16', lemon: '#FDE047', peach: '#FFDAB9', apricot: '#FBCEB1',
+  scarlet: '#FF2400', magenta: '#FF00FF', fuchsia: '#FF00FF', cyan: '#00FFFF',
+  turquoise: '#40E0D0', emerald: '#50C878', ruby: '#E0115F', amber: '#FFBF00',
+  bone: '#E3DAC9', natural: '#FAF0E6', oatmeal: '#D3C6A6', latte: '#C8AD8B',
+};
+
+function resolveColorHex(colorName) {
+  if (!colorName) return null;
+  // 1. Exact match
+  if (COLOR_HEX[colorName]) return COLOR_HEX[colorName];
+  // 2. Title case
+  const titleCased = colorName.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+  if (COLOR_HEX[titleCased]) return COLOR_HEX[titleCased];
+  // 3. Keyword extraction — check each word (last word first, most specific)
+  const words = colorName.toLowerCase().split(/[\s\-_/]+/);
+  for (let i = words.length - 1; i >= 0; i--) {
+    if (COLOR_KEYWORDS[words[i]]) return COLOR_KEYWORDS[words[i]];
+  }
+  // 4. Substring match — check if any keyword is contained in the full name
+  const lower = colorName.toLowerCase();
+  for (const [kw, hex] of Object.entries(COLOR_KEYWORDS)) {
+    if (lower.includes(kw)) return hex;
+  }
+  return null;
+}
 
 // Scroll-triggered animation hook
 function useInView(options = {}) {
@@ -568,12 +621,21 @@ export default function MerchPage() {
     return variant ? parseFloat(variant.retail_price) || 0 : 0;
   }
 
-  function getVariantImage(variant, fallback) {
+  function getVariantImage(variant, fallback, printifyImages) {
     if (!variant) return fallback;
+    // Printful: check files array
     const previewFile = variant.files?.find(f => f.type === 'preview');
     if (previewFile?.preview_url) return previewFile.preview_url;
     if (variant.files?.[0]?.preview_url) return variant.files[0].preview_url;
     if (variant.product?.image) return variant.product.image;
+    // Printify: match variant ID against images[].variant_ids
+    if (printifyImages && printifyImages.length > 0) {
+      const vid = variant.printifyVariantId || variant.id;
+      if (vid) {
+        const match = printifyImages.find(img => (img.variant_ids || []).includes(vid));
+        if (match?.src) return match.src;
+      }
+    }
     return fallback;
   }
 
@@ -581,13 +643,13 @@ export default function MerchPage() {
     if (!selectedVariant || !selectedItem) return;
     const provider = productDetails?.provider || selectedItem.provider || 'printful';
     addItem(
-      { id: selectedItem.isPrintify ? selectedItem.printifyId : selectedItem.id, name: selectedItem.name, image: getVariantImage(selectedVariant, selectedItem.image) },
+      { id: selectedItem.isPrintify ? selectedItem.printifyId : selectedItem.id, name: selectedItem.name, image: getVariantImage(selectedVariant, selectedItem.image, productDetails?.images) },
       selectedVariant,
       provider
     );
     setAddedToCart(true);
     // Show toast notification
-    setToast({ name: selectedItem.name, image: getVariantImage(selectedVariant, selectedItem.image), price: getPrice(selectedVariant) });
+    setToast({ name: selectedItem.name, image: getVariantImage(selectedVariant, selectedItem.image, productDetails?.images), price: getPrice(selectedVariant) });
     setTimeout(() => { setAddedToCart(false); setToast(null); }, 3000);
   };
 
@@ -1096,7 +1158,7 @@ export default function MerchPage() {
               <div className="aspect-square relative bg-white overflow-hidden">
                 <Zoom zoomMargin={40}>
                   <img
-                    src={getVariantImage(selectedVariant, selectedItem.image) || selectedItem.printfulImage || '/images/merch/idmg-black-tee-real.jpg'}
+                    src={getVariantImage(selectedVariant, selectedItem.image, productDetails?.images) || selectedItem.printfulImage || '/images/merch/idmg-black-tee-real.jpg'}
                     alt={selectedItem.name}
                     className="w-full h-full object-cover"
                     style={{ width: '100%', height: '100%' }}
@@ -1159,7 +1221,7 @@ export default function MerchPage() {
                                 </label>
                                 <div className="flex flex-wrap gap-2.5 mb-5">
                                   {allColors.map(color => {
-                                    const hex = COLOR_HEX[color] || COLOR_HEX[color.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')] || null;
+                                    const hex = resolveColorHex(color);
                                     const isAvailable = !selectedSize || (colorsBySize[selectedSize] || []).includes(color);
                                     const isSelected = selectedColor === color;
                                     return (
@@ -1182,11 +1244,11 @@ export default function MerchPage() {
                                         {hex ? (
                                           <span className="block w-full h-full rounded-full border-2 border-white/20" style={{ backgroundColor: hex }} />
                                         ) : (
-                                          <span className="block w-full h-full rounded-full border-2 border-white/20 bg-gradient-to-br from-pink-400 via-purple-400 to-blue-400 text-[8px] text-white flex items-center justify-center font-bold">
+                                          <span className="block w-full h-full rounded-full border-2 border-white/30 bg-white/10 text-[8px] text-white/70 flex items-center justify-center font-bold">
                                             {color.slice(0, 2)}
                                           </span>
                                         )}
-                                        {isSelected && <span className="absolute inset-0 flex items-center justify-center"><Check size={14} className={`${hex === '#FFFFFF' || hex === '#FACC15' || hex === '#EAB308' ? 'text-black' : 'text-white'} drop-shadow-md`} /></span>}
+                                        {isSelected && <span className="absolute inset-0 flex items-center justify-center"><Check size={14} className={`${hex === '#FFFFFF' || hex === '#FACC15' || hex === '#EAB308' || hex === '#FFF8DC' || hex === '#FFFFF0' ? 'text-black' : 'text-white'} drop-shadow-md`} /></span>}
                                       </button>
                                     );
                                   })}
