@@ -1087,6 +1087,29 @@ export const tracks = [
 ];
 
 // Featured Song of the Week
+// ─── ALBUM ART MAPPING ───
+// Cindy's Son cover is default for ALL Mike Page tracks
+// Shezzy Knew It and Grammy Nights keep their own covers
+const albumArtMap = {
+  'cindys-son': '/images/albums/cindys-son.jpg',
+  'shezzy-knew-it': '/images/albums/shezzy-knew-it.jpg',
+  'grammy-nights': '/images/grammy-nights-cover.png',
+};
+const DEFAULT_ART = '/images/albums/cindys-son.jpg';
+
+// Apply albumArt to every track
+tracks.forEach(t => {
+  if (!t.albumArt) {
+    t.albumArt = albumArtMap[t.albumId] || DEFAULT_ART;
+  }
+});
+
+export const getTrackAlbumArt = (track) => {
+  if (track?.albumArt) return track.albumArt;
+  if (track?.albumId && albumArtMap[track.albumId]) return albumArtMap[track.albumId];
+  return DEFAULT_ART;
+};
+
 export const featuredSong = {
   id: 141,
   title: "One Of A Kind N...A",

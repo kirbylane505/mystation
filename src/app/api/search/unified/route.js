@@ -1,7 +1,7 @@
 /**
  * MYSTATION - Unified Global Music Search
- * Searches local catalog + Spotify + Deezer in parallel
- * Deezer provides playable 30-sec previews (Spotify killed theirs in 2024)
+ * Searches local catalog + Spotify
+ * Spotify-only — no Deezer
  */
 
 import { NextResponse } from 'next/server';
@@ -58,39 +58,15 @@ export async function GET(request) {
       return NextResponse.json(cached.data);
     }
 
-    // ─── PARALLEL SEARCH: Spotify + Deezer ───
-    // Fetch more from Deezer (all have 30s previews) to maximize playable results
-    const [spotifyResult, deezerResult] = await Promise.allSettled([
-      searchSpotify(q, Math.min(limit, 10)), // Spotify client credentials caps at 10
-      searchDeezer(q, Math.min(limit + 10, 25)), // Deezer has no cap, get extras for matching
-    ]);
-
-    const spotify = spotifyResult.status === 'fulfilled' ? spotifyResult.value : { tracks: [], artists: [] };
-    const deezer = deezerResult.status === 'fulfilled' ? deezerResult.value : { tracks: [] };
-
-    // ─── MERGE: Enrich Spotify tracks with Deezer previews ───
-    const enrichedTracks = mergeResults(spotify.tracks, deezer.tracks);
-
-    // Unmatched Deezer tracks (all have 30s previews)
-    const usedDeezerIds = new Set(enrichedTracks.filter(t => t.deezerId).map(t => t.deezerId));
-    const deezerOnly = deezer.tracks.filter(dt => !usedDeezerIds.has(dt.deezerId));
-
-    // Combine all tracks and sort: playable first, then by source quality
-    const allTracks = [...enrichedTracks, ...deezerOnly];
-    allTracks.sort((a, b) => {
-      const aPlayable = a.previewUrl ? 1 : 0;
-      const bPlayable = b.previewUrl ? 1 : 0;
-      if (bPlayable !== aPlayable) return bPlayable - aPlayable; // playable first
-      return (b.popularity || b.rank || 0) - (a.popularity || a.rank || 0); // then by popularity
-    });
+    // ─── SPOTIFY SEARCH ONLY ───
+    const spotify = await searchSpotify(q, limit);
 
     const result = {
-      tracks: allTracks.slice(0, limit),
+      tracks: spotify.tracks.slice(0, limit),
       artists: spotify.artists || [],
       query: q,
       sources: {
-        spotify: spotifyResult.status === 'fulfilled',
-        deezer: deezerResult.status === 'fulfilled',
+        spotify: true,
       },
     };
 
@@ -117,7 +93,6 @@ async function searchSpotify(q, limit) {
   if (!token) return { tracks: [], artists: [] };
 
   try {
-    // Separate calls for tracks and artists (avoids comma encoding issue)
     const [trackRes, artistRes] = await Promise.all([
       fetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent(q)}&type=track&limit=${limit}&market=US`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -144,7 +119,6 @@ async function searchSpotify(q, limit) {
       spotifyUrl: t.external_urls?.spotify,
       popularity: t.popularity,
       explicit: t.explicit,
-      isrc: t.external_ids?.isrc || null,
       source: 'spotify',
     }));
 
@@ -165,87 +139,4 @@ async function searchSpotify(q, limit) {
     console.error('Spotify search failed:', err.message);
     return { tracks: [], artists: [] };
   }
-}
-
-// ─── DEEZER SEARCH ───
-async function searchDeezer(q, limit) {
-  try {
-    const res = await fetch(
-      `https://api.deezer.com/search?q=${encodeURIComponent(q)}&limit=${limit}`,
-      { signal: AbortSignal.timeout(5000) }
-    );
-    if (!res.ok) return { tracks: [] };
-    const data = await res.json();
-
-    const tracks = (data.data || []).map(t => ({
-      deezerId: t.id,
-      title: t.title_short || t.title,
-      artist: t.artist?.name || 'Unknown',
-      album: t.album?.title || '',
-      albumArt: t.album?.cover_xl || t.album?.cover_big || null,
-      albumArtSmall: t.album?.cover_medium || t.album?.cover_small || null,
-      previewUrl: t.preview || null,
-      duration: t.duration * 1000,
-      durationFormatted: `${Math.floor(t.duration / 60)}:${String(t.duration % 60).padStart(2, '0')}`,
-      explicit: t.explicit_lyrics || false,
-      rank: t.rank || 0,
-      source: 'deezer',
-    }));
-
-    return { tracks };
-  } catch (err) {
-    console.error('Deezer search failed:', err.message);
-    return { tracks: [] };
-  }
-}
-
-// ─── MERGE: Match Spotify tracks with Deezer previews ───
-function mergeResults(spotifyTracks, deezerTracks) {
-  // Build lookups by normalized title AND by title+first-artist
-  const deezerByTitle = new Map();
-  const deezerByTitleArtist = new Map();
-  for (const dt of deezerTracks) {
-    const titleKey = normalize(dt.title);
-    const titleArtistKey = normalize(`${dt.title} ${dt.artist.split(',')[0]}`);
-    if (!deezerByTitle.has(titleKey)) deezerByTitle.set(titleKey, dt);
-    if (!deezerByTitleArtist.has(titleArtistKey)) deezerByTitleArtist.set(titleArtistKey, dt);
-  }
-
-  const usedDeezerIds = new Set();
-
-  // Enrich Spotify tracks with Deezer preview URLs
-  const merged = spotifyTracks.map(st => {
-    const titleKey = normalize(st.title);
-    const firstArtist = st.artist.split(',')[0].trim();
-    const titleArtistKey = normalize(`${st.title} ${firstArtist}`);
-
-    // Try title+artist match first, then title-only
-    const deezerMatch = deezerByTitleArtist.get(titleArtistKey) || deezerByTitle.get(titleKey);
-
-    if (deezerMatch && !usedDeezerIds.has(deezerMatch.deezerId)) {
-      usedDeezerIds.add(deezerMatch.deezerId);
-      return {
-        ...st,
-        previewUrl: st.previewUrl || deezerMatch.previewUrl,
-        deezerId: deezerMatch.deezerId,
-        previewSource: st.previewUrl ? 'spotify' : 'deezer',
-      };
-    }
-
-    return { ...st, previewSource: st.previewUrl ? 'spotify' : null };
-  });
-
-  return merged;
-}
-
-function normalize(str) {
-  return str
-    .toLowerCase()
-    .replace(/\(.*?\)/g, '') // Remove parenthetical (feat. X)
-    .replace(/\[.*?\]/g, '') // Remove bracket content
-    .replace(/feat\.?/gi, '')
-    .replace(/ft\.?/gi, '')
-    .replace(/[^a-z0-9\s]/g, '')
-    .replace(/\s+/g, ' ')
-    .trim();
 }

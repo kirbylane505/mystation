@@ -150,7 +150,7 @@ function SearchPageInner() {
         title: track.title,
         artist: track.artist || (track.featured ? `Mike Page ft. ${track.featured}` : 'Mike Page'),
         album: track.album,
-        albumArt: '/images/albums/cindys-son.jpg',
+        albumArt: track.albumArt || '/images/albums/cindys-son.jpg',
         audioSrc: track.audioFile,
         duration: track.duration,
         source: 'mystation',
@@ -328,7 +328,7 @@ function SearchPageInner() {
                 <Disc3 size={14} className="text-white" />
               </div>
               <h2 className="text-base font-bold text-white tracking-wide uppercase">Global</h2>
-              <span className="text-[10px] text-purple-300 bg-purple-500/15 px-2 py-0.5 rounded-md font-medium">Spotify + Deezer</span>
+              <span className="text-[10px] text-green-300 bg-green-500/15 px-2 py-0.5 rounded-md font-medium">Spotify</span>
               {!canUseSpotifyResults && (
                 <span className="text-[10px] text-yellow-300 bg-yellow-500/15 px-2.5 py-0.5 rounded-md font-medium ml-auto">Subscribe to Unlock</span>
               )}
@@ -513,7 +513,6 @@ function TrackRow({
   spotify = false,
 }) {
   const hasPreview = spotify ? !!track.previewUrl : true;
-  const isDeezer = track.previewSource === 'deezer' || track.source === 'deezer';
 
   return (
     <div className="relative group">
@@ -577,13 +576,11 @@ function TrackRow({
         {spotify && (
           <span className={`hidden sm:inline-flex items-center gap-1 text-[10px] px-2 py-1 rounded-md shrink-0 ${
             hasPreview
-              ? isDeezer
-                ? 'text-purple-300 bg-purple-500/15'
-                : 'text-green-300 bg-green-500/15'
+              ? 'text-green-300 bg-green-500/15'
               : 'text-white/25 bg-white/5'
           }`}>
             {hasPreview && <span className="w-1.5 h-1.5 rounded-full bg-current" />}
-            {hasPreview ? (isDeezer ? '30s' : '30s') : 'No audio'}
+            {hasPreview ? '30s' : 'No audio'}
           </span>
         )}
         {!spotify && (
