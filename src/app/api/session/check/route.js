@@ -8,7 +8,7 @@ import { NextResponse } from 'next/server';
 import { createHmac } from 'crypto';
 
 const AUDIO_SECRET = process.env.AUDIO_SECRET || 'ms-audio-2026-idmg';
-const BROWSE_DURATION_MS = 10 * 60 * 1000;
+const BROWSE_DURATION_MS = 26 * 60 * 1000; // Must match session/start
 
 function hmacSign(prefix, payload) {
   return createHmac('sha256', AUDIO_SECRET).update(`${prefix}:${payload}`).digest('hex').slice(0, 32);
