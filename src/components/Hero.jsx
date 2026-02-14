@@ -53,14 +53,6 @@ export default function Hero() {
           </p>
         </div>
 
-        {/* Stats bar */}
-        <div className="mt-4 flex items-center justify-center gap-8 text-white/30 text-xs uppercase tracking-wider hero-stats">
-          <span>{officialTracks.length} Tracks</span>
-          <span className="w-1 h-1 bg-white/20 rounded-full" />
-          <span>100% Free</span>
-          <span className="w-1 h-1 bg-white/20 rounded-full" />
-          <span>501(c)(3)</span>
-        </div>
       </div>
     </div>
   );

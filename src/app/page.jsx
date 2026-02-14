@@ -457,7 +457,7 @@ export default function HomePage() {
       <div className="w-full overflow-hidden py-8 border-t border-b border-white/5 bg-gradient-to-r from-transparent via-white/[0.02] to-transparent">
         <div className="flex animate-marquee whitespace-nowrap">
           {[...Array(8)].map((_, i) => (
-            <span key={i} className="mx-12 text-2xl md:text-3xl font-black tracking-[0.3em] text-white/[0.07] uppercase select-none">
+            <span key={i} className="mx-12 text-2xl md:text-3xl font-black tracking-[0.3em] text-white/15 uppercase select-none">
               IMPOSSIBLE DREAMZ MUSIC GROUP
             </span>
           ))}

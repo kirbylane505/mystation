@@ -832,7 +832,7 @@ img {
 }
 
 .animate-marquee {
-  animation: marquee 60s linear infinite;
+  animation: marquee 20s linear infinite;
 }
 
 /* Force rebuild Thu Feb 13 00:00:00 EST 2026 */
