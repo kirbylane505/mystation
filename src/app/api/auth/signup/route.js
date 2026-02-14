@@ -71,15 +71,19 @@ export async function POST(request) {
           const freeUntil = new Date();
           freeUntil.setDate(freeUntil.getDate() + 30);
 
-          await supabase.from('subscribers').insert({
+          const { error: insertErr } = await supabase.from('subscribers').upsert({
             email: cleanEmail,
-            name: name || cleanEmail.split('@')[0],
             status: 'active',
             tier: 'regular',
             is_free_trial: true,
+            subscriber_number: subscriberNumber,
             free_until: freeUntil.toISOString(),
             created_at: new Date().toISOString(),
-          });
+          }, { onConflict: 'email' });
+
+          if (insertErr) {
+            console.error('Subscribers insert error:', insertErr);
+          }
 
           isFreeSlot = true;
           isSubscribed = true;
