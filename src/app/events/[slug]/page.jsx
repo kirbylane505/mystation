@@ -596,8 +596,9 @@ export default function EventDetailPage() {
               {event.ticket_types.map((tier) => {
                 const isSelected = selectedTier?.id === tier.id;
                 const soldOut = (tier.quantity_remaining || 0) <= 0;
+                // Price in dollars (not cents) — display as $XX.00
                 const priceDisplay = tier.price > 0
-                  ? `$${tier.price.toFixed(2)}`
+                  ? `$${Number(tier.price).toFixed(2)}`
                   : 'FREE';
 
                 return (
