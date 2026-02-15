@@ -8,6 +8,7 @@ import { NextResponse } from 'next/server';
 import { createHmac } from 'crypto';
 import { signUp } from '@/lib/supabase';
 import { sendWelcomeEmail, sendNewSignupAlert } from '@/lib/email';
+import { addSubscriber } from '@/lib/kit';
 
 const AUDIO_SECRET = process.env.AUDIO_SECRET || 'ms-audio-2026-idmg';
 
@@ -111,6 +112,11 @@ export async function POST(request) {
       subscriberNumber,
       isFreeSlot,
     }).catch(err => console.error('Signup alert failed:', err));
+
+    // Sync to Kit for marketing (fire-and-forget)
+    addSubscriber(cleanEmail, name || cleanEmail.split('@')[0], ['mystation-signup']).catch(err =>
+      console.error('Kit sync error (signup):', err)
+    );
 
     const response = NextResponse.json({
       success: true,
