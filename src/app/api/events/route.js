@@ -23,6 +23,7 @@ export async function GET(request) {
       .from('events')
       .select('*, ticket_types(*)')
       .eq('is_active', true)
+      .eq('ticket_types.is_active', true)
       .order('date', { ascending: true });
 
     if (org) {
