@@ -91,7 +91,7 @@ function MerchMarquee({ slug }) {
   const doubled = [...products, ...products];
 
   return (
-    <div className="fixed bottom-[80px] left-0 right-0 z-[140] bg-gradient-to-r from-black/95 via-gray-900/95 to-black/95 backdrop-blur-xl border-t border-white/10 shadow-2xl shadow-black/50">
+    <div className="fixed bottom-[76px] md:bottom-[116px] left-0 right-0 z-[35] bg-gradient-to-r from-black/95 via-gray-900/95 to-black/95 backdrop-blur-xl border-t border-white/10 shadow-2xl shadow-black/50">
       {/* Header bar */}
       <div className="flex items-center justify-between px-4 py-2 border-b border-white/5">
         <div className="flex items-center gap-2">
