@@ -644,6 +644,8 @@ export default function EventDetailPage() {
                           {tier.name === 'Buddy Pass' ? '/ 4 tickets' :
                            tier.name === 'Squad Pack' ? '/ 6 tickets' :
                            tier.name === 'Family Pack' ? '/ 8 tickets' :
+                           tier.name === 'VIP Tent' ? '/ 12 guests' :
+                           tier.name === 'Parking Pass' ? '/ 1 spot' :
                            'per ticket'}
                         </span>
                       )}
@@ -728,6 +730,8 @@ export default function EventDetailPage() {
                     {selectedTier.name === 'Buddy Pass' ? ' per 4-pack' :
                      selectedTier.name === 'Squad Pack' ? ' per 6-pack' :
                      selectedTier.name === 'Family Pack' ? ' per 8-pack' :
+                     selectedTier.name === 'VIP Tent' ? ' per tent (12 guests)' :
+                     selectedTier.name === 'Parking Pass' ? ' per spot' :
                      ' each'}
                   </p>
                 </div>
