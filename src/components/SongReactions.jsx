@@ -14,6 +14,7 @@ export default function SongReactions({ trackId, size = 'md' }) {
   const currentReaction = trackReactions[trackId];
 
   const sizeClasses = {
+    xs: 'text-base p-1',
     sm: 'text-lg p-1.5',
     md: 'text-xl p-2',
     lg: 'text-2xl p-3',

@@ -151,6 +151,13 @@ body {
   border: 1px solid transparent;
 }
 
+@media (max-width: 767px) {
+  .track-item {
+    padding: 0;
+    border-radius: 8px;
+  }
+}
+
 .track-item:hover {
   background: rgba(59, 130, 246, 0.08);
   border-color: rgba(59, 130, 246, 0.2);

@@ -60,61 +60,33 @@ export default function TrackList({ trackIds, showAlbum = true, showNumber = tru
             className={`track-item track-list-item group ${isCurrentTrack ? 'playing' : ''}`}
             onClick={() => handleTrackClick(track, index)}
           >
-            {/* Mobile Layout - Full names, no truncation */}
-            <div className="flex md:hidden items-start gap-3 px-4 py-3">
-              {/* Play indicator */}
-              {showNumber && (
-                <div className="text-white/30 font-mono text-sm w-6 shrink-0 pt-1">
-                  {isPlayingThis ? (
-                    <Play size={14} className="text-blue-400" fill="currentColor" />
-                  ) : (
-                    String(index + 1).padStart(2, '0')
-                  )}
-                </div>
-              )}
-
-              {/* Album art */}
-              <div className="w-11 h-11 bg-gradient-to-br from-blue-600/20 to-blue-900/30 rounded-lg flex items-center justify-center shrink-0 border border-white/5">
-                {track.streamOnly ? (
-                  <ExternalLink size={16} className="text-green-400" />
+            {/* Mobile Layout - Compact rows (~56px) */}
+            <div className="flex md:hidden items-center gap-2.5 px-3 py-2">
+              {/* Album art with play overlay */}
+              <div className="relative w-10 h-10 bg-gradient-to-br from-blue-600/20 to-blue-900/30 rounded-lg flex items-center justify-center shrink-0 border border-white/5">
+                {isPlayingThis ? (
+                  <Play size={14} className="text-blue-400" fill="currentColor" />
+                ) : track.streamOnly ? (
+                  <ExternalLink size={14} className="text-green-400" />
                 ) : (
-                  <Music size={16} className="text-blue-400/60" />
+                  <Music size={14} className="text-blue-400/60" />
                 )}
               </div>
 
-              {/* Title & Artist - Full text, wraps naturally */}
-              <div className="flex-1">
-                <p className={`font-bold text-[15px] leading-tight ${isCurrentTrack ? 'text-blue-400' : 'text-white'}`}>
+              {/* Title & Artist - Compact, truncated */}
+              <div className="flex-1 min-w-0">
+                <p className={`font-bold text-[14px] leading-tight truncate ${isCurrentTrack ? 'text-blue-400' : 'text-white'}`}>
                   {track.title}
                 </p>
-                <p className="text-[13px] text-white/80 mt-0.5">
-                  Mike Page{track.featured && ` ft. ${track.featured}`}
-                </p>
-                {track.producer && (
-                  <p className="text-[11px] text-purple-400 mt-0.5">
-                    Prod by {track.producer}
-                  </p>
-                )}
-                <p className="text-[12px] text-white/60 mt-0.5">
-                  {track.album} • {track.year}
+                <p className="text-[12px] text-white/60 truncate mt-0.5">
+                  Mike Page{track.featured ? ` ft. ${track.featured}` : ''}{track.producer ? ` • ${track.producer}` : ''}
                 </p>
               </div>
 
-              {/* Actions - Smaller on mobile */}
-              <div className="flex items-center gap-1 shrink-0 pt-1">
+              {/* Actions - minimal on mobile */}
+              <div className="flex items-center shrink-0">
                 <div onClick={(e) => e.stopPropagation()}>
                   <SongReactions trackId={track.id} size="xs" />
-                </div>
-                {showComments && (
-                  <button
-                    onClick={(e) => { e.stopPropagation(); setCommentTrack(track); }}
-                    className="p-1.5 text-white/40 hover:text-blue-400 transition"
-                  >
-                    <MessageCircle size={16} />
-                  </button>
-                )}
-                <div onClick={(e) => e.stopPropagation()}>
-                  <ShareButton track={track} size="sm" />
                 </div>
               </div>
             </div>
