@@ -14,6 +14,7 @@ import { headers } from 'next/headers';
 import { printful } from '@/lib/printful';
 import { printify } from '@/lib/printify';
 import { sendSaleAlert, sendOrderConfirmation } from '@/lib/email';
+import { tagSubscriber } from '@/lib/kit';
 import { createHmac } from 'crypto';
 
 // Stripe webhook secret for signature verification
@@ -272,6 +273,13 @@ async function handleCheckoutCompleted(session, stripe) {
         total: totalAmount,
         sessionId: session.id,
       }).catch(err => console.error('Order confirmation email failed:', err));
+    }
+
+    // Tag as merch buyer in Kit (fire-and-forget)
+    if (customerEmail) {
+      tagSubscriber(customerEmail, 'merch-buyer').catch(err =>
+        console.error('Kit tag error (merch-buyer):', err)
+      );
     }
 
     // Auto-grant 1 month subscription on any purchase
