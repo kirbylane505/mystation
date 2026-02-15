@@ -12,7 +12,7 @@ import {
   Calendar, MapPin, Ticket, Clock, Users, ChevronLeft,
   Loader2, Check, Copy, Upload, Share2, AlertCircle,
   Minus, Plus, Shield, Sparkles, ExternalLink, ArrowRight,
-  ShoppingBag, ChevronRight
+  ShoppingBag, ChevronRight, Crown, Mail
 } from 'lucide-react';
 import PaymentMethodPicker from '@/components/tickets/PaymentMethodPicker';
 import ScreenshotUpload from '@/components/tickets/ScreenshotUpload';
@@ -639,7 +639,14 @@ export default function EventDetailPage() {
                     {/* Price */}
                     <div className="mb-4">
                       <span className="text-3xl font-black text-white">{priceDisplay}</span>
-                      {tier.price > 0 && <span className="text-white/40 text-sm ml-1">per ticket</span>}
+                      {tier.price > 0 && (
+                        <span className="text-white/40 text-sm ml-1">
+                          {tier.name === 'Buddy Pass' ? '/ 4 tickets' :
+                           tier.name === 'Squad Pack' ? '/ 6 tickets' :
+                           tier.name === 'Family Pack' ? '/ 8 tickets' :
+                           'per ticket'}
+                        </span>
+                      )}
                     </div>
 
                     {/* Description */}
@@ -686,6 +693,30 @@ export default function EventDetailPage() {
             </div>
           )}
 
+          {/* VIP Early Registration CTA */}
+          {event.slug === 'lotl-2026' && (
+            <div className="relative overflow-hidden rounded-2xl mb-8 p-[1px] bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500">
+              <div className="bg-black/95 rounded-[15px] p-6 lg:p-8">
+                <div className="flex flex-col md:flex-row items-center gap-6">
+                  <div className="flex-1 text-center md:text-left">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-500/20 border border-amber-500/30 rounded-full text-amber-400 text-xs font-bold tracking-wider mb-3">
+                      <Crown size={12} /> VIP EARLY REGISTRATION
+                    </div>
+                    <h3 className="text-xl font-bold text-white mb-2">Want VIP Access?</h3>
+                    <p className="text-white/50 text-sm">Email us to get on the VIP early access list. Be first in line when VIP and VIP Tent tickets drop.</p>
+                  </div>
+                  <a
+                    href="mailto:Contact@LOTLFEST.com?subject=LOTL 2026 VIP Early Registration&body=I want to be on the VIP early access list for Love on the Lawn Day 2026!"
+                    className="shrink-0 inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-500 to-yellow-500 text-black font-bold rounded-xl hover:from-amber-400 hover:to-yellow-400 transition-all"
+                  >
+                    <Mail size={18} />
+                    Register for VIP
+                  </a>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Quantity Selector -- shown after tier selection */}
           {selectedTier && (
             <div className="glass rounded-2xl p-6 mb-8">
@@ -693,7 +724,11 @@ export default function EventDetailPage() {
                 <div>
                   <h3 className="text-white font-bold mb-1">Quantity</h3>
                   <p className="text-white/40 text-sm">
-                    {selectedTier.name} -- ${selectedTier.price.toFixed(2)} each
+                    {selectedTier.name} -- ${selectedTier.price.toFixed(2)}
+                    {selectedTier.name === 'Buddy Pass' ? ' per 4-pack' :
+                     selectedTier.name === 'Squad Pack' ? ' per 6-pack' :
+                     selectedTier.name === 'Family Pack' ? ' per 8-pack' :
+                     ' each'}
                   </p>
                 </div>
                 <div className="flex items-center gap-4">
