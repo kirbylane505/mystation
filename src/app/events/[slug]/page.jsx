@@ -11,10 +11,156 @@ import Link from 'next/link';
 import {
   Calendar, MapPin, Ticket, Clock, Users, ChevronLeft,
   Loader2, Check, Copy, Upload, Share2, AlertCircle,
-  Minus, Plus, Shield, Sparkles, ExternalLink, ArrowRight
+  Minus, Plus, Shield, Sparkles, ExternalLink, ArrowRight,
+  ShoppingBag, ChevronRight
 } from 'lucide-react';
 import PaymentMethodPicker from '@/components/tickets/PaymentMethodPicker';
 import ScreenshotUpload from '@/components/tickets/ScreenshotUpload';
+
+// ─── LOTL RECAP VIDEO BACKGROUND ──────────────────────────────
+function RecapVideoBackground({ slug }) {
+  // Only show for LOTL events
+  if (!slug?.includes('lotl')) return null;
+  return (
+    <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+      <video
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="metadata"
+        className="absolute inset-0 w-full h-full object-cover opacity-[0.12]"
+        style={{ filter: 'blur(1px) saturate(1.2)' }}
+      >
+        <source src="/videos/lotl-recap-2025.mp4" type="video/mp4" />
+      </video>
+      {/* Gradient overlays for readability */}
+      <div className="absolute inset-0 bg-gradient-to-b from-mystation-navyDark/80 via-mystation-navyDark/60 to-mystation-navyDark/95" />
+      <div className="absolute inset-0 bg-gradient-to-r from-blue-950/40 via-transparent to-purple-950/40" />
+    </div>
+  );
+}
+
+// ─── MERCH MARQUEE (Sticky bottom ticker) ─────────────────────
+function MerchMarquee({ slug }) {
+  const [products, setProducts] = useState([]);
+  const [showMarquee, setShowMarquee] = useState(true);
+
+  useEffect(() => {
+    if (!slug?.includes('lotl')) return;
+    async function fetchMerch() {
+      try {
+        // Fetch from both Printful and Printify
+        const [pfRes, pyRes] = await Promise.allSettled([
+          fetch('/api/printful/products').then(r => r.json()),
+          fetch('/api/printify/products').then(r => r.json()),
+        ]);
+
+        let items = [];
+
+        if (pfRes.status === 'fulfilled' && pfRes.value?.products) {
+          items.push(...pfRes.value.products.slice(0, 8).map(p => ({
+            id: p.id,
+            name: p.name,
+            price: p.price || p.retail_price,
+            image: p.thumbnail_url || p.image,
+            source: 'printful',
+          })));
+        }
+
+        if (pyRes.status === 'fulfilled' && pyRes.value?.products) {
+          items.push(...pyRes.value.products.slice(0, 8).map(p => ({
+            id: p.id,
+            name: p.title || p.name,
+            price: p.price || (p.variants?.[0]?.price ? `$${(p.variants[0].price / 100).toFixed(0)}` : null),
+            image: p.images?.[0]?.src || p.thumbnail_url,
+            source: 'printify',
+          })));
+        }
+
+        // Deduplicate and limit
+        setProducts(items.slice(0, 12));
+      } catch {}
+    }
+    fetchMerch();
+  }, [slug]);
+
+  if (!slug?.includes('lotl') || products.length === 0 || !showMarquee) return null;
+
+  // Double the array for seamless infinite scroll
+  const doubled = [...products, ...products];
+
+  return (
+    <div className="fixed bottom-[80px] left-0 right-0 z-[140] bg-gradient-to-r from-black/95 via-gray-900/95 to-black/95 backdrop-blur-xl border-t border-white/10 shadow-2xl shadow-black/50">
+      {/* Header bar */}
+      <div className="flex items-center justify-between px-4 py-2 border-b border-white/5">
+        <div className="flex items-center gap-2">
+          <ShoppingBag size={14} className="text-amber-400" />
+          <span className="text-amber-400 text-xs font-bold uppercase tracking-wider">LOTL Official Merch</span>
+          <span className="text-white/30 text-xs">— Tap to shop</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/merch"
+            className="text-blue-400 text-xs font-bold hover:text-blue-300 transition flex items-center gap-1"
+          >
+            View All <ChevronRight size={12} />
+          </Link>
+          <button
+            onClick={() => setShowMarquee(false)}
+            className="text-white/30 hover:text-white/60 text-xs transition"
+          >
+            ✕
+          </button>
+        </div>
+      </div>
+
+      {/* Scrolling products */}
+      <div className="overflow-hidden py-3">
+        <div
+          className="flex gap-4 animate-marquee whitespace-nowrap"
+          style={{
+            animation: `marquee ${products.length * 4}s linear infinite`,
+          }}
+        >
+          {doubled.map((product, i) => (
+            <Link
+              key={`${product.id}-${i}`}
+              href="/merch"
+              className="inline-flex items-center gap-3 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-amber-500/30 rounded-xl transition-all duration-300 group shrink-0 hover:scale-105"
+            >
+              {product.image && (
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className="w-10 h-10 rounded-lg object-cover bg-white/10"
+                />
+              )}
+              <div className="max-w-[140px]">
+                <p className="text-white text-xs font-bold truncate group-hover:text-amber-300 transition-colors">
+                  {product.name}
+                </p>
+                {product.price && (
+                  <p className="text-green-400 text-xs font-bold">
+                    {typeof product.price === 'number' ? `$${product.price}` : product.price}
+                  </p>
+                )}
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* CSS for marquee animation */}
+      <style jsx>{`
+        @keyframes marquee {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+      `}</style>
+    </div>
+  );
+}
 
 // Format date: "Saturday, September 5, 2026 at 2:00 PM"
 function formatDateFull(dateStr) {
@@ -330,9 +476,12 @@ export default function EventDetailPage() {
   const fullAddress = [event.venue, event.address, event.city, event.state, event.zip].filter(Boolean).join(', ');
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen relative">
+      {/* LOTL Recap Video Background — transparent, immersive */}
+      <RecapVideoBackground slug={slug} />
+
       {/* Hero Section */}
-      <section className="relative py-16 lg:py-24 overflow-hidden">
+      <section className="relative py-16 lg:py-24 overflow-hidden z-10">
         {/* Background image or gradient */}
         {event.cover_image_url ? (
           <>
@@ -435,7 +584,7 @@ export default function EventDetailPage() {
       </section>
 
       {/* Ticket Tiers */}
-      <section className="py-12 lg:py-16">
+      <section className="py-12 lg:py-16 relative z-10">
         <div className="max-w-screen-xl mx-auto px-6">
           <div className="mb-10">
             <h2 className="text-2xl lg:text-3xl font-black text-white mb-2">Select Your Tickets</h2>
@@ -762,6 +911,9 @@ export default function EventDetailPage() {
           </div>
         </div>
       </section>
+
+      {/* LOTL Merch Marquee — sticky scrolling product ticker */}
+      <MerchMarquee slug={slug} />
     </div>
   );
 }
