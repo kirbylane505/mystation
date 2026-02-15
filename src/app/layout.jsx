@@ -19,6 +19,7 @@ import AccountWall from '@/components/AccountWall';
 import { Suspense } from 'react';
 import ReferralDetector from '@/components/ReferralDetector';
 import Script from 'next/script';
+import { Toaster } from 'sonner';
 
 // Lazy-loaded utilities — code-split into separate chunks (loaded async after hydration)
 import LazyUtilities from '@/components/LazyUtilities';
@@ -142,6 +143,16 @@ export default function RootLayout({ children }) {
             }
           `}
         </Script>
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            style: {
+              background: '#0a1628',
+              border: '1px solid rgba(255,255,255,0.1)',
+              color: '#f8fafc',
+            },
+          }}
+        />
       </body>
     </html>
   );
