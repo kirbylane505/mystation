@@ -120,7 +120,7 @@ export default function RootLayout({ children }) {
           <TimerGuard />
           <AccountWall />
           <Navbar />
-          <main className="pt-20 md:pt-24 pb-28">
+          <main className="pt-20 md:pt-24 pb-36">
             {children}
           </main>
           <Player />

@@ -952,6 +952,9 @@ export default function EventDetailPage() {
         </div>
       </section>
 
+      {/* Spacer for LOTL merch marquee + player bar overlap prevention */}
+      {slug?.includes('lotl') && <div className="h-28 md:h-32" />}
+
       {/* LOTL Merch Marquee — sticky scrolling product ticker */}
       <MerchMarquee slug={slug} />
     </div>
