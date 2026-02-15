@@ -145,7 +145,7 @@ function EventCard({ event }) {
               <div>
                 <span className="text-white/40 text-xs">From</span>
                 <span className="text-white font-black text-xl ml-1.5">
-                  ${(startingPrice / 100).toFixed(0)}
+                  ${startingPrice}
                 </span>
               </div>
             ) : (

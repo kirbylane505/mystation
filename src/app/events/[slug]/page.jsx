@@ -448,7 +448,7 @@ export default function EventDetailPage() {
                 const isSelected = selectedTier?.id === tier.id;
                 const soldOut = (tier.quantity_remaining || 0) <= 0;
                 const priceDisplay = tier.price > 0
-                  ? `$${(tier.price / 100).toFixed(2)}`
+                  ? `$${tier.price.toFixed(2)}`
                   : 'FREE';
 
                 return (
@@ -543,7 +543,7 @@ export default function EventDetailPage() {
                 <div>
                   <h3 className="text-white font-bold mb-1">Quantity</h3>
                   <p className="text-white/40 text-sm">
-                    {selectedTier.name} -- ${(selectedTier.price / 100).toFixed(2)} each
+                    {selectedTier.name} -- ${selectedTier.price.toFixed(2)} each
                   </p>
                 </div>
                 <div className="flex items-center gap-4">
@@ -565,7 +565,7 @@ export default function EventDetailPage() {
               <div className="mt-4 pt-4 border-t border-white/10 flex items-center justify-between">
                 <span className="text-white/50">Total</span>
                 <span className="text-white font-black text-2xl">
-                  ${((selectedTier.price * quantity) / 100).toFixed(2)}
+                  ${((selectedTier.price * quantity)).toFixed(2)}
                 </span>
               </div>
             </div>
@@ -615,7 +615,7 @@ export default function EventDetailPage() {
                       </button>
                     </div>
                     <p className="text-white/40 text-xs">
-                      Amount: <span className="text-white font-bold">${((selectedTier.price * quantity) / 100).toFixed(2)}</span>
+                      Amount: <span className="text-white font-bold">${((selectedTier.price * quantity)).toFixed(2)}</span>
                       {' '} -- Include your email in the payment note for faster verification.
                     </p>
                   </div>
@@ -699,7 +699,7 @@ export default function EventDetailPage() {
                   ) : (
                     <>
                       <Ticket size={20} />
-                      SUBMIT ORDER -- ${((selectedTier?.price || 0) * quantity / 100).toFixed(2)}
+                      SUBMIT ORDER -- ${((selectedTier?.price || 0) * quantity).toFixed(2)}
                     </>
                   )}
                 </button>
