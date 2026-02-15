@@ -7,6 +7,7 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { generateReferralCode } from '@/lib/referral';
+import { addSubscriber } from '@/lib/kit';
 
 export async function POST(request) {
   try {
@@ -39,6 +40,11 @@ export async function POST(request) {
         }),
       });
     }
+
+    // Sync to Kit for marketing campaigns (fire-and-forget)
+    addSubscriber(cleanEmail, null, ['email-capture']).catch(err =>
+      console.error('Kit sync error (email-capture):', err)
+    );
 
     // ─── STREET TEAM REFERRAL TRACKING ───
     // Check for referral cookie — if present, credit the referrer
@@ -87,6 +93,11 @@ export async function POST(request) {
 
         // Still send welcome email before returning
         await sendWelcomeEmail(cleanEmail);
+
+        // Sync to Kit (fire-and-forget)
+        addSubscriber(cleanEmail, null, ['email-capture']).catch(err =>
+          console.error('Kit sync error (email-capture referral):', err)
+        );
 
         return response;
       }
