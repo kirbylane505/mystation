@@ -593,7 +593,7 @@ export default function EventDetailPage() {
 
           {event.ticket_types && event.ticket_types.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-              {event.ticket_types.map((tier) => {
+              {event.ticket_types.filter(t => t.is_active !== false).map((tier) => {
                 const isSelected = selectedTier?.id === tier.id;
                 const soldOut = (tier.quantity_remaining || 0) <= 0;
                 // Price in dollars (not cents) — display as $XX.00
