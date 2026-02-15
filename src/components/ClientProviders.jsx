@@ -1,10 +1,18 @@
 /**
  * MYSTATION - Client-side Providers
- * Clean - no popups, no modals
  */
 
 'use client';
 
+import { Suspense } from 'react';
+import PostHogProvider from './PostHogProvider';
+
 export default function ClientProviders({ children }) {
-  return <>{children}</>;
+  return (
+    <PostHogProvider>
+      <Suspense fallback={null}>
+        {children}
+      </Suspense>
+    </PostHogProvider>
+  );
 }

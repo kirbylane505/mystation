@@ -1,58 +1,21 @@
+const { withSentryConfig } = require('@sentry/nextjs');
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
   images: {
     remotePatterns: [
-      // Production domains
-      {
-        protocol: 'https',
-        hostname: 'mystationlive.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'mystation.vercel.app',
-      },
-      // Spotify album art CDN
-      {
-        protocol: 'https',
-        hostname: 'i.scdn.co',
-      },
-      {
-        protocol: 'https',
-        hostname: 'mosaic.scdn.co',
-      },
-      // Deezer album art CDN
-      {
-        protocol: 'https',
-        hostname: 'e-cdns-images.dzcdn.net',
-      },
-      {
-        protocol: 'https',
-        hostname: 'cdns-images.dzcdn.net',
-      },
-      {
-        protocol: 'https',
-        hostname: 'api.deezer.com',
-      },
-      // Merch image CDNs
-      {
-        protocol: 'https',
-        hostname: 'images.printify.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'cdn.printful.com',
-      },
-      // Legacy domains
-      {
-        protocol: 'https',
-        hostname: 'mystation.app',
-      },
-      {
-        protocol: 'https',
-        hostname: 'idmg.live',
-      },
-      // Localhost for development only
+      { protocol: 'https', hostname: 'mystationlive.com' },
+      { protocol: 'https', hostname: 'mystation.vercel.app' },
+      { protocol: 'https', hostname: 'i.scdn.co' },
+      { protocol: 'https', hostname: 'mosaic.scdn.co' },
+      { protocol: 'https', hostname: 'e-cdns-images.dzcdn.net' },
+      { protocol: 'https', hostname: 'cdns-images.dzcdn.net' },
+      { protocol: 'https', hostname: 'api.deezer.com' },
+      { protocol: 'https', hostname: 'images.printify.com' },
+      { protocol: 'https', hostname: 'cdn.printful.com' },
+      { protocol: 'https', hostname: 'mystation.app' },
+      { protocol: 'https', hostname: 'idmg.live' },
       ...(process.env.NODE_ENV === 'development'
         ? [{ protocol: 'http', hostname: 'localhost' }]
         : []),
@@ -67,6 +30,13 @@ const nextConfig = {
       },
     ];
   },
-}
+};
 
-module.exports = nextConfig
+module.exports = withSentryConfig(nextConfig, {
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  silent: true,
+  widenClientFileUpload: true,
+  disableLogger: true,
+  hideSourceMaps: true,
+});
