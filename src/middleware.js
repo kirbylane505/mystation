@@ -76,19 +76,12 @@ async function verifyAudioToken(token, pathname) {
 export async function middleware(request) {
   const { pathname, searchParams } = request.nextUrl;
 
-  // Admin analytics access — header-based auth only (page uses client-side fetch with header)
-  if (pathname.startsWith('/admin/analytics')) {
-    const adminKey = request.headers.get('x-admin-key');
-    if (process.env.ADMIN_KEY && adminKey === process.env.ADMIN_KEY) {
-      // Authorized admin — skip password gate, proceed to security headers
-    } else if (!pathname.startsWith('/api/')) {
-      // Page request without key — allow page load (auth happens client-side via API)
-    } else {
-      return NextResponse.redirect(new URL('/', request.url));
-    }
+  // Admin pages — allow through (each page handles its own auth client-side)
+  if (pathname.startsWith('/admin/analytics') || pathname.startsWith('/admin/orders') || pathname.startsWith('/admin/check-in') || pathname.startsWith('/admin/listeners')) {
+    // Allow page load — auth happens client-side via admin key
   }
 
-  // Block all other /admin routes — redirect to home
+  // Block unknown /admin routes — redirect to home
   else if (pathname.startsWith('/admin') && !pathname.startsWith('/api/admin')) {
     return NextResponse.redirect(new URL('/', request.url));
   }
