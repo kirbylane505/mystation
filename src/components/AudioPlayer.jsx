@@ -28,6 +28,7 @@ function getGlobalAudio() {
     globalAudio.preload = 'auto';
     globalAudio.setAttribute('playsinline', '');
     globalAudio.setAttribute('webkit-playsinline', '');
+    if (typeof window !== 'undefined') window.__mystation_audio = globalAudio;
   }
   return globalAudio;
 }

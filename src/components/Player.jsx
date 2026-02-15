@@ -18,6 +18,7 @@ import VoiceCommand from './VoiceCommand';
 import { shareMP3 } from '@/lib/shareAudio';
 import { albums } from '@/data/tracks';
 import Image from 'next/image';
+import WaveformProgress from './WaveformProgress';
 
 // Get album cover art for a track
 function getAlbumArt(track) {
@@ -431,9 +432,13 @@ export default function Player() {
 
             <div className="flex items-center gap-4">
               <span className="text-xs text-white/40 w-12 text-right font-mono">{formatTime(progress)}</span>
-              <div className="progress-bar flex-1" onClick={handleProgressClick}>
-                <div className="progress-bar-fill" style={{ width: `${(progress / duration) * 100 || 0}%` }} />
-              </div>
+              {mounted && typeof window !== 'undefined' && window.__mystation_audio ? (
+                <WaveformProgress audioElement={window.__mystation_audio} />
+              ) : (
+                <div className="progress-bar flex-1" onClick={handleProgressClick}>
+                  <div className="progress-bar-fill" style={{ width: `${(progress / duration) * 100 || 0}%` }} />
+                </div>
+              )}
               <span className="text-xs text-white/40 w-12 font-mono">{formatTime(duration)}</span>
             </div>
           </div>
