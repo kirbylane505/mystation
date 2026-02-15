@@ -13,7 +13,7 @@ import { useCartStore } from '@/store/cartStore';
 import { useUserStore, usePlayerStore } from '@/store/playerStore';
 import {
   Home, Music, Flame, Heart, Users, ShoppingBag,
-  Search, User, LogOut, X, Play, Menu, Lock, Mail, Calendar, Crown, Newspaper, Download, Gift, Zap, ListMusic, Gamepad2, Ticket
+  Search, User, LogOut, X, Play, Menu, Lock, Mail, Calendar, Crown, Newspaper, Download, Gift, Zap, ListMusic, Gamepad2, Ticket, Film
 } from 'lucide-react';
 import { useEngagementStore } from '@/store/engagementStore';
 import { useStationStore } from '@/store/stationStore';
@@ -44,10 +44,11 @@ export default function Navbar() {
     { href: '/lounge', icon: Gamepad2, label: 'Lounge', highlight: true, mobileOrder: 8 },
     { href: '/make-a-hit', icon: Flame, label: 'Make A Hit', highlight: true, mobileOrder: 9 },
     { href: '/news', icon: Newspaper, label: 'News', mobileOrder: 10 },
-    { href: '/playlists', icon: ListMusic, label: 'Playlists', mobileOrder: 11 },
-    { href: '/search', icon: Search, label: 'Search', highlight: true, mobileOrder: 12 },
-    { href: '/contact', icon: Mail, label: 'Contact', mobileOrder: 13 },
-    { href: '/street-team', icon: Users, label: 'Street Team', mobileOrder: 14 },
+    { href: '/videos', icon: Film, label: 'Videos', mobileOrder: 11 },
+    { href: '/playlists', icon: ListMusic, label: 'Playlists', mobileOrder: 12 },
+    { href: '/search', icon: Search, label: 'Search', highlight: true, mobileOrder: 13 },
+    { href: '/contact', icon: Mail, label: 'Contact', mobileOrder: 14 },
+    { href: '/street-team', icon: Users, label: 'Street Team', mobileOrder: 15 },
     { href: '/rewards', icon: Gift, label: 'Rewards', hidden: true, mobileOrder: 99 },
     { href: '/vault', icon: Lock, label: 'Vault', hidden: true, mobileOrder: 99 },
   ];
@@ -337,7 +338,7 @@ export default function Navbar() {
 
         {/* Mobile Menu Dropdown */}
         {mobileMenuOpen && (
-          <div className="absolute top-16 left-0 right-0 bg-mystation-navy/95 backdrop-blur-xl border-b border-white/10 p-4 space-y-2">
+          <div className="absolute top-16 left-0 right-0 bg-mystation-navy backdrop-blur-xl border-b border-white/10 p-4 space-y-2">
             {mobileNavItems.filter(item => !item.hidden).map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;
