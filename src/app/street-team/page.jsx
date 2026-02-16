@@ -69,7 +69,7 @@ export default function StreetTeamPage() {
         setReward(data.reward || '');
       }
     } catch (err) {
-      console.error('Failed to fetch referral stats:', err);
+      // silently handle referral stats fetch error
     }
   }, []);
 
@@ -81,7 +81,7 @@ export default function StreetTeamPage() {
         setLeaderboard(data.leaderboard || []);
       }
     } catch (err) {
-      console.error('Failed to fetch leaderboard:', err);
+      // silently handle leaderboard fetch error
     }
   };
 

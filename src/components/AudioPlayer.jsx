@@ -204,8 +204,6 @@ export default function AudioPlayer() {
     const onError = () => {
       const err = audio.error;
       if (!err) return;
-      console.error('Audio error:', err.code, err.message);
-
       if (err.code === 2 && audio.src) {
         setTimeout(() => {
           audio.load();
@@ -215,7 +213,6 @@ export default function AudioPlayer() {
         consecutiveErrors++;
         const now = Date.now();
         if (consecutiveErrors > 3 || now - lastSkipTime < 2000) {
-          console.warn('Audio: stopping auto-skip after consecutive errors');
           consecutiveErrors = 0;
           storeActionsRef.current.pause();
           return;

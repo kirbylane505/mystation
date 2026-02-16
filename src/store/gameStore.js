@@ -107,7 +107,7 @@ export const useGameStore = create((set, get) => ({
         body: JSON.stringify({ roomId: room.id, playerId: myPlayerId }),
       });
     } catch (err) {
-      console.error('Leave error:', err);
+      // silently handle leave errors
     }
 
     get().unsubscribeAll();
@@ -132,7 +132,7 @@ export const useGameStore = create((set, get) => ({
         set({ players: data.players });
       }
     } catch (err) {
-      console.error('Ready toggle error:', err);
+      // silently handle ready toggle errors
     }
   },
 
@@ -184,7 +184,7 @@ export const useGameStore = create((set, get) => ({
       // Fetch updated state directly (don't wait for broadcast)
       get().fetchGameState();
     } catch (err) {
-      console.error('Move error:', err);
+      // silently handle move errors
     }
   },
 
@@ -199,7 +199,7 @@ export const useGameStore = create((set, get) => ({
         set({ gameState: data.gameState });
       }
     } catch (err) {
-      console.error('State fetch error:', err);
+      // silently handle state fetch errors
     }
   },
 
@@ -216,7 +216,7 @@ export const useGameStore = create((set, get) => ({
         body: JSON.stringify({ roomId: room.id, playerId: myPlayerId, text }),
       });
     } catch (err) {
-      console.error('Chat error:', err);
+      // silently handle chat errors
     }
   },
 
@@ -231,7 +231,7 @@ export const useGameStore = create((set, get) => ({
         body: JSON.stringify({ roomId: room.id, playerId: myPlayerId, emote: emoteId }),
       });
     } catch (err) {
-      console.error('Emote error:', err);
+      // silently handle emote errors
     }
   },
 
@@ -245,7 +245,7 @@ export const useGameStore = create((set, get) => ({
         set({ openRooms: data.rooms || [] });
       }
     } catch (err) {
-      console.error('Fetch rooms error:', err);
+      // silently handle fetch rooms errors
     }
   },
 

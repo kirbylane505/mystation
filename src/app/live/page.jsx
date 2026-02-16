@@ -7,6 +7,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import toast from 'react-hot-toast';
 import dynamic from 'next/dynamic';
 import { Radio, Users, Heart, MessageCircle, Send, Bell, Calendar, Video, Copy, Check, DollarSign, Sparkles, ExternalLink } from 'lucide-react';
 
@@ -69,11 +70,10 @@ export default function LivePage() {
       if (data.success) {
         setStreamData(data);
       } else {
-        alert('Failed to create stream: ' + (data.error || 'Unknown error'));
+        toast.error('Failed to create stream: ' + (data.error || 'Unknown error'));
       }
     } catch (err) {
-      console.error(err);
-      alert('Error creating stream');
+      toast.error('Error creating stream');
     }
   };
 
@@ -103,7 +103,7 @@ export default function LivePage() {
     setTipAmount(10);
 
     // In production, this would create a Stripe payment
-    alert(`Tip of $${tipAmount} received! (Demo mode - Stripe integration ready)`);
+    toast.success(`Tip of $${tipAmount} received!`);
   };
 
   // Send chat message

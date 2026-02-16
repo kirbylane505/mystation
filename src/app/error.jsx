@@ -5,7 +5,7 @@ import { AlertTriangle, RefreshCw } from 'lucide-react';
 
 export default function GlobalError({ error, reset }) {
   useEffect(() => {
-    console.error('MyStation Error:', error);
+    // error boundary triggered
   }, [error]);
 
   return (

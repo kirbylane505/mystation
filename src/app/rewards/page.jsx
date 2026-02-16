@@ -61,7 +61,7 @@ export default function RewardsPage() {
           setSpending(data.totalSpentCents || 0);
         }
       } catch (e) {
-        console.error('Failed to fetch rewards:', e);
+        // silently handle rewards fetch error
       }
       setLoading(false);
     }

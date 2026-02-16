@@ -611,7 +611,7 @@ export default function MerchPage() {
         }
       }
     } catch (err) {
-      console.error('Failed to load product details:', err);
+      // Product detail fetch failed — modal will show fallback UI
     } finally {
       setLoadingDetails(false);
     }

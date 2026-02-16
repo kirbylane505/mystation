@@ -60,7 +60,7 @@ export default function ShareButtons({
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      console.error('Failed to copy');
+      // copy failed silently
     }
   };
 

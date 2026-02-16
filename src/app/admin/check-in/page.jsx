@@ -7,6 +7,7 @@
  */
 
 import { useState, useRef, useCallback, useEffect } from 'react';
+import toast from 'react-hot-toast';
 
 export default function CheckInPage() {
   const [mode, setMode] = useState('manual'); // 'manual' or 'camera'
@@ -73,7 +74,7 @@ export default function CheckInPage() {
         }
       }, 500);
     } catch (err) {
-      alert('Camera access denied. Use manual mode instead.');
+      toast.error('Camera access denied. Use manual mode instead.');
       setMode('manual');
     }
   };

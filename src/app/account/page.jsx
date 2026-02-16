@@ -40,7 +40,6 @@ export default function AccountPage() {
         window.location.href = 'https://buy.stripe.com/eVq5kEcWS8VW8z10xs73G04';
       }
     } catch (err) {
-      console.error('Portal error:', err);
       window.location.href = 'https://buy.stripe.com/eVq5kEcWS8VW8z10xs73G04';
     } finally {
       setLoading(false);

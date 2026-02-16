@@ -49,7 +49,7 @@ export default function AdminAnalyticsPage() {
         setData(json);
       }
     } catch (err) {
-      console.error('Failed to fetch analytics:', err);
+      // Analytics fetch failed — silently handled
     } finally {
       setLoading(false);
     }

@@ -41,7 +41,6 @@ export default function SubscribeModal() {
       localStorage.setItem('mystation-selected-tier', tier);
       window.location.href = STRIPE_LINKS[tier];
     } catch (err) {
-      console.error('Subscription error:', err);
       setLoading(false);
     }
   };

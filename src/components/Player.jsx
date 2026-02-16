@@ -6,6 +6,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import toast from 'react-hot-toast';
 import { usePlayerStore, useUserStore } from '@/store/playerStore';
 import {
   Play, Pause, SkipBack, SkipForward,
@@ -107,7 +108,7 @@ export default function Player() {
 
     if (platform === 'copy') {
       navigator.clipboard.writeText(trackUrl);
-      alert('Link copied! Share it anywhere.');
+      toast.success('Link copied! Share it anywhere.');
     } else if (platform === 'native' && navigator.share) {
       navigator.share({
         title: `${currentTrack.title} - Mike Page`,

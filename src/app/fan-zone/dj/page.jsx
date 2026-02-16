@@ -71,7 +71,6 @@ class DeckEngine {
       if (this.isPlaying) this.stop();
       return { ok: true };
     } catch (e) {
-      console.error('Failed to load track:', e);
       return { ok: false, error: e.message || 'Failed to load audio' };
     }
   }
@@ -361,7 +360,6 @@ function Deck({ label, deckColor, engine, initAudio, tracks }) {
         setError(result.error || 'Could not decode audio');
       }
     } catch (e) {
-      console.error('Failed to load:', e);
       setError(e.message || 'Failed to load song');
     }
     setLoading(false);
@@ -592,7 +590,6 @@ export default function DJPage() {
       if (ctx.state === 'suspended') await ctx.resume();
       return true;
     } catch (e) {
-      console.error('AudioContext init failed:', e);
       return false;
     }
   }, []);

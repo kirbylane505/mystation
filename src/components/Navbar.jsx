@@ -6,6 +6,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import toast from 'react-hot-toast';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { CartButton } from './Cart';
@@ -97,7 +98,7 @@ export default function Navbar() {
       if (result.outcome === 'accepted') setInstallPrompt(null);
     } else {
       // iOS fallback — show instructions
-      alert('Tap the share button in your browser, then "Add to Home Screen"');
+      toast('Tap the share button in your browser, then "Add to Home Screen"', { icon: '📲', duration: 5000 });
     }
     setMobileMenuOpen(false);
   };

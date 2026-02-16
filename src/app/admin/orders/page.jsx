@@ -7,6 +7,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
+import toast from 'react-hot-toast';
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState([]);
@@ -56,10 +57,10 @@ export default function AdminOrdersPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Approve failed');
-      alert(`Order ${order_ref} approved! ${data.quantity} ticket(s) generated.`);
+      toast.success(`Order ${order_ref} approved! ${data.quantity} ticket(s) generated.`);
       fetchOrders();
     } catch (err) {
-      alert(`Error: ${err.message}`);
+      toast.error(err.message);
     } finally {
       setActionLoading(null);
     }
@@ -76,7 +77,7 @@ export default function AdminOrdersPage() {
       });
       fetchOrders();
     } catch (err) {
-      alert(`Error: ${err.message}`);
+      toast.error(err.message);
     } finally {
       setActionLoading(null);
     }

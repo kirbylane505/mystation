@@ -91,7 +91,6 @@ export default function CheckoutPage() {
         throw new Error('No checkout URL returned');
       }
     } catch (err) {
-      console.error('Checkout error:', err);
       setError(err.message || 'Something went wrong. Please try again.');
       setLoading(false);
     }
