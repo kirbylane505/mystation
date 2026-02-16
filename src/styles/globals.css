@@ -795,6 +795,30 @@ img {
 
 .animate-float-slow {
   animation: floatSlow 15s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* Hero orbs — pre-blurred CSS radial gradients (no runtime blur filter) */
+.bg-orb-blue {
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.08) 0%, transparent 70%);
+}
+.bg-orb-purple {
+  background: radial-gradient(circle, rgba(147, 51, 234, 0.06) 0%, transparent 70%);
+}
+.bg-orb-cyan {
+  background: radial-gradient(circle, rgba(96, 165, 250, 0.05) 0%, transparent 70%);
+}
+
+.hero-orb-blue {
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.08) 0%, transparent 70%);
+}
+
+.hero-orb-purple {
+  background: radial-gradient(circle, rgba(147, 51, 234, 0.06) 0%, transparent 70%);
+}
+
+.hero-orb-cyan {
+  background: radial-gradient(circle, rgba(96, 165, 250, 0.05) 0%, transparent 70%);
 }
 
 /* ==========================================
@@ -852,6 +876,7 @@ img {
 
 .animate-marquee {
   animation: marquee 20s linear infinite;
+  will-change: transform;
 }
 
 /* Force rebuild Thu Feb 13 00:00:00 EST 2026 */

@@ -15,7 +15,8 @@ export default function WaveformProgress({ audioElement }) {
   const containerRef = useRef(null);
   const wavesurferRef = useRef(null);
   const [ready, setReady] = useState(false);
-  const { currentTrack, setProgress } = usePlayerStore();
+  const currentTrack = usePlayerStore(s => s.currentTrack);
+  const setProgress = usePlayerStore(s => s.setProgress);
 
   // Lazy-load wavesurfer (avoid SSR issues)
   useEffect(() => {

@@ -4,6 +4,7 @@ const { withSentryConfig } = require('@sentry/nextjs');
 const nextConfig = {
   reactStrictMode: true,
   images: {
+    formats: ['image/avif', 'image/webp'],
     remotePatterns: [
       { protocol: 'https', hostname: 'mystationlive.com' },
       { protocol: 'https', hostname: 'mystation.vercel.app' },
@@ -16,6 +17,7 @@ const nextConfig = {
       { protocol: 'https', hostname: 'cdn.printful.com' },
       { protocol: 'https', hostname: 'mystation.app' },
       { protocol: 'https', hostname: 'idmg.live' },
+      { protocol: 'https', hostname: 'i.ytimg.com' },
       ...(process.env.NODE_ENV === 'development'
         ? [{ protocol: 'http', hostname: 'localhost' }]
         : []),

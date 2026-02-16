@@ -19,7 +19,9 @@ import Link from 'next/link';
 import Image from 'next/image';
 
 export default function HomePage() {
-  const { setQueue, currentTrack, isPlaying, queue } = usePlayerStore();
+  const setQueue = usePlayerStore(s => s.setQueue);
+  const currentTrack = usePlayerStore(s => s.currentTrack);
+  const isPlaying = usePlayerStore(s => s.isPlaying);
   const [activeAlbum, setActiveAlbum] = useState(null);
 
   // Get official tracks only
@@ -56,10 +58,10 @@ export default function HomePage() {
       {/* Hero Section */}
       <Hero />
 
-      {/* Scrolling IDMG Marquee */}
+      {/* Scrolling IDMG Marquee — 4 spans (2x is enough for seamless loop) */}
       <div className="w-full overflow-hidden py-6 border-t border-b border-white/5 bg-gradient-to-r from-transparent via-white/[0.02] to-transparent">
         <div className="flex animate-marquee whitespace-nowrap">
-          {[...Array(8)].map((_, i) => (
+          {[...Array(4)].map((_, i) => (
             <span key={i} className="mx-12 text-2xl md:text-3xl font-black tracking-[0.3em] text-white/15 uppercase select-none">
               IMPOSSIBLE DREAMZ MUSIC GROUP
             </span>
@@ -117,9 +119,11 @@ export default function HomePage() {
             </div>
             <div className="relative">
               <div className="aspect-square rounded-2xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-white/10 flex items-center justify-center overflow-hidden">
-                <img
+                <Image
                   src="/images/idmg-logo-white.png"
                   alt="Mike Page - IDMG"
+                  width={400}
+                  height={400}
                   className="w-3/4 h-3/4 object-contain opacity-80"
                 />
               </div>
@@ -189,10 +193,12 @@ export default function HomePage() {
               <div className={`aspect-square ${album.coverImage ? '' : `bg-gradient-to-br ${album.coverGradient}`} rounded-xl mb-5 flex flex-col items-center justify-center relative overflow-hidden border border-white/10 shadow-xl`}>
                 {/* Real Album Cover Image */}
                 {album.coverImage && (
-                  <img
+                  <Image
                     src={album.coverImage}
                     alt={album.title}
-                    className="absolute inset-0 w-full h-full object-cover"
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 33vw"
+                    className="object-cover"
                   />
                 )}
 

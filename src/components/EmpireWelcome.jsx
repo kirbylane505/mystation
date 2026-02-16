@@ -21,10 +21,10 @@ const LOTL_TRACK = {
   featured: "Vincent Berry II",
   album: "Coming Soon",
   year: 2026,
-  duration: "3:26",
+  duration: "3:48",
   trackNumber: 8,
   albumId: 'singles-2026',
-  audioFile: '/audio/grammy-nights/02-i-want-this-one.mp3',
+  audioFile: '/audio/grammy-nights/04-love-on-the-lawn.mp3',
   isNew: true,
 };
 

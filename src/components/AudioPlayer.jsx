@@ -9,6 +9,7 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { usePlayerStore, useUserStore } from '@/store/playerStore';
 import { useEngagementStore } from '@/store/engagementStore';
+import { progressBridge } from '@/lib/progressBridge';
 
 // Global audio element - persists across page navigation
 let globalAudio = null;
@@ -111,29 +112,24 @@ export default function AudioPlayer() {
   const storeActionsRef = useRef({});
   const repeatRef = useRef('off');
 
-  const {
-    currentTrack,
-    isPlaying,
-    volume,
-    isMuted,
-    progress,
-    setProgress,
-    setDuration,
-    nextTrack,
-    prevTrack,
-    repeat,
-    incrementPlayCount,
-    openSubscribeModal,
-    pause,
-    play,
-    isLocked,
-    lockedTrackId,
-    lockSite,
-  } = usePlayerStore();
+  const currentTrack = usePlayerStore(s => s.currentTrack);
+  const isPlaying = usePlayerStore(s => s.isPlaying);
+  const volume = usePlayerStore(s => s.volume);
+  const isMuted = usePlayerStore(s => s.isMuted);
+  const repeat = usePlayerStore(s => s.repeat);
+  const pause = usePlayerStore(s => s.pause);
+  const play = usePlayerStore(s => s.play);
+  const incrementPlayCount = usePlayerStore(s => s.incrementPlayCount);
 
   storeActionsRef.current = {
-    setProgress, setDuration, nextTrack, prevTrack,
-    incrementPlayCount, openSubscribeModal, pause, play, lockSite,
+    nextTrack: usePlayerStore.getState().nextTrack,
+    prevTrack: usePlayerStore.getState().prevTrack,
+    incrementPlayCount,
+    openSubscribeModal: usePlayerStore.getState().openSubscribeModal,
+    pause,
+    play,
+    lockSite: usePlayerStore.getState().lockSite,
+    setDuration: usePlayerStore.getState().setDuration,
   };
   repeatRef.current = repeat;
 
@@ -184,12 +180,13 @@ export default function AudioPlayer() {
     setupIOSAudioUnlock();
 
     const onTimeUpdate = () => {
-      storeActionsRef.current.setProgress(audio.currentTime);
+      progressBridge.set(audio.currentTime, audio.duration || 0);
       if (consecutiveErrors > 0) consecutiveErrors = 0;
     };
 
     const onLoadedMetadata = () => {
       storeActionsRef.current.setDuration(audio.duration);
+      progressBridge.set(audio.currentTime, audio.duration);
     };
 
     const onEnded = () => {
@@ -410,13 +407,20 @@ export default function AudioPlayer() {
     if (audio) audio.volume = isMuted ? 0 : volume;
   }, [volume, isMuted]);
 
-  // Seeking
+  // Seeking — subscribe to store progress for user-initiated seeks only
   useEffect(() => {
-    const audio = getGlobalAudio();
-    if (audio && Math.abs(audio.currentTime - progress) > 1.5) {
-      audio.currentTime = progress;
-    }
-  }, [progress]);
+    let lastProgress = usePlayerStore.getState().progress;
+    const unsub = usePlayerStore.subscribe((state) => {
+      if (state.progress !== lastProgress) {
+        lastProgress = state.progress;
+        const audio = getGlobalAudio();
+        if (audio && Math.abs(audio.currentTime - state.progress) > 1.5) {
+          audio.currentTime = state.progress;
+        }
+      }
+    });
+    return unsub;
+  }, []);
 
   // Media Session
   useEffect(() => {
@@ -434,20 +438,23 @@ export default function AudioPlayer() {
     }
   }, [currentTrack, isPlaying]);
 
-  // Position state for lock screen seek bar
+  // Position state for lock screen seek bar — use progressBridge
   useEffect(() => {
     if (!currentTrack || typeof navigator === 'undefined' || !('mediaSession' in navigator)) return;
-    const audio = getGlobalAudio();
-    if (audio && audio.duration && navigator.mediaSession.setPositionState) {
-      try {
-        navigator.mediaSession.setPositionState({
-          duration: audio.duration,
-          playbackRate: audio.playbackRate,
-          position: Math.min(audio.currentTime, audio.duration),
-        });
-      } catch (e) {}
-    }
-  }, [progress, currentTrack]);
+    const unsub = progressBridge.subscribe((progress) => {
+      const audio = getGlobalAudio();
+      if (audio && audio.duration && navigator.mediaSession.setPositionState) {
+        try {
+          navigator.mediaSession.setPositionState({
+            duration: audio.duration,
+            playbackRate: audio.playbackRate,
+            position: Math.min(progress, audio.duration),
+          });
+        } catch (e) {}
+      }
+    });
+    return unsub;
+  }, [currentTrack]);
 
   return null;
 }

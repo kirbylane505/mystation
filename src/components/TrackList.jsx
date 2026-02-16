@@ -1,21 +1,141 @@
 /**
  * MYSTATION - Premium Track List
  * Navy blue theme with sharing & reactions
+ * Perf: React.memo TrackRow, zustand selectors
  */
 
 'use client';
 
-import { useState } from 'react';
+import { useState, memo, useCallback } from 'react';
 import { usePlayerStore } from '@/store/playerStore';
-import { useEngagementStore } from '@/store/engagementStore';
-import { Play, Pause, Heart, MoreHorizontal, Clock, Music, ExternalLink, MessageCircle } from 'lucide-react';
+import { Play, Pause, Clock, Music, ExternalLink, MessageCircle } from 'lucide-react';
 import { tracks } from '@/data/tracks';
 import { ShareButton } from './ShareTrack';
 import SongReactions from './SongReactions';
 import CommentSection from './CommentSection';
 
+// Memoized track row — only re-renders when its own state changes
+const TrackRow = memo(function TrackRow({ track, index, isCurrentTrack, isPlayingThis, showNumber, showAlbum, showComments, onTrackClick, onCommentClick }) {
+  return (
+    <div
+      className={`track-item track-list-item group ${isCurrentTrack ? 'playing' : ''}`}
+      onClick={() => onTrackClick(track, index)}
+    >
+      {/* Mobile Layout */}
+      <div className="flex md:hidden items-center gap-2.5 px-3 py-2">
+        <div className="relative w-10 h-10 bg-gradient-to-br from-blue-600/20 to-blue-900/30 rounded-lg flex items-center justify-center shrink-0 border border-white/5">
+          {isPlayingThis ? (
+            <Play size={14} className="text-blue-400" fill="currentColor" />
+          ) : track.streamOnly ? (
+            <ExternalLink size={14} className="text-green-400" />
+          ) : (
+            <Music size={14} className="text-blue-400/60" />
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className={`font-bold text-[14px] leading-tight truncate ${isCurrentTrack ? 'text-blue-400' : 'text-white'}`}>
+            {track.title}
+          </p>
+          <p className="text-[12px] text-white/60 truncate mt-0.5">
+            Mike Page{track.featured ? ` ft. ${track.featured}` : ''}{track.producer ? ` • ${track.producer}` : ''}
+          </p>
+        </div>
+        <div className="flex items-center shrink-0">
+          <div onClick={(e) => e.stopPropagation()}>
+            <SongReactions trackId={track.id} size="xs" />
+          </div>
+        </div>
+      </div>
+
+      {/* Desktop Layout */}
+      <div className="hidden md:grid grid-cols-12 gap-4 items-center">
+        {showNumber && (
+          <div className="col-span-1 text-white/30 font-mono text-sm">
+            <span className="group-hover:hidden">
+              {isPlayingThis ? (
+                <span className="visualizer-bars">
+                  <span className="visualizer-bar" style={{ animationDelay: '0s' }} />
+                  <span className="visualizer-bar" style={{ animationDelay: '0.2s' }} />
+                  <span className="visualizer-bar" style={{ animationDelay: '0.4s' }} />
+                </span>
+              ) : (
+                String(index + 1).padStart(2, '0')
+              )}
+            </span>
+            <span className="hidden group-hover:block">
+              {isPlayingThis ? (
+                <Pause size={16} className="text-blue-400" />
+              ) : (
+                <Play size={16} className="text-white" />
+              )}
+            </span>
+          </div>
+        )}
+        <div className={showNumber ? 'col-span-5' : 'col-span-6'}>
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-blue-600/20 to-blue-900/30 rounded-lg flex items-center justify-center shrink-0 border border-white/5">
+              {track.streamOnly ? (
+                <ExternalLink size={18} className="text-green-400" />
+              ) : track.isNew ? (
+                <span className="text-[10px] font-bold bg-blue-500 text-white px-1.5 py-0.5 rounded">NEW</span>
+              ) : (
+                <Music size={18} className="text-blue-400/60" />
+              )}
+            </div>
+            <div>
+              <p className={`font-bold ${isCurrentTrack ? 'text-blue-400' : 'text-white'}`}>
+                {track.title}
+              </p>
+              <p className="text-sm text-white/70">
+                Mike Page{track.featured && <span className="text-white/60"> • {track.featured}</span>}
+                {track.producer && <span className="text-purple-400"> • Prod by {track.producer}</span>}
+              </p>
+            </div>
+          </div>
+        </div>
+        {showAlbum && (
+          <div className="col-span-3 text-white/40 text-sm">
+            {track.album}
+          </div>
+        )}
+        <div className="col-span-2 text-white/40 text-sm">
+          {track.year}
+          {track.isExclusive && (
+            <span className="ml-2 text-[10px] bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-full uppercase tracking-wider">
+              Exclusive
+            </span>
+          )}
+        </div>
+        <div className="col-span-1 flex items-center justify-end gap-3">
+          <div onClick={(e) => e.stopPropagation()} className="flex items-center">
+            <SongReactions trackId={track.id} size="sm" />
+          </div>
+          {showComments && (
+            <button
+              onClick={(e) => { e.stopPropagation(); onCommentClick(track); }}
+              className="p-1.5 text-white/40 hover:text-blue-400 transition"
+              title="Comments"
+            >
+              <MessageCircle size={16} />
+            </button>
+          )}
+          <div onClick={(e) => e.stopPropagation()} className="flex items-center">
+            <ShareButton track={track} />
+          </div>
+          <span className="text-white/30 text-sm font-mono hidden sm:inline">
+            {track.duration}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+});
+
 export default function TrackList({ trackIds, showAlbum = true, showNumber = true, showComments = false }) {
-  const { currentTrack, isPlaying, setQueue, togglePlay } = usePlayerStore();
+  const currentTrack = usePlayerStore(s => s.currentTrack);
+  const isPlaying = usePlayerStore(s => s.isPlaying);
+  const setQueue = usePlayerStore(s => s.setQueue);
+  const togglePlay = usePlayerStore(s => s.togglePlay);
   const [commentTrack, setCommentTrack] = useState(null);
 
   // Preserve trackIds order (filter loses intended ordering)
@@ -23,19 +143,21 @@ export default function TrackList({ trackIds, showAlbum = true, showNumber = tru
     ? trackIds.map(id => tracks.find(t => t.id === id)).filter(Boolean)
     : tracks;
 
-  const handleTrackClick = (track, index) => {
-    // If stream only, open Spotify
+  const handleTrackClick = useCallback((track, index) => {
     if (track.streamOnly) {
       window.open(track.spotify || track.apple, '_blank');
       return;
     }
-
     if (currentTrack?.id === track.id) {
       togglePlay();
     } else {
       setQueue(displayTracks, index);
     }
-  };
+  }, [currentTrack?.id, togglePlay, setQueue, displayTracks]);
+
+  const handleCommentClick = useCallback((track) => {
+    setCommentTrack(track);
+  }, []);
 
   return (
     <>
@@ -49,143 +171,23 @@ export default function TrackList({ trackIds, showAlbum = true, showNumber = tru
         <div className="col-span-1 text-right"><Clock size={14} /></div>
       </div>
 
-      {/* Tracks */}
-      {displayTracks.map((track, index) => {
-        const isCurrentTrack = currentTrack?.id === track.id;
-        const isPlayingThis = isCurrentTrack && isPlaying;
-
-        return (
-          <div
-            key={track.id}
-            className={`track-item track-list-item group ${isCurrentTrack ? 'playing' : ''}`}
-            onClick={() => handleTrackClick(track, index)}
-          >
-            {/* Mobile Layout - Compact rows (~56px) */}
-            <div className="flex md:hidden items-center gap-2.5 px-3 py-2">
-              {/* Album art with play overlay */}
-              <div className="relative w-10 h-10 bg-gradient-to-br from-blue-600/20 to-blue-900/30 rounded-lg flex items-center justify-center shrink-0 border border-white/5">
-                {isPlayingThis ? (
-                  <Play size={14} className="text-blue-400" fill="currentColor" />
-                ) : track.streamOnly ? (
-                  <ExternalLink size={14} className="text-green-400" />
-                ) : (
-                  <Music size={14} className="text-blue-400/60" />
-                )}
-              </div>
-
-              {/* Title & Artist - Compact, truncated */}
-              <div className="flex-1 min-w-0">
-                <p className={`font-bold text-[14px] leading-tight truncate ${isCurrentTrack ? 'text-blue-400' : 'text-white'}`}>
-                  {track.title}
-                </p>
-                <p className="text-[12px] text-white/60 truncate mt-0.5">
-                  Mike Page{track.featured ? ` ft. ${track.featured}` : ''}{track.producer ? ` • ${track.producer}` : ''}
-                </p>
-              </div>
-
-              {/* Actions - minimal on mobile */}
-              <div className="flex items-center shrink-0">
-                <div onClick={(e) => e.stopPropagation()}>
-                  <SongReactions trackId={track.id} size="xs" />
-                </div>
-              </div>
-            </div>
-
-            {/* Desktop Layout */}
-            <div className="hidden md:grid grid-cols-12 gap-4 items-center">
-              {/* Number / Play indicator */}
-              {showNumber && (
-                <div className="col-span-1 text-white/30 font-mono text-sm">
-                  <span className="group-hover:hidden">
-                    {isPlayingThis ? (
-                      <span className="visualizer-bars">
-                        <span className="visualizer-bar" style={{ animationDelay: '0s' }} />
-                        <span className="visualizer-bar" style={{ animationDelay: '0.2s' }} />
-                        <span className="visualizer-bar" style={{ animationDelay: '0.4s' }} />
-                      </span>
-                    ) : (
-                      String(index + 1).padStart(2, '0')
-                    )}
-                  </span>
-                  <span className="hidden group-hover:block">
-                    {isPlayingThis ? (
-                      <Pause size={16} className="text-blue-400" />
-                    ) : (
-                      <Play size={16} className="text-white" />
-                    )}
-                  </span>
-                </div>
-              )}
-
-              {/* Title & Artist */}
-              <div className={showNumber ? 'col-span-5' : 'col-span-6'}>
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-600/20 to-blue-900/30 rounded-lg flex items-center justify-center shrink-0 border border-white/5">
-                    {track.streamOnly ? (
-                      <ExternalLink size={18} className="text-green-400" />
-                    ) : track.isNew ? (
-                      <span className="text-[10px] font-bold bg-blue-500 text-white px-1.5 py-0.5 rounded">NEW</span>
-                    ) : (
-                      <Music size={18} className="text-blue-400/60" />
-                    )}
-                  </div>
-                  <div>
-                    <p className={`font-bold ${isCurrentTrack ? 'text-blue-400' : 'text-white'}`}>
-                      {track.title}
-                    </p>
-                    <p className="text-sm text-white/70">
-                      Mike Page{track.featured && <span className="text-white/60"> • {track.featured}</span>}
-                      {track.producer && <span className="text-purple-400"> • Prod by {track.producer}</span>}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Album */}
-              {showAlbum && (
-                <div className="col-span-3 text-white/40 text-sm">
-                  {track.album}
-                </div>
-              )}
-
-              {/* Year */}
-              <div className="col-span-2 text-white/40 text-sm">
-                {track.year}
-                {track.isExclusive && (
-                  <span className="ml-2 text-[10px] bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-full uppercase tracking-wider">
-                    Exclusive
-                  </span>
-                )}
-              </div>
-
-              {/* Duration & Actions */}
-              <div className="col-span-1 flex items-center justify-end gap-3">
-                <div onClick={(e) => e.stopPropagation()} className="flex items-center">
-                  <SongReactions trackId={track.id} size="sm" />
-                </div>
-                {showComments && (
-                  <button
-                    onClick={(e) => { e.stopPropagation(); setCommentTrack(track); }}
-                    className="p-1.5 text-white/40 hover:text-blue-400 transition"
-                    title="Comments"
-                  >
-                    <MessageCircle size={16} />
-                  </button>
-                )}
-                <div onClick={(e) => e.stopPropagation()} className="flex items-center">
-                  <ShareButton track={track} />
-                </div>
-                <span className="text-white/30 text-sm font-mono hidden sm:inline">
-                  {track.duration}
-                </span>
-              </div>
-            </div>
-          </div>
-        );
-      })}
+      {/* Tracks — memoized rows */}
+      {displayTracks.map((track, index) => (
+        <TrackRow
+          key={track.id}
+          track={track}
+          index={index}
+          isCurrentTrack={currentTrack?.id === track.id}
+          isPlayingThis={currentTrack?.id === track.id && isPlaying}
+          showNumber={showNumber}
+          showAlbum={showAlbum}
+          showComments={showComments}
+          onTrackClick={handleTrackClick}
+          onCommentClick={handleCommentClick}
+        />
+      ))}
     </div>
 
-    {/* Comment Section Modal */}
     {commentTrack && (
       <CommentSection
         trackId={commentTrack.id}

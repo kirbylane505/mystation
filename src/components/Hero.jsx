@@ -1,28 +1,34 @@
 /**
  * MYSTATION - Hero Section
  * Animated entrance, floating orbs, premium feel
+ * Perf: Lazy YouTube iframe, next/image, CSS gradient orbs
  */
 
-import { getOfficialTracks } from '@/data/tracks';
+'use client';
+
+import { useState } from 'react';
+import Image from 'next/image';
+import { Play } from 'lucide-react';
 
 export default function Hero() {
-  const officialTracks = getOfficialTracks();
+  const [showVideo, setShowVideo] = useState(false);
 
   return (
     <div className="relative min-h-[85vh] flex items-center justify-center overflow-hidden" style={{ background: '#0a1628' }}>
-      {/* Animated background orbs */}
-      <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-blue-600/8 rounded-full blur-[120px] animate-float-slow" />
-      <div className="absolute bottom-[-15%] right-[-10%] w-[400px] h-[400px] bg-purple-600/6 rounded-full blur-[100px] animate-float-slow" style={{ animationDelay: '-7s' }} />
-      <div className="absolute top-[40%] right-[20%] w-[200px] h-[200px] bg-blue-400/5 rounded-full blur-[80px] animate-float-slow" style={{ animationDelay: '-3s' }} />
+      {/* Animated background orbs — CSS gradients instead of runtime blur */}
+      <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full animate-float-slow bg-orb-blue" />
+      <div className="absolute bottom-[-15%] right-[-10%] w-[400px] h-[400px] rounded-full animate-float-slow bg-orb-purple" style={{ animationDelay: '-7s' }} />
+      <div className="absolute top-[40%] right-[20%] w-[200px] h-[200px] rounded-full animate-float-slow bg-orb-cyan" style={{ animationDelay: '-3s' }} />
 
       <div className="text-center px-6 relative z-10">
-        {/* Logo */}
+        {/* Logo — next/image with priority for LCP */}
         <div className="mb-6 flex justify-center hero-title">
-          <img
+          <Image
             src="/images/idmg-logo-white.png"
             alt="IDMG - Impossible Dreamz Music Group"
             width={300}
             height={300}
+            priority
             className="drop-shadow-2xl"
           />
         </div>
@@ -37,16 +43,39 @@ export default function Hero() {
           Your Music. Your Station. No Limits.
         </p>
 
-        {/* Featured Video — "Caught That" Official 4K Video */}
+        {/* Featured Video — Lazy loaded YouTube */}
         <div className="w-full max-w-2xl mx-auto mb-8 hero-cta">
           <div className="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl shadow-blue-500/10" style={{ paddingBottom: '56.25%' }}>
-            <iframe
-              className="absolute inset-0 w-full h-full"
-              src="https://www.youtube.com/embed/xqw4wV8Npzs?rel=0&modestbranding=1&color=white"
-              title="Mike Page - Caught That (Official 4K Video) prod. by The Cubist"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
+            {showVideo ? (
+              <iframe
+                className="absolute inset-0 w-full h-full"
+                src="https://www.youtube.com/embed/xqw4wV8Npzs?rel=0&modestbranding=1&color=white&autoplay=1"
+                title="Mike Page - Caught That (Official 4K Video) prod. by The Cubist"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            ) : (
+              <button
+                onClick={() => setShowVideo(true)}
+                className="absolute inset-0 w-full h-full group cursor-pointer"
+                aria-label="Play video"
+              >
+                {/* YouTube thumbnail */}
+                <Image
+                  src="https://i.ytimg.com/vi/xqw4wV8Npzs/maxresdefault.jpg"
+                  alt="Mike Page - Caught That (Official 4K Video)"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 672px) 100vw, 672px"
+                />
+                {/* Play button overlay */}
+                <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                  <div className="w-20 h-20 bg-red-600 rounded-2xl flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform">
+                    <Play size={36} className="text-white ml-1" fill="white" />
+                  </div>
+                </div>
+              </button>
+            )}
           </div>
           <p className="text-white/30 text-xs mt-3 text-center uppercase tracking-wider">
             "Caught That" — Official 4K Video • Prod. by The Cubist

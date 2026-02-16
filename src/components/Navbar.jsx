@@ -27,10 +27,13 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [installPrompt, setInstallPrompt] = useState(null);
   const searchRef = useRef(null);
-  const { user, isLoggedIn, logout, isSubscribed } = useUserStore();
-  const { currentStreak } = useEngagementStore();
-  const { setQueue, openSubscribeModal } = usePlayerStore();
-  const { isCreator, stationData } = useStationStore();
+  const user = useUserStore(s => s.user);
+  const isLoggedIn = useUserStore(s => s.isLoggedIn);
+  const logout = useUserStore(s => s.logout);
+  const isSubscribed = useUserStore(s => s.isSubscribed);
+  const currentStreak = useEngagementStore(s => s.currentStreak);
+  const setQueue = usePlayerStore(s => s.setQueue);
+  const isCreator = useStationStore(s => s.isCreator);
 
   // Nav items with icons
   // Mobile order: LOTL first, then Merch, Fan Zone, Foundation, then the rest

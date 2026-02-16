@@ -5,9 +5,10 @@
 
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { toast } from 'sonner';
 import { usePlayerStore, useUserStore } from '@/store/playerStore';
+import { progressBridge } from '@/lib/progressBridge';
 import {
   Play, Pause, SkipBack, SkipForward,
   Volume2, VolumeX, Shuffle, Repeat,
@@ -31,35 +32,65 @@ function getAlbumArt(track) {
 
 export default function Player() {
   const audioRef = useRef(null);
+  const progressBarRef = useRef(null);
+  const mobileProgressBarRef = useRef(null);
+  const desktopProgressBarRef = useRef(null);
+  const progressTextRef = useRef(null);
+  const desktopProgressTextRef = useRef(null);
   const [mounted, setMounted] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [showAlarmModal, setShowAlarmModal] = useState(false);
   const [showSleepTimer, setShowSleepTimer] = useState(false);
   const [mp3Loading, setMp3Loading] = useState(false);
-  const {
-    currentTrack,
-    isPlaying,
-    progress,
-    duration,
-    volume,
-    isMuted,
-    shuffle,
-    repeat,
-    playCount,
-    togglePlay,
-    setProgress,
-    setDuration,
-    setVolume,
-    toggleMute,
-    nextTrack,
-    prevTrack,
-    toggleShuffle,
-    toggleRepeat,
-    openSubscribeModal,
-  } = usePlayerStore();
 
-  const { isSubscribed } = useUserStore();
+  // Targeted zustand selectors — only re-render when specific values change
+  const currentTrack = usePlayerStore(s => s.currentTrack);
+  const isPlaying = usePlayerStore(s => s.isPlaying);
+  const duration = usePlayerStore(s => s.duration);
+  const volume = usePlayerStore(s => s.volume);
+  const isMuted = usePlayerStore(s => s.isMuted);
+  const shuffle = usePlayerStore(s => s.shuffle);
+  const repeat = usePlayerStore(s => s.repeat);
+  const togglePlay = usePlayerStore(s => s.togglePlay);
+  const setProgress = usePlayerStore(s => s.setProgress);
+  const setVolume = usePlayerStore(s => s.setVolume);
+  const toggleMute = usePlayerStore(s => s.toggleMute);
+  const nextTrack = usePlayerStore(s => s.nextTrack);
+  const prevTrack = usePlayerStore(s => s.prevTrack);
+  const toggleShuffle = usePlayerStore(s => s.toggleShuffle);
+  const toggleRepeat = usePlayerStore(s => s.toggleRepeat);
+
+  const isSubscribed = useUserStore(s => s.isSubscribed);
+
+  // Subscribe to progressBridge for smooth progress updates without zustand re-renders
+  const progressRef = useRef(0);
+  const durationRef = useRef(0);
+  useEffect(() => {
+    const unsub = progressBridge.subscribe((p, d) => {
+      progressRef.current = p;
+      durationRef.current = d || duration;
+      const pct = d ? (p / d) * 100 : 0;
+
+      // Direct DOM updates — zero re-renders
+      if (progressBarRef.current) {
+        progressBarRef.current.style.width = `${pct}%`;
+      }
+      if (mobileProgressBarRef.current) {
+        mobileProgressBarRef.current.style.width = `${pct}%`;
+      }
+      if (desktopProgressBarRef.current) {
+        desktopProgressBarRef.current.style.width = `${pct}%`;
+      }
+      if (progressTextRef.current) {
+        progressTextRef.current.textContent = formatTime(p);
+      }
+      if (desktopProgressTextRef.current) {
+        desktopProgressTextRef.current.textContent = formatTime(p);
+      }
+    });
+    return unsub;
+  }, [duration]);
 
   useEffect(() => {
     setMounted(true);
@@ -79,13 +110,14 @@ export default function Player() {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const handleProgressClick = (e) => {
+  const handleProgressClick = useCallback((e) => {
     const bar = e.currentTarget;
     const rect = bar.getBoundingClientRect();
     const percent = (e.clientX - rect.left) / rect.width;
-    const newTime = percent * duration;
+    const dur = durationRef.current || duration;
+    const newTime = percent * dur;
     setProgress(newTime);
-  };
+  }, [duration, setProgress]);
 
   const handleVolumeChange = (e) => {
     setVolume(parseFloat(e.target.value));
@@ -192,10 +224,10 @@ export default function Player() {
         {/* Progress */}
         <div className="px-8 mb-4">
           <div className="progress-bar h-2 rounded-full" onClick={handleProgressClick}>
-            <div className="progress-bar-fill h-full rounded-full" style={{ width: `${(progress / duration) * 100 || 0}%` }} />
+            <div ref={progressBarRef} className="progress-bar-fill h-full rounded-full" style={{ width: '0%' }} />
           </div>
           <div className="flex justify-between mt-2">
-            <span className="text-xs text-white/40 font-mono">{formatTime(progress)}</span>
+            <span ref={progressTextRef} className="text-xs text-white/40 font-mono">0:00</span>
             <span className="text-xs text-white/40 font-mono">{formatTime(duration)}</span>
           </div>
         </div>
@@ -339,7 +371,7 @@ export default function Player() {
       >
         {/* Mini Progress Bar */}
         <div className="h-1 bg-white/10">
-          <div className="h-full bg-blue-500" style={{ width: `${(progress / duration) * 100 || 0}%` }} />
+          <div ref={mobileProgressBarRef} className="h-full bg-blue-500" style={{ width: '0%' }} />
         </div>
 
         <div className="flex items-center gap-3 p-3">
@@ -432,12 +464,12 @@ export default function Player() {
             </div>
 
             <div className="flex items-center gap-4">
-              <span className="text-xs text-white/40 w-12 text-right font-mono">{formatTime(progress)}</span>
+              <span ref={desktopProgressTextRef} className="text-xs text-white/40 w-12 text-right font-mono">0:00</span>
               {mounted && typeof window !== 'undefined' && window.__mystation_audio ? (
                 <WaveformProgress audioElement={window.__mystation_audio} />
               ) : (
                 <div className="progress-bar flex-1" onClick={handleProgressClick}>
-                  <div className="progress-bar-fill" style={{ width: `${(progress / duration) * 100 || 0}%` }} />
+                  <div ref={desktopProgressBarRef} className="progress-bar-fill" style={{ width: '0%' }} />
                 </div>
               )}
               <span className="text-xs text-white/40 w-12 font-mono">{formatTime(duration)}</span>
