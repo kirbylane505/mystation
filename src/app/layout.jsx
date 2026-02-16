@@ -18,6 +18,7 @@ import TimerGuard from '@/components/TimerGuard';
 import AccountWall from '@/components/AccountWall';
 import { Suspense } from 'react';
 import ReferralDetector from '@/components/ReferralDetector';
+import EmpireWelcome from '@/components/EmpireWelcome';
 import Script from 'next/script';
 import { Toaster } from 'sonner';
 
@@ -130,6 +131,7 @@ export default function RootLayout({ children }) {
           <Cart />
           <SessionGuard />
           <Suspense><ReferralDetector /></Suspense>
+          <Suspense><EmpireWelcome /></Suspense>
           <LazyUtilities />
         </ClientProviders>
         <Script id="register-sw" strategy="afterInteractive">
