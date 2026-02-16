@@ -25,7 +25,7 @@ export default function AlarmClockModal({ isOpen, onClose }) {
   useEffect(() => {
     const saved = localStorage.getItem('mystation-alarms');
     if (saved) {
-      setSavedAlarms(JSON.parse(saved));
+      try { setSavedAlarms(JSON.parse(saved)); } catch { localStorage.removeItem('mystation-alarms'); }
     }
   }, []);
 

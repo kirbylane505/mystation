@@ -106,7 +106,7 @@ export default function Navbar() {
   useEffect(() => {
     const savedUser = localStorage.getItem('mystation_user');
     if (savedUser) {
-      useUserStore.getState().setUser(JSON.parse(savedUser));
+      try { useUserStore.getState().setUser(JSON.parse(savedUser)); } catch { localStorage.removeItem('mystation_user'); }
     }
   }, []);
 

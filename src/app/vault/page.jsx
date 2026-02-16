@@ -110,15 +110,16 @@ export default function VaultPage() {
     const defaultTracks = getDefaultTracks();
     const saved = localStorage.getItem('mystation_vault');
     if (saved) {
-      const savedTracks = JSON.parse(saved);
-      // Merge: default tracks + any new uploaded tracks
-      const mergedTracks = [...defaultTracks];
-      savedTracks.forEach(track => {
-        if (!mergedTracks.find(t => t.id === track.id)) {
-          mergedTracks.push(track);
-        }
-      });
-      setVaultTracks(mergedTracks);
+      try {
+        const savedTracks = JSON.parse(saved);
+        const mergedTracks = [...defaultTracks];
+        savedTracks.forEach(track => {
+          if (!mergedTracks.find(t => t.id === track.id)) {
+            mergedTracks.push(track);
+          }
+        });
+        setVaultTracks(mergedTracks);
+      } catch { localStorage.removeItem('mystation_vault'); setVaultTracks(defaultTracks); }
     } else {
       setVaultTracks(defaultTracks);
     }

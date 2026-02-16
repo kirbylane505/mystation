@@ -471,7 +471,7 @@ export async function sendWelcomeEmail({ customerName, customerEmail, password }
           <div style="background: #1a1f36; padding: 20px; border-radius: 12px; margin-bottom: 20px;">
             <h3 style="color: #3b82f6; margin: 0 0 12px 0;">Your Account</h3>
             <p style="margin: 6px 0; color: #e2e8f0;">Email: <strong>${customerEmail}</strong></p>
-            <p style="margin: 6px 0; color: #e2e8f0;">Password: <strong>${password}</strong></p>
+            <p style="margin: 6px 0; color: #94a3b8; font-size: 14px;">Use the password you chose at signup to log in.</p>
           </div>
 
           <p style="color: #e2e8f0; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">

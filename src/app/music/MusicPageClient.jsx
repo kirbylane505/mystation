@@ -44,7 +44,7 @@ export default function MusicPageClient({ initialTrackId, autoplay = false }) {
   useEffect(() => {
     const saved = localStorage.getItem('mystation-playlists');
     if (saved) {
-      setUserPlaylists(JSON.parse(saved));
+      try { setUserPlaylists(JSON.parse(saved)); } catch { localStorage.removeItem('mystation-playlists'); }
     }
   }, []);
 

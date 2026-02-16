@@ -45,7 +45,7 @@ export default function FanWall() {
     const savedLikes = localStorage.getItem('mystation-fan-wall-likes');
     const savedOwner = localStorage.getItem('mystation-fan-wall-owner');
     if (savedUsername) setUsername(savedUsername);
-    if (savedLikes) setLikedPosts(JSON.parse(savedLikes));
+    if (savedLikes) { try { setLikedPosts(JSON.parse(savedLikes)); } catch {} }
     if (savedOwner === 'true') setIsOwner(true);
     fetchPosts();
     const interval = setInterval(fetchPosts, 30000);

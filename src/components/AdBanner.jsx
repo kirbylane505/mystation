@@ -71,7 +71,7 @@ export default function AdBanner({
           setAdLoaded(true);
         }
       } catch (e) {
-        console.log('AdSense not available:', e);
+        // AdSense not available
       }
     }
   }, [adClient, adSlot]);
