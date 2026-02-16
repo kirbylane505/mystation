@@ -24,13 +24,13 @@ const PAYMENT_INSTRUCTIONS = {
   },
   zelle: {
     method: 'zelle',
-    handle: 'idmgatl@gmail.com',
-    instructions: 'Send payment to idmgatl@gmail.com via Zelle. Include your order reference in the note.',
+    handle: 'mystationllc@gmail.com',
+    instructions: 'Send payment to mystationllc@gmail.com via Zelle. Include your order reference in the note.',
   },
   applepay: {
     method: 'applepay',
-    handle: 'idmgatl@gmail.com',
-    instructions: 'Send payment to idmgatl@gmail.com via Apple Pay. Include your order reference in the note.',
+    handle: 'mystationllc@gmail.com',
+    instructions: 'Send payment to mystationllc@gmail.com via Apple Pay. Include your order reference in the note.',
   },
 };
 

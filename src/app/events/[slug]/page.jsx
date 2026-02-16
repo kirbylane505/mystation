@@ -792,11 +792,11 @@ export default function EventDetailPage() {
                     </p>
                     <div className="flex items-center justify-between bg-black/30 rounded-lg px-4 py-3 mb-3">
                       <span className="text-white font-bold text-lg font-mono">
-                        {paymentMethod === 'cashapp' ? '$RIDE4PAGEMUSIC847' : 'idmgatl@gmail.com'}
+                        {paymentMethod === 'cashapp' ? '$RIDE4PAGEMUSIC847' : 'mystationllc@gmail.com'}
                       </span>
                       <button
                         type="button"
-                        onClick={() => copy(paymentMethod === 'cashapp' ? '$RIDE4PAGEMUSIC847' : 'idmgatl@gmail.com')}
+                        onClick={() => copy(paymentMethod === 'cashapp' ? '$RIDE4PAGEMUSIC847' : 'mystationllc@gmail.com')}
                         className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 rounded-lg text-white/60 hover:text-white hover:bg-white/20 transition text-sm"
                       >
                         {copied ? <Check size={14} className="text-green-400" /> : <Copy size={14} />}

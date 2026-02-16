@@ -130,11 +130,11 @@ export default function CreateStationPage() {
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
                 <a
-                  href="mailto:mystationlive@gmail.com?subject=I%20Want%20to%20Stream%20at%20LOTL!"
+                  href="mailto:mystationllc@gmail.com?subject=I%20Want%20to%20Stream%20at%20LOTL!"
                   className="px-6 py-3 bg-green-500 hover:bg-green-600 text-white font-bold rounded-xl transition flex items-center gap-2"
                 >
                   <Mail size={18} />
-                  Apply Now — mystationlive@gmail.com
+                  Apply Now — mystationllc@gmail.com
                 </a>
                 <Link
                   href="/lotl"

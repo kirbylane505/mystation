@@ -98,7 +98,7 @@ export const makeAHitInfo = {
   ],
 
   contact: {
-    email: "mystationlive@gmail.com",
+    email: "mystationllc@gmail.com",
     subject: "MAKE A HIT - [Track Name]",
     instagram: "@mikepage"
   }

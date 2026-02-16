@@ -156,7 +156,7 @@ async function notifyAdmin(comment, trackTitle) {
 
   await resend.emails.send({
     from: process.env.RESEND_FROM_EMAIL || 'MyStation <notifications@mystationlive.com>',
-    to: 'idmgatl@gmail.com',
+    to: 'mystationllc@gmail.com',
     subject: `New Comment on "${trackTitle || 'a track'}" \u2014 ${comment.name}`,
     html: `
       <div style="font-family:-apple-system,sans-serif;max-width:500px;margin:0 auto;background:#0a0e1a;color:#fff;padding:24px;border-radius:16px;">
