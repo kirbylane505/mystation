@@ -133,7 +133,7 @@ export async function POST(request) {
 
     // Create Stripe Checkout session
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card', 'klarna', 'afterpay_clearpay'],
+      automatic_payment_methods: { enabled: true },
       line_items: lineItems,
       mode: 'payment',
       customer_email: email || undefined,
