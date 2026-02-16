@@ -7,7 +7,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState([]);

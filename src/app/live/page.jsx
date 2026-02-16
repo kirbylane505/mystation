@@ -7,7 +7,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import dynamic from 'next/dynamic';
 import { Radio, Users, Heart, MessageCircle, Send, Bell, Calendar, Video, Copy, Check, DollarSign, Sparkles, ExternalLink } from 'lucide-react';
 

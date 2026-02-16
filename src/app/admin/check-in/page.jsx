@@ -7,7 +7,7 @@
  */
 
 import { useState, useRef, useCallback, useEffect } from 'react';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 export default function CheckInPage() {
   const [mode, setMode] = useState('manual'); // 'manual' or 'camera'
