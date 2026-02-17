@@ -48,11 +48,9 @@ export async function POST(request) {
       );
     }
 
-    // Import and initialize Stripe at runtime
+    // Import and initialize Stripe at runtime (use SDK default API version)
     const Stripe = (await import('stripe')).default;
-    const stripe = new Stripe(stripeKey, {
-      apiVersion: '2023-10-16',
-    });
+    const stripe = new Stripe(stripeKey);
 
     // Verify prices against Printify/Printful catalog when variant IDs are provided
     if (items.some(item => item.printifyProductId && item.printifyVariantId)) {
@@ -133,7 +131,6 @@ export async function POST(request) {
 
     // Create Stripe Checkout session
     const session = await stripe.checkout.sessions.create({
-      automatic_payment_methods: { enabled: true },
       line_items: lineItems,
       mode: 'payment',
       customer_email: email || undefined,
@@ -179,8 +176,11 @@ export async function POST(request) {
     });
   } catch (error) {
     console.error('Stripe checkout error:', error);
+    const msg = error?.type === 'StripeInvalidRequestError'
+      ? `Payment error: ${error.message}`
+      : 'Checkout failed. Please try again.';
     return NextResponse.json(
-      { success: false, error: 'Checkout failed. Please try again.' },
+      { success: false, error: msg },
       { status: 500 }
     );
   }

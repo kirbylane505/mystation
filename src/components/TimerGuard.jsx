@@ -11,8 +11,8 @@ import { usePathname } from 'next/navigation';
 import { usePlayerStore, useUserStore } from '@/store/playerStore';
 import { Clock } from 'lucide-react';
 
-// Pages that bypass the timer (ticketing, admin)
-const OPEN_PATHS = ['/events', '/tickets', '/admin'];
+// Pages that bypass the timer (commerce, ticketing, admin)
+const OPEN_PATHS = ['/events', '/tickets', '/admin', '/merch'];
 
 function formatTime(seconds) {
   if (seconds === null || seconds === undefined) return '';
