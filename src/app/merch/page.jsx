@@ -324,16 +324,29 @@ export default function MerchPage() {
   const { addItem, openCart } = useCartStore();
   const { queue, setQueue } = usePlayerStore();
 
-  // Auto-play music while shopping — queue new releases if nothing playing
-  // NEVER override if something is already playing or queued
+  // Auto-play "Love On The Lawn" when entering merch — LOCKED
+  // Only if nothing is already playing (don't interrupt active music)
   useEffect(() => {
     const state = usePlayerStore.getState();
-    if (state.currentTrack || state.queue.length > 0 || state.isPlaying) return;
+    if (state.isPlaying) return; // Don't interrupt active playback
+    const lotlTrack = {
+      id: 138,
+      title: "Love On The Lawn",
+      artist: "Mike Page",
+      featured: "Vincent Berry II",
+      album: "Coming Soon",
+      year: 2026,
+      duration: "3:48",
+      trackNumber: 8,
+      albumId: 'singles-2026',
+      audioFile: '/audio/grammy-nights/04-love-on-the-lawn.mp3',
+      isNew: true,
+    };
+    // Queue LOTL first, then new releases after it
     const officialTracks = getOfficialTracks();
-    const newReleaseTracks = officialTracks.filter(t => t.isNew);
-    if (newReleaseTracks.length > 0) {
-      setQueue(newReleaseTracks, 0);
-    }
+    const newReleaseTracks = officialTracks.filter(t => t.isNew && t.id !== 138);
+    const fullQueue = [lotlTrack, ...newReleaseTracks];
+    setQueue(fullQueue, 0);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
