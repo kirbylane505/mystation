@@ -10,11 +10,9 @@ import Hero from '@/components/Hero';
 import TrackList from '@/components/TrackList';
 import EmailCapture from '@/components/EmailCapture';
 import LOTLCountdown from '@/components/LOTLCountdown';
-import SocialEmbeds from '@/components/SocialEmbeds';
-import ReferralProgram from '@/components/ReferralProgram';
 import { tracks, albums, getOfficialTracks, getNonVaultTracks } from '@/data/tracks';
 import { usePlayerStore } from '@/store/playerStore';
-import { Play, Pause, Heart, ExternalLink, Music, Headphones, ChevronLeft, Shuffle, Search, ListMusic, Globe } from 'lucide-react';
+import { Play, ExternalLink, Headphones, ChevronLeft, Shuffle, ShoppingBag, Gamepad2 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -29,6 +27,12 @@ export default function HomePage() {
 
   // New releases - official tracks marked as isNew
   const newReleases = officialTracks.filter(t => t.isNew).map(t => t.id);
+
+  // Trending this week - top 6 non-vault official tracks by highest ID (most recent)
+  const trendingTracks = getNonVaultTracks()
+    .sort((a, b) => (b.playCount || b.id) - (a.playCount || a.id))
+    .slice(0, 6)
+    .map(t => t.id);
 
   // Get track objects for an album
   const getAlbumTracks = (album) => {
@@ -82,91 +86,6 @@ export default function HomePage() {
         </div>
         <div className="glass rounded-2xl p-2">
           <TrackList trackIds={newReleases.length > 0 ? newReleases : [21, 22, 23, 30, 31, 32, 34, 35]} showNumber={false} />
-        </div>
-      </section>
-
-      {/* About Mike Page */}
-      <section className="max-w-screen-xl mx-auto px-6 py-20">
-        <div className="glass rounded-2xl p-8 md:p-12">
-          <div className="grid md:grid-cols-2 gap-10 items-center">
-            <div>
-              <span className="text-blue-400 text-sm font-semibold uppercase tracking-wider mb-3 block">The Story</span>
-              <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-                Music That Gives Back
-              </h2>
-              <p className="text-white/60 text-lg leading-relaxed mb-4">
-                Mike Page built MyStation on a simple idea: every play should matter. As founder of the Mike Page Foundation, a 501(c)(3) nonprofit, he channels music into real impact — funding youth programs, community events, and the annual Love on the Lawn Festival.
-              </p>
-              <p className="text-white/60 text-lg leading-relaxed mb-6">
-                From Atlanta to the world, IDMG (Impossible Dreamz Music Group) represents independent artists who refuse to wait for permission. Stream the catalog. Wear the merch. Join the movement.
-              </p>
-              <div className="flex items-center gap-6">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-white">501(c)(3)</div>
-                  <div className="text-white/40 text-xs">Nonprofit</div>
-                </div>
-                <div className="w-px h-10 bg-white/10" />
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-white">10K+</div>
-                  <div className="text-white/40 text-xs">Festival Capacity</div>
-                </div>
-                <div className="w-px h-10 bg-white/10" />
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-white">50+</div>
-                  <div className="text-white/40 text-xs">Original Tracks</div>
-                </div>
-              </div>
-            </div>
-            <div className="relative">
-              <div className="aspect-square rounded-2xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-white/10 flex items-center justify-center overflow-hidden">
-                <Image
-                  src="/images/idmg-logo-white.png"
-                  alt="Mike Page - IDMG"
-                  width={400}
-                  height={400}
-                  className="w-3/4 h-3/4 object-contain opacity-80"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Section Divider */}
-      <div className="section-divider" />
-
-      {/* Discover Music — Global Search CTA */}
-      <section className="max-w-screen-xl mx-auto px-6 py-16">
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600/20 via-purple-600/20 to-pink-600/20 border border-white/10 p-8 md:p-12">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl" />
-          <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-500/10 rounded-full blur-3xl" />
-          <div className="relative z-10">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl flex items-center justify-center">
-                <Globe size={20} className="text-white" />
-              </div>
-              <h2 className="text-3xl font-bold text-white">Discover Music</h2>
-            </div>
-            <p className="text-white/50 mb-8 max-w-lg">
-              Search 100M+ songs from every artist in the world. Create playlists mixing Mike Page with your favorites.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Link
-                href="/search"
-                className="flex items-center gap-3 px-8 py-4 bg-white/10 hover:bg-white/15 border border-white/10 rounded-full text-white font-medium transition group"
-              >
-                <Search size={20} className="text-blue-400 group-hover:text-blue-300" />
-                Search all music...
-              </Link>
-              <Link
-                href="/playlists"
-                className="flex items-center gap-3 px-8 py-4 bg-blue-600 hover:bg-blue-500 rounded-full text-white font-bold transition"
-              >
-                <ListMusic size={20} />
-                My Playlists
-              </Link>
-            </div>
-          </div>
         </div>
       </section>
 
@@ -323,11 +242,122 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* All Tracks (excludes Vault - those are exclusive) */}
-      <section className="max-w-screen-xl mx-auto px-6 py-20">
-        <h2 className="text-3xl font-bold text-white mb-10">Full Catalog</h2>
+      {/* Trending This Week */}
+      <section className="max-w-screen-xl mx-auto px-6 py-12">
+        <div className="flex items-center justify-between mb-10">
+          <div>
+            <h2 className="text-3xl font-bold text-white mb-2">Trending This Week 🔥</h2>
+            <p className="text-white/40">Most played tracks right now</p>
+          </div>
+          <Link href="/music" className="text-blue-400 hover:text-blue-300 transition text-sm font-medium">
+            See All →
+          </Link>
+        </div>
         <div className="glass rounded-2xl p-2">
-          <TrackList trackIds={getNonVaultTracks().map(t => t.id)} />
+          <TrackList trackIds={trendingTracks} showNumber={false} />
+        </div>
+      </section>
+
+      {/* Fresh Merch */}
+      <section className="max-w-screen-xl mx-auto px-6 py-16">
+        <div className="flex items-center justify-between mb-10">
+          <div>
+            <h2 className="text-3xl font-bold text-white mb-2">Fresh Merch</h2>
+            <p className="text-white/40">New drops from the IDMG store</p>
+          </div>
+          <Link href="/merch" className="text-blue-400 hover:text-blue-300 transition text-sm font-medium">
+            Shop All →
+          </Link>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {[
+            { name: 'IDMG Hoodie', price: '$44.99', gradient: 'from-blue-500/20 to-purple-500/20' },
+            { name: 'LOTL Tank Top', price: '$29.99', gradient: 'from-green-500/20 to-teal-500/20' },
+            { name: 'Foundation Tee', price: '$34.99', gradient: 'from-pink-500/20 to-red-500/20' },
+            { name: 'IDMG Cap', price: '$24.99', gradient: 'from-orange-500/20 to-yellow-500/20' },
+          ].map((item, i) => (
+            <Link key={i} href="/merch" className="glass rounded-2xl p-4 hover:border-blue-500/30 transition-all group">
+              <div className={`aspect-square bg-gradient-to-br ${item.gradient} rounded-xl mb-3 flex items-center justify-center border border-white/10`}>
+                <ShoppingBag size={32} className="text-white/30 group-hover:text-white/50 transition" />
+              </div>
+              <p className="text-white font-medium text-sm">{item.name}</p>
+              <p className="text-blue-400 font-bold text-sm">{item.price}</p>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* Kickback Lounge */}
+      <section className="max-w-screen-xl mx-auto px-6 py-16">
+        <div className="glass rounded-2xl p-8 md:p-12 bg-gradient-to-br from-purple-500/10 to-blue-500/10">
+          <div className="flex flex-col md:flex-row items-center gap-8">
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-4">
+                <Gamepad2 size={28} className="text-purple-400" />
+                <h2 className="text-3xl font-bold text-white">Kickback Lounge</h2>
+              </div>
+              <p className="text-white/60 text-lg mb-6">Play Spades, Blackjack, 8-Ball Pool and more with fans worldwide. The hangout spot where music meets games.</p>
+              <Link href="/lounge" className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full text-white font-bold hover:shadow-lg hover:shadow-purple-500/30 transition">
+                <Gamepad2 size={20} />
+                Enter the Lounge
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              {['Spades', 'Blackjack', '8-Ball', 'Slides & Ladders'].map((game, i) => (
+                <div key={i} className="w-28 h-28 rounded-xl bg-white/5 border border-white/10 flex flex-col items-center justify-center gap-2">
+                  <span className="text-2xl">{['\u2660\uFE0F', '\uD83C\uDCCF', '\uD83C\uDFB1', '\uD83C\uDFB2'][i]}</span>
+                  <span className="text-white/60 text-xs font-medium">{game}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* About Mike Page */}
+      <section className="max-w-screen-xl mx-auto px-6 py-20">
+        <div className="glass rounded-2xl p-8 md:p-12">
+          <div className="grid md:grid-cols-2 gap-10 items-center">
+            <div>
+              <span className="text-blue-400 text-sm font-semibold uppercase tracking-wider mb-3 block">The Story</span>
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
+                Music That Gives Back
+              </h2>
+              <p className="text-white/60 text-lg leading-relaxed mb-4">
+                Mike Page built MyStation on a simple idea: every play should matter. As founder of the Mike Page Foundation, a 501(c)(3) nonprofit, he channels music into real impact — funding youth programs, community events, and the annual Love on the Lawn Festival.
+              </p>
+              <p className="text-white/60 text-lg leading-relaxed mb-6">
+                From Atlanta to the world, IDMG (Impossible Dreamz Music Group) represents independent artists who refuse to wait for permission. Stream the catalog. Wear the merch. Join the movement.
+              </p>
+              <div className="flex items-center gap-6">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-white">501(c)(3)</div>
+                  <div className="text-white/40 text-xs">Nonprofit</div>
+                </div>
+                <div className="w-px h-10 bg-white/10" />
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-white">10K+</div>
+                  <div className="text-white/40 text-xs">Festival Capacity</div>
+                </div>
+                <div className="w-px h-10 bg-white/10" />
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-white">50+</div>
+                  <div className="text-white/40 text-xs">Original Tracks</div>
+                </div>
+              </div>
+            </div>
+            <div className="relative">
+              <div className="aspect-square rounded-2xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-white/10 flex items-center justify-center overflow-hidden">
+                <Image
+                  src="/images/idmg-logo-white.png"
+                  alt="Mike Page - IDMG"
+                  width={400}
+                  height={400}
+                  className="w-3/4 h-3/4 object-contain opacity-80"
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -348,14 +378,6 @@ export default function HomePage() {
             Get notified when new music drops. No spam, just fire.
           </p>
           <EmailCapture variant="minimal" className="max-w-md mx-auto" />
-        </div>
-      </section>
-
-      {/* Social + Referral */}
-      <section className="max-w-screen-xl mx-auto px-6 pb-20">
-        <div className="grid md:grid-cols-2 gap-6">
-          <SocialEmbeds />
-          <ReferralProgram />
         </div>
       </section>
 

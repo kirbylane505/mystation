@@ -13,8 +13,8 @@ import { CartButton } from './Cart';
 import { useCartStore } from '@/store/cartStore';
 import { useUserStore, usePlayerStore } from '@/store/playerStore';
 import {
-  Home, Music, Flame, Heart, Users, ShoppingBag,
-  Search, User, LogOut, X, Play, Menu, Lock, Mail, Calendar, Crown, Newspaper, Download, Gift, Zap, ListMusic, Gamepad2, Ticket, Film
+  Home, Music, Heart, Users, ShoppingBag,
+  Search, User, LogOut, X, Play, Menu, Mail, Crown, Newspaper, Gamepad2, Ticket, Film, MoreHorizontal
 } from 'lucide-react';
 import { useEngagementStore } from '@/store/engagementStore';
 import { useStationStore } from '@/store/stationStore';
@@ -27,38 +27,32 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [installPrompt, setInstallPrompt] = useState(null);
   const searchRef = useRef(null);
+  const moreRef = useRef(null);
+  const [moreMenuOpen, setMoreMenuOpen] = useState(false);
   const user = useUserStore(s => s.user);
   const isLoggedIn = useUserStore(s => s.isLoggedIn);
   const logout = useUserStore(s => s.logout);
   const isSubscribed = useUserStore(s => s.isSubscribed);
-  const currentStreak = useEngagementStore(s => s.currentStreak);
   const setQueue = usePlayerStore(s => s.setQueue);
   const isCreator = useStationStore(s => s.isCreator);
 
-  // Nav items with icons
-  // Mobile order: LOTL first, then Merch, Fan Zone, Foundation, then the rest
+  // Core nav items — 6 tabs
   const navItems = [
     { href: '/', icon: Home, label: 'Home', mobileOrder: 1 },
-    { href: '/events', icon: Ticket, label: 'Events', mobileOrder: 2 },
-    { href: '/lotl', icon: Calendar, label: 'LOTL Tickets', mobileOrder: 3 },
-    { href: '/music', icon: Music, label: 'Music', mobileOrder: 4 },
-    { href: '/merch', icon: ShoppingBag, label: 'Merch', mobileOrder: 5 },
-    { href: '/fan-zone', icon: Zap, label: 'Fan Zone', mobileOrder: 6 },
-    { href: '/about', icon: Heart, label: 'Foundation', mobileOrder: 7 },
-    { href: '/lounge', icon: Gamepad2, label: 'Lounge', highlight: true, mobileOrder: 8 },
-    { href: '/make-a-hit', icon: Flame, label: 'Make A Hit', highlight: true, mobileOrder: 9 },
-    { href: '/news', icon: Newspaper, label: 'News', mobileOrder: 10 },
-    { href: '/videos', icon: Film, label: 'Videos', mobileOrder: 11 },
-    { href: '/playlists', icon: ListMusic, label: 'Playlists', mobileOrder: 12 },
-    { href: '/search', icon: Search, label: 'Search', highlight: true, mobileOrder: 13 },
-    { href: '/contact', icon: Mail, label: 'Contact', mobileOrder: 14 },
-    { href: '/street-team', icon: Users, label: 'Street Team', mobileOrder: 15 },
-    { href: '/rewards', icon: Gift, label: 'Rewards', hidden: true, mobileOrder: 99 },
-    { href: '/vault', icon: Lock, label: 'Vault', hidden: true, mobileOrder: 99 },
+    { href: '/music', icon: Music, label: 'Music', mobileOrder: 2 },
+    { href: '/merch', icon: ShoppingBag, label: 'Merch', mobileOrder: 3 },
+    { href: '/lounge', icon: Gamepad2, label: 'Lounge', highlight: true, mobileOrder: 4 },
+    { href: '/events', icon: Ticket, label: 'Events', mobileOrder: 5 },
+    { href: '/videos', icon: Film, label: 'Videos', mobileOrder: 6 },
   ];
 
-  // Sorted for mobile menu
-  const mobileNavItems = [...navItems].sort((a, b) => (a.mobileOrder || 99) - (b.mobileOrder || 99));
+  // More menu items (shown in dropdown)
+  const moreItems = [
+    { href: '/about', icon: Heart, label: 'Foundation' },
+    { href: '/contact', icon: Mail, label: 'Contact' },
+    { href: '/news', icon: Newspaper, label: 'News' },
+    { href: '/street-team', icon: Users, label: 'Street Team' },
+  ];
 
   // Filter tracks based on search
   const searchResults = searchQuery.length > 1
@@ -81,6 +75,9 @@ export default function Navbar() {
     const handleClick = (e) => {
       if (searchRef.current && !searchRef.current.contains(e.target)) {
         setSearchOpen(false);
+      }
+      if (moreRef.current && !moreRef.current.contains(e.target)) {
+        setMoreMenuOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClick);
@@ -186,6 +183,44 @@ export default function Navbar() {
               </Link>
             );
           })}
+
+          {/* More Dropdown */}
+          <div className="relative" ref={moreRef}>
+            <button
+              onClick={() => setMoreMenuOpen(!moreMenuOpen)}
+              className={`group relative flex items-center justify-center w-11 h-11 rounded-full transition-all duration-300 ${
+                moreMenuOpen ? 'bg-blue-500 shadow-lg shadow-blue-500/40' : 'hover:bg-white/10'
+              }`}
+            >
+              <MoreHorizontal size={20} className={moreMenuOpen ? 'text-white' : 'text-white/60 group-hover:text-white transition'} />
+              {/* Tooltip */}
+              <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-black/90 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap pointer-events-none">
+                More
+              </span>
+            </button>
+
+            {moreMenuOpen && (
+              <div className="absolute top-14 right-0 w-52 bg-mystation-navy/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden py-2">
+                {moreItems.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = pathname === item.href;
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setMoreMenuOpen(false)}
+                      className={`flex items-center gap-3 px-4 py-3 transition ${
+                        isActive ? 'bg-blue-500/20 text-blue-400' : 'hover:bg-white/10 text-white'
+                      }`}
+                    >
+                      <Icon size={18} className={isActive ? 'text-blue-400' : 'text-white/60'} />
+                      <span className="text-sm font-medium">{item.label}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+          </div>
 
           {/* Create Station / Dashboard Button */}
           {isCreator ? (
@@ -342,27 +377,11 @@ export default function Navbar() {
 
         {/* Mobile Menu Dropdown */}
         {mobileMenuOpen && (
-          <div className="absolute top-16 left-0 right-0 bg-mystation-navy backdrop-blur-xl border-b border-white/10 p-4 space-y-2">
-            {mobileNavItems.filter(item => !item.hidden).map((item) => {
+          <div className="absolute top-16 left-0 right-0 bg-mystation-navy backdrop-blur-xl border-b border-white/10 p-4 space-y-2 max-h-[calc(100vh-5rem)] overflow-y-auto">
+            {/* Core Nav Items */}
+            {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;
-
-              if (item.external) {
-                return (
-                  <a
-                    key={item.href}
-                    href={item.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 transition"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    <Icon size={20} className="text-white/60" />
-                    <span className="text-white">{item.label}</span>
-                  </a>
-                );
-              }
-
               return (
                 <Link
                   key={item.href}
@@ -374,11 +393,32 @@ export default function Navbar() {
                 >
                   <Icon size={20} className={isActive ? 'text-blue-400' : 'text-white/60'} />
                   <span>{item.label}</span>
-                  {item.badge && (
-                    <span className="ml-auto bg-orange-500 text-white text-xs px-2 py-0.5 rounded-full font-bold">
-                      {item.badge}
-                    </span>
-                  )}
+                </Link>
+              );
+            })}
+
+            {/* More Divider */}
+            <div className="flex items-center gap-3 pt-2 pb-1 px-4">
+              <MoreHorizontal size={16} className="text-white/30" />
+              <span className="text-white/30 text-xs font-semibold uppercase tracking-wider">More</span>
+              <div className="flex-1 h-px bg-white/10" />
+            </div>
+
+            {/* More Items */}
+            {moreItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = pathname === item.href;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl transition ${
+                    isActive ? 'bg-blue-500/20 text-blue-400' : 'hover:bg-white/10 text-white'
+                  }`}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <Icon size={20} className={isActive ? 'text-blue-400' : 'text-white/60'} />
+                  <span>{item.label}</span>
                 </Link>
               );
             })}

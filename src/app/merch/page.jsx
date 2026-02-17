@@ -8,9 +8,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShoppingBag, Heart, Truck, Shield, Package, X, Loader2, Check, Ticket, Sparkles, Search, ChevronDown } from 'lucide-react';
+import { ShoppingBag, Heart, Truck, Shield, Package, X, Loader2, Check, Ticket, Sparkles, Search, ChevronDown, ExternalLink } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
 import { usePlayerStore } from '@/store/playerStore';
+import { generateSlug } from '@/lib/merch-utils';
 import { getOfficialTracks } from '@/data/tracks';
 import { motion, AnimatePresence } from 'framer-motion';
 import Zoom from 'react-medium-image-zoom';
@@ -213,37 +214,46 @@ const KIDS_ITEMS = [
 function ProductCard({ item, idx, onQuickView }) {
   return (
     <div
-      className="group glass rounded-2xl overflow-hidden hover:border-blue-500/30 transition-all duration-500 cursor-pointer merch-card"
+      className="group relative glass rounded-2xl overflow-hidden hover:border-blue-500/30 transition-all duration-500 cursor-pointer merch-card"
       style={{ animationDelay: `${idx * 0.06}s` }}
-      onClick={() => onQuickView(item)}
     >
-      <div className="aspect-square relative overflow-hidden">
-        <ProductImage src={item.image} fallbackSrc={item.printfulImage} alt={item.name} className="transition-transform duration-700 group-hover:scale-110" />
-        {item.badge && (
-          <div className={`absolute top-4 left-4 px-3 py-1 text-xs font-bold rounded-full z-10 ${
-            item.badge === 'LOTL' ? 'bg-purple-500 text-white' :
-            item.badge === 'MPF' ? 'bg-red-500 text-white' :
-            item.badge === 'NEW' ? 'bg-green-500 text-white' :
-            'bg-blue-500 text-white'
-          }`}>{item.badge}</div>
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-end justify-center pb-6">
-          <span className="px-6 py-3 bg-white text-black font-bold rounded-full transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">Select Size & Buy</span>
+      <Link href={`/merch/${generateSlug(item.name)}`} className="block">
+        <div className="aspect-square relative overflow-hidden">
+          <ProductImage src={item.image} fallbackSrc={item.printfulImage} alt={item.name} className="transition-transform duration-700 group-hover:scale-110" />
+          {item.badge && (
+            <div className={`absolute top-4 left-4 px-3 py-1 text-xs font-bold rounded-full z-10 ${
+              item.badge === 'LOTL' ? 'bg-purple-500 text-white' :
+              item.badge === 'MPF' ? 'bg-red-500 text-white' :
+              item.badge === 'NEW' ? 'bg-green-500 text-white' :
+              'bg-blue-500 text-white'
+            }`}>{item.badge}</div>
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-end justify-center pb-6">
+            <span className="px-6 py-3 bg-white text-black font-bold rounded-full transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">View Product</span>
+          </div>
+          <div className="merch-card-glow absolute inset-0 opacity-0 transition-opacity duration-500 pointer-events-none rounded-2xl" style={{ boxShadow: 'inset 0 0 30px rgba(59,130,246,0.15)' }} />
         </div>
-        <div className="merch-card-glow absolute inset-0 opacity-0 transition-opacity duration-500 pointer-events-none rounded-2xl" style={{ boxShadow: 'inset 0 0 30px rgba(59,130,246,0.15)' }} />
-      </div>
-      <div className="p-4">
-        <h3 className="text-base font-bold text-white mb-1 group-hover:text-blue-300 transition-colors duration-300">{item.name}</h3>
-        <p className="text-white/40 text-xs mb-2">{item.description}</p>
-        <div className="flex items-center justify-between">
-          <span className="text-lg font-black text-white">
-            {item.startingPrice ? `$${item.startingPrice.toFixed(2)}` : '---'}
-          </span>
-          <span className="px-3 py-1 bg-blue-500 text-white text-xs font-bold rounded-full group-hover:bg-blue-400 transition-colors duration-300">
-            {item.sizeCount > 1 ? `${item.sizeCount} sizes` : item.colorCount > 1 ? `${item.colorCount} colors` : item.synced > 1 ? `${item.synced} options` : 'Buy Now'}
-          </span>
+        <div className="p-4">
+          <h3 className="text-base font-bold text-white mb-1 group-hover:text-blue-300 transition-colors duration-300">{item.name}</h3>
+          <p className="text-white/40 text-xs mb-2">{item.description}</p>
+          <div className="flex items-center justify-between">
+            <span className="text-lg font-black text-white">
+              {item.startingPrice ? `$${item.startingPrice.toFixed(2)}` : '---'}
+            </span>
+            <span className="px-3 py-1 bg-blue-500 text-white text-xs font-bold rounded-full group-hover:bg-blue-400 transition-colors duration-300">
+              {item.sizeCount > 1 ? `${item.sizeCount} sizes` : item.colorCount > 1 ? `${item.colorCount} colors` : item.synced > 1 ? `${item.synced} options` : 'Buy Now'}
+            </span>
+          </div>
         </div>
-      </div>
+      </Link>
+      {/* Quick View button */}
+      <button
+        onClick={(e) => { e.preventDefault(); e.stopPropagation(); onQuickView(item); }}
+        className="absolute top-4 right-4 p-2 bg-black/50 backdrop-blur-sm rounded-full text-white/60 hover:text-white hover:bg-black/70 opacity-0 group-hover:opacity-100 transition-all duration-300 z-10"
+        title="Quick View"
+      >
+        <ExternalLink size={16} />
+      </button>
     </div>
   );
 }
