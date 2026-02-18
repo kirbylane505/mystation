@@ -879,7 +879,7 @@ export const tracks = [
     duration: "3:29",
     trackNumber: 16,
     albumId: 'cindys-son',
-    audioFile: '/audio/cindys-son/Mike Page - What Do We Do..(Main)_MASTERED.mp3',
+    audioFile: '/audio/cindys-son/Mike Page - What Do We Do (Main)_MASTERED.mp3',
     bpm: 129,
     key: 'D# Minor',
     hitScore: 65,

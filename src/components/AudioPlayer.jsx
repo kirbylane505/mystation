@@ -161,7 +161,7 @@ export default function AudioPlayer() {
       }
       const { token } = await resp.json();
       if (!token) return null;
-      return `${track.audioFile}?_t=${token}`;
+      return `/api/audio/stream?path=${encodeURIComponent(track.audioFile)}&_t=${token}`;
     } catch {
       return null;
     }

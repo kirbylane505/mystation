@@ -1,0 +1,2 @@
+# Audio files are served from Cloudflare R2 — exclude from Vercel build
+public/audio
