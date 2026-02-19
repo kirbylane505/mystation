@@ -2,7 +2,12 @@
  * MYSTATION - Audio Stream from Cloudflare R2
  * Verifies HMAC token, fetches from R2 public URL, streams back.
  * Supports Range requests for seeking.
+ * LOGS EVERY STREAM to Supabase — subscriber or not.
  */
+
+import { headers } from 'next/headers';
+import { createHash } from 'crypto';
+import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
 
 const AUDIO_SECRET = process.env.AUDIO_SECRET;
 const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL;
@@ -43,6 +48,57 @@ async function verifyToken(token, audioPath) {
   }
 }
 
+/**
+ * Fire-and-forget: Log stream event to Supabase
+ * Never blocks the audio stream — errors are silently caught.
+ */
+async function logStream(request, audioPath) {
+  try {
+    const supabase = getSupabaseAdmin();
+    if (!supabase) return;
+
+    const headersList = await headers();
+
+    // Geo from Vercel edge headers
+    const city = headersList.get('x-vercel-ip-city') || null;
+    const region = headersList.get('x-vercel-ip-country-region') || null;
+    const country = headersList.get('x-vercel-ip-country') || null;
+
+    // Hash IP for privacy
+    const ip = headersList.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+    const hashSalt = process.env.IP_HASH_SALT || 'ms-ip-salt-2026';
+    const ip_hash = createHash('sha256').update(ip + hashSalt).digest('hex').slice(0, 16);
+
+    // Device type
+    const ua = headersList.get('user-agent') || '';
+    const device_type = /Mobile|Android|iPhone|iPad/i.test(ua) ? 'mobile'
+      : /Tablet/i.test(ua) ? 'tablet' : 'desktop';
+
+    const referrer = headersList.get('referer') || null;
+
+    // Extract track filename for identification
+    const filename = audioPath.split('/').pop();
+
+    await supabase.from('analytics_events').insert({
+      event_type: 'stream',
+      track_id: null,
+      track_title: filename,
+      page_path: `/api/audio/stream?path=${encodeURIComponent(audioPath)}`,
+      session_id: ip_hash,
+      ip_hash,
+      city: city ? decodeURIComponent(city) : null,
+      region,
+      country,
+      device_type,
+      user_agent: ua.slice(0, 500),
+      referrer: referrer?.slice(0, 500) || null,
+      amount_cents: null,
+    });
+  } catch {
+    // Silent — never break audio for analytics
+  }
+}
+
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const audioPath = searchParams.get('path');
@@ -61,6 +117,13 @@ export async function GET(request) {
     return new Response('Access Denied', { status: 403 });
   }
 
+  // Log this stream — fire and forget, don't await
+  const rangeHeader = request.headers.get('range');
+  if (!rangeHeader) {
+    // Only log on initial request, not range/seek requests
+    logStream(request, audioPath);
+  }
+
   // Extract filename from path (e.g., /audio/singles/song.mp3 → song.mp3)
   const filename = audioPath.split('/').pop();
   const ext = filename.split('.').pop().toLowerCase();
@@ -70,7 +133,6 @@ export async function GET(request) {
     const r2Url = `${R2_PUBLIC_URL}/${encodeURIComponent(decodeURIComponent(filename))}`;
 
     const fetchHeaders = {};
-    const rangeHeader = request.headers.get('range');
     if (rangeHeader) {
       fetchHeaders['Range'] = rangeHeader;
     }
@@ -84,7 +146,7 @@ export async function GET(request) {
       return new Response('Stream error', { status: 500 });
     }
 
-    const headers = {
+    const responseHeaders = {
       'Content-Type': contentType,
       'Content-Disposition': 'inline',
       'Cache-Control': 'no-store, no-cache, must-revalidate, private',
@@ -95,14 +157,14 @@ export async function GET(request) {
     };
 
     const cl = r2Response.headers.get('content-length');
-    if (cl) headers['Content-Length'] = cl;
+    if (cl) responseHeaders['Content-Length'] = cl;
 
     const cr = r2Response.headers.get('content-range');
-    if (cr) headers['Content-Range'] = cr;
+    if (cr) responseHeaders['Content-Range'] = cr;
 
     return new Response(r2Response.body, {
       status: r2Response.status,
-      headers,
+      headers: responseHeaders,
     });
   } catch (err) {
     console.error('[R2 Stream Error]', err.message);

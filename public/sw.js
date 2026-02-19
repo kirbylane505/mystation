@@ -1,51 +1,46 @@
 /**
- * MyStation Service Worker
- * Enables offline support and PWA functionality
+ * MyStation Service Worker v5
+ * Network-first for ALL requests — guarantees users always get the latest version.
+ * Cache is ONLY used as offline fallback. Never serves stale content.
  */
 
-const CACHE_NAME = 'mystation-v4';
+const CACHE_NAME = 'mystation-v5';
 const OFFLINE_URL = '/offline.html';
 
-// Assets to cache immediately
+// Assets to cache for offline fallback only
 const PRECACHE_ASSETS = [
-  '/',
   '/offline.html',
   '/icons/icon-192x192.png',
   '/icons/icon-512x512.png',
-  '/images/mpf-logo.png',
-  '/images/idmg-logo.png',
 ];
 
-// Install event - cache core assets
+// Install — cache offline assets, skip waiting immediately
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(PRECACHE_ASSETS);
-    })
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_ASSETS))
   );
   self.skipWaiting();
 });
 
-// Activate event - clean old caches
+// Activate — delete ALL old caches, claim clients immediately
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
+    caches.keys().then((cacheNames) =>
+      Promise.all(
         cacheNames
           .filter((name) => name !== CACHE_NAME)
           .map((name) => caches.delete(name))
-      );
-    })
+      )
+    )
   );
   self.clients.claim();
 });
 
-// Fetch event - serve from cache, fallback to network, offline page on failure
+// Fetch — NETWORK FIRST for everything. Cache is offline fallback only.
 self.addEventListener('fetch', (event) => {
-  // Skip non-GET requests
   if (event.request.method !== 'GET') return;
 
-  // Skip API calls and external requests
+  // Skip API calls and external requests entirely — let them go direct
   if (event.request.url.includes('/api/') ||
       !event.request.url.startsWith(self.location.origin)) {
     return;
@@ -56,49 +51,34 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       fetch(event.request)
         .then((response) => {
-          // Cache successful page loads
-          const responseToCache = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
-          });
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
           return response;
         })
-        .catch(() => {
-          // Try cache first, then offline page
-          return caches.match(event.request).then((cachedResponse) => {
-            return cachedResponse || caches.match(OFFLINE_URL);
-          });
-        })
+        .catch(() =>
+          caches.match(event.request).then((cached) => cached || caches.match(OFFLINE_URL))
+        )
     );
     return;
   }
 
-  // Static assets — cache first, network fallback
+  // Static assets — NETWORK FIRST (not cache-first). Fresh content always wins.
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-
-      return fetch(event.request).then((response) => {
-        // Don't cache non-successful responses
-        if (!response || response.status !== 200) {
-          return response;
+    fetch(event.request)
+      .then((response) => {
+        if (response && response.status === 200) {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
         }
-
-        // Cache images and static assets
-        if (event.request.url.match(/\.(png|jpg|jpeg|gif|svg|ico|woff2?|css|js)$/)) {
-          const responseToCache = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
-          });
-        }
-
         return response;
-      }).catch(() => {
-        // For images, return nothing rather than error
-        return new Response('', { status: 408 });
-      });
-    })
+      })
+      .catch(() => caches.match(event.request).then((cached) => cached || new Response('', { status: 408 })))
   );
+});
+
+// Listen for update messages from the app
+self.addEventListener('message', (event) => {
+  if (event.data === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
