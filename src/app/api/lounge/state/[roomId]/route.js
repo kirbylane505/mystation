@@ -7,6 +7,7 @@ import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
 import { sanitizeBlackjackState } from '@/lib/games/blackjack';
 import { sanitizeSlidesLaddersState } from '@/lib/games/slidesLadders';
+import { sanitizePoolState } from '@/lib/games/pool';
 import { sanitizeSpadesState } from '@/lib/games/spades';
 
 export async function GET(request, { params }) {
@@ -55,11 +56,14 @@ export async function GET(request, { params }) {
       case 'slidesLadders':
         gameState = sanitizeSlidesLaddersState(stateRow.state);
         break;
+      case 'pool':
+        gameState = sanitizePoolState(stateRow.state);
+        break;
       case 'spades':
         gameState = sanitizeSpadesState(stateRow.state, playerId);
         break;
       default:
-        gameState = null;
+        gameState = stateRow.state;
     }
 
     return NextResponse.json({

@@ -119,6 +119,7 @@ export default function LoungePage() {
                   Selected: <span className="text-white font-medium">{selectedGame}</span>
                 </span>
                 <button
+                  data-testid="create-room-btn"
                   onClick={handleCreateRoom}
                   disabled={loading || !displayName.trim()}
                   className="flex items-center gap-2 px-6 py-2.5 bg-blue-500 hover:bg-blue-600 disabled:bg-white/10 disabled:text-white/30 text-white rounded-xl font-bold transition"

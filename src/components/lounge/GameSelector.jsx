@@ -18,6 +18,7 @@ export default function GameSelector({ onSelect }) {
         return (
           <button
             key={key}
+            data-testid={`game-card-${key}`}
             onClick={() => !game.comingSoon && onSelect(key)}
             disabled={game.comingSoon}
             className={`relative group p-6 rounded-2xl border text-left transition-all duration-300 ${

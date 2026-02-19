@@ -69,9 +69,12 @@ export async function POST(request) {
       case 'slidesLadders':
         gameState = initSlidesLadders(playerIds);
         break;
-      case 'pool':
-        gameState = initPool(playerIds);
+      case 'pool': {
+        const poolIds = [...playerIds];
+        if (poolIds.length < 2) poolIds.push('ai_opponent');
+        gameState = initPool(poolIds);
         break;
+      }
       case 'spades': {
         // Fill with AI if fewer than 4 players
         const spadesIds = [...playerIds];

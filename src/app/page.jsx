@@ -5,7 +5,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Hero from '@/components/Hero';
 import TrackList from '@/components/TrackList';
 import EmailCapture from '@/components/EmailCapture';
@@ -21,6 +21,21 @@ export default function HomePage() {
   const currentTrack = usePlayerStore(s => s.currentTrack);
   const isPlaying = usePlayerStore(s => s.isPlaying);
   const [activeAlbum, setActiveAlbum] = useState(null);
+  const [freshMerch, setFreshMerch] = useState([]);
+
+  useEffect(() => {
+    fetch('/api/printify/products')
+      .then(r => r.json())
+      .then(data => {
+        const products = Array.isArray(data) ? data : data.data || data.products || [];
+        const withImages = products.filter(p => {
+          const img = p.images?.find(i => i.is_default) || p.images?.[0];
+          return img?.src;
+        });
+        setFreshMerch(withImages.slice(0, 4));
+      })
+      .catch(() => {});
+  }, []);
 
   // Get official tracks only
   const officialTracks = getOfficialTracks();
@@ -270,19 +285,30 @@ export default function HomePage() {
           </Link>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[
-            { name: 'IDMG Hoodie', price: '$44.99', gradient: 'from-blue-500/20 to-purple-500/20' },
-            { name: 'LOTL Tank Top', price: '$29.99', gradient: 'from-green-500/20 to-teal-500/20' },
-            { name: 'Foundation Tee', price: '$34.99', gradient: 'from-pink-500/20 to-red-500/20' },
-            { name: 'IDMG Cap', price: '$24.99', gradient: 'from-orange-500/20 to-yellow-500/20' },
-          ].map((item, i) => (
-            <Link key={i} href="/merch" className="glass rounded-2xl p-4 hover:border-blue-500/30 transition-all group">
-              <div className={`aspect-square bg-gradient-to-br ${item.gradient} rounded-xl mb-3 flex items-center justify-center border border-white/10`}>
-                <ShoppingBag size={32} className="text-white/30 group-hover:text-white/50 transition" />
-              </div>
-              <p className="text-white font-medium text-sm">{item.name}</p>
-              <p className="text-blue-400 font-bold text-sm">{item.price}</p>
-            </Link>
+          {freshMerch.map((product) => {
+            const img = product.images?.find(i => i.is_default) || product.images?.[0];
+            const price = product.variants?.find(v => v.is_enabled)?.price;
+            const priceStr = price ? `$${(price / 100).toFixed(2)}` : '';
+            return (
+              <Link key={product.id} href={`/merch/${product.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}`} className="glass rounded-2xl p-4 hover:border-blue-500/30 transition-all group">
+                <div className="aspect-square bg-gradient-to-br from-white/5 to-white/10 rounded-xl mb-3 flex items-center justify-center border border-white/10 overflow-hidden">
+                  {img?.src ? (
+                    <img src={img.src} alt={product.title} className="w-full h-full object-contain p-2" />
+                  ) : (
+                    <ShoppingBag size={32} className="text-white/30" />
+                  )}
+                </div>
+                <p className="text-white font-medium text-sm truncate">{product.title}</p>
+                {priceStr && <p className="text-blue-400 font-bold text-sm">{priceStr}</p>}
+              </Link>
+            );
+          })}
+          {freshMerch.length === 0 && [0,1,2,3].map(i => (
+            <div key={i} className="glass rounded-2xl p-4">
+              <div className="aspect-square bg-gradient-to-br from-white/5 to-white/10 rounded-xl mb-3 animate-pulse border border-white/10" />
+              <div className="h-4 bg-white/10 rounded animate-pulse mb-2 w-3/4" />
+              <div className="h-4 bg-blue-400/20 rounded animate-pulse w-1/3" />
+            </div>
           ))}
         </div>
       </section>

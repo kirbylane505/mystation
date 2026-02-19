@@ -72,6 +72,7 @@ export default function GameRoom() {
             {isPlaying && <TurnTimer />}
 
             <button
+              data-testid="invite-btn"
               onClick={() => setShowInvite(true)}
               className="flex items-center gap-2 px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-white/70 text-sm transition"
             >
@@ -80,6 +81,7 @@ export default function GameRoom() {
             </button>
 
             <button
+              data-testid="leave-btn"
               onClick={leaveRoom}
               className="flex items-center gap-2 px-3 py-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 rounded-xl text-red-400 text-sm transition"
             >
@@ -105,6 +107,7 @@ export default function GameRoom() {
               <div className="flex items-center justify-center gap-3">
                 {!isHost && (
                   <button
+                    data-testid="ready-btn"
                     onClick={toggleReady}
                     className={`px-6 py-3 rounded-xl font-bold transition ${
                       players.find(p => p.user_id === myPlayerId)?.ready
@@ -118,6 +121,7 @@ export default function GameRoom() {
 
                 {isHost && (
                   <button
+                    data-testid="start-game-btn"
                     onClick={startGame}
                     disabled={!canStart}
                     className="flex items-center gap-2 px-6 py-3 bg-green-500 hover:bg-green-600 disabled:bg-white/10 disabled:text-white/30 text-white rounded-xl font-bold transition"

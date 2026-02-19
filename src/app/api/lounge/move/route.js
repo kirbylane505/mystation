@@ -58,9 +58,13 @@ export async function POST(request) {
       case 'slidesLadders':
         result = applySlidesLaddersMove(gameState, playerId);
         break;
-      case 'pool':
-        result = applyPoolMove(gameState, playerId, action);
+      case 'pool': {
+        // In solo mode, use the current turn player (may be AI)
+        const poolPlayer = gameState.turnOrder?.[gameState.currentPlayerIndex] === 'ai_opponent'
+          ? 'ai_opponent' : playerId;
+        result = applyPoolMove(gameState, poolPlayer, action);
         break;
+      }
       case 'spades':
         result = applySpadesMove(gameState, playerId, action);
         break;

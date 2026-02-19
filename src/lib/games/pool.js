@@ -13,10 +13,10 @@ const RACK_ORDER = [
   [13, 6, 15, 7, 14],// row 4
 ];
 
-const TABLE_W = 800;
-const TABLE_H = 400;
-const BALL_R = 10;
-const BORDER = 30;
+const TABLE_W = 1200;
+const TABLE_H = 600;
+const BALL_R = 13;
+const BORDER = 48;
 
 export function initPool(playerIds) {
   if (playerIds.length !== 2) {
@@ -30,10 +30,11 @@ export function initPool(playerIds) {
   balls.push({ id: 0, x: TABLE_W * 0.25, y: TABLE_H / 2, pocketed: false });
 
   // Rack balls
-  const rackX = TABLE_W * 0.68;
+  const rackX = TABLE_W * 0.72;
   const rackY = TABLE_H / 2;
-  const rowDx = BALL_R * Math.sqrt(3);
-  const colDy = BALL_R * 2.05;
+  const spacing = BALL_R * 2.06;
+  const rowDx = spacing * Math.sqrt(3) / 2;
+  const colDy = spacing;
 
   RACK_ORDER.forEach((row, rowIdx) => {
     row.forEach((ballId, colIdx) => {

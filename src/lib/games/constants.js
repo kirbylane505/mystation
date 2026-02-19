@@ -99,8 +99,8 @@ export const GAME_TYPES = {
   pool: {
     id: 'pool',
     name: '8-Ball Pool',
-    description: 'Classic 2-player billiards — sink your balls then pocket the 8!',
-    minPlayers: 2,
+    description: 'Classic billiards — sink your balls then pocket the 8!',
+    minPlayers: 1,
     maxPlayers: 2,
     icon: '🎱',
     color: '#6366f1',

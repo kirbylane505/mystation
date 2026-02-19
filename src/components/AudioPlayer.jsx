@@ -63,6 +63,8 @@ async function safePlay(audio, retries = 3) {
       return true;
     } catch (err) {
       if (err.name === 'NotAllowedError') return false;
+      // AbortError means another play() call interrupted this one — not a real failure
+      if (err.name === 'AbortError') return true;
       if (i < retries - 1) {
         await new Promise(r => setTimeout(r, 200 * (i + 1)));
       }
@@ -108,6 +110,7 @@ export default function AudioPlayer() {
   const lastTrackIdRef = useRef(null);
   const isLoadingRef = useRef(false);
   const canPlayListenerRef = useRef(null);
+  const loadTimeoutRef = useRef(null);
 
   const storeActionsRef = useRef({});
   const repeatRef = useRef('off');
@@ -307,6 +310,25 @@ export default function AudioPlayer() {
 
     lastTrackIdRef.current = currentTrack.id;
 
+    // Set loading flag SYNCHRONOUSLY so play/pause effect skips this render cycle
+    isLoadingRef.current = true;
+
+    // PAUSE immediately — stop old track from playing during async token fetch
+    audio.pause();
+
+    // Remove stale canplay listeners synchronously before async work
+    if (canPlayListenerRef.current) {
+      audio.removeEventListener('canplay', canPlayListenerRef.current);
+      audio.removeEventListener('canplaythrough', canPlayListenerRef.current);
+      canPlayListenerRef.current = null;
+    }
+
+    // Clear stale fallback timeout
+    if (loadTimeoutRef.current) {
+      clearTimeout(loadTimeoutRef.current);
+      loadTimeoutRef.current = null;
+    }
+
     // Analytics (fire-and-forget)
     fetch('/api/analytics/track', {
       method: 'POST',
@@ -323,19 +345,20 @@ export default function AudioPlayer() {
       useEngagementStore.getState().recordPlay(currentTrack.id, currentTrack.albumId);
     } catch (e) {}
 
+    // Track generation counter to discard stale async results
+    const trackGeneration = currentTrack.id;
+
     // Async: get secure audio URL with token
     (async () => {
       const audioUrl = await getAudioUrl(currentTrack);
       if (!audioUrl) {
         lastTrackIdRef.current = null;
+        isLoadingRef.current = false;
         return;
       }
 
-      if (canPlayListenerRef.current) {
-        audio.removeEventListener('canplay', canPlayListenerRef.current);
-        audio.removeEventListener('canplaythrough', canPlayListenerRef.current);
-        canPlayListenerRef.current = null;
-      }
+      // Discard if user already switched to another track
+      if (lastTrackIdRef.current !== trackGeneration) return;
 
       const currentSrc = audio.src ? audio.src : '';
       const trackFile = currentTrack.audioFile;
@@ -344,14 +367,25 @@ export default function AudioPlayer() {
         currentSrc.includes(encodeURI(trackFile))
       );
       if (!trackLoaded) {
-        isLoadingRef.current = true;
         audio.src = audioUrl;
         audio.load();
+
+        // Clear any previous fallback timeout
+        if (loadTimeoutRef.current) {
+          clearTimeout(loadTimeoutRef.current);
+          loadTimeoutRef.current = null;
+        }
 
         const onReady = async () => {
           audio.removeEventListener('canplay', onReady);
           audio.removeEventListener('canplaythrough', onReady);
           canPlayListenerRef.current = null;
+          // Clear fallback timeout — canplay won the race
+          if (loadTimeoutRef.current) {
+            clearTimeout(loadTimeoutRef.current);
+            loadTimeoutRef.current = null;
+          }
+          if (!isLoadingRef.current) return; // already handled by timeout
           isLoadingRef.current = false;
           if (usePlayerStore.getState().isPlaying) {
             const played = await safePlay(audio);
@@ -362,7 +396,8 @@ export default function AudioPlayer() {
         audio.addEventListener('canplay', onReady);
         audio.addEventListener('canplaythrough', onReady);
 
-        setTimeout(async () => {
+        loadTimeoutRef.current = setTimeout(async () => {
+          loadTimeoutRef.current = null;
           if (isLoadingRef.current && audio.readyState >= 2) {
             isLoadingRef.current = false;
             if (usePlayerStore.getState().isPlaying) {
@@ -371,6 +406,12 @@ export default function AudioPlayer() {
             }
           }
         }, 5000);
+      } else {
+        // Track already loaded — clear loading flag and play
+        isLoadingRef.current = false;
+        if (usePlayerStore.getState().isPlaying) {
+          safePlay(audio);
+        }
       }
     })();
   }, [currentTrack?.id, getAudioUrl, checkCanPlay, incrementPlayCount, pause, isVaultTrack]);
@@ -413,6 +454,9 @@ export default function AudioPlayer() {
     const unsub = usePlayerStore.subscribe((state) => {
       if (state.progress !== lastProgress) {
         lastProgress = state.progress;
+        // Skip seeking while a new track is loading — the progress:0 reset
+        // from nextTrack/prevTrack would otherwise seek the OLD track to 0
+        if (isLoadingRef.current) return;
         const audio = getGlobalAudio();
         if (audio && Math.abs(audio.currentTime - state.progress) > 1.5) {
           audio.currentTime = state.progress;
