@@ -21,6 +21,7 @@ import ReferralDetector from '@/components/ReferralDetector';
 import EmpireWelcome from '@/components/EmpireWelcome';
 import Script from 'next/script';
 import { Toaster } from 'sonner';
+import FoundingMemberBanner from '@/components/FoundingMemberBanner';
 
 // Lazy-loaded utilities — code-split into separate chunks (loaded async after hydration)
 import LazyUtilities from '@/components/LazyUtilities';
@@ -123,6 +124,7 @@ export default function RootLayout({ children }) {
           <AccountWall />
           <Navbar />
           <main className="pt-20 md:pt-24 pb-36">
+            <FoundingMemberBanner />
             {children}
           </main>
           <Player />
