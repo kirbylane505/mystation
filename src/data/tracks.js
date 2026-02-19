@@ -1003,30 +1003,30 @@ export const tracks = [
   // VAULT - UNNAMED TRACKS (Need Naming)
   // Play to listen, then rename
   // ========================================
-  { id: 201, title: "Thanking God", album: "Vault", year: 2024, albumId: 'vault', audioFile: '/audio/01 (X4.3) iDMG 788 MIKE PAGE x LY.mp3', featured: "Lyrivelli", producer: "The Cubist" },
-  { id: 202, title: "No Weapon", album: "Vault", year: 2024, albumId: 'vault', audioFile: '/audio/01 iDMG 143 Mike Page x King Deaz.mp3', featured: "King Deazel", producer: "The Cubist" },
+  { id: 401, title: "Thanking God", album: "Vault", year: 2024, albumId: 'vault', audioFile: '/audio/01 (X4.3) iDMG 788 MIKE PAGE x LY.mp3', featured: "Lyrivelli", producer: "The Cubist" },
+  { id: 402, title: "No Weapon", album: "Vault", year: 2024, albumId: 'vault', audioFile: '/audio/01 iDMG 143 Mike Page x King Deaz.mp3', featured: "King Deazel", producer: "The Cubist" },
   // ========================================
   // QUICK REELS VAULT - MATCHED FULL SONGS
   // ========================================
-  { id: 203, title: "Soon As", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/01 Mike Page - Soon as (x1.4)L.mp3', producer: "The Cubist" },
-  { id: 204, title: "Photo Shoot", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/Mike Page - Photo Shoot prod. JT GOLDXN (geemix1.0)L.mp3', producer: "JT GOLDXN" },
-  { id: 205, title: "Trap Get Ugly", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/Mike Page -TRAP (X6)L.mp3', producer: "The Cubist" },
-  { id: 206, title: "Walk In Dat Parti", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/idmg x st236 - Mike Page (ruff01) Walk In.mp3', producer: "The Cubist" },
-  { id: 207, title: "It's My Bday Bitch", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/Mike Page x Krissie the Don x Chevy - Bday Bitch (x1.0).mp3', featured: "Krissie the Don", producer: "The Cubist" },
-  { id: 208, title: "Pick It Up, Bag It", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/Mike Page x Majik - Pick it up bagg it (geemix1.0).mp3', featured: "Majik", producer: "The Cubist" },
-  { id: 209, title: "From The Town", artist: "Drewson", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/From The Town (feat. Mike Page) [u1qUeN3tabY].mp3', featured: "Mike Page", producer: "The Cubist" },
-  { id: 210, title: "200 On The Dashboard", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/IDMG 338 Deazel Page.mp3', featured: "King Deazel", producer: "The Cubist" },
-  { id: 211, title: "No Ho", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/IDMG 337 VINYL Page.mp3', featured: "Vincent Berry", producer: "The Cubist" },
-  { id: 212, title: "Broken Glass", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/IDMG Defoor 100 Shawn Hibbler - Mike Page (ruff01).mp3', producer: "The Cubist" },
-  { id: 213, title: "Rollin'", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/01 Mike Page Rolling.mp3', producer: "The Cubist" },
-  { id: 214, title: "Lizzo", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/01 Mike Page Lizzo.mp3', producer: "The Art Teacher" },
-  { id: 215, title: "Stand Up (RIP Jakhi)", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/01 Mike Page -Stand  Up(X05)(M02).mp3', producer: "The Cubist" },
-  { id: 216, title: "Roulette", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/01 Mike Page - idmg483 (X3.0) L.mp3', producer: "The Cubist" },
+  { id: 403, title: "Soon As", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/01 Mike Page - Soon as (x1.4)L.mp3', producer: "The Cubist" },
+  { id: 404, title: "Photo Shoot", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/Mike Page - Photo Shoot prod. JT GOLDXN (geemix1.0)L.mp3', producer: "JT GOLDXN" },
+  { id: 405, title: "Trap Get Ugly", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/Mike Page -TRAP (X6)L.mp3', producer: "The Cubist" },
+  { id: 406, title: "Walk In Dat Parti", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/idmg x st236 - Mike Page (ruff01) Walk In.mp3', producer: "The Cubist" },
+  { id: 407, title: "It's My Bday Bitch", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/Mike Page x Krissie the Don x Chevy - Bday Bitch (x1.0).mp3', featured: "Krissie the Don", producer: "The Cubist" },
+  { id: 408, title: "Pick It Up, Bag It", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/Mike Page x Majik - Pick it up bagg it (geemix1.0).mp3', featured: "Majik", producer: "The Cubist" },
+  { id: 409, title: "From The Town", artist: "Drewson", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/From The Town (feat. Mike Page) [u1qUeN3tabY].mp3', featured: "Mike Page", producer: "The Cubist" },
+  { id: 410, title: "200 On The Dashboard", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/IDMG 338 Deazel Page.mp3', featured: "King Deazel", producer: "The Cubist" },
+  { id: 411, title: "No Ho", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/IDMG 337 VINYL Page.mp3', featured: "Vincent Berry", producer: "The Cubist" },
+  { id: 412, title: "Broken Glass", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/IDMG Defoor 100 Shawn Hibbler - Mike Page (ruff01).mp3', producer: "The Cubist" },
+  { id: 413, title: "Rollin'", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/01 Mike Page Rolling.mp3', producer: "The Cubist" },
+  { id: 414, title: "Lizzo", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/01 Mike Page Lizzo.mp3', producer: "The Art Teacher" },
+  { id: 415, title: "Stand Up (RIP Jakhi)", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/01 Mike Page -Stand  Up(X05)(M02).mp3', producer: "The Cubist" },
+  { id: 416, title: "Roulette", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/01 Mike Page - idmg483 (X3.0) L.mp3', producer: "The Cubist" },
   // ========================================
   // VAULT - UNRELEASED (From Name That Song)
   // ========================================
-  { id: 217, title: "Too Far Gone 2 Long", album: "Vault", year: 2024, albumId: 'vault', audioFile: '/audio/2023-06-08_Impossible Dreamz Splice 124_2rough.mp3', producer: "The Cubist" },
-  { id: 218, title: "Splice Session 124-B", album: "Vault", year: 2024, albumId: 'vault', audioFile: '/audio/2023-06-07_Impossible Dreamz Splice 124_2rough.mp3', producer: "The Cubist" },
+  { id: 417, title: "Too Far Gone 2 Long", album: "Vault", year: 2024, albumId: 'vault', audioFile: '/audio/2023-06-08_Impossible Dreamz Splice 124_2rough.mp3', producer: "The Cubist" },
+  { id: 418, title: "Splice Session 124-B", album: "Vault", year: 2024, albumId: 'vault', audioFile: '/audio/2023-06-07_Impossible Dreamz Splice 124_2rough.mp3', producer: "The Cubist" },
   { id: 219, title: "Who Said Rap Was Dead", album: "Vault", year: 2024, albumId: 'vault', audioFile: '/audio/01 Mike Page idmg482 ruff2.mp3', producer: "The Cubist" },
   { id: 220, title: "No Weapon (Final)", album: "Vault", year: 2024, albumId: 'vault', audioFile: '/audio/01 iDMG No Weapon Final1.mp3', featured: "King Deazel", producer: "The Cubist" },
   { id: 221, title: "We Gon Do Whatever", album: "Vault", year: 2024, albumId: 'vault', audioFile: '/audio/Impossible Dreamz 2024 86 - Mike Page x King Deazel _1.mp3', featured: "King Deazel", producer: "The Cubist" },
