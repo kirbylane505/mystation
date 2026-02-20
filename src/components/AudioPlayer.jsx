@@ -197,7 +197,13 @@ export default function AudioPlayer() {
         audio.currentTime = 0;
         safePlay(audio);
       } else {
-        storeActionsRef.current.nextTrack();
+        // Guard: only auto-advance if the ended track is still the current track
+        // Prevents race where user clicks a new track but onEnded fires before
+        // AudioPlayer effect can pause the old audio
+        const storeTrackId = usePlayerStore.getState().currentTrack?.id;
+        if (storeTrackId === lastTrackIdRef.current) {
+          storeActionsRef.current.nextTrack();
+        }
       }
     };
 

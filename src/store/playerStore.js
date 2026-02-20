@@ -1,7 +1,7 @@
 /**
  * MYSTATION - Audio Player State Management
  * Using Zustand for simple, powerful state
- * v5: 26-minute browse timer + account wall + locked song loops
+ * v6: Fixed stale queue persistence + onEnded race condition guard
  */
 
 import { create } from 'zustand';
@@ -213,17 +213,27 @@ export const usePlayerStore = create(
 }),
     {
       name: 'mystation-player',
-      version: 5, // v5: 26-min timer, locked song loops
+      version: 6, // v6: stop persisting queue/currentTrack — prevents stale audio desync
       partialize: (state) => ({
         volume: state.volume,
         isMuted: state.isMuted,
         shuffle: state.shuffle,
         repeat: state.repeat,
-        currentTrack: state.currentTrack,
-        queue: state.queue,
-        queueIndex: state.queueIndex,
         isLocked: state.isLocked,
       }),
+      migrate: (persisted, version) => {
+        // v5→v6: clear stale queue data, keep user preferences only
+        if (version < 6) {
+          return {
+            volume: persisted.volume ?? 0.8,
+            isMuted: persisted.isMuted ?? false,
+            shuffle: persisted.shuffle ?? false,
+            repeat: persisted.repeat ?? 'all',
+            isLocked: persisted.isLocked ?? false,
+          };
+        }
+        return persisted;
+      },
     }
   )
 );
