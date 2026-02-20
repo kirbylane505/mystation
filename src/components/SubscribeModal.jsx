@@ -11,11 +11,11 @@ import { usePlayerStore, useUserStore } from '@/store/playerStore';
 import { X, Music, Check, CreditCard, Crown, ShoppingBag, Gem, Star, Headphones } from 'lucide-react';
 import Link from 'next/link';
 
-// Stripe checkout links per tier
+// Stripe checkout links per tier — MyStation LLC (acct_1T1jP1R0BloCNd9r)
 const STRIPE_LINKS = {
-  regular: 'https://buy.stripe.com/eVq5kEcWS8VW8z10xs73G04',
-  premium: 'https://buy.stripe.com/4gM9AU5uq8VWg1t7ZU73G09',
-  diamond: 'https://buy.stripe.com/14AdRa4qm5JK8z1gwq73G0a',
+  regular: 'https://buy.stripe.com/5kQbJ3fyX0l0gLafHd1oI00',
+  premium: 'https://buy.stripe.com/bJe00lcmL2t8cuUcv11oI01',
+  diamond: 'https://buy.stripe.com/6oUbJ3euT5FkdyYgLh1oI02',
 };
 
 export default function SubscribeModal() {

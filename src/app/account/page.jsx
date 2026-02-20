@@ -18,7 +18,7 @@ export default function AccountPage() {
     const email = useUserStore.getState().email;
     if (!email) {
       // No email stored — just link to subscription checkout
-      window.location.href = 'https://buy.stripe.com/eVq5kEcWS8VW8z10xs73G04';
+      window.location.href = 'https://buy.stripe.com/5kQbJ3fyX0l0gLafHd1oI00';
       return;
     }
 
@@ -37,10 +37,10 @@ export default function AccountPage() {
         window.location.href = data.url;
       } else {
         // Fallback — open subscription page
-        window.location.href = 'https://buy.stripe.com/eVq5kEcWS8VW8z10xs73G04';
+        window.location.href = 'https://buy.stripe.com/5kQbJ3fyX0l0gLafHd1oI00';
       }
     } catch (err) {
-      window.location.href = 'https://buy.stripe.com/eVq5kEcWS8VW8z10xs73G04';
+      window.location.href = 'https://buy.stripe.com/5kQbJ3fyX0l0gLafHd1oI00';
     } finally {
       setLoading(false);
     }

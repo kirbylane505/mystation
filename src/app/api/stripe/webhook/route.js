@@ -13,7 +13,7 @@ import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import { printful } from '@/lib/printful';
 import { printify } from '@/lib/printify';
-import { sendSaleAlert, sendOrderConfirmation } from '@/lib/email';
+import { sendSaleAlert, sendOrderConfirmation, sendNewSignupAlert } from '@/lib/email';
 import { tagSubscriber } from '@/lib/kit';
 import { createHmac } from 'crypto';
 
@@ -116,7 +116,16 @@ async function handleCheckoutCompleted(session, stripe) {
     });
 
     if (merchItems.length === 0) {
-      console.log('No merch items in order - subscription only');
+      console.log('No merch items in order - checking for subscription');
+
+      // If this is a subscription checkout, register the subscriber
+      const subItems = lineItems.filter(item => item.price?.type === 'recurring');
+      if (subItems.length > 0) {
+        const customerEmail = fullSession.customer_details?.email || session.customer_email;
+        if (customerEmail) {
+          await registerNewSubscriber(customerEmail, subItems[0]?.price?.unit_amount || 0);
+        }
+      }
       return;
     }
 
@@ -401,21 +410,31 @@ async function handleInvoicePaid(invoice) {
     const supabase = getSupabaseAdmin();
     if (!supabase) return;
 
+    // Detect tier from invoice amount (in cents)
+    const amountPaid = invoice.amount_paid || 0;
+    let tier = 'regular';
+    if (amountPaid >= 1499) tier = 'diamond';
+    else if (amountPaid >= 999) tier = 'premium';
+
     // Extend subscription
     const thirtyDaysFromNow = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
     // Update subscribers table
     const { data: existing } = await supabase
       .from('subscribers')
-      .select('id')
+      .select('id, tier')
       .eq('email', email)
       .single();
 
     if (existing) {
+      // Only upgrade tier, never downgrade (they might have been manually upgraded)
+      const tierRank = { free: 0, regular: 1, supporter: 1, premium: 2, diamond: 3 };
+      const newTier = (tierRank[tier] || 0) >= (tierRank[existing.tier] || 0) ? tier : existing.tier;
       await supabase
         .from('subscribers')
         .update({
           status: 'active',
+          tier: newTier,
           free_until: thirtyDaysFromNow.toISOString(),
         })
         .eq('email', email);
@@ -423,7 +442,7 @@ async function handleInvoicePaid(invoice) {
       await supabase.from('subscribers').insert({
         email,
         status: 'active',
-        tier: 'regular',
+        tier,
         created_at: new Date().toISOString(),
         free_until: thirtyDaysFromNow.toISOString(),
       });
@@ -439,6 +458,19 @@ async function handleInvoicePaid(invoice) {
       }, { onConflict: 'email' });
 
     console.log('Subscription renewed for:', email, 'until', thirtyDaysFromNow.toISOString());
+
+    // Alert Mike about new/renewed subscriber
+    const { count } = await supabase
+      .from('subscribers')
+      .select('*', { count: 'exact', head: true });
+
+    sendNewSignupAlert({
+      customerName: invoice.customer_name || email.split('@')[0],
+      customerEmail: email,
+      subscriberNumber: count || 1,
+      isFreeSlot: false,
+    }).catch(() => {});
+
   } catch (err) {
     console.error('invoice.paid handler error:', err);
   }
@@ -481,6 +513,66 @@ async function handleSubscriptionCanceled(subscription) {
     console.log('Subscription marked canceled for:', email);
   } catch (err) {
     console.error('subscription.deleted handler error:', err);
+  }
+}
+
+/**
+ * Register a new subscriber in Supabase when they first checkout
+ * This keeps the founding member counter accurate in real-time
+ */
+async function registerNewSubscriber(customerEmail, amountCents) {
+  const email = customerEmail.toLowerCase();
+  try {
+    const { getSupabaseAdmin } = await import('@/lib/supabaseAdmin');
+    const supabase = getSupabaseAdmin();
+    if (!supabase) return;
+
+    // Check if already in subscribers table
+    const { data: existing } = await supabase
+      .from('subscribers')
+      .select('id')
+      .eq('email', email)
+      .single();
+
+    if (existing) {
+      console.log('Subscriber already exists:', email);
+      return;
+    }
+
+    // Detect tier from amount
+    let tier = 'supporter';
+    if (amountCents >= 1499) tier = 'diamond';
+    else if (amountCents >= 999) tier = 'premium';
+
+    // Get next subscriber number
+    const { count } = await supabase
+      .from('subscribers')
+      .select('*', { count: 'exact', head: true });
+
+    const subscriberNumber = (count || 0) + 1;
+    const thirtyDays = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+
+    await supabase.from('subscribers').insert({
+      email,
+      status: 'active',
+      tier,
+      subscriber_number: subscriberNumber,
+      created_at: new Date().toISOString(),
+      free_until: thirtyDays.toISOString(),
+    });
+
+    console.log(`New subscriber registered: ${email} (#${subscriberNumber}, ${tier})`);
+
+    // Alert Mike
+    sendNewSignupAlert({
+      customerName: email.split('@')[0],
+      customerEmail: email,
+      subscriberNumber,
+      isFreeSlot: subscriberNumber <= 26,
+    }).catch(() => {});
+
+  } catch (err) {
+    console.error('registerNewSubscriber error:', err);
   }
 }
 

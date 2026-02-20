@@ -58,7 +58,7 @@ export default function ReferralDetector() {
   if (!showBanner) return null;
 
   return (
-    <div className="fixed top-16 md:top-20 left-0 right-0 z-40 px-4 py-2 animate-slide-up">
+    <div className="relative z-40 px-4 py-2 mb-2 animate-slide-up">
       <div className="max-w-lg mx-auto flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-500/30 rounded-2xl backdrop-blur-xl">
         <Gift size={20} className="text-green-400 shrink-0" />
         <div className="flex-1 min-w-0">

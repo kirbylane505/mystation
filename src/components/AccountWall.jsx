@@ -15,9 +15,9 @@ import { usePlayerStore, useUserStore } from '@/store/playerStore';
 const OPEN_PATHS = ['/events', '/tickets', '/admin', '/merch'];
 import { Mail, Lock, User, Loader2, Headphones, Music, Clock, CreditCard, ShoppingBag, Ticket } from 'lucide-react';
 
-// Stripe checkout links per tier
+// Stripe checkout links per tier — MyStation LLC (acct_1T1jP1R0BloCNd9r)
 const STRIPE_LINKS = {
-  regular: 'https://buy.stripe.com/eVq5kEcWS8VW8z10xs73G04',
+  regular: 'https://buy.stripe.com/5kQbJ3fyX0l0gLafHd1oI00',
 };
 
 export default function AccountWall() {

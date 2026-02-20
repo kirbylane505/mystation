@@ -12,20 +12,24 @@ export default function SubscribeSuccessPage() {
   const { subscribe } = useUserStore();
 
   useEffect(() => {
+    // Read the tier they selected before Stripe redirect
+    const selectedTier = localStorage.getItem('mystation-selected-tier') || 'regular';
+
     // Set server-side subscription session cookie (httpOnly, HMAC-signed)
     fetch('/api/subscription/session', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'activate' }),
+      body: JSON.stringify({ action: 'activate', tier: selectedTier }),
     }).catch(() => {});
 
-    // Mark user as subscribed in client store
-    subscribe('subscriber@mystation.com');
+    // Mark user as subscribed in client store WITH correct tier
+    subscribe('subscriber@mystation.com', selectedTier);
+    localStorage.removeItem('mystation-selected-tier');
 
     // Get the pending track from localStorage (saved before Stripe redirect)
     const savedPendingTrack = localStorage.getItem('mystation-pending-track');
 
-    // Auto-play after 3 seconds
+    // Show welcome message for 14 seconds, then redirect
     const timer = setTimeout(() => {
       if (savedPendingTrack) {
         try {
@@ -38,7 +42,7 @@ export default function SubscribeSuccessPage() {
 
       // Redirect to home after showing message
       router.push('/');
-    }, 4000);
+    }, 14000);
 
     return () => clearTimeout(timer);
   }, []);

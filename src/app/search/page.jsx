@@ -432,7 +432,7 @@ function SearchPageInner() {
               href="/subscribe/success"
               onClick={(e) => {
                 e.preventDefault();
-                window.location.href = 'https://buy.stripe.com/4gM9AU5uq8VWg1t7ZU73G09';
+                window.location.href = 'https://buy.stripe.com/bJe00lcmL2t8cuUcv11oI01';
               }}
               className="block w-full py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-bold rounded-xl text-center text-sm hover:opacity-90 transition"
             >

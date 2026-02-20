@@ -6,6 +6,7 @@
 
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
+import { sendNewSignupAlert } from '@/lib/email';
 
 const FREE_SLOTS = 26;
 
@@ -29,9 +30,9 @@ export async function POST(request) {
         success: true,
         isFree: false,
         message: 'Redirecting to payment',
-        stripeUrl: 'https://buy.stripe.com/eVq5kEcWS8VW8z10xs73G04',
-      premiumUrl: 'https://buy.stripe.com/4gM9AU5uq8VWg1t7ZU73G09',
-      diamondUrl: 'https://buy.stripe.com/14AdRa4qm5JK8z1gwq73G0a',
+        stripeUrl: 'https://buy.stripe.com/5kQbJ3fyX0l0gLafHd1oI00',
+      premiumUrl: 'https://buy.stripe.com/bJe00lcmL2t8cuUcv11oI01',
+      diamondUrl: 'https://buy.stripe.com/6oUbJ3euT5FkdyYgLh1oI02',
       });
     }
 
@@ -74,6 +75,14 @@ export async function POST(request) {
         created_at: new Date().toISOString(),
       }, { onConflict: 'email' });
 
+      // Fire-and-forget: Alert Mike about new founding member
+      sendNewSignupAlert({
+        customerName: email.split('@')[0],
+        customerEmail: email.toLowerCase(),
+        subscriberNumber,
+        isFreeSlot: true,
+      }).catch(() => {});
+
       return NextResponse.json({
         success: true,
         isFree: true,
@@ -90,9 +99,9 @@ export async function POST(request) {
       isFree: false,
       subscriberNumber,
       message: 'Free slots filled. Subscribe for $4.99/mo.',
-      stripeUrl: 'https://buy.stripe.com/eVq5kEcWS8VW8z10xs73G04',
-      premiumUrl: 'https://buy.stripe.com/4gM9AU5uq8VWg1t7ZU73G09',
-      diamondUrl: 'https://buy.stripe.com/14AdRa4qm5JK8z1gwq73G0a',
+      stripeUrl: 'https://buy.stripe.com/5kQbJ3fyX0l0gLafHd1oI00',
+      premiumUrl: 'https://buy.stripe.com/bJe00lcmL2t8cuUcv11oI01',
+      diamondUrl: 'https://buy.stripe.com/6oUbJ3euT5FkdyYgLh1oI02',
     });
   } catch (err) {
     console.error('Subscribe error:', err);

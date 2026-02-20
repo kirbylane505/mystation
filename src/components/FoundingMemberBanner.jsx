@@ -36,7 +36,7 @@ export default function FoundingMemberBanner() {
   }, []);
 
   // Don't render anything until fully loaded
-  if (isSubscribed || dismissed || remaining === null || !ready) return null;
+  if (dismissed || remaining === null || !ready) return null;
 
   const handleClick = () => {
     usePlayerStore.getState().openSubscribeModal();

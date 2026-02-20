@@ -22,6 +22,7 @@ import EmpireWelcome from '@/components/EmpireWelcome';
 import Script from 'next/script';
 import { Toaster } from 'sonner';
 import FoundingMemberBanner from '@/components/FoundingMemberBanner';
+import CashAppThankYou from '@/components/CashAppThankYou';
 
 // Lazy-loaded utilities — code-split into separate chunks (loaded async after hydration)
 import LazyUtilities from '@/components/LazyUtilities';
@@ -125,6 +126,7 @@ export default function RootLayout({ children }) {
           <Navbar />
           <main className="pt-20 md:pt-24 pb-36">
             <FoundingMemberBanner />
+            <Suspense><ReferralDetector /></Suspense>
             {children}
           </main>
           <Player />
@@ -132,8 +134,8 @@ export default function RootLayout({ children }) {
           <SubscribeModal />
           <Cart />
           <SessionGuard />
-          <Suspense><ReferralDetector /></Suspense>
           <Suspense><EmpireWelcome /></Suspense>
+          <CashAppThankYou />
           <LazyUtilities />
         </ClientProviders>
         <Script id="register-sw" strategy="afterInteractive">
