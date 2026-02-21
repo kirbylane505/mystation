@@ -22,7 +22,7 @@ export async function POST(request) {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
-        maxAge: 30 * 24 * 60 * 60, // 30 days
+        maxAge: 365 * 24 * 60 * 60, // 365 days — subscribers remembered forever
         path: '/',
       });
 
@@ -47,7 +47,7 @@ export async function POST(request) {
     const expected = createHmac('sha256', secret).update(`sub:${timestamp}`).digest('hex').slice(0, 32);
     let diff = 0;
     for (let i = 0; i < expected.length; i++) diff |= expected.charCodeAt(i) ^ sig.charCodeAt(i);
-    const valid = diff === 0 && (Date.now() - parseInt(timestamp, 10)) < 30 * 24 * 60 * 60 * 1000;
+    const valid = diff === 0 && (Date.now() - parseInt(timestamp, 10)) < 365 * 24 * 60 * 60 * 1000;
 
     return NextResponse.json({ isSubscribed: valid });
   } catch {

@@ -73,16 +73,25 @@ export async function POST(request) {
 
     const response = NextResponse.json({ success: true, user, isSubscribed, tier });
 
-    // Set auth cookie
+    // Set auth cookie (365 days)
     response.cookies.set('mystation-auth', createAuthCookie(cleanEmail), {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',
-      maxAge: 30 * 24 * 60 * 60, // 30 days
+      maxAge: 365 * 24 * 60 * 60,
     });
 
-    // Set sub cookie if subscribed
+    // Set persistent email cookie — never forget who they are (365 days)
+    response.cookies.set('mystation-email', cleanEmail, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 365 * 24 * 60 * 60,
+    });
+
+    // Set sub cookie if subscribed (365 days)
     if (isSubscribed) {
       const subTs = Date.now();
       const subSig = createHmac('sha256', AUDIO_SECRET).update(`sub:${subTs}`).digest('hex').slice(0, 32);
@@ -91,7 +100,7 @@ export async function POST(request) {
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
         path: '/',
-        maxAge: 30 * 24 * 60 * 60,
+        maxAge: 365 * 24 * 60 * 60,
       });
     }
 

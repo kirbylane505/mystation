@@ -65,7 +65,16 @@ export async function POST(request) {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 26 * 60, // 26 minutes
+      maxAge: 365 * 24 * 60 * 60, // Keep trial cookie for email lookup (365 days)
+      path: '/',
+    });
+
+    // Set persistent email cookie — site never forgets who visited (365 days)
+    response.cookies.set('mystation-email', cleanEmail, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 365 * 24 * 60 * 60,
       path: '/',
     });
 

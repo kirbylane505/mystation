@@ -21,7 +21,7 @@ function verifySubCookie(cookieStr) {
     for (let i = 0; i < expected.length; i++) diff |= expected.charCodeAt(i) ^ sig.charCodeAt(i);
     if (diff !== 0) return false;
     const ts = parseInt(timestamp, 10);
-    if (isNaN(ts) || Date.now() - ts > 30 * 24 * 60 * 60 * 1000) return false;
+    if (isNaN(ts) || Date.now() - ts > 365 * 24 * 60 * 60 * 1000) return false;
     return true;
   } catch {
     return false;
@@ -67,23 +67,54 @@ export async function GET(request) {
       });
     }
 
-    // 2. Check trial cookie
+    // 2. Get email from trial cookie OR persistent email cookie
     const trial = verifyTrialCookie(cookieStr);
+    const emailMatch = cookieStr.match(/mystation-email=([^;]+)/);
+    const email = trial?.email || (emailMatch ? decodeURIComponent(emailMatch[1]) : null);
 
-    // 3. If we have email from trial, check Supabase for purchase-granted sub
-    if (trial?.email) {
+    // 3. If we have email, check Supabase — subscribers table first, then user_trials
+    if (email) {
       try {
         const { getSupabaseAdmin } = await import('@/lib/supabaseAdmin');
         const supabase = getSupabaseAdmin();
         if (supabase) {
+          // Check subscribers table (active Stripe subscribers)
+          const { data: sub } = await supabase
+            .from('subscribers')
+            .select('status, tier, email')
+            .eq('email', email.toLowerCase())
+            .eq('status', 'active')
+            .single();
+
+          if (sub) {
+            // Active subscriber — refresh their sub cookie so it never expires
+            const response = NextResponse.json({
+              status: 'subscribed',
+              expiresAt: null,
+              source: 'subscriber',
+              tier: sub.tier,
+            });
+            // Auto-refresh sub cookie for 365 days
+            const timestamp = String(Date.now());
+            const sig = createHmac('sha256', AUDIO_SECRET).update(`sub:${timestamp}`).digest('hex').slice(0, 32);
+            response.cookies.set('mystation-sub', `${timestamp}.${sig}`, {
+              httpOnly: true,
+              secure: true,
+              sameSite: 'strict',
+              maxAge: 365 * 24 * 60 * 60,
+              path: '/',
+            });
+            return response;
+          }
+
+          // Check user_trials table
           const { data } = await supabase
             .from('user_trials')
             .select('purchased_sub_until, stripe_sub_active')
-            .eq('email', trial.email)
+            .eq('email', email.toLowerCase())
             .single();
 
           if (data) {
-            // Check purchased_sub_until
             if (data.purchased_sub_until && new Date(data.purchased_sub_until) > new Date()) {
               return NextResponse.json({
                 status: 'subscribed',
@@ -91,7 +122,6 @@ export async function GET(request) {
                 source: 'purchase',
               });
             }
-            // Check stripe_sub_active
             if (data.stripe_sub_active) {
               return NextResponse.json({
                 status: 'subscribed',
@@ -104,8 +134,10 @@ export async function GET(request) {
       } catch (e) {
         console.error('Supabase trial check error:', e);
       }
+    }
 
-      // 4. Check trial window (26 min from start)
+    // 4. Check trial window (26 min from start) — only if trial cookie exists
+    if (trial?.email) {
       const elapsed = Date.now() - trial.trialStartedAt;
       const trialMs = 26 * 60 * 1000;
 

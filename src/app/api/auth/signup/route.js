@@ -128,16 +128,25 @@ export async function POST(request) {
       freeSignupSlots: isFreeSlot ? Math.max(0, 26 - subscriberNumber) : 0,
     });
 
-    // Set auth cookie
+    // Set auth cookie (365 days)
     response.cookies.set('mystation-auth', createAuthCookie(cleanEmail), {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',
-      maxAge: 30 * 24 * 60 * 60, // 30 days
+      maxAge: 365 * 24 * 60 * 60,
     });
 
-    // Set sub cookie if free slot
+    // Set persistent email cookie — so we always know who they are (365 days)
+    response.cookies.set('mystation-email', cleanEmail, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 365 * 24 * 60 * 60,
+    });
+
+    // Set sub cookie if free slot (365 days)
     if (isSubscribed) {
       const subTs = Date.now();
       const subSig = createHmac('sha256', AUDIO_SECRET).update(`sub:${subTs}`).digest('hex').slice(0, 32);
@@ -146,7 +155,7 @@ export async function POST(request) {
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
         path: '/',
-        maxAge: 30 * 24 * 60 * 60,
+        maxAge: 365 * 24 * 60 * 60,
       });
     }
 
