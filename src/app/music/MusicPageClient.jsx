@@ -358,7 +358,7 @@ export default function MusicPageClient({ initialTrackId, autoplay = false }) {
         />
       )}
 
-      {/* Playlist Detail View */}
+      {/* Playlist Detail View — LOCKED */}
       {activePlaylist && (
         <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm overflow-y-auto">
           <div className="min-h-screen p-4 md:p-8">
@@ -470,3 +470,4 @@ export default function MusicPageClient({ initialTrackId, autoplay = false }) {
     </div>
   );
 }
+

@@ -26,24 +26,56 @@ export default function SlidesLaddersGame({ gameState, myPlayerId, onRoll, playe
   };
 
   return (
-    <div className="w-full flex flex-col items-center gap-6">
-      {/* Turn indicator */}
-      <div className="text-center">
-        {isMyTurn ? (
-          <p className="text-blue-400 font-bold text-lg">Your Turn!</p>
-        ) : (
-          <p className="text-white/50 text-sm">
-            Waiting for <span className="text-white font-medium">{currentPlayerName}</span>...
-          </p>
-        )}
-      </div>
+    <div className="w-full flex flex-col items-center gap-4">
+      {/* Turn indicator + Dice + Roll Button (always visible at top) */}
+      <div className="flex items-center gap-6">
+        <DiceRoller
+          value={gameState.lastRoll}
+          rolling={rolling}
+          lastMove={gameState.lastMove}
+        />
 
-      {/* Board */}
-      <BoardGrid
-        positions={gameState.positions}
-        playerOrder={gameState.playerOrder}
-        lastMove={gameState.lastMove}
-      />
+        <div className="flex flex-col items-center gap-2">
+          {isMyTurn ? (
+            <p className="text-blue-400 font-bold text-lg">Your Turn!</p>
+          ) : (
+            <p className="text-white/50 text-sm">
+              Waiting for <span className="text-white font-medium">{currentPlayerName}</span>...
+            </p>
+          )}
+
+          <button
+            onClick={handleRoll}
+            disabled={!isMyTurn || rolling}
+            className={`px-8 py-3 rounded-2xl font-black text-lg transition-all ${
+              isMyTurn && !rolling
+                ? 'bg-purple-500 hover:bg-purple-600 text-white shadow-lg shadow-purple-500/30 hover:scale-105'
+                : 'bg-white/5 text-white/20 cursor-not-allowed'
+            }`}
+          >
+            {rolling ? 'Rolling...' : 'Roll Dice'}
+          </button>
+
+          {/* Last move info */}
+          {gameState.lastMove && (
+            <div className="text-center text-xs">
+              {gameState.lastMove.ladder && (
+                <p className="text-green-400">
+                  Ladder! {gameState.lastMove.ladder.from} &rarr; {gameState.lastMove.ladder.to}
+                </p>
+              )}
+              {gameState.lastMove.slide && (
+                <p className="text-red-400">
+                  Slide! {gameState.lastMove.slide.from} &rarr; {gameState.lastMove.slide.to}
+                </p>
+              )}
+              {gameState.lastMove.bonusRoll && (
+                <p className="text-yellow-400">Rolled a 6 — bonus turn!</p>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* Player positions legend */}
       <div className="flex flex-wrap justify-center gap-4">
@@ -51,6 +83,7 @@ export default function SlidesLaddersGame({ gameState, myPlayerId, onRoll, playe
           const player = players?.find(p => p.user_id === pid);
           const color = PLAYER_COLORS[idx % PLAYER_COLORS.length];
           const pos = gameState.positions[pid] || 0;
+          const name = pid.startsWith('ai_') ? 'CPU' : (player?.display_name || 'Player');
 
           return (
             <div key={pid} className="flex items-center gap-2">
@@ -59,52 +92,19 @@ export default function SlidesLaddersGame({ gameState, myPlayerId, onRoll, playe
                 style={{ backgroundColor: color }}
               />
               <span className={`text-sm ${pid === myPlayerId ? 'text-blue-400 font-medium' : 'text-white/60'}`}>
-                {player?.display_name || 'Player'}: {pos}
+                {name}: {pos}
               </span>
             </div>
           );
         })}
       </div>
 
-      {/* Dice + Roll Button */}
-      <div className="flex flex-col items-center gap-4">
-        <DiceRoller
-          value={gameState.lastRoll}
-          rolling={rolling}
-          lastMove={gameState.lastMove}
-        />
-
-        <button
-          onClick={handleRoll}
-          disabled={!isMyTurn || rolling}
-          className={`px-10 py-4 rounded-2xl font-black text-xl transition-all ${
-            isMyTurn && !rolling
-              ? 'bg-purple-500 hover:bg-purple-600 text-white shadow-lg shadow-purple-500/30 hover:scale-105'
-              : 'bg-white/5 text-white/20 cursor-not-allowed'
-          }`}
-        >
-          {rolling ? 'Rolling...' : 'Roll Dice'}
-        </button>
-
-        {/* Last move info */}
-        {gameState.lastMove && (
-          <div className="text-center text-sm">
-            {gameState.lastMove.ladder && (
-              <p className="text-green-400">
-                Ladder! {gameState.lastMove.ladder.from} &rarr; {gameState.lastMove.ladder.to}
-              </p>
-            )}
-            {gameState.lastMove.slide && (
-              <p className="text-red-400">
-                Slide! {gameState.lastMove.slide.from} &rarr; {gameState.lastMove.slide.to}
-              </p>
-            )}
-            {gameState.lastMove.bonusRoll && (
-              <p className="text-yellow-400">Rolled a 6 — bonus turn!</p>
-            )}
-          </div>
-        )}
-      </div>
+      {/* Board */}
+      <BoardGrid
+        positions={gameState.positions}
+        playerOrder={gameState.playerOrder}
+        lastMove={gameState.lastMove}
+      />
     </div>
   );
 }

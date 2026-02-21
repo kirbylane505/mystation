@@ -352,7 +352,7 @@ export default function MerchPage() {
       audioFile: '/audio/grammy-nights/04-love-on-the-lawn.mp3',
       isNew: true,
     };
-    // Queue LOTL first, then new releases after it
+    // Queue merch track first, then new releases after it
     const officialTracks = getOfficialTracks();
     const newReleaseTracks = officialTracks.filter(t => t.isNew && t.id !== 138);
     const fullQueue = [lotlTrack, ...newReleaseTracks];

@@ -9,15 +9,16 @@ import { LADDERS, SLIDES, PLAYER_COLORS } from '@/lib/games/constants';
 import PlayerToken from './PlayerToken';
 
 export default function BoardGrid({ positions = {}, playerOrder = [], lastMove }) {
-  // Generate board squares (100 to 1, snake pattern)
+  // Generate board squares (snake pattern, 91-100 at top, 1-10 at bottom)
   const board = [];
-  for (let row = 9; row >= 0; row--) {
+  for (let row = 0; row <= 9; row++) {
     const rowSquares = [];
     for (let col = 0; col < 10; col++) {
-      const isEvenRow = (9 - row) % 2 === 0;
+      const boardRow = 9 - row; // row 0 on screen = board row 9 (squares 91-100)
+      const isEvenRow = boardRow % 2 === 0;
       const num = isEvenRow
-        ? (9 - row) * 10 + col + 1
-        : (9 - row) * 10 + (9 - col) + 1;
+        ? boardRow * 10 + col + 1
+        : boardRow * 10 + (9 - col) + 1;
       rowSquares.push(num);
     }
     board.push(rowSquares);
