@@ -7,7 +7,7 @@ import { NextResponse } from 'next/server';
 import { createHmac } from 'crypto';
 import { signIn } from '@/lib/supabase';
 
-const AUDIO_SECRET = process.env.AUDIO_SECRET || 'ms-audio-2026-idmg';
+const AUDIO_SECRET = process.env.AUDIO_SECRET;
 
 function createAuthCookie(email) {
   const timestamp = Date.now();

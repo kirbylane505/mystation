@@ -6,7 +6,7 @@
 import { NextResponse } from 'next/server';
 import { createHmac } from 'crypto';
 
-const AUDIO_SECRET = process.env.AUDIO_SECRET || 'ms-audio-2026-idmg';
+const AUDIO_SECRET = process.env.AUDIO_SECRET;
 
 export async function POST(request) {
   try {

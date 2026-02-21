@@ -38,7 +38,7 @@ export default function BoardGrid({ positions = {}, playerOrder = [], lastMove }
 
   return (
     <div className="w-full max-w-lg mx-auto">
-      <div className="grid grid-cols-10 gap-0.5 bg-white/5 rounded-xl p-1 border border-white/10">
+      <div className="grid grid-cols-10 gap-0.5 bg-white/5 rounded-xl p-1 border border-white/10" style={{ gridTemplateColumns: 'repeat(10, minmax(0, 1fr))' }}>
         {board.flat().map((num) => {
           const hasLadder = isLadderBottom(num);
           const hasSlide = isSlideTop(num);

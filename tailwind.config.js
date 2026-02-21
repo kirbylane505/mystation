@@ -5,6 +5,9 @@ module.exports = {
   ],
   theme: {
     extend: {
+      gridTemplateColumns: {
+        '10': 'repeat(10, minmax(0, 1fr))',
+      },
       colors: {
         'mystation': {
           navy: '#0a1628',

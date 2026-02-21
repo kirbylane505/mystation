@@ -13,7 +13,7 @@ export async function POST(request) {
 
     if (action === 'activate') {
       // Create signed subscription cookie
-      const secret = process.env.AUDIO_SECRET || 'ms-audio-2026-idmg';
+      const secret = process.env.AUDIO_SECRET;
       const timestamp = String(Date.now());
       const sig = createHmac('sha256', secret).update(`sub:${timestamp}`).digest('hex').slice(0, 32);
 
@@ -43,7 +43,7 @@ export async function POST(request) {
     }
 
     const [timestamp, sig] = match[1].split('.');
-    const secret = process.env.AUDIO_SECRET || 'ms-audio-2026-idmg';
+    const secret = process.env.AUDIO_SECRET;
     const expected = createHmac('sha256', secret).update(`sub:${timestamp}`).digest('hex').slice(0, 32);
     let diff = 0;
     for (let i = 0; i < expected.length; i++) diff |= expected.charCodeAt(i) ^ sig.charCodeAt(i);

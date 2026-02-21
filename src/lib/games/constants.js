@@ -106,6 +106,16 @@ export const GAME_TYPES = {
     color: '#6366f1',
     turnBased: true,
   },
+  dominoes: {
+    id: 'dominoes',
+    name: 'Dominoes',
+    description: 'Match tiles, clear your hand. Classic bone-slamming action!',
+    minPlayers: 2,
+    maxPlayers: 4,
+    icon: '🁡',
+    color: '#d97706',
+    turnBased: true,
+  },
 };
 
 // Player token colors for board games

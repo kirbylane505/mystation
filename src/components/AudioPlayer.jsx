@@ -193,6 +193,11 @@ export default function AudioPlayer() {
     };
 
     const onEnded = () => {
+      // Don't auto-advance during track loading — prevents iOS audio unlock
+      // silence WAV from triggering nextTrack() when its ended event races
+      // with the real track load (off-by-one bug)
+      if (isLoadingRef.current) return;
+
       if (repeatRef.current === 'one') {
         audio.currentTime = 0;
         safePlay(audio);

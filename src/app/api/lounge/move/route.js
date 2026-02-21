@@ -11,10 +11,11 @@ import { applyBlackjackMove, sanitizeBlackjackState } from '@/lib/games/blackjac
 import { applySlidesLaddersMove, sanitizeSlidesLaddersState } from '@/lib/games/slidesLadders';
 import { applyPoolMove, sanitizePoolState } from '@/lib/games/pool';
 import { applySpadesMove, sanitizeSpadesState } from '@/lib/games/spades';
+import { applyDominoesMove, sanitizeDominoesState } from '@/lib/games/dominoes';
 
 export async function POST(request) {
   try {
-    const { roomId, playerId, action } = await request.json();
+    const { roomId, playerId, action, ...moveData } = await request.json();
 
     if (!roomId || !playerId || !action) {
       return NextResponse.json({ error: 'roomId, playerId, action required' }, { status: 400 });
@@ -67,6 +68,9 @@ export async function POST(request) {
       }
       case 'spades':
         result = applySpadesMove(gameState, playerId, action);
+        break;
+      case 'dominoes':
+        result = applyDominoesMove(gameState, playerId, action, moveData);
         break;
       default:
         return NextResponse.json({ error: 'Game type not supported' }, { status: 400 });
@@ -132,6 +136,9 @@ export async function POST(request) {
       case 'spades':
         broadcastState = sanitizeSpadesState(newState, '__broadcast__');
         break;
+      case 'dominoes':
+        broadcastState = sanitizeDominoesState(newState, '__broadcast__');
+        break;
     }
 
     const event = newState.phase === 'finished' ? 'game:end' : 'game:state';
@@ -174,6 +181,12 @@ async function awardGamePoints(supabase, room, gameState) {
           }
         }
       } else if (room.game_type === 'spades' && gameState.results) {
+        const result = gameState.results[userId];
+        if (result?.outcome === 'win') {
+          isWinner = true;
+          pointsEarned = GAME_POINTS.gameWin;
+        }
+      } else if (room.game_type === 'dominoes' && gameState.results) {
         const result = gameState.results[userId];
         if (result?.outcome === 'win') {
           isWinner = true;
