@@ -8,6 +8,7 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
+import Link from 'next/link';
 
 export default function CheckInPage() {
   const [mode, setMode] = useState('manual'); // 'manual' or 'camera'
@@ -132,12 +133,12 @@ export default function CheckInPage() {
           <h1 style={{ margin: 0, fontSize: 24, fontWeight: 700 }}>Check-In Scanner</h1>
           <p style={{ margin: '4px 0 0', color: '#94a3b8', fontSize: 13 }}>Scan QR codes at the gate</p>
         </div>
-        <a href="/admin/orders" style={{
+        <Link href="/admin/orders" style={{
           padding: '8px 16px', background: '#1e293b', color: '#94a3b8',
           borderRadius: 8, textDecoration: 'none', fontSize: 13, fontWeight: 600,
         }}>
           Orders
-        </a>
+        </Link>
       </div>
 
       {/* Staff Name */}

@@ -8,6 +8,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
+import Link from 'next/link';
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState([]);
@@ -158,12 +159,12 @@ export default function AdminOrdersPage() {
             Order Management Dashboard
           </p>
         </div>
-        <a href="/admin/check-in" style={{
+        <Link href="/admin/check-in" style={{
           padding: '10px 20px', background: '#10b981', color: '#fff', borderRadius: 8,
           textDecoration: 'none', fontWeight: 600, fontSize: 14, display: 'inline-block',
         }}>
           QR Scanner
-        </a>
+        </Link>
       </div>
 
       {/* Stats Cards */}
