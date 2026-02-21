@@ -23,8 +23,8 @@ export default function PasswordPage() {
       });
 
       if (res.ok) {
-        // Cookie set by API response — hard redirect so middleware picks it up
-        window.location.href = '/';
+        // Cookie set by API response — client-side navigate to preserve audio
+        router.push('/');
       } else {
         setError('Incorrect password');
         setLoading(false);

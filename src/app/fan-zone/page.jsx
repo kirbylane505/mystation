@@ -262,8 +262,8 @@ export default function FanZonePage() {
             The more you listen, the more you unlock!
           </p>
           <div className="flex items-center justify-center gap-4">
-            <a href="/music" className="btn-primary">Start Listening</a>
-            <a href="/" className="btn-secondary">Explore Music</a>
+            <Link href="/music" className="btn-primary">Start Listening</Link>
+            <Link href="/" className="btn-secondary">Explore Music</Link>
           </div>
         </div>
       </section>

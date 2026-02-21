@@ -160,7 +160,7 @@ export default function AdminOrdersPage() {
         </div>
         <a href="/admin/check-in" style={{
           padding: '10px 20px', background: '#10b981', color: '#fff', borderRadius: 8,
-          textDecoration: 'none', fontWeight: 600, fontSize: 14,
+          textDecoration: 'none', fontWeight: 600, fontSize: 14, display: 'inline-block',
         }}>
           QR Scanner
         </a>

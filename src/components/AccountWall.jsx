@@ -13,6 +13,7 @@ import { usePlayerStore, useUserStore } from '@/store/playerStore';
 
 // Pages that should NEVER be blocked by the account wall (commerce, ticketing, admin)
 const OPEN_PATHS = ['/events', '/tickets', '/admin', '/merch'];
+import Link from 'next/link';
 import { Mail, Lock, User, Loader2, Headphones, Music, Clock, CreditCard, ShoppingBag, Ticket } from 'lucide-react';
 
 // Stripe checkout links per tier — MyStation LLC (acct_1T1jP1R0BloCNd9r)
@@ -440,14 +441,14 @@ export default function AccountWall() {
 
             {/* Commerce links — always accessible, no subscription needed */}
             <div className="mt-6 flex items-center justify-center gap-6">
-              <a href="/merch" className="flex items-center gap-1.5 text-white/50 hover:text-white text-sm transition">
+              <Link href="/merch" className="flex items-center gap-1.5 text-white/50 hover:text-white text-sm transition">
                 <ShoppingBag size={15} />
                 Shop Merch
-              </a>
-              <a href="/events" className="flex items-center gap-1.5 text-white/50 hover:text-white text-sm transition">
+              </Link>
+              <Link href="/events" className="flex items-center gap-1.5 text-white/50 hover:text-white text-sm transition">
                 <Ticket size={15} />
                 Buy Tickets
-              </a>
+              </Link>
             </div>
           </div>
         )}
