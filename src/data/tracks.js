@@ -535,6 +535,21 @@ export const tracks = [
     genre: 'Trap',
     producer: 'The Cubist'
   },
+  {
+    id: 166,
+    title: "God N U",
+    artist: "Mike Page",
+    album: "Coming Soon",
+    year: 2026,
+    duration: "1:32",
+    trackNumber: 36,
+    albumId: 'singles-2026',
+    audioFile: '/audio/Mike Page - God N U_MASTERED.mp3',
+    isNew: true,
+    hitScore: 91,
+    genre: 'Trap',
+    producer: 'The Cubist'
+  },
   // ========================================
   // GRAMMY NIGHTS VOL. 1 - VB & MP (PRIVATE)
   // Access: MP2026 (Mike Page), VB2026 (Vincent Berry)
