@@ -80,7 +80,27 @@ export async function POST(request) {
       return NextResponse.json({ error: result.error }, { status: 400 });
     }
 
-    const newState = result.state;
+    let newState = result.state;
+
+    // Auto-play AI turns (Slides & Ladders + Dominoes)
+    if (room.game_type === 'slidesLadders' || room.game_type === 'dominoes') {
+      let safety = 0;
+      while (newState.phase !== 'finished' && safety < 100) {
+        const nextPlayer = newState.playerOrder[newState.currentTurnIndex];
+        if (!nextPlayer?.startsWith('ai_')) break;
+
+        let aiResult;
+        if (room.game_type === 'slidesLadders') {
+          aiResult = applySlidesLaddersMove(newState, nextPlayer);
+        } else {
+          aiResult = playDominoesAI(newState, nextPlayer);
+        }
+
+        if (!aiResult.valid) break;
+        newState = aiResult.state;
+        safety++;
+      }
+    }
 
     // Log the move
     const { data: moveCount } = await supabase
@@ -153,6 +173,53 @@ export async function POST(request) {
     console.error('Move error:', err);
     return NextResponse.json({ error: 'Failed to process move' }, { status: 500 });
   }
+}
+
+/**
+ * Simple AI for Dominoes — plays first valid tile, draws if stuck, passes if blocked
+ */
+function playDominoesAI(state, aiPlayerId) {
+  const hand = state.hands[aiPlayerId];
+  if (!hand || hand.length === 0) {
+    return { state, valid: false, error: 'AI has no tiles' };
+  }
+
+  // First tile (empty chain) — play highest pip tile
+  if (state.chain.length === 0) {
+    let bestIdx = 0;
+    let bestPips = hand[0].a + hand[0].b;
+    for (let i = 1; i < hand.length; i++) {
+      const pips = hand[i].a + hand[i].b;
+      if (pips > bestPips) { bestPips = pips; bestIdx = i; }
+    }
+    return applyDominoesMove(state, aiPlayerId, 'play', { tileId: hand[bestIdx].id, end: 'right' });
+  }
+
+  // Try to play a tile — prefer higher pip count to shed heavy tiles
+  let bestTile = null;
+  let bestEnd = null;
+  let bestPips = -1;
+  for (const tile of hand) {
+    const pips = tile.a + tile.b;
+    if (tile.a === state.leftEnd || tile.b === state.leftEnd) {
+      if (pips > bestPips) { bestTile = tile; bestEnd = 'left'; bestPips = pips; }
+    }
+    if (tile.a === state.rightEnd || tile.b === state.rightEnd) {
+      if (pips > bestPips) { bestTile = tile; bestEnd = 'right'; bestPips = pips; }
+    }
+  }
+
+  if (bestTile) {
+    return applyDominoesMove(state, aiPlayerId, 'play', { tileId: bestTile.id, end: bestEnd });
+  }
+
+  // Can't play — draw from boneyard
+  if (state.boneyard.length > 0) {
+    return applyDominoesMove(state, aiPlayerId, 'draw', {});
+  }
+
+  // Can't play + no boneyard — pass
+  return applyDominoesMove(state, aiPlayerId, 'pass', {});
 }
 
 /**

@@ -67,9 +67,12 @@ export async function POST(request) {
       case 'blackjack':
         gameState = initBlackjack(playerIds);
         break;
-      case 'slidesLadders':
-        gameState = initSlidesLadders(playerIds);
+      case 'slidesLadders': {
+        const slIds = [...playerIds];
+        if (slIds.length < 2) slIds.push('ai_opponent');
+        gameState = initSlidesLadders(slIds);
         break;
+      }
       case 'pool': {
         const poolIds = [...playerIds];
         if (poolIds.length < 2) poolIds.push('ai_opponent');
@@ -87,9 +90,12 @@ export async function POST(request) {
         gameState = initSpades(spadesIds);
         break;
       }
-      case 'dominoes':
-        gameState = initDominoes(playerIds);
+      case 'dominoes': {
+        const domIds = [...playerIds];
+        if (domIds.length < 2) domIds.push('ai_opponent');
+        gameState = initDominoes(domIds);
         break;
+      }
       default:
         return NextResponse.json({ error: 'Game type not yet implemented' }, { status: 400 });
     }

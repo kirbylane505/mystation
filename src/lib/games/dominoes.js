@@ -64,8 +64,8 @@ function canPlay(tile, leftEnd, rightEnd) {
  * @returns {object} initial game state
  */
 export function initDominoes(playerIds) {
-  if (playerIds.length < 2 || playerIds.length > 4) {
-    throw new Error('Dominoes requires 2-4 players');
+  if (playerIds.length < 1 || playerIds.length > 4) {
+    throw new Error('Dominoes requires 1-4 players');
   }
 
   const tiles = shuffleTiles(generateDominoes());

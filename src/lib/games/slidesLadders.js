@@ -20,8 +20,8 @@ import { rollDice } from './deck';
  * @returns {object} initial game state
  */
 export function initSlidesLadders(playerIds) {
-  if (playerIds.length < 2 || playerIds.length > 4) {
-    throw new Error('Slides & Ladders requires 2-4 players');
+  if (playerIds.length < 1 || playerIds.length > 4) {
+    throw new Error('Slides & Ladders requires 1-4 players');
   }
 
   const positions = {};
