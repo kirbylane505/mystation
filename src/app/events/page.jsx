@@ -1,15 +1,17 @@
 /**
- * MYTICKETSLIVE - Events Listing Page
- * Browse all events from IDMG, LOTL, and Mike Page Foundation
+ * MYTICKETSLIVE - Events Hub
+ * High-energy events page with LOTL hero, upcoming events, merch marquee, and CTA
  */
 
 'use client';
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   Calendar, MapPin, Ticket, Clock, Loader2, Filter,
-  Music, Heart, Sparkles, ChevronRight, Users
+  Music, Heart, Sparkles, ChevronRight, Users,
+  ShoppingBag, Flame
 } from 'lucide-react';
 
 // Format date nicely: "Sat, Sep 5, 2026"
@@ -181,12 +183,124 @@ function EventCardSkeleton() {
   );
 }
 
+// ─── MERCH MARQUEE (Inline scrolling section) ────────────────────
+function MerchMarquee() {
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    async function fetchMerch() {
+      try {
+        const [pfRes, pyRes] = await Promise.allSettled([
+          fetch('/api/printful/products').then(r => r.json()),
+          fetch('/api/printify/products').then(r => r.json()),
+        ]);
+
+        let items = [];
+
+        if (pfRes.status === 'fulfilled' && pfRes.value?.products) {
+          items.push(...pfRes.value.products.slice(0, 8).map(p => ({
+            id: `pf-${p.id}`,
+            name: p.name,
+            price: p.price || p.retail_price,
+            image: p.thumbnail_url || p.image,
+          })));
+        }
+
+        if (pyRes.status === 'fulfilled' && pyRes.value?.products) {
+          items.push(...pyRes.value.products.slice(0, 8).map(p => ({
+            id: `py-${p.id}`,
+            name: p.title || p.name,
+            price: p.price || (p.variants?.[0]?.price ? `$${(p.variants[0].price / 100).toFixed(0)}` : null),
+            image: p.images?.[0]?.src || p.thumbnail_url,
+          })));
+        }
+
+        setProducts(items.slice(0, 12));
+      } catch {
+        // Silently fail — section just won't render
+      }
+    }
+    fetchMerch();
+  }, []);
+
+  if (products.length === 0) return null;
+
+  const doubled = [...products, ...products];
+
+  return (
+    <section className="py-10 overflow-hidden">
+      <div className="max-w-screen-xl mx-auto px-6 mb-5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-center justify-center">
+              <ShoppingBag size={16} className="text-amber-400" />
+            </div>
+            <span className="text-white font-bold text-lg">OFFICIAL MERCH</span>
+          </div>
+          <Link
+            href="/merch"
+            className="text-blue-400 text-sm font-bold hover:text-blue-300 transition flex items-center gap-1"
+          >
+            Shop All <ChevronRight size={14} />
+          </Link>
+        </div>
+      </div>
+
+      <div className="overflow-hidden">
+        <div
+          className="flex gap-4 whitespace-nowrap"
+          style={{
+            animation: `events-marquee ${products.length * 4}s linear infinite`,
+          }}
+        >
+          {doubled.map((product, i) => (
+            <Link
+              key={`${product.id}-${i}`}
+              href="/merch"
+              className="inline-flex items-center gap-3 px-4 py-3 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-amber-500/30 rounded-xl transition-all duration-300 group shrink-0 hover:scale-105"
+            >
+              {product.image && (
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className="w-14 h-14 rounded-lg object-cover bg-white/10"
+                />
+              )}
+              <div className="max-w-[140px]">
+                <p className="text-white text-xs font-bold truncate group-hover:text-amber-300 transition-colors">
+                  {product.name}
+                </p>
+                {product.price && (
+                  <p className="text-green-400 text-sm font-bold mt-0.5">
+                    {typeof product.price === 'number' ? `$${product.price}` : product.price}
+                  </p>
+                )}
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      <style jsx>{`
+        @keyframes events-marquee {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+      `}</style>
+    </section>
+  );
+}
+
+// ─── MAIN PAGE ───────────────────────────────────────────────────
 export default function EventsPage() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeFilter, setActiveFilter] = useState('all');
+  const [mounted, setMounted] = useState(false);
+  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
+  // Fetch events
   useEffect(() => {
     async function fetchEvents() {
       try {
@@ -207,6 +321,33 @@ export default function EventsPage() {
     fetchEvents();
   }, []);
 
+  // Countdown timer
+  useEffect(() => {
+    setMounted(true);
+    const targetDate = new Date('2026-09-05T14:00:00-05:00');
+
+    function updateCountdown() {
+      const now = new Date();
+      const diff = targetDate - now;
+
+      if (diff <= 0) {
+        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+        return;
+      }
+
+      setTimeLeft({
+        days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
+        minutes: Math.floor((diff / (1000 * 60)) % 60),
+        seconds: Math.floor((diff / 1000) % 60),
+      });
+    }
+
+    updateCountdown();
+    const interval = setInterval(updateCountdown, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   const filters = [
     { id: 'all', label: 'All Events', icon: Sparkles },
     { id: 'LOTL', label: 'LOTL', icon: Music },
@@ -218,61 +359,157 @@ export default function EventsPage() {
     ? events
     : events.filter(e => e.organization === activeFilter);
 
+  const countdownUnits = [
+    { label: 'Days', value: timeLeft.days },
+    { label: 'Hours', value: timeLeft.hours },
+    { label: 'Min', value: timeLeft.minutes },
+    { label: 'Sec', value: timeLeft.seconds },
+  ];
+
   return (
     <div className="min-h-screen">
-      {/* Hero Section */}
-      <section className="relative py-16 lg:py-24 overflow-hidden">
-        {/* Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-900/60 via-indigo-950/50 to-mystation-navyDark" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-500/20 via-transparent to-transparent" />
-        <div className="bg-orb w-[600px] h-[600px] bg-blue-500 top-[-250px] left-[-150px] opacity-30" />
-        <div className="bg-orb w-[500px] h-[500px] bg-indigo-500 top-[50px] right-[-200px] opacity-20" style={{ animationDelay: '-4s' }} />
-        <div className="bg-orb w-[400px] h-[400px] bg-purple-500 bottom-[-100px] left-[30%] opacity-15" style={{ animationDelay: '-8s' }} />
+      {/* ─── SECTION 1: LOTL HERO ─────────────────────────────── */}
+      <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
+        {/* YouTube background */}
+        <div className="absolute inset-0 z-0 pointer-events-none">
+          <iframe
+            src="https://www.youtube.com/embed/fu1YZRHOXlg?autoplay=1&mute=1&loop=1&controls=0&showinfo=0&modestbranding=1&playlist=fu1YZRHOXlg&playsinline=1"
+            title="LOTL Recap"
+            allow="autoplay; encrypted-media"
+            allowFullScreen
+            className="absolute top-1/2 left-1/2 w-[180%] h-[180%] -translate-x-1/2 -translate-y-1/2 opacity-[0.15]"
+            style={{ border: 'none', pointerEvents: 'none' }}
+          />
+        </div>
 
-        {/* Grid pattern */}
-        <div
-          className="absolute inset-0 opacity-[0.03]"
-          style={{
-            backgroundImage: 'linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)',
-            backgroundSize: '60px 60px',
-          }}
-        />
+        {/* Gradient overlays */}
+        <div className="absolute inset-0 z-[1] bg-gradient-to-b from-mystation-navyDark via-mystation-navyDark/60 to-mystation-navyDark" />
+        <div className="absolute inset-0 z-[1] bg-gradient-to-r from-emerald-950/30 via-transparent to-emerald-950/30" />
+        <div className="absolute inset-0 z-[1] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-green-900/20 via-transparent to-transparent" />
 
-        <div className="relative max-w-screen-xl mx-auto px-6 text-center">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-5 py-2 bg-blue-500/10 border border-blue-500/30 rounded-full mb-8">
-            <Ticket size={16} className="text-blue-400" />
-            <span className="text-blue-300 text-sm font-bold uppercase tracking-wider">MyTicketsLive</span>
+        {/* Animated orbs */}
+        <div className="bg-orb w-[600px] h-[600px] bg-green-500 top-[-200px] left-[-150px] opacity-20 z-[2]" />
+        <div className="bg-orb w-[500px] h-[500px] bg-emerald-500 bottom-[-150px] right-[-200px] opacity-15 z-[2]" style={{ animationDelay: '-5s' }} />
+        <div className="bg-orb w-[350px] h-[350px] bg-green-400 top-[40%] left-[60%] opacity-10 z-[2]" style={{ animationDelay: '-10s' }} />
+
+        {/* Content */}
+        <div className="relative z-10 max-w-screen-xl mx-auto px-6 text-center py-20">
+          {/* Year badge */}
+          <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-green-500/10 border border-green-500/30 rounded-full mb-8 animate-pulse">
+            <Flame size={16} className="text-orange-400" />
+            <span className="text-green-300 text-sm font-black uppercase tracking-widest">Year 5</span>
+            <Flame size={16} className="text-orange-400" />
+          </div>
+
+          {/* LOTL Logo */}
+          <div className="flex justify-center mb-6">
+            <Image
+              src="/images/lotl-logo-2026.png"
+              alt="Love on the Lawn 2026"
+              width={320}
+              height={320}
+              className="w-[240px] md:w-[320px] h-auto drop-shadow-2xl"
+              priority
+            />
           </div>
 
           {/* Title */}
-          <h1 className="text-5xl lg:text-7xl font-black text-white mb-6 leading-tight">
-            <span className="bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 bg-clip-text text-transparent">
-              EVENTS
+          <h1 className="text-4xl md:text-5xl lg:text-7xl font-black text-white mb-5 leading-tight">
+            Love on the Lawn{' '}
+            <span className="bg-gradient-to-r from-green-400 via-emerald-400 to-green-500 bg-clip-text text-transparent">
+              Day 2026
             </span>
           </h1>
 
-          <p className="text-lg lg:text-xl text-white/50 mb-8 max-w-2xl mx-auto font-body">
-            Live experiences from IDMG. Concerts, festivals, and exclusive gatherings --
-            all supporting youth music programs through the Mike Page Foundation.
-          </p>
+          {/* Date + Location */}
+          <div className="flex flex-wrap items-center justify-center gap-6 mb-10 text-white/70">
+            <div className="flex items-center gap-2">
+              <Calendar size={18} className="text-green-400" />
+              <span className="font-semibold">September 5, 2026</span>
+            </div>
+            <div className="hidden sm:block w-px h-5 bg-white/20" />
+            <div className="flex items-center gap-2">
+              <MapPin size={18} className="text-green-400" />
+              <span className="font-semibold">Festival Park, Elgin, IL</span>
+            </div>
+          </div>
+
+          {/* Countdown */}
+          {mounted && (
+            <div className="flex items-center justify-center gap-3 md:gap-5 mb-10">
+              {countdownUnits.map((unit) => (
+                <div
+                  key={unit.label}
+                  className="w-[72px] md:w-[88px] py-3 md:py-4 bg-gradient-to-b from-green-500/20 to-emerald-600/20 border border-green-500/30 rounded-2xl backdrop-blur-sm"
+                >
+                  <p className="text-2xl md:text-4xl font-black text-white tabular-nums">
+                    {String(unit.value).padStart(2, '0')}
+                  </p>
+                  <p className="text-green-300/70 text-[10px] md:text-xs font-bold uppercase tracking-wider mt-1">
+                    {unit.label}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* CTAs */}
+          <div className="flex flex-wrap gap-4 justify-center mb-10">
+            <Link
+              href="/events/lotl-2026"
+              className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-black rounded-2xl hover:shadow-xl hover:shadow-green-500/30 transition-all hover:scale-105 flex items-center gap-2 text-lg"
+            >
+              <Ticket size={20} />
+              Get Tickets
+            </Link>
+            <Link
+              href="/lotl"
+              className="px-8 py-4 bg-white/5 border border-white/20 text-white font-bold rounded-2xl hover:bg-white/10 transition-all flex items-center gap-2 backdrop-blur-sm"
+            >
+              <Sparkles size={18} />
+              Explore LOTL
+            </Link>
+          </div>
 
           {/* Stats */}
-          <div className="flex flex-wrap items-center justify-center gap-8 text-white/40">
-            <div className="flex items-center gap-2">
-              <Users size={18} className="text-blue-400" />
-              <span className="text-sm">10,000+ fans served</span>
+          <div className="flex flex-wrap items-center justify-center gap-6 md:gap-10 text-white/40">
+            <div className="text-center">
+              <p className="text-white font-black text-xl">10K+</p>
+              <p className="text-xs uppercase tracking-wider">Capacity</p>
             </div>
-            <div className="hidden sm:block w-px h-4 bg-white/20" />
-            <div className="flex items-center gap-2">
-              <Music size={18} className="text-blue-400" />
-              <span className="text-sm">Live music events</span>
+            <div className="w-px h-8 bg-white/10 hidden sm:block" />
+            <div className="text-center">
+              <p className="text-white font-black text-xl">Year 5</p>
+              <p className="text-xs uppercase tracking-wider">Anniversary</p>
             </div>
-            <div className="hidden sm:block w-px h-4 bg-white/20" />
-            <div className="flex items-center gap-2">
-              <Heart size={18} className="text-blue-400" />
-              <span className="text-sm">100% to the community</span>
+            <div className="w-px h-8 bg-white/10 hidden sm:block" />
+            <div className="text-center">
+              <p className="text-white font-black text-xl">100%</p>
+              <p className="text-xs uppercase tracking-wider">Community</p>
             </div>
+          </div>
+        </div>
+
+        {/* Bottom gradient glow divider */}
+        <div className="absolute bottom-0 left-0 right-0 z-10 h-px bg-gradient-to-r from-transparent via-green-500/50 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 z-10 h-8 bg-gradient-to-t from-mystation-navyDark to-transparent" />
+      </section>
+
+      {/* ─── SECTION 2: UPCOMING EVENTS ───────────────────────── */}
+      <section className="pt-16 pb-4">
+        <div className="max-w-screen-xl mx-auto px-6">
+          <div className="flex items-end justify-between mb-2">
+            <h2 className="text-3xl lg:text-4xl font-black text-white">
+              Upcoming{' '}
+              <span className="bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
+                Events
+              </span>
+            </h2>
+            {!loading && !error && (
+              <span className="text-white/30 text-sm font-medium">
+                {filteredEvents.length} event{filteredEvents.length !== 1 ? 's' : ''}
+              </span>
+            )}
           </div>
         </div>
       </section>
@@ -347,35 +584,34 @@ export default function EventsPage() {
               )}
             </div>
           ) : (
-            <>
-              <div className="flex items-center justify-between mb-8">
-                <p className="text-white/40 text-sm">
-                  {filteredEvents.length} event{filteredEvents.length !== 1 ? 's' : ''}
-                </p>
-              </div>
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredEvents.map((event) => (
-                  <EventCard key={event.id} event={event} />
-                ))}
-              </div>
-            </>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredEvents.map((event) => (
+                <EventCard key={event.id} event={event} />
+              ))}
+            </div>
           )}
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* ─── SECTION 3: MERCH MARQUEE ─────────────────────────── */}
+      <MerchMarquee />
+
+      {/* ─── SECTION 4: CTA ───────────────────────────────────── */}
       <section className="py-20">
         <div className="max-w-screen-xl mx-auto px-6">
           <div className="relative glass rounded-3xl p-10 lg:p-16 text-center overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-900/30 via-indigo-900/20 to-transparent" />
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-48 bg-blue-500/15 rounded-full blur-3xl" />
+            <div className="absolute inset-0 bg-gradient-to-br from-green-900/20 via-indigo-900/20 to-transparent" />
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-48 bg-green-500/10 rounded-full blur-3xl" />
             <div className="relative">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-blue-500/10 border border-blue-500/20 rounded-full mb-6">
                 <Sparkles size={14} className="text-blue-400" />
                 <span className="text-blue-400 text-xs font-bold uppercase tracking-wider">Powered by MyTicketsLive</span>
               </div>
               <h2 className="text-3xl lg:text-4xl font-black text-white mb-4">
-                Never Miss a <span className="bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">Moment</span>
+                Never Miss a{' '}
+                <span className="bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent">
+                  Live Experience
+                </span>
               </h2>
               <p className="text-white/50 text-lg mb-8 max-w-2xl mx-auto">
                 From Love on the Lawn to exclusive IDMG showcases -- every ticket purchase
@@ -383,17 +619,17 @@ export default function EventsPage() {
               </p>
               <div className="flex flex-wrap gap-4 justify-center">
                 <Link
-                  href="/lotl"
+                  href="/events/lotl-2026"
                   className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-2xl hover:shadow-xl hover:shadow-green-500/30 transition-all hover:scale-105 flex items-center gap-2"
                 >
-                  <Calendar size={18} />
-                  LOTL 2026
+                  <Ticket size={18} />
+                  LOTL 2026 Tickets
                 </Link>
                 <Link
                   href="/merch"
                   className="px-8 py-4 bg-white/10 border border-white/20 text-white font-bold rounded-2xl hover:bg-white/20 transition-all flex items-center gap-2"
                 >
-                  <Heart size={18} />
+                  <ShoppingBag size={18} />
                   Shop Merch
                 </Link>
               </div>
