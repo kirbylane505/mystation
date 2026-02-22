@@ -140,7 +140,7 @@ const TrackRow = memo(function TrackRow({ track, index, isCurrentTrack, isPlayin
   );
 });
 
-export default function TrackList({ trackIds, showAlbum = true, showNumber = true, showComments = false }) {
+export default function TrackList({ trackIds, showAlbum = true, showNumber = true, showComments = true }) {
   const currentTrack = usePlayerStore(s => s.currentTrack);
   const isPlaying = usePlayerStore(s => s.isPlaying);
   const setQueue = usePlayerStore(s => s.setQueue);

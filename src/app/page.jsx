@@ -111,7 +111,7 @@ export default function HomePage() {
           </Link>
         </div>
         <div className="glass rounded-2xl p-2">
-          <TrackList trackIds={newReleases.length > 0 ? newReleases : [21, 22, 23, 30, 31, 32, 34, 35]} showNumber={false} />
+          <TrackList trackIds={newReleases.length > 0 ? newReleases : [21, 22, 23, 30, 31, 32, 34, 35]} showNumber={false} showComments={true} />
         </div>
       </section>
 
@@ -280,7 +280,7 @@ export default function HomePage() {
           </Link>
         </div>
         <div className="glass rounded-2xl p-2">
-          <TrackList trackIds={trendingTracks} showNumber={false} />
+          <TrackList trackIds={trendingTracks} showNumber={false} showComments={true} />
         </div>
       </section>
 
