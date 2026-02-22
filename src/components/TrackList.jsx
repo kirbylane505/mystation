@@ -40,10 +40,18 @@ const TrackRow = memo(function TrackRow({ track, index, isCurrentTrack, isPlayin
             Mike Page{track.featured ? ` ft. ${track.featured}` : ''}{track.producer ? ` • ${track.producer}` : ''}
           </p>
         </div>
-        <div className="flex items-center shrink-0">
+        <div className="flex items-center gap-1.5 shrink-0">
           <div onClick={(e) => e.stopPropagation()}>
             <SongReactions trackId={track.id} size="xs" />
           </div>
+          {showComments && (
+            <button
+              onClick={(e) => { e.stopPropagation(); onCommentClick(track); }}
+              className="p-1.5 text-white/40 hover:text-blue-400 transition"
+            >
+              <MessageCircle size={16} />
+            </button>
+          )}
         </div>
       </div>
 
