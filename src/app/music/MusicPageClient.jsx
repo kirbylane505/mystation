@@ -1,6 +1,6 @@
 /**
  * MYSTATION - Music Browse Page Client
- * Full catalog with filters, sorting, playlists, and comments
+ * Full catalog with filters, sorting, playlists, comments, and Vault tab
  */
 
 'use client';
@@ -13,7 +13,8 @@ import { usePlayerStore } from '@/store/playerStore';
 import {
   Search, SlidersHorizontal, Grid, List, Plus,
   ArrowUpDown, Music, Clock, Calendar, Disc,
-  TrendingUp, Shuffle, Play, ChevronLeft, Pause
+  TrendingUp, Shuffle, Play, ChevronLeft, Pause,
+  Lock, Unlock, ShieldCheck, KeyRound
 } from 'lucide-react';
 
 export default function MusicPageClient({ initialTrackId, autoplay = false }) {
@@ -24,8 +25,13 @@ export default function MusicPageClient({ initialTrackId, autoplay = false }) {
   const [viewMode, setViewMode] = useState('list');
   const [showPlaylistModal, setShowPlaylistModal] = useState(false);
   const [userPlaylists, setUserPlaylists] = useState([]);
-  const [activePlaylist, setActivePlaylist] = useState(null); // Currently viewing playlist
-  const { setQueue, play, currentTrack, isPlaying } = usePlayerStore();
+  const [activePlaylist, setActivePlaylist] = useState(null);
+  const [activeTab, setActiveTab] = useState('music');
+  const [hasVaultAccess, setHasVaultAccess] = useState(false);
+  const [accessCodeInput, setAccessCodeInput] = useState('');
+  const [accessCodeError, setAccessCodeError] = useState('');
+  const [accessCodeLoading, setAccessCodeLoading] = useState(false);
+  const { setQueue, play, currentTrack, isPlaying, vaultUnlocked, setVaultUnlocked, isSubscribed } = usePlayerStore();
 
   // Auto-play track if coming from share link
   useEffect(() => {
@@ -48,25 +54,47 @@ export default function MusicPageClient({ initialTrackId, autoplay = false }) {
     }
   }, []);
 
+  // Check vault access on mount
+  useEffect(() => {
+    // If already unlocked in store or subscribed, grant access
+    if (vaultUnlocked || isSubscribed) {
+      setHasVaultAccess(true);
+      return;
+    }
+    // Check server-side cookies
+    fetch('/api/vault/verify')
+      .then(res => res.json())
+      .then(data => {
+        if (data.valid) {
+          setHasVaultAccess(true);
+          setVaultUnlocked(true);
+        }
+      })
+      .catch(() => {});
+  }, [vaultUnlocked, isSubscribed, setVaultUnlocked]);
+
   // Get only official tracks
   const officialTracks = getOfficialTracks();
 
-  // Get unique years and albums
-  const years = [...new Set(officialTracks.map(t => t.year))].sort((a, b) => b - a);
-  const albumList = [...new Set(officialTracks.filter(t => t.album !== 'Vault' && t.albumId !== 'vault').map(t => t.album).filter(Boolean))];
+  // Separate vault tracks
+  const vaultTracks = officialTracks.filter(t => t.album === 'Vault' || t.albumId === 'vault');
+  const musicTracks = officialTracks.filter(t => t.album !== 'Vault' && t.albumId !== 'vault');
 
-  // Filter tracks - EXCLUDE VAULT tracks (those are only on /vault page)
-  let filteredTracks = officialTracks.filter(track => {
-    // Hide Vault tracks from main music page
-    if (track.album === 'Vault' || track.albumId === 'vault') return false;
+  // Get unique years and albums (from non-vault tracks)
+  const years = [...new Set(musicTracks.map(t => t.year))].sort((a, b) => b - a);
+  const albumList = [...new Set(musicTracks.map(t => t.album).filter(Boolean))];
 
+  // Filter tracks based on active tab
+  const baseTracksForFilter = activeTab === 'vault' ? vaultTracks : musicTracks;
+
+  let filteredTracks = baseTracksForFilter.filter(track => {
     const matchesSearch = track.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (track.featured && track.featured.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (track.producer && track.producer.toLowerCase().includes(searchQuery.toLowerCase()));
     const matchesYear = filterYear === 'all' || track.year === parseInt(filterYear);
     const matchesAlbum = filterAlbum === 'all' || track.album === filterAlbum;
 
-    return matchesSearch && matchesYear && matchesAlbum;
+    return matchesSearch && matchesYear && (activeTab === 'vault' || matchesAlbum);
   });
 
   // Sort tracks
@@ -93,7 +121,6 @@ export default function MusicPageClient({ initialTrackId, autoplay = false }) {
       filteredTracks = [...filteredTracks].sort(() => Math.random() - 0.5);
       break;
     default:
-      // Keep default order (track number / ID)
       break;
   }
 
@@ -104,33 +131,53 @@ export default function MusicPageClient({ initialTrackId, autoplay = false }) {
     setShowPlaylistModal(false);
   };
 
-  // Open playlist detail view
   const handleOpenPlaylist = (playlist) => {
     setActivePlaylist(playlist);
   };
 
-  // Play all tracks in playlist
   const handlePlayAllPlaylist = (playlist, startIndex = 0) => {
     const playlistTrackIds = playlist.trackIds || [];
     if (playlistTrackIds.length === 0) return;
-
-    // Get actual track objects from IDs
     const playlistTracks = playlistTrackIds
       .map(id => tracks.find(t => t.id === id))
       .filter(Boolean);
-
     if (playlistTracks.length > 0) {
       setQueue(playlistTracks, startIndex);
       play();
     }
   };
 
-  // Get tracks for active playlist
   const getPlaylistTracks = (playlist) => {
     if (!playlist) return [];
     return (playlist.trackIds || [])
       .map(id => tracks.find(t => t.id === id))
       .filter(Boolean);
+  };
+
+  const handleAccessCodeSubmit = async (e) => {
+    e.preventDefault();
+    if (!accessCodeInput.trim()) return;
+    setAccessCodeLoading(true);
+    setAccessCodeError('');
+    try {
+      const res = await fetch('/api/access-code/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: accessCodeInput.trim() }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setHasVaultAccess(true);
+        setVaultUnlocked(true);
+        setAccessCodeInput('');
+      } else {
+        setAccessCodeError(data.error || 'Invalid code');
+      }
+    } catch {
+      setAccessCodeError('Connection error. Try again.');
+    } finally {
+      setAccessCodeLoading(false);
+    }
   };
 
   const allPlaylists = [...playlists, ...userPlaylists];
@@ -142,211 +189,301 @@ export default function MusicPageClient({ initialTrackId, autoplay = false }) {
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-white mb-2">Browse Music</h1>
           <p className="text-white/60">
-            {officialTracks.length} tracks • Free to stream • Support the Foundation
+            {musicTracks.length} tracks • Free to stream • Support the Foundation
           </p>
         </div>
 
-        {/* Search & Filters */}
-        <div className="glass rounded-2xl p-6 mb-8">
-          <div className="flex flex-col gap-4">
-            {/* Top Row - Search */}
-            <div className="relative">
-              <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" />
-              <input
-                type="text"
-                placeholder="Search tracks, producers, features..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                autoComplete="off"
-                name="mystation-music-filter"
-                className="w-full bg-white/10 border border-white/20 rounded-xl py-3 pl-12 pr-4 text-white placeholder:text-white/40 focus:outline-none focus:border-blue-500"
-              />
-            </div>
+        {/* Tab Switcher */}
+        <div className="flex gap-2 mb-6">
+          <button
+            onClick={() => { setActiveTab('music'); setFilterAlbum('all'); }}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-semibold text-sm transition ${
+              activeTab === 'music'
+                ? 'bg-blue-500 text-white'
+                : 'bg-white/10 text-white/60 hover:bg-white/15 hover:text-white'
+            }`}
+          >
+            <Music size={16} />
+            All Music
+          </button>
+          <button
+            onClick={() => { setActiveTab('vault'); setFilterAlbum('all'); }}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-semibold text-sm transition ${
+              activeTab === 'vault'
+                ? 'bg-purple-600 text-white'
+                : 'bg-white/10 text-white/60 hover:bg-white/15 hover:text-white'
+            }`}
+          >
+            {hasVaultAccess ? <Unlock size={16} /> : <Lock size={16} />}
+            The Vault
+            {!hasVaultAccess && (
+              <span className="ml-1 w-2 h-2 rounded-full bg-amber-400 inline-block" />
+            )}
+          </button>
+        </div>
 
-            {/* Bottom Row - Filters & Sort */}
-            <div className="flex flex-wrap gap-3">
-              {/* Year Filter */}
-              <select
-                value={filterYear}
-                onChange={(e) => setFilterYear(e.target.value)}
-                className="bg-white/10 border border-white/20 rounded-lg py-2 px-3 text-white text-sm focus:outline-none focus:border-blue-500"
-              >
-                <option value="all">All Years</option>
-                {years.map(year => (
-                  <option key={year} value={year}>{year}</option>
-                ))}
-              </select>
+        {/* Vault Locked State */}
+        {activeTab === 'vault' && !hasVaultAccess && (
+          <div className="glass rounded-2xl p-8 md:p-12 mb-8 text-center relative overflow-hidden">
+            {/* Background glow */}
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-900/30 via-transparent to-amber-900/20 pointer-events-none" />
 
-              {/* Album Filter */}
-              <select
-                value={filterAlbum}
-                onChange={(e) => setFilterAlbum(e.target.value)}
-                className="bg-white/10 border border-white/20 rounded-lg py-2 px-3 text-white text-sm focus:outline-none focus:border-blue-500"
-              >
-                <option value="all">All Albums</option>
-                {albumList.map(album => (
-                  <option key={album} value={album}>{album}</option>
-                ))}
-              </select>
+            <div className="relative z-10">
+              <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-purple-500/20 border border-purple-500/30 flex items-center justify-center">
+                <Lock size={36} className="text-purple-400" />
+              </div>
 
-              {/* Sort By */}
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="bg-white/10 border border-white/20 rounded-lg py-2 px-3 text-white text-sm focus:outline-none focus:border-blue-500"
-              >
-                <option value="default">Default Order</option>
-                <option value="title-asc">Title A-Z</option>
-                <option value="title-desc">Title Z-A</option>
-                <option value="year-new">Newest First</option>
-                <option value="year-old">Oldest First</option>
-                <option value="album">By Album</option>
-                <option value="bpm">By BPM</option>
-                <option value="shuffle">Shuffle</option>
-              </select>
+              <h2 className="text-2xl font-bold text-white mb-2">The Vault is Locked</h2>
+              <p className="text-white/60 mb-8 max-w-md mx-auto">
+                {vaultTracks.length} exclusive tracks. Enter your access code or subscribe to unlock.
+              </p>
 
-              {/* Spacer */}
-              <div className="flex-1" />
+              {/* Access Code Form */}
+              <form onSubmit={handleAccessCodeSubmit} className="max-w-sm mx-auto mb-6">
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <KeyRound size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" />
+                    <input
+                      type="text"
+                      value={accessCodeInput}
+                      onChange={(e) => { setAccessCodeInput(e.target.value); setAccessCodeError(''); }}
+                      placeholder="Enter access code"
+                      autoComplete="off"
+                      name="vault-access-code"
+                      className="w-full bg-white/10 border border-white/20 rounded-xl py-3 pl-10 pr-4 text-white placeholder:text-white/40 focus:outline-none focus:border-purple-500"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={accessCodeLoading || !accessCodeInput.trim()}
+                    className="px-5 py-3 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-600/50 text-white font-semibold rounded-xl transition"
+                  >
+                    {accessCodeLoading ? '...' : 'Unlock'}
+                  </button>
+                </div>
+                {accessCodeError && (
+                  <p className="text-red-400 text-sm mt-2">{accessCodeError}</p>
+                )}
+              </form>
 
-              {/* View Toggle */}
-              <div className="flex bg-white/10 rounded-lg p-1">
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={`p-2 rounded transition ${viewMode === 'list' ? 'bg-blue-500 text-white' : 'text-white/60 hover:text-white'}`}
-                >
-                  <List size={18} />
-                </button>
-                <button
-                  onClick={() => setViewMode('grid')}
-                  className={`p-2 rounded transition ${viewMode === 'grid' ? 'bg-blue-500 text-white' : 'text-white/60 hover:text-white'}`}
-                >
-                  <Grid size={18} />
-                </button>
+              <div className="flex items-center gap-2 justify-center text-white/40 text-sm">
+                <ShieldCheck size={14} />
+                <span>Subscribers get full vault access</span>
               </div>
             </div>
           </div>
-        </div>
+        )}
 
-        {/* Playlists Section */}
-        <div className="mb-12">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-white">Playlists</h2>
-            <button
-              onClick={() => setShowPlaylistModal(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition"
-            >
-              <Plus size={18} />
-              Create Playlist
-            </button>
-          </div>
-          <div className="flex gap-4 overflow-x-auto pb-4">
-            {/* Existing Playlists */}
-            {allPlaylists.map(playlist => (
-              <button
-                key={playlist.id}
-                onClick={() => handleOpenPlaylist(playlist)}
-                className="flex-shrink-0 w-48 glass rounded-xl p-4 hover:bg-white/10 transition cursor-pointer group text-left"
-              >
-                <div className={`w-full aspect-square bg-gradient-to-br ${playlist.coverGradient || 'from-blue-500/30 to-purple-500/30'} rounded-lg mb-3 flex items-center justify-center relative overflow-hidden`}>
-                  <span className="text-4xl">{playlist.emoji || '🎧'}</span>
-                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
-                    <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
-                      <Play size={20} className="text-white ml-1" fill="white" />
-                    </div>
+        {/* Search & Filters — shown for music tab always, vault tab only when unlocked */}
+        {(activeTab === 'music' || (activeTab === 'vault' && hasVaultAccess)) && (
+          <>
+            <div className="glass rounded-2xl p-6 mb-8">
+              <div className="flex flex-col gap-4">
+                {/* Top Row - Search */}
+                <div className="relative">
+                  <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" />
+                  <input
+                    type="text"
+                    placeholder={activeTab === 'vault' ? "Search vault tracks..." : "Search tracks, producers, features..."}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    autoComplete="off"
+                    name="mystation-music-filter"
+                    className="w-full bg-white/10 border border-white/20 rounded-xl py-3 pl-12 pr-4 text-white placeholder:text-white/40 focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+
+                {/* Bottom Row - Filters & Sort */}
+                <div className="flex flex-wrap gap-3">
+                  {/* Year Filter */}
+                  <select
+                    value={filterYear}
+                    onChange={(e) => setFilterYear(e.target.value)}
+                    className="bg-white/10 border border-white/20 rounded-lg py-2 px-3 text-white text-sm focus:outline-none focus:border-blue-500"
+                  >
+                    <option value="all">All Years</option>
+                    {years.map(year => (
+                      <option key={year} value={year}>{year}</option>
+                    ))}
+                  </select>
+
+                  {/* Album Filter — only for music tab */}
+                  {activeTab === 'music' && (
+                    <select
+                      value={filterAlbum}
+                      onChange={(e) => setFilterAlbum(e.target.value)}
+                      className="bg-white/10 border border-white/20 rounded-lg py-2 px-3 text-white text-sm focus:outline-none focus:border-blue-500"
+                    >
+                      <option value="all">All Albums</option>
+                      {albumList.map(album => (
+                        <option key={album} value={album}>{album}</option>
+                      ))}
+                    </select>
+                  )}
+
+                  {/* Sort By */}
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="bg-white/10 border border-white/20 rounded-lg py-2 px-3 text-white text-sm focus:outline-none focus:border-blue-500"
+                  >
+                    <option value="default">Default Order</option>
+                    <option value="title-asc">Title A-Z</option>
+                    <option value="title-desc">Title Z-A</option>
+                    <option value="year-new">Newest First</option>
+                    <option value="year-old">Oldest First</option>
+                    {activeTab === 'music' && <option value="album">By Album</option>}
+                    <option value="bpm">By BPM</option>
+                    <option value="shuffle">Shuffle</option>
+                  </select>
+
+                  <div className="flex-1" />
+
+                  {/* View Toggle */}
+                  <div className="flex bg-white/10 rounded-lg p-1">
+                    <button
+                      onClick={() => setViewMode('list')}
+                      className={`p-2 rounded transition ${viewMode === 'list' ? 'bg-blue-500 text-white' : 'text-white/60 hover:text-white'}`}
+                    >
+                      <List size={18} />
+                    </button>
+                    <button
+                      onClick={() => setViewMode('grid')}
+                      className={`p-2 rounded transition ${viewMode === 'grid' ? 'bg-blue-500 text-white' : 'text-white/60 hover:text-white'}`}
+                    >
+                      <Grid size={18} />
+                    </button>
                   </div>
                 </div>
-                <h4 className="font-semibold text-white">{playlist.title || playlist.name}</h4>
-                <p className="text-white/60 text-sm">{playlist.trackIds?.length || 0} tracks</p>
-              </button>
-            ))}
+              </div>
+            </div>
 
-            {/* Show message if no playlists */}
-            {allPlaylists.length === 0 && (
-              <div className="flex-shrink-0 w-48 glass rounded-xl p-4 border-2 border-dashed border-white/20 flex flex-col items-center justify-center text-center">
-                <Music size={32} className="text-white/30 mb-2" />
-                <p className="text-white/50 text-sm">No playlists yet</p>
-                <p className="text-white/30 text-xs">Click "Create Playlist" to start</p>
+            {/* Playlists Section — only on music tab */}
+            {activeTab === 'music' && (
+              <div className="mb-12">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold text-white">Playlists</h2>
+                  <button
+                    onClick={() => setShowPlaylistModal(true)}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition"
+                  >
+                    <Plus size={18} />
+                    Create Playlist
+                  </button>
+                </div>
+                <div className="flex gap-4 overflow-x-auto pb-4">
+                  {allPlaylists.map(playlist => (
+                    <button
+                      key={playlist.id}
+                      onClick={() => handleOpenPlaylist(playlist)}
+                      className="flex-shrink-0 w-48 glass rounded-xl p-4 hover:bg-white/10 transition cursor-pointer group text-left"
+                    >
+                      <div className={`w-full aspect-square bg-gradient-to-br ${playlist.coverGradient || 'from-blue-500/30 to-purple-500/30'} rounded-lg mb-3 flex items-center justify-center relative overflow-hidden`}>
+                        <span className="text-4xl">{playlist.emoji || ''}</span>
+                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                          <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
+                            <Play size={20} className="text-white ml-1" fill="white" />
+                          </div>
+                        </div>
+                      </div>
+                      <h4 className="font-semibold text-white">{playlist.title || playlist.name}</h4>
+                      <p className="text-white/60 text-sm">{playlist.trackIds?.length || 0} tracks</p>
+                    </button>
+                  ))}
+
+                  {allPlaylists.length === 0 && (
+                    <div className="flex-shrink-0 w-48 glass rounded-xl p-4 border-2 border-dashed border-white/20 flex flex-col items-center justify-center text-center">
+                      <Music size={32} className="text-white/30 mb-2" />
+                      <p className="text-white/50 text-sm">No playlists yet</p>
+                      <p className="text-white/30 text-xs">Click &quot;Create Playlist&quot; to start</p>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
-          </div>
-        </div>
 
-        {/* Quick Actions */}
-        <div className="flex flex-wrap gap-3 mb-8">
-          <button
-            onClick={() => setSortBy('shuffle')}
-            className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-sm transition"
-          >
-            <Shuffle size={16} />
-            Shuffle All
-          </button>
-          <button
-            onClick={() => { setFilterYear('all'); setFilterAlbum('all'); setSortBy('year-new'); }}
-            className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-sm transition"
-          >
-            <TrendingUp size={16} />
-            Latest Releases
-          </button>
-          <button
-            onClick={() => { setFilterAlbum("Cindy's Son"); setSortBy('default'); }}
-            className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-sm transition"
-          >
-            <Disc size={16} />
-            Cindy's Son
-          </button>
-          <button
-            onClick={() => { setFilterAlbum("Shezzy Knew It"); setSortBy('default'); }}
-            className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-sm transition"
-          >
-            <Disc size={16} />
-            Shezzy Knew It
-          </button>
-        </div>
-
-        {/* Results */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-white">
-              {filterYear !== 'all' || filterAlbum !== 'all' || searchQuery
-                ? `Results (${filteredTracks.length})`
-                : 'All Tracks'}
-            </h2>
-            {(filterYear !== 'all' || filterAlbum !== 'all' || searchQuery) && (
-              <button
-                onClick={() => {
-                  setSearchQuery('');
-                  setFilterYear('all');
-                  setFilterAlbum('all');
-                  setSortBy('default');
-                }}
-                className="text-blue-400 hover:underline text-sm"
-              >
-                Clear all filters
-              </button>
+            {/* Quick Actions — only on music tab */}
+            {activeTab === 'music' && (
+              <div className="flex flex-wrap gap-3 mb-8">
+                <button
+                  onClick={() => setSortBy('shuffle')}
+                  className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-sm transition"
+                >
+                  <Shuffle size={16} />
+                  Shuffle All
+                </button>
+                <button
+                  onClick={() => { setFilterYear('all'); setFilterAlbum('all'); setSortBy('year-new'); }}
+                  className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-sm transition"
+                >
+                  <TrendingUp size={16} />
+                  Latest Releases
+                </button>
+                <button
+                  onClick={() => { setFilterAlbum("Cindy's Son"); setSortBy('default'); }}
+                  className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-sm transition"
+                >
+                  <Disc size={16} />
+                  Cindy&apos;s Son
+                </button>
+                <button
+                  onClick={() => { setFilterAlbum("Shezzy Knew It"); setSortBy('default'); }}
+                  className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-sm transition"
+                >
+                  <Disc size={16} />
+                  Shezzy Knew It
+                </button>
+              </div>
             )}
-          </div>
 
-          {filteredTracks.length > 0 ? (
-            <div className="glass rounded-2xl p-2">
-              <TrackList trackIds={filteredTracks.map(t => t.id)} showComments={true} />
+            {/* Results */}
+            <div className="mb-8">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-white">
+                  {activeTab === 'vault'
+                    ? `Vault (${filteredTracks.length})`
+                    : filterYear !== 'all' || filterAlbum !== 'all' || searchQuery
+                      ? `Results (${filteredTracks.length})`
+                      : 'All Tracks'}
+                </h2>
+                {(filterYear !== 'all' || filterAlbum !== 'all' || searchQuery) && (
+                  <button
+                    onClick={() => {
+                      setSearchQuery('');
+                      setFilterYear('all');
+                      setFilterAlbum('all');
+                      setSortBy('default');
+                    }}
+                    className="text-blue-400 hover:underline text-sm"
+                  >
+                    Clear all filters
+                  </button>
+                )}
+              </div>
+
+              {filteredTracks.length > 0 ? (
+                <div className="glass rounded-2xl p-2">
+                  <TrackList trackIds={filteredTracks.map(t => t.id)} showComments={true} />
+                </div>
+              ) : (
+                <div className="text-center py-16 glass rounded-2xl">
+                  <Music size={48} className="text-white/20 mx-auto mb-4" />
+                  <p className="text-white/60 text-lg">No tracks found</p>
+                  <button
+                    onClick={() => {
+                      setSearchQuery('');
+                      setFilterYear('all');
+                      setFilterAlbum('all');
+                    }}
+                    className="text-blue-400 hover:underline mt-4"
+                  >
+                    Clear filters
+                  </button>
+                </div>
+              )}
             </div>
-          ) : (
-            <div className="text-center py-16 glass rounded-2xl">
-              <Music size={48} className="text-white/20 mx-auto mb-4" />
-              <p className="text-white/60 text-lg">No tracks found</p>
-              <button
-                onClick={() => {
-                  setSearchQuery('');
-                  setFilterYear('all');
-                  setFilterAlbum('all');
-                }}
-                className="text-blue-400 hover:underline mt-4"
-              >
-                Clear filters
-              </button>
-            </div>
-          )}
-        </div>
+          </>
+        )}
       </div>
 
       {/* Create Playlist Modal */}
@@ -375,7 +512,7 @@ export default function MusicPageClient({ initialTrackId, autoplay = false }) {
               {/* Playlist Info */}
               <div className="flex flex-col md:flex-row gap-6 mb-8">
                 <div className={`w-48 h-48 flex-shrink-0 bg-gradient-to-br ${activePlaylist.coverGradient || 'from-blue-500/30 to-purple-500/30'} rounded-2xl flex items-center justify-center`}>
-                  <span className="text-7xl">{activePlaylist.emoji || '🎧'}</span>
+                  <span className="text-7xl">{activePlaylist.emoji || ''}</span>
                 </div>
                 <div className="flex flex-col justify-end">
                   <p className="text-white/60 text-sm mb-1">PLAYLIST</p>
@@ -424,7 +561,6 @@ export default function MusicPageClient({ initialTrackId, autoplay = false }) {
                         isCurrentTrack ? 'bg-blue-500/20' : ''
                       }`}
                     >
-                      {/* Track Number or Playing Indicator */}
                       <div className="w-8 text-center">
                         {isCurrentTrack && isPlaying ? (
                           <div className="flex items-center justify-center gap-0.5">
@@ -437,7 +573,6 @@ export default function MusicPageClient({ initialTrackId, autoplay = false }) {
                         )}
                       </div>
 
-                      {/* Track Info */}
                       <div className="flex-1 min-w-0">
                         <p className={`font-medium truncate ${isCurrentTrack ? 'text-green-400' : 'text-white'}`}>
                           {track.title}
@@ -448,7 +583,6 @@ export default function MusicPageClient({ initialTrackId, autoplay = false }) {
                         </p>
                       </div>
 
-                      {/* Duration placeholder */}
                       <span className="text-white/40 text-sm">
                         {track.duration || '3:30'}
                       </span>
@@ -470,4 +604,3 @@ export default function MusicPageClient({ initialTrackId, autoplay = false }) {
     </div>
   );
 }
-

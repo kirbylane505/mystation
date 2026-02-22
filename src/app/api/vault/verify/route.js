@@ -1,51 +1,28 @@
 /**
- * MYSTATION - Vault Session Verify
- * Checks if the user has a valid vault session cookie
+ * MYSTATION - Vault Access Verify
+ * Checks if the user has vault access via subscription, friend code, or vault cookie
  */
 
 import { NextResponse } from 'next/server';
-import crypto from 'crypto';
 
 export async function GET(request) {
-  // ═══ VAULT HARD LOCKDOWN — ALL SESSIONS INVALIDATED ═══
+  // Check subscriber cookie
+  const subCookie = request.cookies.get('mystation-sub');
+  if (subCookie?.value) {
+    return NextResponse.json({ valid: true, reason: 'subscriber' });
+  }
+
+  // Check friend/access code cookie
+  const friendCookie = request.cookies.get('mystation-friend');
+  if (friendCookie?.value) {
+    return NextResponse.json({ valid: true, reason: 'friend' });
+  }
+
+  // Check vault PIN cookie
+  const vaultCookie = request.cookies.get('mystation_vault');
+  if (vaultCookie?.value) {
+    return NextResponse.json({ valid: true, reason: 'vault' });
+  }
+
   return NextResponse.json({ valid: false });
-
-  const vaultSecret = process.env.VAULT_SECRET;
-  if (!vaultSecret) {
-    return NextResponse.json({ valid: false });
-  }
-
-  const cookie = request.cookies.get('mystation_vault');
-  if (!cookie?.value) {
-    return NextResponse.json({ valid: false });
-  }
-
-  try {
-    const [timestamp, signature] = cookie.value.split('.');
-    if (!timestamp || !signature) {
-      return NextResponse.json({ valid: false });
-    }
-
-    // Verify signature
-    const expected = crypto
-      .createHmac('sha256', vaultSecret)
-      .update(timestamp)
-      .digest('hex')
-      .slice(0, 32);
-
-    if (signature !== expected) {
-      return NextResponse.json({ valid: false });
-    }
-
-    // Check expiry (24 hours)
-    const issued = parseInt(timestamp);
-    const now = Date.now();
-    if (now - issued > 24 * 60 * 60 * 1000) {
-      return NextResponse.json({ valid: false });
-    }
-
-    return NextResponse.json({ valid: true });
-  } catch {
-    return NextResponse.json({ valid: false });
-  }
 }
