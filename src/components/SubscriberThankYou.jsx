@@ -11,7 +11,7 @@ import { useUserStore } from '@/store/playerStore';
 
 const STORAGE_KEY = 'ms-sub-thanks';
 const MAX_PER_DAY = 2;
-const SHOW_DELAY_MS = 4000;
+const SHOW_DELAY_MS = 8000; // 8s — after service worker refresh settles
 const AUTO_DISMISS_MS = 6000;
 
 function canShowToday() {
