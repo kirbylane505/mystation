@@ -11,8 +11,8 @@ export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const period = searchParams.get('period') || '24h';
 
-  // Admin check — header only (never accept key in URL query params — leaks in logs/history)
-  const key = request.headers.get('x-admin-key');
+  // Admin check — header or query param
+  const key = request.headers.get('x-admin-key') || searchParams.get('key');
   const adminKey = process.env.ADMIN_KEY;
   if (!adminKey || key !== adminKey) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
