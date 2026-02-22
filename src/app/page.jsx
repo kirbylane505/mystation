@@ -40,14 +40,25 @@ export default function HomePage() {
   // Get official tracks only
   const officialTracks = getOfficialTracks();
 
-  // New releases - official tracks marked as isNew
-  const newReleases = officialTracks.filter(t => t.isNew).map(t => t.id);
+  // New releases - official tracks marked as isNew (shuffled each visit)
+  const [newReleases] = useState(() => {
+    const newTracks = officialTracks.filter(t => t.isNew);
+    for (let i = newTracks.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [newTracks[i], newTracks[j]] = [newTracks[j], newTracks[i]];
+    }
+    return newTracks.map(t => t.id);
+  });
 
-  // Trending this week - top 6 non-vault official tracks by highest ID (most recent)
-  const trendingTracks = getNonVaultTracks()
-    .sort((a, b) => (b.playCount || b.id) - (a.playCount || a.id))
-    .slice(0, 6)
-    .map(t => t.id);
+  // Trending this week - top non-vault official tracks (shuffled each visit)
+  const [trendingTracks] = useState(() => {
+    const trending = getNonVaultTracks().slice();
+    for (let i = trending.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [trending[i], trending[j]] = [trending[j], trending[i]];
+    }
+    return trending.slice(0, 6).map(t => t.id);
+  });
 
   // Get track objects for an album
   const getAlbumTracks = (album) => {

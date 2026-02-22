@@ -27,6 +27,7 @@ export default function MusicPageClient({ initialTrackId, autoplay = false }) {
   const [userPlaylists, setUserPlaylists] = useState([]);
   const [activePlaylist, setActivePlaylist] = useState(null);
   const [activeTab, setActiveTab] = useState('music');
+  const [shuffleSeed] = useState(() => Math.random());
   const { setQueue, play, currentTrack, isPlaying } = usePlayerStore();
 
   // Auto-play track if coming from share link
@@ -96,6 +97,12 @@ export default function MusicPageClient({ initialTrackId, autoplay = false }) {
       filteredTracks = [...filteredTracks].sort(() => Math.random() - 0.5);
       break;
     default:
+      // Default: shuffle on each page visit using stable seed
+      filteredTracks = [...filteredTracks].sort((a, b) => {
+        const hashA = ((a.id * 2654435761 + shuffleSeed * 1000000) >>> 0) % 1000;
+        const hashB = ((b.id * 2654435761 + shuffleSeed * 1000000) >>> 0) % 1000;
+        return hashA - hashB;
+      });
       break;
   }
 
