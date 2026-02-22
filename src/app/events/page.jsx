@@ -366,49 +366,31 @@ export default function EventsPage() {
   ];
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen relative">
+      {/* ─── FIXED 3D LOGO VIDEO BACKGROUND (entire page) ───── */}
+      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          className="absolute inset-0 w-full h-full object-cover opacity-[0.45]"
+          style={{ filter: 'saturate(1.3) contrast(1.1)' }}
+        >
+          <source src="/videos/lotl-day-3d-logo.mp4" type="video/mp4" />
+        </video>
+      </div>
+
       {/* ─── SECTION 1: LOTL HERO ─────────────────────────────── */}
       <section className="relative min-h-[100vh] flex flex-col overflow-hidden">
-        {/* YouTube recap as atmospheric background */}
-        <div className="absolute inset-0 z-0 pointer-events-none">
-          <iframe
-            src="https://www.youtube.com/embed/fu1YZRHOXlg?autoplay=1&mute=1&loop=1&controls=0&showinfo=0&modestbranding=1&playlist=fu1YZRHOXlg&playsinline=1"
-            title="LOTL Recap"
-            allow="autoplay; encrypted-media"
-            allowFullScreen
-            className="absolute top-1/2 left-1/2 w-[180%] h-[180%] -translate-x-1/2 -translate-y-1/2 opacity-[0.08]"
-            style={{ border: 'none', pointerEvents: 'none' }}
-          />
-        </div>
-
-        {/* Gradient overlays */}
-        <div className="absolute inset-0 z-[1] bg-gradient-to-b from-black/60 via-mystation-navyDark/40 to-mystation-navyDark" />
-        <div className="absolute inset-0 z-[1] bg-gradient-to-r from-emerald-950/30 via-transparent to-emerald-950/30" />
-
         {/* Animated orbs */}
         <div className="bg-orb w-[600px] h-[600px] bg-green-500 top-[-200px] left-[-150px] opacity-20 z-[2]" />
         <div className="bg-orb w-[500px] h-[500px] bg-emerald-500 bottom-[-150px] right-[-200px] opacity-15 z-[2]" style={{ animationDelay: '-5s' }} />
         <div className="bg-orb w-[350px] h-[350px] bg-green-400 top-[40%] left-[60%] opacity-10 z-[2]" style={{ animationDelay: '-10s' }} />
 
-        {/* 3D Logo Video — Front and center */}
-        <div className="relative z-[5] flex justify-center pt-8 md:pt-12">
-          <div className="w-full max-w-[700px] mx-auto px-4">
-            <video
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="auto"
-              className="w-full h-auto rounded-2xl shadow-2xl shadow-green-900/40"
-              style={{ filter: 'saturate(1.1) contrast(1.05)' }}
-            >
-              <source src="/videos/lotl-day-3d-logo.mp4" type="video/mp4" />
-            </video>
-          </div>
-        </div>
-
-        {/* Content below the 3D logo */}
-        <div className="relative z-10 max-w-screen-xl mx-auto px-6 text-center pt-8 pb-20 flex-1 flex flex-col justify-center">
+        {/* Content */}
+        <div className="relative z-10 max-w-screen-xl mx-auto px-6 text-center pt-24 md:pt-32 pb-20 flex-1 flex flex-col justify-center">
           {/* Year badge */}
           <div className="flex justify-center mb-6">
             <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-green-500/10 border border-green-500/30 rounded-full animate-pulse">
