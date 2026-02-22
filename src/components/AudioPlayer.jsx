@@ -250,6 +250,19 @@ export default function AudioPlayer() {
     audio.addEventListener('stalled', onStalled);
     audio.addEventListener('waiting', onStalled);
 
+    // Background audio persistence — auto-resume if system pauses audio
+    const onAudioPause = () => {
+      // If the store says we should be playing but audio got paused (e.g. iOS background),
+      // try to resume after a short delay. Don't fight immediate intentional pauses.
+      setTimeout(() => {
+        const state = usePlayerStore.getState();
+        if (state.isPlaying && audio.paused && audio.readyState >= 2 && !isLoadingRef.current) {
+          safePlay(audio);
+        }
+      }, 300);
+    };
+    audio.addEventListener('pause', onAudioPause);
+
     const onVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
         const state = usePlayerStore.getState();
@@ -268,6 +281,28 @@ export default function AudioPlayer() {
 
     document.addEventListener('visibilitychange', onVisibilityChange);
 
+    // Web Lock API — keeps page alive during background audio playback
+    // Prevents browser from suspending the tab while music is playing
+    let wakeLockRef = null;
+    const acquireWakeLock = async () => {
+      if ('locks' in navigator && usePlayerStore.getState().isPlaying) {
+        try {
+          navigator.locks.request('mystation-audio-lock', { mode: 'shared' }, () => {
+            return new Promise((resolve) => { wakeLockRef = resolve; });
+          });
+        } catch {}
+      }
+    };
+    const releaseWakeLock = () => {
+      if (wakeLockRef) { wakeLockRef(); wakeLockRef = null; }
+    };
+    acquireWakeLock();
+    // Re-acquire on play, release on pause
+    const lockSub = usePlayerStore.subscribe((state, prev) => {
+      if (state.isPlaying && !prev?.isPlaying) acquireWakeLock();
+      if (!state.isPlaying && prev?.isPlaying) releaseWakeLock();
+    });
+
     return () => {
       audio.removeEventListener('timeupdate', onTimeUpdate);
       audio.removeEventListener('loadedmetadata', onLoadedMetadata);
@@ -275,7 +310,10 @@ export default function AudioPlayer() {
       audio.removeEventListener('error', onError);
       audio.removeEventListener('stalled', onStalled);
       audio.removeEventListener('waiting', onStalled);
+      audio.removeEventListener('pause', onAudioPause);
       document.removeEventListener('visibilitychange', onVisibilityChange);
+      releaseWakeLock();
+      lockSub();
     };
   }, []);
 
