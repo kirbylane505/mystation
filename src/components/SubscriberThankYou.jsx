@@ -1,19 +1,18 @@
 /**
  * MYSTATION - Subscriber Thank You Toast
- * Gentle appreciation popup for subscribers — max 2x per day, auto-dismiss 6s.
- * Shows on page load after a brief delay so it doesn't compete with initial render.
+ * Gentle appreciation toast for subscribers — max 2x per day.
+ * Uses sonner toast (already in layout) for reliable rendering.
  */
 
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Heart, X } from 'lucide-react';
+import { useEffect, useRef } from 'react';
+import { toast } from 'sonner';
 import { useUserStore } from '@/store/playerStore';
 
 const STORAGE_KEY = 'ms-sub-thanks';
 const MAX_PER_DAY = 2;
-const AUTO_DISMISS_MS = 6000;
-const SHOW_DELAY_MS = 4000; // Wait 4s after page load
+const SHOW_DELAY_MS = 4000;
 
 function canShowToday() {
   try {
@@ -44,95 +43,26 @@ function recordShow() {
 }
 
 export default function SubscriberThankYou() {
-  const [show, setShow] = useState(false);
-  const [exiting, setExiting] = useState(false);
   const { isSubscribed } = useUserStore();
+  const firedRef = useRef(false);
 
   useEffect(() => {
     if (!isSubscribed) return;
+    if (firedRef.current) return;
     if (!canShowToday()) return;
 
-    const showTimer = setTimeout(() => {
-      setShow(true);
+    const timer = setTimeout(() => {
+      firedRef.current = true;
       recordShow();
+      toast('Thank you for choosing MyStation', {
+        description: 'We value every stream. Being independent means everything.',
+        duration: 6000,
+        icon: '💙',
+      });
     }, SHOW_DELAY_MS);
 
-    return () => clearTimeout(showTimer);
+    return () => clearTimeout(timer);
   }, [isSubscribed]);
 
-  // Auto-dismiss
-  useEffect(() => {
-    if (!show) return;
-    const timer = setTimeout(() => dismiss(), AUTO_DISMISS_MS);
-    return () => clearTimeout(timer);
-  }, [show]);
-
-  function dismiss() {
-    setExiting(true);
-    setTimeout(() => setShow(false), 300);
-  }
-
-  if (!show) return null;
-
-  return (
-    <div
-      style={{
-        position: 'fixed',
-        top: '6rem',
-        left: '50%',
-        transform: exiting ? 'translateX(-50%) translateY(-20px)' : 'translateX(-50%) translateY(0)',
-        opacity: exiting ? 0 : 1,
-        transition: 'transform 0.3s ease, opacity 0.3s ease',
-        zIndex: 85,
-        width: '92%',
-        maxWidth: '24rem',
-      }}
-    >
-      <div className="relative bg-gradient-to-r from-[#0f1a2e] to-[#131d33] border border-blue-500/20 rounded-2xl p-4 shadow-2xl shadow-blue-500/10">
-        {/* Close */}
-        <button
-          onClick={dismiss}
-          className="absolute top-3 right-3 w-6 h-6 bg-white/10 rounded-full flex items-center justify-center text-white/40 hover:text-white hover:bg-white/20 transition"
-        >
-          <X size={14} />
-        </button>
-
-        <div className="flex items-center gap-3 pr-6">
-          {/* Heart icon */}
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-blue-500/30">
-            <Heart size={20} className="text-white fill-white" />
-          </div>
-
-          {/* Message */}
-          <div>
-            <p className="text-white font-bold text-sm">
-              Thank you for choosing MyStation
-            </p>
-            <p className="text-white/50 text-xs mt-0.5">
-              We value every stream. Being independent means everything.
-            </p>
-          </div>
-        </div>
-
-        {/* Progress bar */}
-        <div className="mt-3 h-0.5 bg-white/5 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full"
-            style={{
-              width: '100%',
-              animation: `subThanksShrink ${AUTO_DISMISS_MS}ms linear forwards`,
-            }}
-          />
-        </div>
-      </div>
-
-      {/* Global keyframe — not scoped */}
-      <style dangerouslySetInnerHTML={{ __html: `
-        @keyframes subThanksShrink {
-          from { width: 100%; }
-          to { width: 0%; }
-        }
-      ` }} />
-    </div>
-  );
+  return null;
 }
