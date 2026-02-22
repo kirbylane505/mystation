@@ -7,7 +7,6 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import {
   Calendar, MapPin, Ticket, Clock, Loader2, Filter,
   Music, Heart, Sparkles, ChevronRight, Users,
@@ -369,52 +368,58 @@ export default function EventsPage() {
   return (
     <div className="min-h-screen">
       {/* ─── SECTION 1: LOTL HERO ─────────────────────────────── */}
-      <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
-        {/* YouTube background */}
+      <section className="relative min-h-[100vh] flex flex-col overflow-hidden">
+        {/* YouTube recap as atmospheric background */}
         <div className="absolute inset-0 z-0 pointer-events-none">
           <iframe
             src="https://www.youtube.com/embed/fu1YZRHOXlg?autoplay=1&mute=1&loop=1&controls=0&showinfo=0&modestbranding=1&playlist=fu1YZRHOXlg&playsinline=1"
             title="LOTL Recap"
             allow="autoplay; encrypted-media"
             allowFullScreen
-            className="absolute top-1/2 left-1/2 w-[180%] h-[180%] -translate-x-1/2 -translate-y-1/2 opacity-[0.15]"
+            className="absolute top-1/2 left-1/2 w-[180%] h-[180%] -translate-x-1/2 -translate-y-1/2 opacity-[0.08]"
             style={{ border: 'none', pointerEvents: 'none' }}
           />
         </div>
 
         {/* Gradient overlays */}
-        <div className="absolute inset-0 z-[1] bg-gradient-to-b from-mystation-navyDark via-mystation-navyDark/60 to-mystation-navyDark" />
+        <div className="absolute inset-0 z-[1] bg-gradient-to-b from-black/60 via-mystation-navyDark/40 to-mystation-navyDark" />
         <div className="absolute inset-0 z-[1] bg-gradient-to-r from-emerald-950/30 via-transparent to-emerald-950/30" />
-        <div className="absolute inset-0 z-[1] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-green-900/20 via-transparent to-transparent" />
 
         {/* Animated orbs */}
         <div className="bg-orb w-[600px] h-[600px] bg-green-500 top-[-200px] left-[-150px] opacity-20 z-[2]" />
         <div className="bg-orb w-[500px] h-[500px] bg-emerald-500 bottom-[-150px] right-[-200px] opacity-15 z-[2]" style={{ animationDelay: '-5s' }} />
         <div className="bg-orb w-[350px] h-[350px] bg-green-400 top-[40%] left-[60%] opacity-10 z-[2]" style={{ animationDelay: '-10s' }} />
 
-        {/* Content */}
-        <div className="relative z-10 max-w-screen-xl mx-auto px-6 text-center py-20">
-          {/* Year badge */}
-          <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-green-500/10 border border-green-500/30 rounded-full mb-8 animate-pulse">
-            <Flame size={16} className="text-orange-400" />
-            <span className="text-green-300 text-sm font-black uppercase tracking-widest">Year 5</span>
-            <Flame size={16} className="text-orange-400" />
+        {/* 3D Logo Video — Front and center */}
+        <div className="relative z-[5] flex justify-center pt-8 md:pt-12">
+          <div className="w-full max-w-[700px] mx-auto px-4">
+            <video
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="auto"
+              className="w-full h-auto rounded-2xl shadow-2xl shadow-green-900/40"
+              style={{ filter: 'saturate(1.1) contrast(1.05)' }}
+            >
+              <source src="/videos/lotl-day-3d-logo.mp4" type="video/mp4" />
+            </video>
           </div>
+        </div>
 
-          {/* LOTL Logo */}
+        {/* Content below the 3D logo */}
+        <div className="relative z-10 max-w-screen-xl mx-auto px-6 text-center pt-8 pb-20 flex-1 flex flex-col justify-center">
+          {/* Year badge */}
           <div className="flex justify-center mb-6">
-            <Image
-              src="/images/lotl-logo-2026.png"
-              alt="Love on the Lawn 2026"
-              width={320}
-              height={320}
-              className="w-[240px] md:w-[320px] h-auto drop-shadow-2xl"
-              priority
-            />
+            <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-green-500/10 border border-green-500/30 rounded-full animate-pulse">
+              <Flame size={16} className="text-orange-400" />
+              <span className="text-green-300 text-sm font-black uppercase tracking-widest">Year 5</span>
+              <Flame size={16} className="text-orange-400" />
+            </div>
           </div>
 
           {/* Title */}
-          <h1 className="text-4xl md:text-5xl lg:text-7xl font-black text-white mb-5 leading-tight">
+          <h1 className="text-3xl md:text-5xl lg:text-6xl font-black text-white mb-5 leading-tight">
             Love on the Lawn{' '}
             <span className="bg-gradient-to-r from-green-400 via-emerald-400 to-green-500 bg-clip-text text-transparent">
               Day 2026
@@ -422,7 +427,7 @@ export default function EventsPage() {
           </h1>
 
           {/* Date + Location */}
-          <div className="flex flex-wrap items-center justify-center gap-6 mb-10 text-white/70">
+          <div className="flex flex-wrap items-center justify-center gap-6 mb-8 text-white/70">
             <div className="flex items-center gap-2">
               <Calendar size={18} className="text-green-400" />
               <span className="font-semibold">September 5, 2026</span>
@@ -436,7 +441,7 @@ export default function EventsPage() {
 
           {/* Countdown */}
           {mounted && (
-            <div className="flex items-center justify-center gap-3 md:gap-5 mb-10">
+            <div className="flex items-center justify-center gap-3 md:gap-5 mb-8">
               {countdownUnits.map((unit) => (
                 <div
                   key={unit.label}
@@ -454,7 +459,7 @@ export default function EventsPage() {
           )}
 
           {/* CTAs */}
-          <div className="flex flex-wrap gap-4 justify-center mb-10">
+          <div className="flex flex-wrap gap-4 justify-center mb-8">
             <Link
               href="/events/lotl-2026"
               className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-black rounded-2xl hover:shadow-xl hover:shadow-green-500/30 transition-all hover:scale-105 flex items-center gap-2 text-lg"
