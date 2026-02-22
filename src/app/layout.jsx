@@ -21,7 +21,6 @@ import EmpireWelcome from '@/components/EmpireWelcome';
 import Script from 'next/script';
 import { Toaster } from 'sonner';
 import FoundingMemberBanner from '@/components/FoundingMemberBanner';
-import NowPlayingBanner from '@/components/NowPlayingBanner';
 import CashAppThankYou from '@/components/CashAppThankYou';
 
 // Lazy-loaded utilities — code-split into separate chunks (loaded async after hydration)
@@ -125,7 +124,6 @@ export default function RootLayout({ children }) {
           <Navbar />
           <main className="pt-20 md:pt-24 pb-36">
             <FoundingMemberBanner />
-            <NowPlayingBanner />
             <Suspense><ReferralDetector /></Suspense>
             {children}
           </main>
