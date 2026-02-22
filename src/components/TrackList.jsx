@@ -6,7 +6,8 @@
 
 'use client';
 
-import { useState, memo, useCallback } from 'react';
+import { useState, memo, useCallback, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { usePlayerStore } from '@/store/playerStore';
 import { Play, Pause, Clock, Music, ExternalLink, MessageCircle } from 'lucide-react';
 import { tracks } from '@/data/tracks';
@@ -145,6 +146,8 @@ export default function TrackList({ trackIds, showAlbum = true, showNumber = tru
   const setQueue = usePlayerStore(s => s.setQueue);
   const togglePlay = usePlayerStore(s => s.togglePlay);
   const [commentTrack, setCommentTrack] = useState(null);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
 
   // Preserve trackIds order (filter loses intended ordering)
   const displayTracks = trackIds
@@ -196,8 +199,8 @@ export default function TrackList({ trackIds, showAlbum = true, showNumber = tru
       ))}
     </div>
 
-    {/* Comment Modal — fixed overlay when triggered from track list */}
-    {commentTrack && (
+    {/* Comment Modal — portaled to body to escape parent transforms */}
+    {commentTrack && mounted && createPortal(
       <div className="fixed inset-0 z-[10000] flex items-end md:items-center justify-center pb-[72px] md:pb-0" onClick={() => setCommentTrack(null)}>
         <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
         <div
@@ -227,7 +230,8 @@ export default function TrackList({ trackIds, showAlbum = true, showNumber = tru
             />
           </div>
         </div>
-      </div>
+      </div>,
+      document.body
     )}
     </>
   );
