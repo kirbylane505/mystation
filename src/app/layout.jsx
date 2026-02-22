@@ -122,7 +122,7 @@ export default function RootLayout({ children }) {
         <ClientProviders>
           <AccountWall />
           <Navbar />
-          <main className="pt-20 md:pt-24 pb-36">
+          <main className="pt-20 md:pt-24 pb-40">
             <FoundingMemberBanner />
             <Suspense><ReferralDetector /></Suspense>
             {children}
