@@ -6,6 +6,17 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+// Generate or retrieve a stable visitor ID for anonymous likes
+export function getVisitorId() {
+  if (typeof window === 'undefined') return '';
+  let id = localStorage.getItem('ms-visitor-id');
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem('ms-visitor-id', id);
+  }
+  return id;
+}
+
 export const useVideoStore = create(
   persist(
     (set, get) => ({

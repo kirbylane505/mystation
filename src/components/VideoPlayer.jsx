@@ -8,6 +8,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { X, Play, Eye, ExternalLink, Share2, Heart, FileText, ChevronDown, ChevronUp, MessageCircle, Link2, Check, Mail } from 'lucide-react';
 import { useVideoStore } from '@/store/videoStore';
+import { getVisitorId } from '@/store/videoStore';
 import CommentSection from './CommentSection';
 
 // Sample lyrics - can be moved to data file
@@ -59,7 +60,55 @@ export default function VideoPlayer({ video, onClose }) {
   const [lyricsExpanded, setLyricsExpanded] = useState(false);
   const [showShare, setShowShare] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
+  const [isLiked, setIsLiked] = useState(false);
+  const [likeLoading, setLikeLoading] = useState(false);
   const viewCount = getViews(video.id);
+
+  // Fetch like count + liked status when video changes
+  useEffect(() => {
+    const vid = getVisitorId();
+    if (!video?.id) return;
+    fetch(`/api/video-likes?videoId=${encodeURIComponent(video.id)}&visitorId=${encodeURIComponent(vid)}`)
+      .then(r => r.json())
+      .then(data => {
+        setLikeCount(data.likes || 0);
+        setIsLiked(!!data.liked);
+      })
+      .catch(() => {});
+  }, [video?.id]);
+
+  const toggleLike = async () => {
+    if (likeLoading) return;
+    const vid = getVisitorId();
+    // Optimistic update
+    const wasLiked = isLiked;
+    const prevCount = likeCount;
+    setIsLiked(!wasLiked);
+    setLikeCount(wasLiked ? prevCount - 1 : prevCount + 1);
+    setLikeLoading(true);
+    try {
+      const res = await fetch('/api/video-likes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ videoId: video.id, visitorId: vid }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setLikeCount(data.likes);
+        setIsLiked(data.liked);
+      } else {
+        // Revert on error
+        setIsLiked(wasLiked);
+        setLikeCount(prevCount);
+      }
+    } catch {
+      setIsLiked(wasLiked);
+      setLikeCount(prevCount);
+    } finally {
+      setLikeLoading(false);
+    }
+  };
 
   // Get lyrics for this video if available
   const lyrics = videoLyrics[video.id] || null;
@@ -237,8 +286,25 @@ export default function VideoPlayer({ video, onClose }) {
                 <span className="text-sm font-medium">Lyrics</span>
               </button>
             )}
-            <button className="p-3 bg-white/10 rounded-xl hover:bg-white/20 transition">
-              <Heart size={20} className="text-white" />
+            <button
+              onClick={toggleLike}
+              disabled={likeLoading}
+              className={`p-3 rounded-xl transition flex items-center gap-2 ${
+                isLiked
+                  ? 'bg-red-500/20 hover:bg-red-500/30'
+                  : 'bg-white/10 hover:bg-white/20'
+              }`}
+            >
+              <Heart
+                size={20}
+                className={isLiked ? 'text-red-500' : 'text-white'}
+                fill={isLiked ? 'currentColor' : 'none'}
+              />
+              {likeCount > 0 && (
+                <span className={`text-sm font-medium ${isLiked ? 'text-red-400' : 'text-white/60'}`}>
+                  {likeCount.toLocaleString()}
+                </span>
+              )}
             </button>
             <button onClick={() => setShowShare(true)} className="p-3 bg-white/10 rounded-xl hover:bg-white/20 transition">
               <Share2 size={20} className="text-white" />
