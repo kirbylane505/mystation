@@ -38,8 +38,8 @@ function AdminBadge() {
   );
 }
 
-export default function CommentSection({ trackId, trackTitle }) {
-  const [open, setOpen] = useState(false);
+export default function CommentSection({ trackId, trackTitle, modalMode = false }) {
+  const [open, setOpen] = useState(modalMode);
   const [comments, setComments] = useState([]);
   const [count, setCount] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -104,26 +104,26 @@ export default function CommentSection({ trackId, trackTitle }) {
       .catch(() => {});
   }, [trackId]);
 
-  // Full fetch when dropdown opens
+  // Full fetch when dropdown opens (or immediately in modal mode)
   useEffect(() => {
-    if (open && !hasFetched.current) {
+    if ((open || modalMode) && !hasFetched.current) {
       hasFetched.current = true;
       fetchComments();
     }
-  }, [open, fetchComments]);
+  }, [open, modalMode, fetchComments]);
 
   // Reset when trackId changes
   useEffect(() => {
     hasFetched.current = false;
     setComments([]);
     setCount(0);
-    setOpen(false);
+    if (!modalMode) setOpen(false);
     setReplyingTo(null);
-  }, [trackId]);
+  }, [trackId, modalMode]);
 
-  // Close on outside click
+  // Close on outside click (skip in modal mode — parent handles closing)
   useEffect(() => {
-    if (!open) return;
+    if (!open || modalMode) return;
     function handleClick(e) {
       if (panelRef.current && !panelRef.current.contains(e.target)) {
         setOpen(false);
@@ -131,7 +131,7 @@ export default function CommentSection({ trackId, trackTitle }) {
     }
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
-  }, [open]);
+  }, [open, modalMode]);
 
   const scrollToBottom = () => {
     if (listRef.current) {
@@ -307,6 +307,224 @@ export default function CommentSection({ trackId, trackTitle }) {
 
   const canComment = isSubscribed || isAdmin;
 
+  // --- Modal mode: render content directly (no button, no dropdown wrapper) ---
+  if (modalMode) {
+    return (
+      <div className="flex flex-col h-full" ref={panelRef}>
+        {/* Comment List */}
+        <div
+          ref={listRef}
+          className="flex-1 overflow-y-auto overscroll-contain px-4 py-3 space-y-3 scrollbar-thin scrollbar-thumb-white/10"
+        >
+          {loading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="w-5 h-5 border-2 border-white/20 border-t-blue-400 rounded-full animate-spin" />
+            </div>
+          ) : comments.length === 0 ? (
+            <div className="text-center py-8">
+              <MessageCircle size={28} className="mx-auto mb-2 text-white/15" />
+              <p className="text-xs text-white/30">
+                {canComment ? 'Be the first to comment on this track' : 'No comments yet'}
+              </p>
+            </div>
+          ) : (
+            comments.map((comment) => (
+              <div key={comment.id} className="group">
+                <div className="flex items-start gap-2">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className={`text-xs font-bold shrink-0 ${comment.isAdmin ? 'text-blue-400' : 'text-white/80'}`}>
+                        {comment.name || comment.username}
+                      </span>
+                      {comment.isAdmin && <AdminBadge />}
+                      <span className="text-[10px] text-white/25">
+                        {relativeTime(comment.createdAt)}
+                      </span>
+                    </div>
+                    <p className="text-xs text-white/60 leading-relaxed mt-0.5 break-words">
+                      {comment.message || comment.content}
+                    </p>
+                    {isAdmin && !comment.isAdmin && (
+                      <div className="flex items-center gap-3 mt-1">
+                        <button
+                          onClick={() => { setReplyingTo(comment.id); setReplyMessage(''); }}
+                          className="text-[10px] text-blue-400/70 hover:text-blue-400 flex items-center gap-1"
+                        >
+                          <Reply size={10} /> Reply
+                        </button>
+                        <button
+                          onClick={() => handleDelete(comment.id)}
+                          className="text-[10px] text-red-400/50 hover:text-red-400 flex items-center gap-1"
+                        >
+                          <Trash2 size={10} /> Delete
+                        </button>
+                      </div>
+                    )}
+                    {isAdmin && comment.isAdmin && (
+                      <div className="flex items-center gap-3 mt-1">
+                        <button
+                          onClick={() => handleDelete(comment.id)}
+                          className="text-[10px] text-red-400/50 hover:text-red-400 flex items-center gap-1"
+                        >
+                          <Trash2 size={10} /> Delete
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                {comment.replies && comment.replies.length > 0 && (
+                  <div className="ml-4 mt-2 space-y-2 border-l border-white/10 pl-3">
+                    {comment.replies.map((reply) => (
+                      <div key={reply.id}>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className={`text-xs font-bold shrink-0 ${reply.isAdmin ? 'text-blue-400' : 'text-white/80'}`}>
+                            {reply.name || reply.username}
+                          </span>
+                          {reply.isAdmin && <AdminBadge />}
+                          <span className="text-[10px] text-white/25">
+                            {relativeTime(reply.createdAt)}
+                          </span>
+                        </div>
+                        <p className="text-xs text-white/60 leading-relaxed mt-0.5 break-words">
+                          {reply.message || reply.content}
+                        </p>
+                        {isAdmin && (
+                          <button
+                            onClick={() => handleDelete(reply.id, comment.id)}
+                            className="text-[10px] text-red-400/50 hover:text-red-400 flex items-center gap-1 mt-1"
+                          >
+                            <Trash2 size={10} /> Delete
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {replyingTo === comment.id && isAdmin && (
+                  <div className="ml-4 mt-2 flex gap-2 items-center border-l border-blue-500/30 pl-3">
+                    <input
+                      type="text"
+                      value={replyMessage}
+                      onChange={(e) => setReplyMessage(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') handleReply(comment); }}
+                      placeholder="Reply as Mike Page..."
+                      maxLength={500}
+                      autoFocus
+                      className="flex-1 min-w-0 bg-white/5 border border-blue-500/30 rounded-lg px-3 py-1.5 text-xs text-white/80 placeholder:text-white/25 outline-none focus:border-blue-500/50 transition"
+                    />
+                    <button
+                      onClick={() => handleReply(comment)}
+                      disabled={!replyMessage.trim() || submitting}
+                      className="shrink-0 w-7 h-7 flex items-center justify-center rounded-lg bg-blue-500/80 hover:bg-blue-500 disabled:bg-white/5 disabled:text-white/20 text-white transition disabled:cursor-not-allowed"
+                    >
+                      <Send size={12} />
+                    </button>
+                    <button
+                      onClick={() => setReplyingTo(null)}
+                      className="shrink-0 w-7 h-7 flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/10 text-white/40 hover:text-white/60 transition"
+                    >
+                      <X size={12} />
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Input Area */}
+        {canComment ? (
+          <form
+            onSubmit={handleSubmit}
+            className="px-4 py-3 border-t border-white/10 bg-white/[0.02] shrink-0"
+          >
+            <div className="flex gap-2 items-center">
+              {!isAdmin && (
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Name"
+                  maxLength={30}
+                  className="w-20 shrink-0 bg-white/5 border border-white/10 rounded-lg px-2.5 py-2 text-xs text-white/80 placeholder:text-white/25 outline-none focus:border-blue-500/50 transition"
+                />
+              )}
+              <input
+                type="text"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder={isAdmin ? 'Comment as Mike Page...' : 'Add a comment...'}
+                maxLength={500}
+                className="flex-1 min-w-0 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-white/80 placeholder:text-white/25 outline-none focus:border-blue-500/50 transition"
+              />
+              <button
+                type="submit"
+                disabled={(!isAdmin && !name.trim()) || !message.trim() || submitting}
+                className="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-blue-500/80 hover:bg-blue-500 disabled:bg-white/5 disabled:text-white/20 text-white transition-all duration-200 disabled:cursor-not-allowed"
+                aria-label="Send comment"
+              >
+                <Send size={14} />
+              </button>
+            </div>
+            <div className="mt-2 flex items-center justify-between">
+              {isAdmin ? (
+                <div className="flex items-center gap-1.5 text-[10px] text-green-400/70">
+                  <ShieldCheck size={12} />
+                  <span>Admin Mode</span>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setShowAdminInput(prev => !prev)}
+                  className="flex items-center gap-1.5 text-[10px] text-white/20 hover:text-white/40 transition"
+                >
+                  <Lock size={10} />
+                  <span>Admin</span>
+                </button>
+              )}
+            </div>
+            {showAdminInput && !isAdmin && (
+              <form onSubmit={handleAdminLogin} className="mt-2 flex gap-2">
+                <input
+                  type="password"
+                  value={adminKeyInput}
+                  onChange={(e) => { setAdminKeyInput(e.target.value); setAdminError(''); }}
+                  placeholder="Admin key"
+                  autoFocus
+                  className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white/80 placeholder:text-white/25 outline-none focus:border-purple-500/50 transition"
+                />
+                <button
+                  type="submit"
+                  disabled={!adminKeyInput.trim()}
+                  className="px-3 py-1.5 bg-purple-600/80 hover:bg-purple-600 disabled:opacity-50 text-white text-xs rounded-lg transition"
+                >
+                  Go
+                </button>
+              </form>
+            )}
+            {adminError && (
+              <p className="text-red-400 text-[10px] mt-1">{adminError}</p>
+            )}
+          </form>
+        ) : (
+          <div className="px-4 py-4 border-t border-white/10 bg-white/[0.02] text-center shrink-0">
+            <div className="flex items-center justify-center gap-2 text-white/40 mb-2">
+              <Lock size={14} />
+              <span className="text-xs font-medium">Subscribe to join the conversation</span>
+            </div>
+            <a
+              href="/subscribe"
+              className="inline-block px-5 py-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold rounded-full transition"
+            >
+              Subscribe
+            </a>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // --- Standard mode: button + dropdown ---
   return (
     <div className="relative" ref={panelRef}>
       {/* Comment Button with Badge */}

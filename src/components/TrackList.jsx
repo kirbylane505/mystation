@@ -196,12 +196,38 @@ export default function TrackList({ trackIds, showAlbum = true, showNumber = tru
       ))}
     </div>
 
+    {/* Comment Modal — fixed overlay when triggered from track list */}
     {commentTrack && (
-      <CommentSection
-        trackId={commentTrack.id}
-        trackTitle={commentTrack.title}
-        onClose={() => setCommentTrack(null)}
-      />
+      <div className="fixed inset-0 z-[9998] flex items-end md:items-center justify-center" onClick={() => setCommentTrack(null)}>
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+        <div
+          className="relative w-full md:w-[420px] md:max-h-[80vh] max-h-[70vh] rounded-t-2xl md:rounded-2xl border border-white/10 bg-[#0d1117] shadow-2xl overflow-hidden flex flex-col animate-slide-up"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header */}
+          <div className="px-4 py-3 border-b border-white/10 flex items-center justify-between shrink-0">
+            <div>
+              <h3 className="text-sm font-semibold text-white/80 flex items-center gap-2">
+                <MessageCircle size={14} className="text-blue-400" />
+                Comments
+              </h3>
+              <p className="text-[11px] text-white/30 mt-0.5 truncate">{commentTrack.title}</p>
+            </div>
+            <button onClick={() => setCommentTrack(null)} className="p-2 text-white/40 hover:text-white transition">
+              <span className="text-lg leading-none">&times;</span>
+            </button>
+          </div>
+
+          {/* Comment Section — modal mode */}
+          <div className="flex-1 overflow-hidden">
+            <CommentSection
+              trackId={commentTrack.id}
+              trackTitle={commentTrack.title}
+              modalMode={true}
+            />
+          </div>
+        </div>
+      </div>
     )}
     </>
   );
