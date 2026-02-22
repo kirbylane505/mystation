@@ -1,7 +1,7 @@
 /**
  * MYSTATION - Account Wall
- * Full-screen lockout overlay — sign in, sign up, or enter access code.
- * Cannot be dismissed. Shows when isLocked && !isLoggedIn.
+ * Sign in, sign up, or enter access code overlay.
+ * Shows only when triggered from navbar sign-in button (showAccountWall).
  * First 26 signups get first month free.
  */
 
@@ -14,7 +14,7 @@ import { usePlayerStore, useUserStore } from '@/store/playerStore';
 // Pages that should NEVER be blocked by the account wall (commerce, ticketing, admin)
 const OPEN_PATHS = ['/events', '/tickets', '/admin', '/merch'];
 import Link from 'next/link';
-import { Mail, Lock, User, Loader2, Headphones, Music, Clock, CreditCard, ShoppingBag, Ticket } from 'lucide-react';
+import { Mail, Lock, User, Loader2, Headphones, ShoppingBag, Ticket } from 'lucide-react';
 
 // Stripe checkout links per tier — MyStation LLC (acct_1T1jP1R0BloCNd9r)
 const STRIPE_LINKS = {
@@ -23,7 +23,7 @@ const STRIPE_LINKS = {
 
 export default function AccountWall() {
   const pathname = usePathname();
-  const { isLocked, unlockSite, setShowAccountWall, showAccountWall, browseTimeRemaining } = usePlayerStore();
+  const { setShowAccountWall, showAccountWall } = usePlayerStore();
   const { isLoggedIn, isSubscribed, setUser, setEmail: setStoreEmail, subscribe, freeSignupSlotsRemaining, setFreeSignupSlots } = useUserStore();
 
   const [view, setView] = useState('signup'); // 'signup' | 'signin' | 'code'
@@ -53,8 +53,8 @@ export default function AccountWall() {
   const isOpenPath = OPEN_PATHS.some(p => pathname?.startsWith(p));
   if (isOpenPath) return null;
 
-  // Show wall when: (locked AND not logged in) OR showAccountWall flag
-  const shouldShow = (isLocked && !isLoggedIn && !isSubscribed) || showAccountWall;
+  // Show wall only when explicitly triggered (navbar sign-in button)
+  const shouldShow = showAccountWall;
   if (!shouldShow) return null;
 
   const clearError = () => { setErrorMsg(''); setSuccessMsg(''); };
@@ -89,7 +89,6 @@ export default function AccountWall() {
       localStorage.setItem('mystation_user', JSON.stringify(data.user));
       setStoreEmail(cleanEmail);
       setUser(data.user);
-      unlockSite();
       setShowAccountWall(false);
     } catch {
       setErrorMsg('Connection error. Please try again.');
@@ -150,17 +149,14 @@ export default function AccountWall() {
         setFreeSignupSlots(data.freeSignupSlots || 0);
         setSuccessMsg(`Welcome! You're member #${data.subscriberNumber} — first month FREE!`);
         setTimeout(() => {
-          unlockSite();
           setShowAccountWall(false);
           setSuccessMsg('');
         }, 2500);
       } else if (data.needsPayment) {
         // After 26 — redirect to Stripe
-        unlockSite(); // unlock temporarily so they can pay
         setShowAccountWall(false);
         window.location.href = STRIPE_LINKS.regular;
       } else {
-        unlockSite();
         setShowAccountWall(false);
       }
     } catch {
@@ -185,7 +181,6 @@ export default function AccountWall() {
 
       if (data.success) {
         subscribe('friend@mystation.com');
-        unlockSite();
         setShowAccountWall(false);
       } else {
         setErrorMsg('Invalid code. Try again.');
@@ -228,15 +223,8 @@ export default function AccountWall() {
             {/* Header */}
             <div className="text-center mb-6">
               <h2 className="text-xl font-bold text-white mb-2">
-                {isLocked ? 'Your 26 minutes are up!' : 'Welcome Back'}
+                Welcome Back
               </h2>
-              {isLocked ? (
-                <p className="text-white/60 text-sm mb-3">
-                  Subscribe for $4.99/mo to unlock unlimited streaming, merch shopping, and more.
-                  <br />
-                  <span className="text-amber-400 font-medium">Auto-renews monthly. Cancel anytime.</span>
-                </p>
-              ) : null}
               {freeSignupSlotsRemaining > 0 ? (
                 <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-500/20 border border-green-500/30 rounded-full">
                   <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
@@ -374,20 +362,6 @@ export default function AccountWall() {
                   </button>
                 </div>
                 {errorMsg && <p className="text-red-400 text-sm text-center">{errorMsg}</p>}
-              </div>
-            )}
-
-            {/* Direct subscribe button (always visible as option) */}
-            {isLocked && view !== 'code' && (
-              <div className="mt-4">
-                <a
-                  href={STRIPE_LINKS.regular}
-                  className="flex items-center justify-center gap-2 w-full py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-xl hover:opacity-90 transition shadow-lg shadow-green-500/30"
-                >
-                  <CreditCard size={18} />
-                  Subscribe Now — $4.99/mo
-                </a>
-                <p className="text-white/30 text-xs text-center mt-2">Auto-renews monthly. Cancel anytime.</p>
               </div>
             )}
 

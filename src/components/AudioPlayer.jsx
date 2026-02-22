@@ -1,7 +1,7 @@
 /**
- * MYSTATION - Audio Engine v3
+ * MYSTATION - Audio Engine v4
  * Bulletproof streaming: continuous play, background audio, lock screen controls
- * v3: 10-minute timer lockout system (no more trial/guest logic)
+ * No timer lockout — all non-vault tracks are free to stream
  */
 
 'use client';
@@ -131,7 +131,6 @@ export default function AudioPlayer() {
     openSubscribeModal: usePlayerStore.getState().openSubscribeModal,
     pause,
     play,
-    lockSite: usePlayerStore.getState().lockSite,
     setDuration: usePlayerStore.getState().setDuration,
   };
   repeatRef.current = repeat;
@@ -153,13 +152,6 @@ export default function AudioPlayer() {
         body: JSON.stringify({ trackId: track.id })
       });
       if (!resp.ok) {
-        const errData = await resp.json().catch(() => ({}));
-        if (errData.needsAccount) {
-          // Timer expired or no session — trigger lockout
-          storeActionsRef.current.lockSite(track.id);
-          storeActionsRef.current.pause();
-          return null;
-        }
         return null;
       }
       const { token } = await resp.json();
@@ -168,10 +160,6 @@ export default function AudioPlayer() {
     } catch {
       return null;
     }
-  }, []);
-
-  const checkCanPlay = useCallback((trackId) => {
-    return usePlayerStore.getState().canPlay(trackId);
   }, []);
 
   // Initialize audio element ONCE
@@ -337,14 +325,7 @@ export default function AudioPlayer() {
     const isNewTrack = lastTrackIdRef.current !== currentTrack.id;
     if (!isNewTrack) return;
 
-    const { isPlaying: playing, vaultUnlocked, isLocked: locked, lockedTrackId: lockId } = usePlayerStore.getState();
-
-    // If locked and trying to play a different track than the locked one, block
-    if (locked && currentTrack.id !== lockId) {
-      audio.pause();
-      pause();
-      return;
-    }
+    const { isPlaying: playing, vaultUnlocked } = usePlayerStore.getState();
 
     // Block vault tracks if not unlocked
     if (isVaultTrack(currentTrack) && !vaultUnlocked) {
@@ -355,13 +336,6 @@ export default function AudioPlayer() {
       if (nextNonVault) {
         usePlayerStore.getState().setTrack(nextNonVault);
       }
-      return;
-    }
-
-    // Client-side can-play check
-    if (playing && !checkCanPlay(currentTrack.id)) {
-      audio.pause();
-      pause();
       return;
     }
 
@@ -475,7 +449,7 @@ export default function AudioPlayer() {
         }
       }
     })();
-  }, [currentTrack?.id, getAudioUrl, checkCanPlay, incrementPlayCount, pause, isVaultTrack]);
+  }, [currentTrack?.id, getAudioUrl, incrementPlayCount, pause, isVaultTrack]);
 
   // Handle play/pause state changes
   useEffect(() => {
@@ -486,11 +460,6 @@ export default function AudioPlayer() {
     if (isPlaying) {
       const { uniquePlaysThisSession } = usePlayerStore.getState();
       if (!uniquePlaysThisSession.includes(currentTrack.id)) {
-        if (!checkCanPlay(currentTrack.id)) {
-          audio.pause();
-          pause();
-          return;
-        }
         incrementPlayCount(currentTrack.id);
       }
       if (audio.paused && audio.readyState >= 2) {

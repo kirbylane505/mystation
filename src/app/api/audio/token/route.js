@@ -1,6 +1,7 @@
 /**
  * MYSTATION - Audio Token API
- * Access hierarchy: sub > friend > vault > auth > browse(<26min) > DJ > denied
+ * Access hierarchy: sub > friend > vault > auth > open (no timer)
+ * All non-vault tracks are free to stream — no browse timer, no lockout.
  */
 
 import { NextResponse } from 'next/server';
@@ -10,8 +11,6 @@ const AUDIO_SECRET = process.env.AUDIO_SECRET;
 if (!AUDIO_SECRET) {
   console.error('FATAL: AUDIO_SECRET env var is not set');
 }
-
-const BROWSE_DURATION_MS = 26 * 60 * 1000; // 26 minutes — MUST match session/start and session/check
 
 // Use Web Crypto API (same as middleware) for HMAC signing — ensures token compatibility
 async function signToken(payload) {
@@ -70,20 +69,6 @@ function verifyAuthCookie(cookieStr) {
   return { email, timestamp: ts };
 }
 
-// Verify browse cookie (timestamp:hmac, check 10-min window)
-function verifyBrowseCookie(cookieStr) {
-  const val = parseCookie(cookieStr, 'mystation-browse');
-  if (!val) return null;
-  const parts = val.split(':');
-  if (parts.length !== 2) return null;
-  const [timestamp, sig] = parts;
-  const expected = hmacSign('browse', timestamp);
-  if (!timingSafeEqual(expected, sig)) return null;
-  const ts = parseInt(timestamp, 10);
-  if (isNaN(ts)) return null;
-  return { timestamp: ts };
-}
-
 export async function POST(request) {
   try {
     const { trackId } = await request.json();
@@ -99,7 +84,6 @@ export async function POST(request) {
     }
 
     const cookieStr = request.headers.get('cookie') || '';
-    const isDJMode = request.headers.get('x-dj-mode') === '1';
 
     // --- ACCESS HIERARCHY ---
 
@@ -129,31 +113,8 @@ export async function POST(request) {
       return grantToken(track);
     }
 
-    // 5. Browse cookie + <10min → access
-    const browse = verifyBrowseCookie(cookieStr);
-    if (browse) {
-      const elapsed = Date.now() - browse.timestamp;
-      if (elapsed < BROWSE_DURATION_MS) {
-        return grantToken(track);
-      }
-      // Timer expired
-      return NextResponse.json({
-        error: 'Browse time expired — create an account to continue',
-        expired: true,
-        needsAccount: true,
-      }, { status: 403 });
-    }
-
-    // 6. DJ mode → grant (free feature)
-    if (isDJMode) {
-      return grantToken(track);
-    }
-
-    // 7. No cookies → denied
-    return NextResponse.json({
-      error: 'Create an account to listen',
-      needsAccount: true,
-    }, { status: 403 });
+    // 5. Open access — all non-vault tracks are free to stream
+    return grantToken(track);
   } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }

@@ -1,7 +1,7 @@
 /**
  * MYSTATION - Audio Player State Management
  * Using Zustand for simple, powerful state
- * v7: Fixed stale isLocked persistence — timer is server-authoritative, no more stale lockout
+ * v8: Removed browse timer / lockout system — all non-vault tracks are free
  */
 
 import { create } from 'zustand';
@@ -27,11 +27,6 @@ export const usePlayerStore = create(
   // Vault access (session-only, not persisted)
   vaultUnlocked: false,
   setVaultUnlocked: (val) => set({ vaultUnlocked: val }),
-
-  // Lock state (26-min timer system)
-  isLocked: false,
-  lockedTrackId: null, // The track that was playing when lockout triggered — loops until subscribe
-  browseTimeRemaining: 1560, // 26 minutes in seconds
 
   // Engagement tracking
   playCount: 0,
@@ -81,38 +76,6 @@ export const usePlayerStore = create(
     }
   },
 
-  // Lock/unlock site (10-min timer system)
-  lockSite: (trackId = null) => set({
-    isLocked: true,
-    lockedTrackId: trackId || null,
-    browseTimeRemaining: 0,
-  }),
-
-  unlockSite: () => set({
-    isLocked: false,
-    lockedTrackId: null,
-  }),
-
-  setBrowseTimeRemaining: (seconds) => set({ browseTimeRemaining: seconds }),
-
-  // Check if can play (client-side hint — real enforcement is server-side)
-  canPlay: (trackId) => {
-    const { isLocked, lockedTrackId } = get();
-    const { isSubscribed, isLoggedIn } = useUserStore.getState();
-
-    // Authenticated or subscribed = always can play
-    if (isSubscribed || isLoggedIn) return true;
-
-    // Locked but this is the track that was playing when lockout triggered
-    if (isLocked && trackId === lockedTrackId) return true;
-
-    // Locked = can't play anything new
-    if (isLocked) return false;
-
-    // Not locked = browse timer still active
-    return true;
-  },
-
   // Show subscribe modal
   openSubscribeModal: (pendingTrack = null) => set({
     showSubscribeModal: true,
@@ -148,14 +111,7 @@ export const usePlayerStore = create(
   }),
 
   nextTrack: () => {
-    const { queue, queueIndex, repeat, shuffle, isLocked, currentTrack } = get();
-
-    // If locked, loop current song — don't advance queue
-    if (isLocked) {
-      set({ progress: 0 }); // restart same track
-      return;
-    }
-
+    const { queue, queueIndex, repeat, shuffle } = get();
     if (queue.length === 0) return;
 
     let nextIndex;
@@ -213,7 +169,7 @@ export const usePlayerStore = create(
 }),
     {
       name: 'mystation-player',
-      version: 7, // v7: stop persisting isLocked — timer is server-authoritative, stale lock blocks all tracks
+      version: 8, // v8: removed browse timer / lockout system entirely
       partialize: (state) => ({
         volume: state.volume,
         isMuted: state.isMuted,
@@ -221,9 +177,8 @@ export const usePlayerStore = create(
         repeat: state.repeat,
       }),
       migrate: (persisted, version) => {
-        // v6→v7: remove isLocked from persistence (caused stale lockout blocking all tracks)
-        // v5→v7: clear stale queue data + isLocked, keep user preferences only
-        if (version < 7) {
+        // v8: removed browse timer / lockout — keep user preferences only
+        if (version < 8) {
           return {
             volume: persisted.volume ?? 0.8,
             isMuted: persisted.isMuted ?? false,
@@ -258,10 +213,6 @@ export const useUserStore = create(
           isSubscribed: user?.isSubscribed || false,
           supporterTier: user?.tier || 'free'
         });
-        // Unlock site when user logs in
-        if (user) {
-          usePlayerStore.getState().unlockSite();
-        }
       },
 
       subscribe: (email, tier = 'regular') => {
@@ -272,7 +223,6 @@ export const useUserStore = create(
           supporterTier: tier,
           user: { email, isSubscribed: true, tier }
         });
-        usePlayerStore.getState().unlockSite();
       },
 
       setEmail: (email) => set({ email }),
@@ -289,8 +239,6 @@ export const useUserStore = create(
           sessionToken: null,
           sessionKicked: false,
         });
-        // Re-lock site on logout
-        usePlayerStore.getState().lockSite();
       },
 
       // Session heartbeat — call every 30s to enforce single device login
