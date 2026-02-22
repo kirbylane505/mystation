@@ -9,7 +9,7 @@ import { useState, useEffect } from 'react';
 import TrackList from '@/components/TrackList';
 import CreatePlaylistModal from '@/components/CreatePlaylistModal';
 import { tracks, albums, playlists, getOfficialTracks } from '@/data/tracks';
-import { usePlayerStore } from '@/store/playerStore';
+import { usePlayerStore, useUserStore } from '@/store/playerStore';
 import {
   Search, SlidersHorizontal, Grid, List, Plus,
   ArrowUpDown, Music, Clock, Calendar, Disc,
@@ -31,7 +31,8 @@ export default function MusicPageClient({ initialTrackId, autoplay = false }) {
   const [accessCodeInput, setAccessCodeInput] = useState('');
   const [accessCodeError, setAccessCodeError] = useState('');
   const [accessCodeLoading, setAccessCodeLoading] = useState(false);
-  const { setQueue, play, currentTrack, isPlaying, vaultUnlocked, setVaultUnlocked, isSubscribed } = usePlayerStore();
+  const { setQueue, play, currentTrack, isPlaying, vaultUnlocked, setVaultUnlocked } = usePlayerStore();
+  const isSubscribed = useUserStore(s => s.isSubscribed);
 
   // Auto-play track if coming from share link
   useEffect(() => {
