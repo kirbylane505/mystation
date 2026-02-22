@@ -1,7 +1,8 @@
 /**
  * MYSTATION - Comments API (Supabase-backed)
- * GET: Fetch comments for a track
- * POST: Add a comment + notify Mike via email
+ * GET: Fetch comments for a track (with nested admin replies)
+ * POST: Add a comment (subscriber-only) or admin reply
+ * DELETE: Remove a comment (admin-only)
  *
  * Required Supabase table:
  * ---------------------------------------------------------
@@ -11,9 +12,13 @@
  *   username text NOT NULL,
  *   content text NOT NULL,
  *   avatar text DEFAULT '',
+ *   parent_id uuid REFERENCES comments(id) DEFAULT NULL,
+ *   is_admin boolean DEFAULT false,
+ *   role text DEFAULT 'fan',
  *   created_at timestamptz DEFAULT now()
  * );
  * CREATE INDEX idx_comments_track_id ON comments (track_id);
+ * CREATE INDEX idx_comments_parent_id ON comments (parent_id);
  * ---------------------------------------------------------
  */
 
@@ -37,6 +42,25 @@ function checkRateLimit(ip) {
   return true;
 }
 
+function isValidAdminKey(key) {
+  const adminKey = process.env.ADMIN_KEY;
+  return adminKey && key === adminKey;
+}
+
+function mapRow(row) {
+  return {
+    id: row.id,
+    trackId: row.track_id,
+    name: row.username,
+    message: row.content,
+    avatar: row.avatar || '',
+    parentId: row.parent_id || null,
+    isAdmin: row.is_admin || false,
+    role: row.role || 'fan',
+    createdAt: row.created_at,
+  };
+}
+
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const trackId = searchParams.get('trackId');
@@ -47,14 +71,13 @@ export async function GET(request) {
 
   const supabase = getSupabaseAdmin();
   if (!supabase) {
-    // Supabase not configured -- return empty gracefully
     return NextResponse.json({ comments: [] });
   }
 
   try {
     const { data, error } = await supabase
       .from('comments')
-      .select('id, track_id, username, content, avatar, created_at')
+      .select('id, track_id, username, content, avatar, parent_id, is_admin, role, created_at')
       .eq('track_id', String(trackId))
       .order('created_at', { ascending: true });
 
@@ -63,14 +86,25 @@ export async function GET(request) {
       return NextResponse.json({ comments: [] });
     }
 
-    // Map DB columns to the shape the frontend expects
-    const comments = (data || []).map(row => ({
-      id: row.id,
-      trackId: row.track_id,
-      name: row.username,
-      message: row.content,
-      avatar: row.avatar || '',
-      createdAt: row.created_at,
+    const all = (data || []).map(mapRow);
+
+    // Separate top-level comments and replies
+    const topLevel = [];
+    const repliesByParent = {};
+
+    for (const c of all) {
+      if (c.parentId) {
+        if (!repliesByParent[c.parentId]) repliesByParent[c.parentId] = [];
+        repliesByParent[c.parentId].push(c);
+      } else {
+        topLevel.push(c);
+      }
+    }
+
+    // Attach replies to their parent
+    const comments = topLevel.map(c => ({
+      ...c,
+      replies: repliesByParent[c.id] || [],
     }));
 
     return NextResponse.json({ comments });
@@ -88,37 +122,58 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Too many comments. Try again later.' }, { status: 429 });
     }
 
-    const { trackId, trackTitle, name, message } = await request.json();
+    const { trackId, trackTitle, name, message, parentId, adminKey } = await request.json();
 
-    if (!trackId || !name?.trim() || !message?.trim()) {
-      return NextResponse.json({ error: 'Name and message required' }, { status: 400 });
+    const isAdmin = isValidAdminKey(adminKey);
+
+    // Non-admin posts require subscriber cookie
+    if (!isAdmin) {
+      const subCookie = request.cookies.get('mystation-sub');
+      if (!subCookie?.value) {
+        return NextResponse.json({ error: 'Subscribe to comment' }, { status: 403 });
+      }
     }
 
-    // Sanitize inputs
-    const cleanName = name.trim().slice(0, 50);
+    if (!trackId || !message?.trim()) {
+      return NextResponse.json({ error: 'Message required' }, { status: 400 });
+    }
+
+    // Admin always posts as "Mike Page", fans use their name
+    const cleanName = isAdmin ? 'Mike Page' : (name?.trim() || '').slice(0, 50);
+    if (!isAdmin && !cleanName) {
+      return NextResponse.json({ error: 'Name required' }, { status: 400 });
+    }
     const cleanMessage = message.trim().slice(0, 500);
 
     const supabase = getSupabaseAdmin();
     if (!supabase) {
-      // Supabase not configured -- return a fake comment so the UI still works
       const fallback = {
         id: `local-${Date.now()}`,
         trackId: String(trackId),
         name: cleanName,
         message: cleanMessage,
+        parentId: parentId || null,
+        isAdmin,
+        role: isAdmin ? 'admin' : 'fan',
         createdAt: new Date().toISOString(),
+        replies: [],
       };
       return NextResponse.json({ comment: fallback, success: true });
     }
 
+    const insertData = {
+      track_id: String(trackId),
+      username: cleanName,
+      content: cleanMessage,
+      is_admin: isAdmin,
+      role: isAdmin ? 'admin' : 'fan',
+    };
+    if (parentId) insertData.parent_id = parentId;
+
     const { data, error } = await supabase
       .from('comments')
-      .insert({
-        track_id: String(trackId),
-        username: cleanName,
-        content: cleanMessage,
-      })
-      .select('id, track_id, username, content, avatar, created_at')
+      .insert(insertData)
+      .select('id, track_id, username, content, avatar, parent_id, is_admin, role, created_at')
       .single();
 
     if (error) {
@@ -126,18 +181,12 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Failed to post comment' }, { status: 500 });
     }
 
-    // Map DB row to frontend shape
-    const comment = {
-      id: data.id,
-      trackId: data.track_id,
-      name: data.username,
-      message: data.content,
-      avatar: data.avatar || '',
-      createdAt: data.created_at,
-    };
+    const comment = { ...mapRow(data), replies: [] };
 
-    // Send email notification to Mike (fire-and-forget)
-    notifyAdmin(comment, trackTitle).catch(() => {});
+    // Send email notification to Mike for fan comments (not admin's own replies)
+    if (!isAdmin) {
+      notifyAdmin(comment, trackTitle).catch(() => {});
+    }
 
     return NextResponse.json({ comment, success: true });
   } catch (err) {
@@ -146,8 +195,40 @@ export async function POST(request) {
   }
 }
 
+export async function DELETE(request) {
+  try {
+    const { commentId, adminKey } = await request.json();
+
+    if (!isValidAdminKey(adminKey)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    if (!commentId) {
+      return NextResponse.json({ error: 'Comment ID required' }, { status: 400 });
+    }
+
+    const supabase = getSupabaseAdmin();
+    if (!supabase) {
+      return NextResponse.json({ success: true });
+    }
+
+    // Delete replies first (if deleting a parent), then the comment itself
+    await supabase.from('comments').delete().eq('parent_id', commentId);
+    const { error } = await supabase.from('comments').delete().eq('id', commentId);
+
+    if (error) {
+      console.error('Supabase comments delete error:', error.message);
+      return NextResponse.json({ error: 'Failed to delete' }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    console.error('Comments DELETE error:', err);
+    return NextResponse.json({ error: 'Failed to delete' }, { status: 500 });
+  }
+}
+
 async function notifyAdmin(comment, trackTitle) {
-  // Use Resend if configured
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) return;
 
