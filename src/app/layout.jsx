@@ -22,6 +22,7 @@ import Script from 'next/script';
 import { Toaster } from 'sonner';
 import FoundingMemberBanner from '@/components/FoundingMemberBanner';
 import CashAppThankYou from '@/components/CashAppThankYou';
+import SubscriberThankYou from '@/components/SubscriberThankYou';
 
 // Lazy-loaded utilities — code-split into separate chunks (loaded async after hydration)
 import LazyUtilities from '@/components/LazyUtilities';
@@ -134,6 +135,7 @@ export default function RootLayout({ children }) {
           <SessionGuard />
           <Suspense><EmpireWelcome /></Suspense>
           <CashAppThankYou />
+          <SubscriberThankYou />
           <LazyUtilities />
         </ClientProviders>
         <Script id="register-sw" strategy="afterInteractive">
