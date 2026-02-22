@@ -6,7 +6,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { X, Play, Eye, ExternalLink, Share2, Heart, FileText, ChevronDown, ChevronUp, MessageCircle } from 'lucide-react';
+import { X, Play, Eye, ExternalLink, Share2, Heart, FileText, ChevronDown, ChevronUp, MessageCircle, Link2, Check, Mail } from 'lucide-react';
 import { useVideoStore } from '@/store/videoStore';
 import CommentSection from './CommentSection';
 
@@ -57,6 +57,8 @@ export default function VideoPlayer({ video, onClose }) {
   const [hasTracked, setHasTracked] = useState(false);
   const [showLyrics, setShowLyrics] = useState(false);
   const [lyricsExpanded, setLyricsExpanded] = useState(false);
+  const [showShare, setShowShare] = useState(false);
+  const [copied, setCopied] = useState(false);
   const viewCount = getViews(video.id);
 
   // Get lyrics for this video if available
@@ -79,6 +81,48 @@ export default function VideoPlayer({ video, onClose }) {
   const youtubeUrl = video.youtubeId
     ? `https://www.youtube.com/embed/${video.youtubeId}?autoplay=1&rel=0`
     : null;
+
+  const videoShareUrl = video.youtubeId
+    ? `https://youtube.com/watch?v=${video.youtubeId}`
+    : `https://mystationlive.com/videos`;
+  const shareTitle = `${video.title} - Mike Page`;
+  const shareText = `🎬 "${video.title}" - Mike Page\n\nWatch now!`;
+
+  const copyVideoLink = async () => {
+    try {
+      await navigator.clipboard.writeText(videoShareUrl);
+    } catch {
+      const ta = document.createElement('textarea');
+      ta.value = videoShareUrl;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const sendVideoSMS = () => {
+    const body = encodeURIComponent(`${shareText}\n\n🎧 ${videoShareUrl}`);
+    window.location.href = `sms:?&body=${body}`;
+  };
+
+  const sendVideoEmail = () => {
+    const subject = encodeURIComponent(shareTitle);
+    const body = encodeURIComponent(`${shareText}\n\n🎧 Watch here: ${videoShareUrl}`);
+    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+  };
+
+  const shareVideoNative = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: shareTitle, text: shareText, url: videoShareUrl });
+        return;
+      } catch {}
+    }
+    copyVideoLink();
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-xl overflow-y-auto">
@@ -196,7 +240,7 @@ export default function VideoPlayer({ video, onClose }) {
             <button className="p-3 bg-white/10 rounded-xl hover:bg-white/20 transition">
               <Heart size={20} className="text-white" />
             </button>
-            <button className="p-3 bg-white/10 rounded-xl hover:bg-white/20 transition">
+            <button onClick={() => setShowShare(true)} className="p-3 bg-white/10 rounded-xl hover:bg-white/20 transition">
               <Share2 size={20} className="text-white" />
             </button>
             {video.youtubeId && (
@@ -244,6 +288,68 @@ export default function VideoPlayer({ video, onClose }) {
           </div>
         )}
       </div>
+
+      {/* Share Modal */}
+      {showShare && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] flex items-center justify-center p-4" onClick={() => setShowShare(false)}>
+          <div className="glass rounded-2xl max-w-md w-full animate-scale-in" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-6 border-b border-white/10">
+              <div>
+                <h2 className="text-xl font-bold text-white">Share Video</h2>
+                <p className="text-white/50 text-sm">{video.title}</p>
+              </div>
+              <button onClick={() => setShowShare(false)} className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center hover:bg-white/10 transition">
+                <X size={20} className="text-white" />
+              </button>
+            </div>
+            <div className="p-6 space-y-3">
+              {/* Native Share / Instagram */}
+              <button onClick={shareVideoNative} className="w-full flex items-center gap-4 p-4 bg-pink-500/10 hover:bg-pink-500/20 rounded-xl border border-pink-500/30 transition">
+                <div className="w-12 h-12 bg-pink-500/20 rounded-full flex items-center justify-center">
+                  <Share2 size={24} className="text-pink-400" />
+                </div>
+                <div className="text-left">
+                  <p className="font-bold text-white">Share to Social</p>
+                  <p className="text-sm text-white/50">Instagram, Twitter, and more</p>
+                </div>
+              </button>
+              {/* SMS */}
+              <button onClick={sendVideoSMS} className="w-full flex items-center gap-4 p-4 bg-green-500/10 hover:bg-green-500/20 rounded-xl border border-green-500/30 transition">
+                <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center">
+                  <MessageCircle size={24} className="text-green-400" />
+                </div>
+                <div className="text-left">
+                  <p className="font-bold text-white">Send via SMS</p>
+                  <p className="text-sm text-white/50">Text the video link to anyone</p>
+                </div>
+              </button>
+              {/* Email */}
+              <button onClick={sendVideoEmail} className="w-full flex items-center gap-4 p-4 bg-blue-500/10 hover:bg-blue-500/20 rounded-xl border border-blue-500/30 transition">
+                <div className="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center">
+                  <Mail size={24} className="text-blue-400" />
+                </div>
+                <div className="text-left">
+                  <p className="font-bold text-white">Send via Email</p>
+                  <p className="text-sm text-white/50">Email the video link</p>
+                </div>
+              </button>
+              {/* Copy Link */}
+              <button onClick={copyVideoLink} className="w-full flex items-center gap-4 p-4 bg-purple-500/10 hover:bg-purple-500/20 rounded-xl border border-purple-500/30 transition">
+                <div className="w-12 h-12 bg-purple-500/20 rounded-full flex items-center justify-center">
+                  {copied ? <Check size={24} className="text-green-400" /> : <Link2 size={24} className="text-purple-400" />}
+                </div>
+                <div className="text-left">
+                  <p className="font-bold text-white">{copied ? 'Link Copied!' : 'Copy Link'}</p>
+                  <p className="text-sm text-white/50">Share anywhere you want</p>
+                </div>
+              </button>
+            </div>
+            <div className="p-4 border-t border-white/10 text-center">
+              <p className="text-white/30 text-xs">Sharing helps support the Mike Page Foundation</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

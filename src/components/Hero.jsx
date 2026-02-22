@@ -8,13 +8,22 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import Image from 'next/image';
-import { MessageCircle } from 'lucide-react';
+import { MessageCircle, Share2 } from 'lucide-react';
 import CommentSection from './CommentSection';
 
 export default function Hero() {
   const [commentVideo, setCommentVideo] = useState(null);
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
+
+  const shareVideo = async (title, youtubeId) => {
+    const url = `https://youtube.com/watch?v=${youtubeId}`;
+    const text = `🎬 "${title}" - Mike Page\n\nWatch now!`;
+    if (navigator.share) {
+      try { await navigator.share({ title: `${title} - Mike Page`, text, url }); return; } catch {}
+    }
+    try { await navigator.clipboard.writeText(url); } catch {}
+  };
 
   return (
     <section className="video-hero relative min-h-[100vh] flex items-center justify-center overflow-hidden">
@@ -65,13 +74,22 @@ export default function Hero() {
               <p className="text-white/30 text-xs uppercase tracking-[0.2em]">
                 "Caught That" — Official 4K Video
               </p>
-              <button
-                onClick={() => setCommentVideo({ id: 'video-caught-that', title: 'Caught That' })}
-                className="flex items-center gap-1.5 text-white/40 hover:text-blue-400 transition text-xs"
-              >
-                <MessageCircle size={14} />
-                <span>Comments</span>
-              </button>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => shareVideo('Caught That', 'xqw4wV8Npzs')}
+                  className="flex items-center gap-1.5 text-white/40 hover:text-blue-400 transition text-xs"
+                >
+                  <Share2 size={14} />
+                  <span>Share</span>
+                </button>
+                <button
+                  onClick={() => setCommentVideo({ id: 'video-caught-that', title: 'Caught That' })}
+                  className="flex items-center gap-1.5 text-white/40 hover:text-blue-400 transition text-xs"
+                >
+                  <MessageCircle size={14} />
+                  <span>Comments</span>
+                </button>
+              </div>
             </div>
           </div>
           <div>
@@ -89,13 +107,22 @@ export default function Hero() {
               <p className="text-white/30 text-xs uppercase tracking-[0.2em]">
                 "To The Money" — Official 4K Video
               </p>
-              <button
-                onClick={() => setCommentVideo({ id: 'video-to-the-money', title: 'To The Money' })}
-                className="flex items-center gap-1.5 text-white/40 hover:text-blue-400 transition text-xs"
-              >
-                <MessageCircle size={14} />
-                <span>Comments</span>
-              </button>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => shareVideo('To The Money', 'DC9CGQN_DI8')}
+                  className="flex items-center gap-1.5 text-white/40 hover:text-blue-400 transition text-xs"
+                >
+                  <Share2 size={14} />
+                  <span>Share</span>
+                </button>
+                <button
+                  onClick={() => setCommentVideo({ id: 'video-to-the-money', title: 'To The Money' })}
+                  className="flex items-center gap-1.5 text-white/40 hover:text-blue-400 transition text-xs"
+                >
+                  <MessageCircle size={14} />
+                  <span>Comments</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
