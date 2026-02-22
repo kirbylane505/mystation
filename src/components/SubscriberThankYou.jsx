@@ -21,7 +21,7 @@ function canShowToday() {
     if (!raw) return true;
     const data = JSON.parse(raw);
     const today = new Date().toISOString().slice(0, 10);
-    if (data.date !== today) return true; // New day, reset
+    if (data.date !== today) return true;
     return (data.count || 0) < MAX_PER_DAY;
   } catch {
     return true;
@@ -76,9 +76,17 @@ export default function SubscriberThankYou() {
 
   return (
     <div
-      className={`fixed top-24 left-1/2 -translate-x-1/2 z-[85] w-[92%] max-w-sm ${
-        exiting ? 'animate-slideOut' : 'animate-slideIn'
-      }`}
+      style={{
+        position: 'fixed',
+        top: '6rem',
+        left: '50%',
+        transform: exiting ? 'translateX(-50%) translateY(-20px)' : 'translateX(-50%) translateY(0)',
+        opacity: exiting ? 0 : 1,
+        transition: 'transform 0.3s ease, opacity 0.3s ease',
+        zIndex: 85,
+        width: '92%',
+        maxWidth: '24rem',
+      }}
     >
       <div className="relative bg-gradient-to-r from-[#0f1a2e] to-[#131d33] border border-blue-500/20 rounded-2xl p-4 shadow-2xl shadow-blue-500/10">
         {/* Close */}
@@ -106,49 +114,25 @@ export default function SubscriberThankYou() {
           </div>
         </div>
 
-        {/* Subtle progress bar showing auto-dismiss countdown */}
+        {/* Progress bar */}
         <div className="mt-3 h-0.5 bg-white/5 rounded-full overflow-hidden">
           <div
             className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full"
             style={{
-              animation: `shrink ${AUTO_DISMISS_MS}ms linear forwards`,
+              width: '100%',
+              animation: `subThanksShrink ${AUTO_DISMISS_MS}ms linear forwards`,
             }}
           />
         </div>
       </div>
 
-      <style jsx>{`
-        @keyframes slideIn {
-          from {
-            transform: translateX(-50%) translateY(-20px);
-            opacity: 0;
-          }
-          to {
-            transform: translateX(-50%) translateY(0);
-            opacity: 1;
-          }
-        }
-        @keyframes slideOut {
-          from {
-            transform: translateX(-50%) translateY(0);
-            opacity: 1;
-          }
-          to {
-            transform: translateX(-50%) translateY(-20px);
-            opacity: 0;
-          }
-        }
-        @keyframes shrink {
+      {/* Global keyframe — not scoped */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        @keyframes subThanksShrink {
           from { width: 100%; }
           to { width: 0%; }
         }
-        .animate-slideIn {
-          animation: slideIn 0.3s ease-out;
-        }
-        .animate-slideOut {
-          animation: slideOut 0.3s ease-in forwards;
-        }
-      `}</style>
+      ` }} />
     </div>
   );
 }
