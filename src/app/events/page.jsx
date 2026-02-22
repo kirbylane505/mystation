@@ -194,27 +194,44 @@ function MerchMarquee() {
           fetch('/api/printify/products').then(r => r.json()),
         ]);
 
-        let items = [];
+        let allItems = [];
 
-        if (pfRes.status === 'fulfilled' && pfRes.value?.products) {
-          items.push(...pfRes.value.products.slice(0, 8).map(p => ({
-            id: `pf-${p.id}`,
-            name: p.name,
-            price: p.price || p.retail_price,
-            image: p.thumbnail_url || p.image,
-          })));
-        }
-
+        // Printify — real product photos
         if (pyRes.status === 'fulfilled' && pyRes.value?.products) {
-          items.push(...pyRes.value.products.slice(0, 8).map(p => ({
+          allItems.push(...pyRes.value.products.map(p => ({
             id: `py-${p.id}`,
             name: p.title || p.name,
             price: p.price || (p.variants?.[0]?.price ? `$${(p.variants[0].price / 100).toFixed(0)}` : null),
             image: p.images?.[0]?.src || p.thumbnail_url,
-          })));
+            slug: (p.title || p.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
+          })).filter(p => p.image));
         }
 
-        setProducts(items.slice(0, 12));
+        // Printful — only items with real mockup images
+        if (pfRes.status === 'fulfilled' && pfRes.value?.products) {
+          allItems.push(...pfRes.value.products.map(p => ({
+            id: `pf-${p.id}`,
+            name: p.name,
+            price: p.price || p.retail_price,
+            image: p.thumbnail_url || p.image,
+            slug: (p.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
+          })).filter(p => p.image && !p.image.includes('idmg-the-label') && !p.image.includes('mpf-logo') && !p.image.includes('lotl-logo') && !p.image.includes('idmg-logo')));
+        }
+
+        // Deduplicate: one per product type (ignore brand/color)
+        const seen = new Set();
+        const unique = [];
+        const typeWords = ['slides', 'socks', 'tee', 'hoodie', 'cap', 'snapback', 'skully', 'backpack', 'tote', 'fanny', 'bottle', 'leggings', 'shorts', 'tank', 'jacket', 'joggers', 'crop', 'bucket', 'polo', 'bag', 'poster', 'bra', 'towel', 'mat', 'flip flop', 'bandana', 'wallet', 'sticker', 'art', 'mug'];
+        for (const item of allItems) {
+          const lower = item.name.toLowerCase();
+          const type = typeWords.find(t => lower.includes(t)) || lower;
+          if (!seen.has(type)) {
+            seen.add(type);
+            unique.push(item);
+          }
+        }
+
+        setProducts(unique.slice(0, 12));
       } catch {
         // Silently fail — section just won't render
       }
@@ -255,7 +272,7 @@ function MerchMarquee() {
           {doubled.map((product, i) => (
             <Link
               key={`${product.id}-${i}`}
-              href="/merch"
+              href={`/merch/${product.slug}`}
               className="inline-flex items-center gap-3 px-4 py-3 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-amber-500/30 rounded-xl transition-all duration-300 group shrink-0 hover:scale-105"
             >
               {product.image && (
