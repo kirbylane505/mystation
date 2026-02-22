@@ -42,9 +42,17 @@ function setupIOSAudioUnlock() {
     audioUnlocked = true;
     const audio = getGlobalAudio();
     if (audio) {
-      audio.src = SILENCE_DATA_URL;
-      const p = audio.play();
-      if (p) p.then(() => { audio.pause(); audio.currentTime = 0; audio.src = ''; }).catch(() => { audio.src = ''; });
+      // If a real track is already loaded, play IT instead of the silence WAV.
+      // The user gesture still unlocks the iOS audio context.
+      // This prevents the silence WAV from overwriting audio.src and
+      // triggering onEnded → nextTrack (off-by-one track bug).
+      if (audio.src && !audio.src.startsWith('data:') && audio.src !== window.location.href) {
+        audio.play().catch(() => {});
+      } else {
+        audio.src = SILENCE_DATA_URL;
+        const p = audio.play();
+        if (p) p.then(() => { audio.pause(); audio.currentTime = 0; audio.src = ''; }).catch(() => { audio.src = ''; });
+      }
     }
     document.removeEventListener('touchstart', unlock, true);
     document.removeEventListener('touchend', unlock, true);
@@ -184,6 +192,10 @@ export default function AudioPlayer() {
       // silence WAV from triggering nextTrack() when its ended event races
       // with the real track load (off-by-one bug)
       if (isLoadingRef.current) return;
+
+      // Ignore silence WAV endings — iOS audio unlock artifact
+      // The silence WAV is a data: URL; real tracks are streaming URLs
+      if (!audio.src || audio.src.startsWith('data:') || audio.duration < 0.5) return;
 
       if (repeatRef.current === 'one') {
         audio.currentTime = 0;

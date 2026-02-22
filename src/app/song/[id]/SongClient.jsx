@@ -3,27 +3,64 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Play, Pause, Music, Share2, Heart, Disc3, Loader2, SkipBack, SkipForward, Volume2, VolumeX, RotateCcw } from 'lucide-react';
+import { Play, Pause, Music, Share2, Heart, Disc3, Loader2, SkipBack, SkipForward, Volume2, VolumeX, RotateCcw, Smartphone } from 'lucide-react';
 import { usePlayerStore } from '@/store/playerStore';
+import { progressBridge } from '@/lib/progressBridge';
 import { shareMP3 } from '@/lib/shareAudio';
 import CommentSection from '@/components/CommentSection';
 import VoiceCommand from '@/components/VoiceCommand';
 
+// Get the global audio element set by AudioPlayer
+function getAudio() {
+  return typeof window !== 'undefined' ? window.__mystation_audio : null;
+}
+
+// Detect iOS — volume is hardware-only on iOS Safari
+function isIOS() {
+  if (typeof navigator === 'undefined') return false;
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+
 export default function SongClient({ track, allTracks, albumArt }) {
-  const {
-    currentTrack, isPlaying, setTrack, setQueue, togglePlay,
-    progress, duration, setProgress, volume, isMuted, setVolume, toggleMute,
-    nextTrack, prevTrack
-  } = usePlayerStore();
+  const currentTrack = usePlayerStore(s => s.currentTrack);
+  const isPlaying = usePlayerStore(s => s.isPlaying);
+  const setTrack = usePlayerStore(s => s.setTrack);
+  const setQueue = usePlayerStore(s => s.setQueue);
+  const togglePlay = usePlayerStore(s => s.togglePlay);
+  const volume = usePlayerStore(s => s.volume);
+  const isMuted = usePlayerStore(s => s.isMuted);
+  const setVolume = usePlayerStore(s => s.setVolume);
+  const toggleMute = usePlayerStore(s => s.toggleMute);
+  const nextTrack = usePlayerStore(s => s.nextTrack);
+  const prevTrack = usePlayerStore(s => s.prevTrack);
+
   const [shared, setShared] = useState(false);
   const [mp3Loading, setMp3Loading] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [liveProgress, setLiveProgress] = useState(0);
+  const [liveDuration, setLiveDuration] = useState(0);
   const seekBarRef = useRef(null);
+  const progressBarRef = useRef(null);
   const isDraggingRef = useRef(false);
   const isThisTrack = currentTrack?.id === track.id;
   const isThisPlaying = isThisTrack && isPlaying;
+  const isiOS = mounted && isIOS();
 
   useEffect(() => { setMounted(true); }, []);
+
+  // Subscribe to progressBridge for real-time progress (no re-renders via store)
+  useEffect(() => {
+    const unsub = progressBridge.subscribe((p, d) => {
+      setLiveProgress(p);
+      setLiveDuration(d);
+      // Direct DOM update for smooth seek bar (avoids React re-render lag)
+      if (progressBarRef.current && d > 0) {
+        progressBarRef.current.style.width = `${(p / d) * 100}%`;
+      }
+    });
+    return unsub;
+  }, []);
 
   // Auto-play on mount
   useEffect(() => {
@@ -40,19 +77,21 @@ export default function SongClient({ track, allTracks, albumArt }) {
     }
   };
 
-  // Rewind 10 seconds
+  // Rewind 10 seconds — use audio element directly (store progress is stale)
   const handleRewind = useCallback(() => {
-    if (isThisTrack && duration > 0) {
-      setProgress(Math.max(0, progress - 10));
+    const audio = getAudio();
+    if (audio && audio.duration > 0) {
+      audio.currentTime = Math.max(0, audio.currentTime - 10);
     }
-  }, [isThisTrack, duration, progress, setProgress]);
+  }, []);
 
-  // Forward 10 seconds
+  // Forward 10 seconds — use audio element directly
   const handleForward = useCallback(() => {
-    if (isThisTrack && duration > 0) {
-      setProgress(Math.min(duration, progress + 10));
+    const audio = getAudio();
+    if (audio && audio.duration > 0) {
+      audio.currentTime = Math.min(audio.duration, audio.currentTime + 10);
     }
-  }, [isThisTrack, duration, progress, setProgress]);
+  }, []);
 
   const handleShare = async () => {
     const url = `https://mystationlive.com/song/${track.id}`;
@@ -73,14 +112,15 @@ export default function SongClient({ track, allTracks, albumArt }) {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // Seek handler that works for both click and touch drag
+  // Seek — use audio element directly
   const seekToPosition = useCallback((clientX) => {
     const bar = seekBarRef.current;
-    if (!bar || !duration) return;
+    const audio = getAudio();
+    if (!bar || !audio || !audio.duration) return;
     const rect = bar.getBoundingClientRect();
     const percent = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
-    setProgress(percent * duration);
-  }, [duration, setProgress]);
+    audio.currentTime = percent * audio.duration;
+  }, []);
 
   const handleSeek = (e) => seekToPosition(e.clientX);
 
@@ -158,7 +198,7 @@ export default function SongClient({ track, allTracks, albumArt }) {
 
         {/* Player Controls */}
         <div className="w-full max-w-md mb-8">
-          {/* Progress / Seek Bar — Always visible */}
+          {/* Progress / Seek Bar — live via progressBridge */}
           <div
             ref={seekBarRef}
             className="w-full h-3 bg-white/10 rounded-full cursor-pointer relative group touch-none"
@@ -168,15 +208,16 @@ export default function SongClient({ track, allTracks, albumArt }) {
             onTouchEnd={handleTouchEnd}
           >
             <div
-              className="h-full bg-gradient-to-r from-blue-500 to-blue-400 rounded-full relative transition-[width] duration-100"
-              style={{ width: `${duration ? (progress / duration) * 100 : 0}%` }}
+              ref={progressBarRef}
+              className="h-full bg-gradient-to-r from-blue-500 to-blue-400 rounded-full relative"
+              style={{ width: `${liveDuration ? (liveProgress / liveDuration) * 100 : 0}%`, transition: 'none' }}
             >
               <div className="absolute right-0 top-1/2 -translate-y-1/2 w-5 h-5 bg-white rounded-full shadow-lg md:opacity-0 md:group-hover:opacity-100 transition" />
             </div>
           </div>
           <div className="flex justify-between mt-2 px-1">
-            <span className="text-xs text-white/40 font-mono">{formatTime(isThisTrack ? progress : 0)}</span>
-            <span className="text-xs text-white/40 font-mono">{formatTime(isThisTrack ? duration : 0)}</span>
+            <span className="text-xs text-white/40 font-mono">{formatTime(isThisTrack ? liveProgress : 0)}</span>
+            <span className="text-xs text-white/40 font-mono">{formatTime(isThisTrack ? liveDuration : 0)}</span>
           </div>
 
           {/* Transport: Rewind / Prev / Play / Next / Forward */}
@@ -209,44 +250,53 @@ export default function SongClient({ track, allTracks, albumArt }) {
             </button>
           </div>
 
-          {/* Volume Control */}
-          <div className="flex items-center justify-center gap-3">
-            <button
-              onClick={() => setVolume(Math.max(0, volume - 0.2))}
-              className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-white text-xl font-bold active:bg-white/20 active:scale-90 transition-all"
-            >
-              −
-            </button>
-            <button onClick={toggleMute} className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-white/5 transition">
-              {mounted && (isMuted || volume === 0) ? (
-                <VolumeX size={24} className="text-red-400" />
-              ) : (
-                <Volume2 size={24} className="text-blue-400" />
-              )}
-              <span className="text-white font-bold text-lg w-12 text-center">{mounted ? Math.round((isMuted ? 0 : volume) * 100) : 80}%</span>
-            </button>
-            <button
-              onClick={() => setVolume(Math.min(1, volume + 0.2))}
-              className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-white text-xl font-bold active:bg-white/20 active:scale-90 transition-all"
-            >
-              +
-            </button>
-          </div>
+          {/* Volume Control — iOS uses hardware buttons only */}
+          {isiOS ? (
+            <div className="flex items-center justify-center gap-2 py-3 px-4 bg-white/[0.04] rounded-xl">
+              <Smartphone size={16} className="text-white/40" />
+              <span className="text-white/40 text-sm">Use device volume buttons</span>
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center justify-center gap-3">
+                <button
+                  onClick={() => setVolume(Math.max(0, volume - 0.2))}
+                  className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-white text-xl font-bold active:bg-white/20 active:scale-90 transition-all"
+                >
+                  −
+                </button>
+                <button onClick={toggleMute} className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-white/5 transition">
+                  {mounted && (isMuted || volume === 0) ? (
+                    <VolumeX size={24} className="text-red-400" />
+                  ) : (
+                    <Volume2 size={24} className="text-blue-400" />
+                  )}
+                  <span className="text-white font-bold text-lg w-12 text-center">{mounted ? Math.round((isMuted ? 0 : volume) * 100) : 80}%</span>
+                </button>
+                <button
+                  onClick={() => setVolume(Math.min(1, volume + 0.2))}
+                  className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-white text-xl font-bold active:bg-white/20 active:scale-90 transition-all"
+                >
+                  +
+                </button>
+              </div>
 
-          {/* Volume Bars — larger touch targets */}
-          <div className="flex justify-center gap-2 mt-3">
-            {[1, 2, 3, 4, 5].map((level) => (
-              <button
-                key={level}
-                onClick={() => setVolume(level * 0.2)}
-                className={`h-8 w-12 rounded-lg transition-all active:scale-90 ${
-                  mounted && (isMuted ? 0 : volume) >= level * 0.2
-                    ? 'bg-gradient-to-t from-blue-500 to-cyan-400 shadow-md shadow-blue-500/20'
-                    : 'bg-white/10'
-                }`}
-              />
-            ))}
-          </div>
+              {/* Volume Bars — larger touch targets */}
+              <div className="flex justify-center gap-2 mt-3">
+                {[1, 2, 3, 4, 5].map((level) => (
+                  <button
+                    key={level}
+                    onClick={() => setVolume(level * 0.2)}
+                    className={`h-8 w-12 rounded-lg transition-all active:scale-90 ${
+                      mounted && (isMuted ? 0 : volume) >= level * 0.2
+                        ? 'bg-gradient-to-t from-blue-500 to-cyan-400 shadow-md shadow-blue-500/20'
+                        : 'bg-white/10'
+                    }`}
+                  />
+                ))}
+              </div>
+            </>
+          )}
         </div>
 
         {/* Actions */}

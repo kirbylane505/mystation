@@ -22,6 +22,17 @@ import SeekBar from './SeekBar';
 import { shareMP3 } from '@/lib/shareAudio';
 import { albums } from '@/data/tracks';
 import Image from 'next/image';
+import { Smartphone } from 'lucide-react';
+
+// iOS Safari ignores audio.volume — hardware buttons only
+function useIsIOS() {
+  const [ios, setIos] = useState(false);
+  useEffect(() => {
+    setIos(/iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1));
+  }, []);
+  return ios;
+}
 
 // Get album cover art for a track
 function getAlbumArt(track) {
@@ -103,6 +114,7 @@ export default function Player() {
     return () => { document.body.style.overflow = ''; };
   }, [expanded]);
 
+  const isiOS = useIsIOS();
   const isFavorite = currentTrack ? favorites.includes(currentTrack.id) : false;
 
   // Share handlers
@@ -268,28 +280,37 @@ export default function Player() {
             </button>
           </div>
 
-          {/* Volume Slider - Mobile */}
-          <div className="flex items-center gap-3 px-8 mb-8">
-            <button onClick={toggleMute}>
-              <VolumeIcon volume={volume} muted={isMuted} size={20} />
-            </button>
-            <div
-              ref={volumeTrackRef}
-              className="relative flex-1 h-8 flex items-center cursor-pointer"
-              onMouseDown={onVolMouseDown}
-              onTouchStart={(e) => handleVolumeInteraction(e)}
-              onTouchMove={(e) => { e.preventDefault(); handleVolumeInteraction(e); }}
-            >
-              <div className="absolute left-0 right-0 h-1 rounded-full bg-white/10" />
-              <div
-                className="absolute left-0 h-1 rounded-full bg-white/60"
-                style={{ width: `${(isMuted ? 0 : volume) * 100}%` }}
-              />
-              <div
-                className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-white shadow"
-                style={{ left: `${(isMuted ? 0 : volume) * 100}%` }}
-              />
-            </div>
+          {/* Volume - iOS shows hardware message, others get slider */}
+          <div className="px-8 mb-8">
+            {isiOS ? (
+              <div className="flex items-center justify-center gap-2 py-3 px-4 bg-white/[0.04] rounded-xl">
+                <Smartphone size={16} className="text-white/40" />
+                <span className="text-white/40 text-sm">Use device volume buttons</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-3">
+                <button onClick={toggleMute}>
+                  <VolumeIcon volume={volume} muted={isMuted} size={20} />
+                </button>
+                <div
+                  ref={volumeTrackRef}
+                  className="relative flex-1 h-8 flex items-center cursor-pointer"
+                  onMouseDown={onVolMouseDown}
+                  onTouchStart={(e) => handleVolumeInteraction(e)}
+                  onTouchMove={(e) => { e.preventDefault(); handleVolumeInteraction(e); }}
+                >
+                  <div className="absolute left-0 right-0 h-1 rounded-full bg-white/10" />
+                  <div
+                    className="absolute left-0 h-1 rounded-full bg-white/60"
+                    style={{ width: `${(isMuted ? 0 : volume) * 100}%` }}
+                  />
+                  <div
+                    className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-white shadow"
+                    style={{ left: `${(isMuted ? 0 : volume) * 100}%` }}
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Action Buttons */}
