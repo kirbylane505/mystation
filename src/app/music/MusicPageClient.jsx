@@ -5,16 +5,16 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import TrackList from '@/components/TrackList';
 import CreatePlaylistModal from '@/components/CreatePlaylistModal';
 import { tracks, albums, playlists, getOfficialTracks } from '@/data/tracks';
-import { usePlayerStore } from '@/store/playerStore';
+import { usePlayerStore, useUserStore } from '@/store/playerStore';
 import {
   Search, SlidersHorizontal, Grid, List, Plus,
   ArrowUpDown, Music, Clock, Calendar, Disc,
   TrendingUp, Shuffle, Play, ChevronLeft, Pause,
-  Lock, ShieldCheck
+  Lock, Unlock, ShieldCheck, Loader2
 } from 'lucide-react';
 
 export default function MusicPageClient({ initialTrackId, autoplay = false }) {
@@ -28,7 +28,12 @@ export default function MusicPageClient({ initialTrackId, autoplay = false }) {
   const [activePlaylist, setActivePlaylist] = useState(null);
   const [activeTab, setActiveTab] = useState('music');
   const [shuffleSeed] = useState(() => Math.random());
-  const { setQueue, play, currentTrack, isPlaying } = usePlayerStore();
+  const [accessCode, setAccessCode] = useState('');
+  const [accessError, setAccessError] = useState('');
+  const [accessLoading, setAccessLoading] = useState(false);
+  const [hasVaultAccess, setHasVaultAccess] = useState(false);
+  const { setQueue, play, currentTrack, isPlaying, vaultUnlocked, setVaultUnlocked } = usePlayerStore();
+  const { isSubscribed } = useUserStore();
 
   // Auto-play track if coming from share link
   useEffect(() => {
@@ -50,6 +55,54 @@ export default function MusicPageClient({ initialTrackId, autoplay = false }) {
       try { setUserPlaylists(JSON.parse(saved)); } catch { localStorage.removeItem('mystation-playlists'); }
     }
   }, []);
+
+  // Check vault access on mount (server-side cookie check)
+  useEffect(() => {
+    if (isSubscribed || vaultUnlocked) {
+      setHasVaultAccess(true);
+      return;
+    }
+    fetch('/api/vault/verify')
+      .then(r => r.json())
+      .then(data => {
+        if (data.valid) {
+          setHasVaultAccess(true);
+          setVaultUnlocked(true);
+        }
+      })
+      .catch(() => {});
+  }, [isSubscribed, vaultUnlocked, setVaultUnlocked]);
+
+  // Sync store changes
+  useEffect(() => {
+    if (isSubscribed || vaultUnlocked) setHasVaultAccess(true);
+  }, [isSubscribed, vaultUnlocked]);
+
+  const handleAccessCodeSubmit = useCallback(async (e) => {
+    e.preventDefault();
+    if (!accessCode.trim()) return;
+    setAccessLoading(true);
+    setAccessError('');
+    try {
+      const res = await fetch('/api/access-code/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: accessCode.trim() }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setHasVaultAccess(true);
+        setVaultUnlocked(true);
+        setAccessCode('');
+      } else {
+        setAccessError(data.error || 'Invalid code');
+      }
+    } catch {
+      setAccessError('Something went wrong. Try again.');
+    } finally {
+      setAccessLoading(false);
+    }
+  }, [accessCode, setVaultUnlocked]);
 
   // Get only official tracks
   const officialTracks = getOfficialTracks();
@@ -170,13 +223,14 @@ export default function MusicPageClient({ initialTrackId, autoplay = false }) {
                 : 'bg-white/10 text-white/60 hover:bg-white/15 hover:text-white'
             }`}
           >
-            <Lock size={16} />
+            {hasVaultAccess ? <Unlock size={16} /> : <Lock size={16} />}
             The Vault
+            {hasVaultAccess && <span className="text-xs opacity-60">({vaultTracks.length})</span>}
           </button>
         </div>
 
-        {/* Vault Locked State — always locked, teaser only */}
-        {activeTab === 'vault' && (
+        {/* Vault Tab Content */}
+        {activeTab === 'vault' && !hasVaultAccess && (
           <div className="glass rounded-2xl p-8 md:p-12 mb-8 text-center relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-purple-900/30 via-transparent to-amber-900/20 pointer-events-none" />
 
@@ -187,15 +241,58 @@ export default function MusicPageClient({ initialTrackId, autoplay = false }) {
 
               <h2 className="text-2xl font-bold text-white mb-2">The Vault</h2>
               <p className="text-white/60 mb-4 max-w-md mx-auto">
-                {vaultTracks.length} exclusive unreleased tracks. Coming soon.
+                {vaultTracks.length} exclusive unreleased tracks locked inside.
               </p>
+
+              {/* Access Code Input */}
+              <form onSubmit={handleAccessCodeSubmit} className="max-w-sm mx-auto mb-6">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Enter access code"
+                    value={accessCode}
+                    onChange={(e) => { setAccessCode(e.target.value); setAccessError(''); }}
+                    autoComplete="off"
+                    className="flex-1 bg-white/10 border border-white/20 rounded-xl py-3 px-4 text-white placeholder:text-white/40 focus:outline-none focus:border-purple-500 text-center tracking-widest uppercase"
+                  />
+                  <button
+                    type="submit"
+                    disabled={accessLoading || !accessCode.trim()}
+                    className="px-5 py-3 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-semibold transition flex items-center gap-2"
+                  >
+                    {accessLoading ? <Loader2 size={16} className="animate-spin" /> : <Unlock size={16} />}
+                    Unlock
+                  </button>
+                </div>
+                {accessError && (
+                  <p className="text-red-400 text-sm mt-2">{accessError}</p>
+                )}
+              </form>
 
               <div className="flex items-center gap-2 justify-center text-purple-400 text-sm font-medium">
                 <ShieldCheck size={14} />
-                <span>Subscribe to be first in when the Vault opens</span>
+                <span>Subscribers get full vault access</span>
               </div>
             </div>
           </div>
+        )}
+
+        {/* Vault Unlocked — show tracks */}
+        {activeTab === 'vault' && hasVaultAccess && (
+          <>
+            <div className="glass rounded-2xl p-4 mb-6 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-purple-500/20 border border-purple-500/30 flex items-center justify-center">
+                <Unlock size={18} className="text-purple-400" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-white">The Vault</h2>
+                <p className="text-white/50 text-sm">{vaultTracks.length} exclusive tracks</p>
+              </div>
+            </div>
+            <div className="glass rounded-2xl p-2">
+              <TrackList trackIds={vaultTracks.map(t => t.id)} showComments={true} />
+            </div>
+          </>
         )}
 
         {/* Search & Filters — music tab only */}
