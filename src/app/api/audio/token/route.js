@@ -1,6 +1,6 @@
 /**
  * MYSTATION - Audio Token API
- * Access hierarchy: sub > friend > vault > auth > browse(<10min) > DJ > denied
+ * Access hierarchy: sub > friend > vault > auth > browse(<26min) > DJ > denied
  */
 
 import { NextResponse } from 'next/server';
@@ -11,7 +11,7 @@ if (!AUDIO_SECRET) {
   console.error('FATAL: AUDIO_SECRET env var is not set');
 }
 
-const BROWSE_DURATION_MS = 10 * 60 * 1000; // 10 minutes
+const BROWSE_DURATION_MS = 26 * 60 * 1000; // 26 minutes — MUST match session/start and session/check
 
 // Use Web Crypto API (same as middleware) for HMAC signing — ensures token compatibility
 async function signToken(payload) {

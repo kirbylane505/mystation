@@ -251,13 +251,20 @@ export default function AudioPlayer() {
     audio.addEventListener('waiting', onStalled);
 
     // Background audio persistence — auto-resume if system pauses audio
+    // Only tries once per pause event. If resume fails, syncs store to paused
+    // so the UI doesn't show "playing" with no audio (ghost state).
     const onAudioPause = () => {
-      // If the store says we should be playing but audio got paused (e.g. iOS background),
-      // try to resume after a short delay. Don't fight immediate intentional pauses.
       setTimeout(() => {
         const state = usePlayerStore.getState();
         if (state.isPlaying && audio.paused && audio.readyState >= 2 && !isLoadingRef.current) {
-          safePlay(audio);
+          safePlay(audio).then(played => {
+            // If resume failed and user isn't looking at the page, don't force pause yet —
+            // onVisibilityChange will try again when they return.
+            // If they ARE looking, sync the store so UI shows paused.
+            if (!played && document.visibilityState === 'visible') {
+              storeActionsRef.current.pause();
+            }
+          });
         }
       }, 300);
     };
@@ -266,7 +273,12 @@ export default function AudioPlayer() {
     const onVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
         const state = usePlayerStore.getState();
-        if (state.isPlaying && audio.paused) safePlay(audio);
+        if (state.isPlaying && audio.paused) {
+          safePlay(audio).then(played => {
+            // User is looking — if we can't resume, sync store so play button shows paused
+            if (!played) storeActionsRef.current.pause();
+          });
+        }
         if ('mediaSession' in navigator && navigator.mediaSession.setPositionState && audio.duration) {
           try {
             navigator.mediaSession.setPositionState({
