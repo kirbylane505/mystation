@@ -40,20 +40,39 @@ export default function Hero() {
           Your Music. Your Station. No Limits.
         </p>
 
-        {/* "Caught That" Official 4K Video */}
-        <div className="relative w-full aspect-video rounded-2xl overflow-hidden border border-white/10 shadow-2xl shadow-blue-500/10">
-          <iframe
-            className="w-full h-full"
-            src="https://www.youtube.com/embed/xqw4wV8Npzs?rel=0&modestbranding=1&playsinline=1"
-            title="Mike Page - Caught That (Official 4K Video)"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowFullScreen
-            style={{ border: 'none' }}
-          />
+        {/* Official 4K Videos — Side by Side */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+          <div>
+            <div className="relative w-full aspect-video rounded-2xl overflow-hidden border border-white/10 shadow-2xl shadow-blue-500/10">
+              <iframe
+                className="w-full h-full"
+                src="https://www.youtube.com/embed/xqw4wV8Npzs?rel=0&modestbranding=1&playsinline=1"
+                title="Mike Page - Caught That (Official 4K Video)"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                style={{ border: 'none' }}
+              />
+            </div>
+            <p className="text-white/30 text-xs uppercase tracking-[0.2em] mt-3">
+              "Caught That" — Official 4K Video
+            </p>
+          </div>
+          <div>
+            <div className="relative w-full aspect-video rounded-2xl overflow-hidden border border-white/10 shadow-2xl shadow-blue-500/10">
+              <iframe
+                className="w-full h-full"
+                src="https://www.youtube.com/embed/DC9CGQN_DI8?rel=0&modestbranding=1&playsinline=1"
+                title="Mike Page - To The Money (Official 4K Video)"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                style={{ border: 'none' }}
+              />
+            </div>
+            <p className="text-white/30 text-xs uppercase tracking-[0.2em] mt-3">
+              "To The Money" — Official 4K Video
+            </p>
+          </div>
         </div>
-        <p className="text-white/30 text-xs uppercase tracking-[0.2em] mt-4">
-          "Caught That" — Official 4K Video &bull; Prod. by The Cubist
-        </p>
       </div>
     </section>
   );
