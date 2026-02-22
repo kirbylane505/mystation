@@ -6,7 +6,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Play, Eye, ExternalLink, TrendingUp, Film, Youtube } from 'lucide-react';
+import { Play, Eye, ExternalLink, TrendingUp, Film, Youtube, MessageCircle } from 'lucide-react';
 import { videos, videoCategories, youtubeChannel } from '@/data/videos';
 import { useVideoStore } from '@/store/videoStore';
 import VideoPlayer from '@/components/VideoPlayer';

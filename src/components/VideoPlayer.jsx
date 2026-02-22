@@ -6,8 +6,9 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { X, Play, Eye, ExternalLink, Share2, Heart, FileText, ChevronDown, ChevronUp } from 'lucide-react';
+import { X, Play, Eye, ExternalLink, Share2, Heart, FileText, ChevronDown, ChevronUp, MessageCircle } from 'lucide-react';
 import { useVideoStore } from '@/store/videoStore';
+import CommentSection from './CommentSection';
 
 // Sample lyrics - can be moved to data file
 const videoLyrics = {
@@ -210,6 +211,14 @@ export default function VideoPlayer({ video, onClose }) {
               </a>
             )}
           </div>
+        </div>
+
+        {/* Comments Section */}
+        <div className="mt-8 glass rounded-2xl overflow-hidden">
+          <CommentSection
+            trackId={`video-${video.id}`}
+            trackTitle={video.title}
+          />
         </div>
 
         {/* Lyrics Section Below Video (alternative view) */}

@@ -5,9 +5,17 @@
 
 'use client';
 
+import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import Image from 'next/image';
+import { MessageCircle } from 'lucide-react';
+import CommentSection from './CommentSection';
 
 export default function Hero() {
+  const [commentVideo, setCommentVideo] = useState(null);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
   return (
     <section className="video-hero relative min-h-[100vh] flex items-center justify-center overflow-hidden">
       {/* Dark gradient background */}
@@ -53,9 +61,18 @@ export default function Hero() {
                 style={{ border: 'none' }}
               />
             </div>
-            <p className="text-white/30 text-xs uppercase tracking-[0.2em] mt-3">
-              "Caught That" — Official 4K Video
-            </p>
+            <div className="flex items-center justify-between mt-3">
+              <p className="text-white/30 text-xs uppercase tracking-[0.2em]">
+                "Caught That" — Official 4K Video
+              </p>
+              <button
+                onClick={() => setCommentVideo({ id: 'video-caught-that', title: 'Caught That' })}
+                className="flex items-center gap-1.5 text-white/40 hover:text-blue-400 transition text-xs"
+              >
+                <MessageCircle size={14} />
+                <span>Comments</span>
+              </button>
+            </div>
           </div>
           <div>
             <div className="relative w-full aspect-video rounded-2xl overflow-hidden border border-white/10 shadow-2xl shadow-blue-500/10">
@@ -68,12 +85,53 @@ export default function Hero() {
                 style={{ border: 'none' }}
               />
             </div>
-            <p className="text-white/30 text-xs uppercase tracking-[0.2em] mt-3">
-              "To The Money" — Official 4K Video
-            </p>
+            <div className="flex items-center justify-between mt-3">
+              <p className="text-white/30 text-xs uppercase tracking-[0.2em]">
+                "To The Money" — Official 4K Video
+              </p>
+              <button
+                onClick={() => setCommentVideo({ id: 'video-to-the-money', title: 'To The Money' })}
+                className="flex items-center gap-1.5 text-white/40 hover:text-blue-400 transition text-xs"
+              >
+                <MessageCircle size={14} />
+                <span>Comments</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Video Comment Modal — portaled to body */}
+      {commentVideo && mounted && createPortal(
+        <div className="fixed inset-0 z-[10000] flex items-end md:items-center justify-center pb-[72px] md:pb-0" onClick={() => setCommentVideo(null)}>
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+          <div
+            className="relative w-full md:w-[420px] md:max-h-[80vh] max-h-[65vh] rounded-t-2xl md:rounded-2xl border border-white/10 bg-[#0d1117] shadow-2xl overflow-hidden flex flex-col animate-slide-up"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="px-4 py-3 border-b border-white/10 flex items-center justify-between shrink-0">
+              <div>
+                <h3 className="text-sm font-semibold text-white/80 flex items-center gap-2">
+                  <MessageCircle size={14} className="text-blue-400" />
+                  Comments
+                </h3>
+                <p className="text-[11px] text-white/30 mt-0.5 truncate">{commentVideo.title}</p>
+              </div>
+              <button onClick={() => setCommentVideo(null)} className="p-2 text-white/40 hover:text-white transition">
+                <span className="text-lg leading-none">&times;</span>
+              </button>
+            </div>
+            <div className="flex-1 overflow-hidden">
+              <CommentSection
+                trackId={commentVideo.id}
+                trackTitle={commentVideo.title}
+                modalMode={true}
+              />
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
     </section>
   );
 }
