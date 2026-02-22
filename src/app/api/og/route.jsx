@@ -48,6 +48,23 @@ export async function GET(request) {
           }}
         />
 
+        {/* IDMG Circle Logo — right side */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="https://mystationlive.com/images/idmg-logo-white.png"
+          alt=""
+          width="360"
+          height="360"
+          style={{
+            position: 'absolute',
+            right: '60px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            opacity: 0.15,
+            borderRadius: '50%',
+          }}
+        />
+
         {/* Main content */}
         <div
           style={{
