@@ -327,9 +327,9 @@ export default function SongClient({ track, allTracks, albumArt }) {
           </Link>
         </div>
 
-        {/* Stream Free Badge */}
+        {/* Navigation Options for Recipients */}
         <div className="glass rounded-2xl p-6 w-full max-w-md">
-          <div className="flex items-center gap-3 mb-3">
+          <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center">
               <Heart size={20} className="text-blue-400" />
             </div>
@@ -338,12 +338,26 @@ export default function SongClient({ track, allTracks, albumArt }) {
               <p className="text-white/40 text-xs">Every stream supports the Mike Page Foundation</p>
             </div>
           </div>
-          <Link
-            href="/"
-            className="block w-full py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold text-sm rounded-xl text-center hover:shadow-lg hover:shadow-blue-500/30 transition-all"
-          >
-            Open MyStation
-          </Link>
+          <div className="flex flex-col gap-2">
+            <Link
+              href="/"
+              className="block w-full py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold text-sm rounded-xl text-center hover:shadow-lg hover:shadow-blue-500/30 transition-all"
+            >
+              Open MyStation
+            </Link>
+            <Link
+              href="/music"
+              className="block w-full py-3 bg-white/10 hover:bg-white/20 text-white font-bold text-sm rounded-xl text-center transition-all"
+            >
+              Browse All Music
+            </Link>
+            <Link
+              href="/events"
+              className="block w-full py-3 bg-white/10 hover:bg-white/20 text-white font-bold text-sm rounded-xl text-center transition-all"
+            >
+              Tour the Site
+            </Link>
+          </div>
         </div>
       </div>
     </div>
