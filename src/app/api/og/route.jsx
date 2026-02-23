@@ -60,7 +60,7 @@ export async function GET(request) {
             right: '60px',
             top: '50%',
             transform: 'translateY(-50%)',
-            opacity: 0.15,
+            opacity: 0.4,
             borderRadius: '50%',
           }}
         />
