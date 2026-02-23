@@ -34,12 +34,19 @@ function useIsIOS() {
   return ios;
 }
 
+const IDMG_LOGO = '/images/idmg-the-label.jpg';
+
 // Get album cover art for a track
 function getAlbumArt(track) {
-  if (!track) return '/images/idmg-the-label.jpg';
+  if (!track) return IDMG_LOGO;
   if (track.coverArt) return track.coverArt;
   const album = albums.find(a => a.id === track.albumId);
-  return album?.coverImage || '/images/idmg-the-label.jpg';
+  return album?.coverImage || IDMG_LOGO;
+}
+
+// Use object-contain + padding for IDMG logo so it's fully readable
+function artClass(src) {
+  return src === IDMG_LOGO ? 'object-contain p-2 bg-white' : 'object-cover';
 }
 
 function formatTime(seconds) {
@@ -179,7 +186,7 @@ export default function Player() {
         <div className="h-full flex items-center justify-between px-4 md:px-6">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg overflow-hidden border border-white/[0.08] shrink-0 relative">
-              <Image src="/images/idmg-the-label.jpg" alt="IDMG" fill className="object-cover" />
+              <Image src={IDMG_LOGO} alt="IDMG" fill className="object-contain p-2 bg-white" />
             </div>
             <div>
               <p className="text-white/60 text-sm font-medium">Mike Page</p>
@@ -228,7 +235,7 @@ export default function Player() {
           <div className="flex items-center justify-center px-8 pt-4 pb-6">
             <div className="relative w-[280px] h-[280px] sm:w-[320px] sm:h-[320px] rounded-xl overflow-hidden shadow-2xl shadow-black/60">
               {albumArt ? (
-                <Image src={albumArt} alt={currentTrack.album || currentTrack.title} fill className="object-cover" />
+                <Image src={albumArt} alt={currentTrack.album || currentTrack.title} fill className={artClass(albumArt)} />
               ) : (
                 <div className="w-full h-full bg-gradient-to-br from-blue-600/40 to-indigo-900/60 flex items-center justify-center">
                   <Music size={80} className="text-blue-400/60" />
@@ -425,7 +432,7 @@ export default function Player() {
           {/* Album art */}
           <div className="w-11 h-11 rounded-lg overflow-hidden bg-gradient-to-br from-blue-600/30 to-blue-900/50 border border-white/[0.08] shrink-0 relative">
             {albumArt ? (
-              <Image src={albumArt} alt="" fill className="object-cover" />
+              <Image src={albumArt} alt="" fill className={artClass(albumArt)} />
             ) : (
               <div className="w-full h-full flex items-center justify-center"><Music size={16} className="text-blue-400/60" /></div>
             )}
@@ -476,7 +483,7 @@ export default function Player() {
           <div className="flex items-center gap-3.5 w-[280px] shrink-0">
             <div className="w-14 h-14 rounded-lg overflow-hidden bg-gradient-to-br from-blue-600/30 to-blue-900/50 border border-white/[0.08] shrink-0 relative">
               {albumArt ? (
-                <Image src={albumArt} alt="" fill className="object-cover" />
+                <Image src={albumArt} alt="" fill className={artClass(albumArt)} />
               ) : (
                 <div className="w-full h-full flex items-center justify-center"><Music size={22} className="text-blue-400/60" /></div>
               )}

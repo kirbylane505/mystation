@@ -25,6 +25,10 @@ function getTrackArt(track) {
   return album?.coverImage || IDMG_LOGO;
 }
 
+function artClass(src) {
+  return src === IDMG_LOGO ? 'object-contain p-1.5 bg-white' : 'object-cover';
+}
+
 // Memoized track row — only re-renders when its own state changes
 const TrackRow = memo(function TrackRow({ track, index, isCurrentTrack, isPlayingThis, showNumber, showAlbum, showComments, onTrackClick, onCommentClick }) {
   return (
@@ -35,7 +39,7 @@ const TrackRow = memo(function TrackRow({ track, index, isCurrentTrack, isPlayin
       {/* Mobile Layout */}
       <div className="flex md:hidden items-center gap-2.5 px-3 py-2">
         <div className="relative w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-white/5">
-          <Image src={getTrackArt(track)} alt="" fill className="object-cover" />
+          <Image src={getTrackArt(track)} alt="" fill className={artClass(getTrackArt(track))} />
           {isPlayingThis ? (
             <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
               <Play size={14} className="text-blue-400" fill="currentColor" />
@@ -99,7 +103,7 @@ const TrackRow = memo(function TrackRow({ track, index, isCurrentTrack, isPlayin
         <div className={showNumber ? 'col-span-5' : 'col-span-6'}>
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-lg overflow-hidden shrink-0 border border-white/5 relative">
-              <Image src={getTrackArt(track)} alt="" fill className="object-cover" />
+              <Image src={getTrackArt(track)} alt="" fill className={artClass(getTrackArt(track))} />
               {track.streamOnly ? (
                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                   <ExternalLink size={18} className="text-green-400" />
