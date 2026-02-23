@@ -20,7 +20,7 @@ import SleepTimer from './SleepTimer';
 import VoiceCommand from './VoiceCommand';
 import SeekBar from './SeekBar';
 import { shareMP3 } from '@/lib/shareAudio';
-import { albums } from '@/data/tracks';
+import { albums, tracks } from '@/data/tracks';
 import Image from 'next/image';
 import { Smartphone } from 'lucide-react';
 
@@ -36,10 +36,10 @@ function useIsIOS() {
 
 // Get album cover art for a track
 function getAlbumArt(track) {
-  if (!track) return null;
+  if (!track) return '/images/idmg-the-label.jpg';
   if (track.coverArt) return track.coverArt;
   const album = albums.find(a => a.id === track.albumId);
-  return album?.coverImage || null;
+  return album?.coverImage || '/images/idmg-the-label.jpg';
 }
 
 function formatTime(seconds) {
@@ -169,12 +169,31 @@ export default function Player() {
   // EMPTY STATE — no track selected
   // ========================================
   if (!currentTrack) {
+    const handleQuickPlay = () => {
+      const { setQueue } = usePlayerStore.getState();
+      const playable = tracks.filter(t => !t.streamOnly && t.audioFile);
+      if (playable.length > 0) setQueue(playable, 0);
+    };
     return (
-      <div className="fixed bottom-14 md:bottom-0 left-0 right-0 h-16 md:h-20 bg-[#0a0f1a]/98 backdrop-blur-2xl border-t border-white/[0.06] flex items-center justify-center z-[500]">
-        <p className="text-white/25 flex items-center gap-2.5 text-sm">
-          <Music size={16} />
-          Select a track to play
-        </p>
+      <div className="fixed bottom-14 md:bottom-0 left-0 right-0 h-16 md:h-20 bg-[#0a0f1a]/98 backdrop-blur-2xl border-t border-white/[0.06] z-[500]">
+        <div className="h-full flex items-center justify-between px-4 md:px-6">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg overflow-hidden border border-white/[0.08] shrink-0 relative">
+              <Image src="/images/idmg-the-label.jpg" alt="IDMG" fill className="object-cover" />
+            </div>
+            <div>
+              <p className="text-white/60 text-sm font-medium">Mike Page</p>
+              <p className="text-white/30 text-xs">73 tracks ready to stream</p>
+            </div>
+          </div>
+          <button
+            onClick={handleQuickPlay}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-400 rounded-full text-white text-sm font-semibold transition active:scale-95"
+          >
+            <Play size={14} fill="currentColor" />
+            Play
+          </button>
+        </div>
       </div>
     );
   }

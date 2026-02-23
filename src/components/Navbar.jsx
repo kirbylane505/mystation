@@ -389,7 +389,12 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* Mobile Menu Dropdown — extracted for proper z-index (must be outside nav stacking context) */}
+      {/* Mobile Menu Backdrop + Dropdown — extracted for proper z-index */}
+      {mobileMenuOpen && (
+        <div className="md:hidden fixed inset-0 z-[455]" onClick={() => setMobileMenuOpen(false)}>
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+        </div>
+      )}
       {mobileMenuOpen && (
         <div className="md:hidden fixed bottom-14 left-0 right-0 bg-mystation-navy/98 backdrop-blur-xl border-t border-white/10 p-4 space-y-2 max-h-[60vh] overflow-y-auto z-[460]">
           {/* Core Nav Items */}

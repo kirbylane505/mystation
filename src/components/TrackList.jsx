@@ -10,11 +10,20 @@ import { useState, memo, useCallback, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { usePlayerStore } from '@/store/playerStore';
 import { Play, Pause, Clock, Music, ExternalLink, MessageCircle } from 'lucide-react';
-import { tracks } from '@/data/tracks';
+import { tracks, albums } from '@/data/tracks';
 import { ShareButton } from './ShareTrack';
 import SongReactions from './SongReactions';
 import TrackHeart from './TrackHeart';
 import CommentSection from './CommentSection';
+import Image from 'next/image';
+
+const IDMG_LOGO = '/images/idmg-the-label.jpg';
+
+function getTrackArt(track) {
+  if (track.coverArt) return track.coverArt;
+  const album = albums.find(a => a.id === track.albumId);
+  return album?.coverImage || IDMG_LOGO;
+}
 
 // Memoized track row — only re-renders when its own state changes
 const TrackRow = memo(function TrackRow({ track, index, isCurrentTrack, isPlayingThis, showNumber, showAlbum, showComments, onTrackClick, onCommentClick }) {
@@ -25,14 +34,17 @@ const TrackRow = memo(function TrackRow({ track, index, isCurrentTrack, isPlayin
     >
       {/* Mobile Layout */}
       <div className="flex md:hidden items-center gap-2.5 px-3 py-2">
-        <div className="relative w-10 h-10 bg-gradient-to-br from-blue-600/20 to-blue-900/30 rounded-lg flex items-center justify-center shrink-0 border border-white/5">
+        <div className="relative w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-white/5">
+          <Image src={getTrackArt(track)} alt="" fill className="object-cover" />
           {isPlayingThis ? (
-            <Play size={14} className="text-blue-400" fill="currentColor" />
+            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+              <Play size={14} className="text-blue-400" fill="currentColor" />
+            </div>
           ) : track.streamOnly ? (
-            <ExternalLink size={14} className="text-green-400" />
-          ) : (
-            <Music size={14} className="text-blue-400/60" />
-          )}
+            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+              <ExternalLink size={14} className="text-green-400" />
+            </div>
+          ) : null}{/* clean thumbnail */}
         </div>
         <div className="flex-1 min-w-0">
           <p className={`font-bold text-[14px] leading-tight truncate ${isCurrentTrack ? 'text-blue-400' : 'text-white'}`}>
@@ -86,14 +98,17 @@ const TrackRow = memo(function TrackRow({ track, index, isCurrentTrack, isPlayin
         )}
         <div className={showNumber ? 'col-span-5' : 'col-span-6'}>
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-blue-600/20 to-blue-900/30 rounded-lg flex items-center justify-center shrink-0 border border-white/5">
+            <div className="w-12 h-12 rounded-lg overflow-hidden shrink-0 border border-white/5 relative">
+              <Image src={getTrackArt(track)} alt="" fill className="object-cover" />
               {track.streamOnly ? (
-                <ExternalLink size={18} className="text-green-400" />
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                  <ExternalLink size={18} className="text-green-400" />
+                </div>
               ) : track.isNew ? (
-                <span className="text-[10px] font-bold bg-blue-500 text-white px-1.5 py-0.5 rounded">NEW</span>
-              ) : (
-                <Music size={18} className="text-blue-400/60" />
-              )}
+                <div className="absolute top-0.5 left-0.5">
+                  <span className="text-[8px] font-bold bg-blue-500 text-white px-1 py-0.5 rounded">NEW</span>
+                </div>
+              ) : null}
             </div>
             <div>
               <p className={`font-bold ${isCurrentTrack ? 'text-blue-400' : 'text-white'}`}>
