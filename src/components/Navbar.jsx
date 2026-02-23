@@ -353,7 +353,7 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* Mobile Navbar */}
+      {/* Mobile Top Bar */}
       <nav className="fixed top-0 left-0 right-0 z-[300] md:hidden bg-mystation-navy/90 backdrop-blur-xl border-b border-white/10">
         <div className="flex items-center justify-between px-4 h-16">
           {/* Logo */}
@@ -387,134 +387,146 @@ export default function Navbar() {
             </button>
           </div>
         </div>
+      </nav>
 
-        {/* Mobile Menu Dropdown — slides up from bottom tab bar */}
-        {mobileMenuOpen && (
-          <div className="fixed bottom-14 left-0 right-0 bg-mystation-navy/98 backdrop-blur-xl border-t border-white/10 p-4 space-y-2 max-h-[60vh] overflow-y-auto z-[449]">
-            {/* Core Nav Items */}
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = pathname === item.href;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl transition ${
-                    isActive ? 'bg-blue-500/20 text-blue-400' : 'hover:bg-white/10 text-white'
-                  }`}
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <Icon size={20} className={isActive ? 'text-blue-400' : 'text-white/60'} />
-                  <span>{item.label}</span>
-                </Link>
-              );
-            })}
-
-            {/* More Divider */}
-            <div className="flex items-center gap-3 pt-2 pb-1 px-4">
-              <MoreHorizontal size={16} className="text-white/30" />
-              <span className="text-white/30 text-xs font-semibold uppercase tracking-wider">More</span>
-              <div className="flex-1 h-px bg-white/10" />
-            </div>
-
-            {/* More Items */}
-            {moreItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = pathname === item.href;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl transition ${
-                    isActive ? 'bg-blue-500/20 text-blue-400' : 'hover:bg-white/10 text-white'
-                  }`}
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <Icon size={20} className={isActive ? 'text-blue-400' : 'text-white/60'} />
-                  <span>{item.label}</span>
-                </Link>
-              );
-            })}
-
-            {/* My Cart - Mobile */}
-            <button
-              onClick={() => { setMobileMenuOpen(false); useCartStore.getState().openCart(); }}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-500/10 border border-blue-500/20 hover:bg-blue-500/20 transition mb-2"
-            >
-              <ShoppingBag size={20} className="text-blue-400" />
-              <span className="text-white font-medium">My Cart</span>
-              {useCartStore.getState().getItemCount() > 0 && (
-                <span className="ml-auto bg-blue-500 text-white text-xs px-2.5 py-0.5 rounded-full font-bold">
-                  {useCartStore.getState().getItemCount()}
-                </span>
-              )}
-            </button>
-
-            {/* Create Station / Dashboard Button - Mobile */}
-            {isCreator ? (
+      {/* Mobile Menu Dropdown — extracted for proper z-index (must be outside nav stacking context) */}
+      {mobileMenuOpen && (
+        <div className="md:hidden fixed bottom-14 left-0 right-0 bg-mystation-navy/98 backdrop-blur-xl border-t border-white/10 p-4 space-y-2 max-h-[60vh] overflow-y-auto z-[460]">
+          {/* Core Nav Items */}
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = pathname === item.href;
+            return (
               <Link
-                href="/station/dashboard"
-                className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl text-white font-bold mb-2"
+                key={item.href}
+                href={item.href}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition ${
+                  isActive ? 'bg-blue-500/20 text-blue-400' : 'hover:bg-white/10 text-white'
+                }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
-                <Crown size={18} />
-                My Station Dashboard
+                <Icon size={20} className={isActive ? 'text-blue-400' : 'text-white/60'} />
+                <span>{item.label}</span>
               </Link>
-            ) : (
+            );
+          })}
+
+          {/* More Divider */}
+          <div className="flex items-center gap-3 pt-2 pb-1 px-4">
+            <MoreHorizontal size={16} className="text-white/30" />
+            <span className="text-white/30 text-xs font-semibold uppercase tracking-wider">More</span>
+            <div className="flex-1 h-px bg-white/10" />
+          </div>
+
+          {/* More Items */}
+          {moreItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = pathname === item.href;
+            return (
               <Link
-                href="/station/create"
-                className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl text-white font-bold mb-2"
+                key={item.href}
+                href={item.href}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition ${
+                  isActive ? 'bg-blue-500/20 text-blue-400' : 'hover:bg-white/10 text-white'
+                }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
-                <Crown size={18} />
-                Create Your Station
+                <Icon size={20} className={isActive ? 'text-blue-400' : 'text-white/60'} />
+                <span>{item.label}</span>
               </Link>
+            );
+          })}
+
+          {/* Fan Zone */}
+          <Link
+            href="/fan-zone"
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition ${
+              pathname === '/fan-zone' ? 'bg-blue-500/20 text-blue-400' : 'hover:bg-white/10 text-white'
+            }`}
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <Crown size={20} className={pathname === '/fan-zone' ? 'text-blue-400' : 'text-white/60'} />
+            <span>Fan Zone</span>
+          </Link>
+
+          {/* My Cart - Mobile */}
+          <button
+            onClick={() => { setMobileMenuOpen(false); useCartStore.getState().openCart(); }}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-500/10 border border-blue-500/20 hover:bg-blue-500/20 transition mb-2"
+          >
+            <ShoppingBag size={20} className="text-blue-400" />
+            <span className="text-white font-medium">My Cart</span>
+            {useCartStore.getState().getItemCount() > 0 && (
+              <span className="ml-auto bg-blue-500 text-white text-xs px-2.5 py-0.5 rounded-full font-bold">
+                {useCartStore.getState().getItemCount()}
+              </span>
             )}
+          </button>
 
-            {/* Subscribe Button - Mobile */}
-            {!isSubscribed && (
+          {/* Create Station / Dashboard Button - Mobile */}
+          {isCreator ? (
+            <Link
+              href="/station/dashboard"
+              className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl text-white font-bold mb-2"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <Crown size={18} />
+              My Station Dashboard
+            </Link>
+          ) : (
+            <Link
+              href="/station/create"
+              className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl text-white font-bold mb-2"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <Crown size={18} />
+              Create Your Station
+            </Link>
+          )}
+
+          {/* Subscribe Button - Mobile */}
+          {!isSubscribed && (
+            <button
+              className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-xl text-white font-bold mb-4"
+              onClick={() => { setMobileMenuOpen(false); usePlayerStore.getState().openSubscribeModal(); }}
+            >
+              <Crown size={18} />
+              Subscribe — Plans from $4.99/mo
+            </button>
+          )}
+
+          <div className="pt-4 border-t border-white/10">
+            {isLoggedIn ? (
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
+                    <span className="text-white font-bold">
+                      {user?.name?.charAt(0).toUpperCase() || 'U'}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="text-white font-medium">{user?.name || 'User'}</p>
+                    <p className="text-white/50 text-sm">{user?.email}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={handleSignOut}
+                  className="px-4 py-2 bg-red-500/20 text-red-400 rounded-xl text-sm font-medium"
+                >
+                  Sign Out
+                </button>
+              </div>
+            ) : (
               <button
-                className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-xl text-white font-bold mb-4"
-                onClick={() => { setMobileMenuOpen(false); usePlayerStore.getState().openSubscribeModal(); }}
+                onClick={() => { setMobileMenuOpen(false); usePlayerStore.getState().setShowAccountWall(true); }}
+                className="w-full py-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl text-white font-bold"
               >
-                <Crown size={18} />
-                Subscribe — Plans from $4.99/mo
+                Sign In
               </button>
             )}
-
-            <div className="pt-4 border-t border-white/10">
-              {isLoggedIn ? (
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
-                      <span className="text-white font-bold">
-                        {user?.name?.charAt(0).toUpperCase() || 'U'}
-                      </span>
-                    </div>
-                    <div>
-                      <p className="text-white font-medium">{user?.name || 'User'}</p>
-                      <p className="text-white/50 text-sm">{user?.email}</p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={handleSignOut}
-                    className="px-4 py-2 bg-red-500/20 text-red-400 rounded-xl text-sm font-medium"
-                  >
-                    Sign Out
-                  </button>
-                </div>
-              ) : (
-                <button
-                  onClick={() => { setMobileMenuOpen(false); usePlayerStore.getState().setShowAccountWall(true); }}
-                  className="w-full py-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl text-white font-bold"
-                >
-                  Sign In
-                </button>
-              )}
-            </div>
           </div>
-        )}
-      </nav>
+        </div>
+      )}
 
       {/* Mobile Bottom Tab Bar — persistent, Spotify-style */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-[450] bg-[#0a0f1a]/98 backdrop-blur-2xl border-t border-white/[0.06]">
@@ -541,13 +553,13 @@ export default function Navbar() {
               </Link>
             );
           })}
-          {/* More tab — opens hamburger menu */}
+          {/* More tab — highlight when menu open OR on a non-tab page */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="flex flex-col items-center justify-center w-16 h-full gap-0.5"
           >
-            <MoreHorizontal size={20} className={mobileMenuOpen ? 'text-blue-400' : 'text-white/40'} />
-            <span className={`text-[10px] font-medium ${mobileMenuOpen ? 'text-blue-400' : 'text-white/40'}`}>
+            <MoreHorizontal size={20} className={mobileMenuOpen || !['/', '/music', '/search', '/merch'].includes(pathname) ? 'text-blue-400' : 'text-white/40'} />
+            <span className={`text-[10px] font-medium ${mobileMenuOpen || !['/', '/music', '/search', '/merch'].includes(pathname) ? 'text-blue-400' : 'text-white/40'}`}>
               More
             </span>
           </button>
