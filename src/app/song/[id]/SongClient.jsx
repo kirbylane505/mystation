@@ -95,7 +95,7 @@ export default function SongClient({ track, allTracks, albumArt }) {
 
   const handleShare = async () => {
     const url = `https://mystationlive.com/song/${track.id}`;
-    const text = `Listen to "${track.title}" by Mike Page${track.featured ? ` ft. ${track.featured}` : ''} on MyStation`;
+    const text = `🎵 "${track.title}" - Mike Page\n\nYou subscribing means the world to me. Independent PAGE, I'm nothing without you.`;
     if (navigator.share) {
       await navigator.share({ title: track.title, text, url });
     } else {
