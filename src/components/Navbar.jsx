@@ -103,12 +103,31 @@ export default function Navbar() {
     setMobileMenuOpen(false);
   };
 
-  // Check for saved user on mount
+  // Restore user on mount — verify subscription from server (never forget subscribers)
   useEffect(() => {
+    // First restore from localStorage for instant UI
     const savedUser = localStorage.getItem('mystation_user');
     if (savedUser) {
       try { useUserStore.getState().setUser(JSON.parse(savedUser)); } catch { localStorage.removeItem('mystation_user'); }
     }
+
+    // Then verify against server DB (httpOnly cookies identify user)
+    fetch('/api/auth/session')
+      .then(r => r.json())
+      .then(data => {
+        if (data.user?.email) {
+          const serverUser = {
+            email: data.user.email,
+            name: data.user.name,
+            tier: data.user.tier,
+            isSubscribed: data.user.isSubscribed,
+          };
+          // Always trust server — it checks the database
+          useUserStore.getState().setUser(serverUser);
+          localStorage.setItem('mystation_user', JSON.stringify(serverUser));
+        }
+      })
+      .catch(() => {}); // Network error — keep localStorage state
   }, []);
 
   const handleSignOut = () => {

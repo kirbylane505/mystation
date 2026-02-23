@@ -8,6 +8,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { MessageCircle, Send, Trash2, Reply, ShieldCheck, Lock, X, CheckCircle2 } from 'lucide-react';
+import { useUserStore } from '@/store/playerStore';
 
 function relativeTime(dateStr) {
   const now = Date.now();
@@ -46,6 +47,7 @@ export default function CommentSection({ trackId, trackTitle, modalMode = false 
   const [name, setName] = useState('');
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const storeSubscribed = useUserStore(s => s.isSubscribed);
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [showAdminInput, setShowAdminInput] = useState(false);
@@ -62,14 +64,17 @@ export default function CommentSection({ trackId, trackTitle, modalMode = false 
     const savedName = localStorage.getItem('mystation-comment-name');
     if (savedName) setName(savedName);
 
-    // Check subscription via cookie presence (server validates on POST)
-    const hasSub = document.cookie.split(';').some(c => c.trim().startsWith('mystation-sub='));
-    setIsSubscribed(hasSub);
+    // Subscription check handled by Zustand store (synced from server on page load)
 
     // Check admin session
     const adminSession = sessionStorage.getItem('mystation-admin');
     if (adminSession) setIsAdmin(true);
   }, []);
+
+  // Sync subscription from Zustand store (server-verified on page load)
+  useEffect(() => {
+    setIsSubscribed(storeSubscribed);
+  }, [storeSubscribed]);
 
   const fetchComments = useCallback(async () => {
     if (!trackId) return;
