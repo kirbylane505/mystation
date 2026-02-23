@@ -1,27 +1,28 @@
 /**
  * MYSTATION - PWA Install Prompt
- * Shows install banner on mobile only, dismissible
+ * Shows install banner on ALL devices — mobile + desktop
+ * Dismissible, once per day (localStorage)
  */
 
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Download, X } from 'lucide-react';
+import { Download, X, Smartphone, Monitor, Share } from 'lucide-react';
 
 export default function InstallPWA() {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showBanner, setShowBanner] = useState(false);
 
   useEffect(() => {
-    // Only show on mobile
-    const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
-    if (!isMobile) return;
-
-    // Check if already dismissed this session
-    if (sessionStorage.getItem('pwa-dismissed')) return;
-
-    // Check if already installed
+    // Already installed as PWA
     if (window.matchMedia('(display-mode: standalone)').matches) return;
+
+    // Dismissed today already
+    const dismissed = localStorage.getItem('pwa-dismissed');
+    if (dismissed) {
+      const dismissedAt = parseInt(dismissed, 10);
+      if (Date.now() - dismissedAt < 24 * 60 * 60 * 1000) return;
+    }
 
     const handler = (e) => {
       e.preventDefault();
@@ -31,21 +32,36 @@ export default function InstallPWA() {
 
     window.addEventListener('beforeinstallprompt', handler);
 
-    // iOS Safari — show manual instructions after 5s
+    // iOS/Safari — no beforeinstallprompt, show manual instructions after 3s
     const isIOS = /iPhone|iPad/.test(navigator.userAgent) && !window.MSStream;
-    if (isIOS) {
+    const isSafariDesktop = /^((?!chrome|android).)*safari/i.test(navigator.userAgent) && !isIOS;
+
+    if (isIOS || isSafariDesktop) {
       const timer = setTimeout(() => {
-        if (!sessionStorage.getItem('pwa-dismissed')) {
+        const d = localStorage.getItem('pwa-dismissed');
+        if (!d || Date.now() - parseInt(d, 10) > 24 * 60 * 60 * 1000) {
           setShowBanner(true);
         }
-      }, 5000);
+      }, 3000);
       return () => {
         clearTimeout(timer);
         window.removeEventListener('beforeinstallprompt', handler);
       };
     }
 
-    return () => window.removeEventListener('beforeinstallprompt', handler);
+    // Chrome/Edge on desktop — also show after 3s if beforeinstallprompt hasn't fired
+    const fallback = setTimeout(() => {
+      // If prompt hasn't fired yet but we're on a supported browser, still show
+      const d = localStorage.getItem('pwa-dismissed');
+      if (!d || Date.now() - parseInt(d, 10) > 24 * 60 * 60 * 1000) {
+        setShowBanner(true);
+      }
+    }, 4000);
+
+    return () => {
+      clearTimeout(fallback);
+      window.removeEventListener('beforeinstallprompt', handler);
+    };
   }, []);
 
   const handleInstall = async () => {
@@ -54,6 +70,7 @@ export default function InstallPWA() {
       const { outcome } = await deferredPrompt.userChoice;
       if (outcome === 'accepted') {
         setShowBanner(false);
+        localStorage.setItem('pwa-dismissed', String(Date.now()));
       }
       setDeferredPrompt(null);
     }
@@ -61,15 +78,16 @@ export default function InstallPWA() {
 
   const handleDismiss = () => {
     setShowBanner(false);
-    sessionStorage.setItem('pwa-dismissed', '1');
+    localStorage.setItem('pwa-dismissed', String(Date.now()));
   };
 
   if (!showBanner) return null;
 
   const isIOS = typeof navigator !== 'undefined' && /iPhone|iPad/.test(navigator.userAgent);
+  const isMobile = typeof navigator !== 'undefined' && /Android|iPhone|iPad/i.test(navigator.userAgent);
 
   return (
-    <div className="fixed bottom-24 left-4 right-4 z-40 animate-[merch-fade-up_0.4s_ease-out]">
+    <div className="fixed bottom-24 left-4 right-4 z-[80] animate-[merch-fade-up_0.4s_ease-out]">
       <div className="glass rounded-2xl p-4 border border-indigo-500/30 shadow-2xl shadow-indigo-500/20 max-w-md mx-auto">
         <button
           onClick={handleDismiss}
@@ -79,24 +97,40 @@ export default function InstallPWA() {
         </button>
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center flex-shrink-0">
-            <Download size={24} className="text-white" />
+            {isIOS ? (
+              <Share size={22} className="text-white" />
+            ) : (
+              <Download size={22} className="text-white" />
+            )}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-white font-bold text-sm">Install MyStation</p>
-            <p className="text-white/50 text-xs">
+            <p className="text-white font-bold text-sm">
+              {isMobile ? 'Add MyStation to Home Screen' : 'Install MyStation App'}
+            </p>
+            <p className="text-white/50 text-xs leading-relaxed">
               {isIOS
-                ? 'Tap Share, then "Add to Home Screen"'
-                : 'Add to your home screen for the best experience'
+                ? 'Tap the Share button, then "Add to Home Screen"'
+                : isMobile
+                  ? 'Get the full app experience — music never stops'
+                  : 'Pin MyStation to your desktop for instant access'
               }
             </p>
           </div>
-          {!isIOS && deferredPrompt && (
+          {!isIOS && deferredPrompt ? (
             <button
               onClick={handleInstall}
               className="px-4 py-2 bg-indigo-500 text-white text-xs font-bold rounded-full hover:bg-indigo-400 transition flex-shrink-0"
             >
               Install
             </button>
+          ) : isIOS ? (
+            <div className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center flex-shrink-0">
+              <Smartphone size={16} className="text-indigo-400" />
+            </div>
+          ) : (
+            <div className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center flex-shrink-0">
+              {isMobile ? <Smartphone size={16} className="text-indigo-400" /> : <Monitor size={16} className="text-indigo-400" />}
+            </div>
           )}
         </div>
       </div>

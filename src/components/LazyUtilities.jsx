@@ -12,6 +12,7 @@ const TrackingPixels = dynamic(() => import('@/components/TrackingPixels'), { ss
 const ExtensionBridge = dynamic(() => import('@/components/ExtensionBridge'), { ssr: false });
 const SharePage = dynamic(() => import('@/components/SharePage'), { ssr: false });
 const IDMGBadge = dynamic(() => import('@/components/IDMGBadge'), { ssr: false });
+const InstallPWA = dynamic(() => import('@/components/InstallPWA'), { ssr: false });
 
 export default function LazyUtilities() {
   return (
@@ -21,6 +22,7 @@ export default function LazyUtilities() {
       <ExtensionBridge />
       <SharePage />
       <IDMGBadge />
+      <InstallPWA />
     </>
   );
 }
