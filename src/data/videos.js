@@ -292,6 +292,26 @@ export const videos = [
     category: 'music-video',
     year: 2022,
     featured: false
+  },
+
+  // === CLASSIC ERA ===
+  {
+    id: 'v33',
+    title: "Show Yo Swag",
+    youtubeId: 'iieXiGjJZiI',
+    description: "Official HD music video directed by Justin Staggs",
+    category: 'music-video',
+    year: 2010,
+    featured: false
+  },
+  {
+    id: 'v34',
+    title: "Fantasy ft. Q Parker (from 112)",
+    youtubeId: 'VMRtiy6Ewzc',
+    description: "Official video featuring Q Parker from 112",
+    category: 'music-video',
+    year: 2009,
+    featured: false
   }
 ];
 
@@ -301,7 +321,7 @@ export const videoCategories = [
 ];
 
 export const youtubeChannel = {
-  url: 'https://youtube.com/@mikepage',
-  name: '@mikepage',
+  url: 'https://youtube.com/@IDMGATL',
+  name: '@IDMGATL',
   description: 'Official Mike Page YouTube Channel'
 };
