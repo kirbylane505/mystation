@@ -2,14 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* PERMANENT: Override Tailwind animate-pulse at utility layer — NO BLINKING EVER */
-@layer utilities {
-  .animate-pulse {
-    animation: none !important;
-    opacity: 1 !important;
-  }
-}
-
 :root {
   --navy: #0a1628;
   --navy-light: #1a2d4a;
@@ -501,19 +493,19 @@ input[type="range"]:active::-moz-range-thumb {
   animation: bounce 2s ease-in-out infinite;
 }
 
-/* PERMANENT: Kill ALL blinking/pulsing site-wide — NO EXCEPTIONS */
-.animate-pulse,
-[class*="animate-pulse"],
-[class*="glow-pulse"],
-[class*="pulse-blue"] {
-  animation: none !important;
-  opacity: 1 !important;
+/* Player "now playing" visualizer bars */
+@keyframes visualizer-bounce {
+  0%, 100% { transform: scaleY(0.4); }
+  50% { transform: scaleY(1); }
 }
 
-@keyframes pulse {
-  /* Killed permanently — no blinking on this site */
-  0%, 50%, 100% { opacity: 1; }
+.now-playing-bar {
+  animation: visualizer-bounce 0.8s ease-in-out infinite;
+  transform-origin: bottom;
 }
+
+/* Pulse animations restored for skeleton loaders.
+   If a specific element blinks annoyingly, kill it on THAT element only. */
 
 .animate-shimmer {
   background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);

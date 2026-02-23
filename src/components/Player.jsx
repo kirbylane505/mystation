@@ -218,10 +218,10 @@ export default function Player() {
               {/* Playing indicator */}
               {isPlaying && (
                 <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-[3px] bg-black/50 backdrop-blur-sm px-3 py-1.5 rounded-full">
-                  <span className="w-[3px] h-4 bg-blue-400 rounded-full animate-pulse" />
-                  <span className="w-[3px] h-6 bg-blue-400 rounded-full animate-pulse" style={{ animationDelay: '150ms' }} />
-                  <span className="w-[3px] h-3 bg-blue-400 rounded-full animate-pulse" style={{ animationDelay: '300ms' }} />
-                  <span className="w-[3px] h-5 bg-cyan-400 rounded-full animate-pulse" style={{ animationDelay: '100ms' }} />
+                  <span className="w-[3px] h-4 bg-blue-400 rounded-full now-playing-bar" />
+                  <span className="w-[3px] h-6 bg-blue-400 rounded-full now-playing-bar" style={{ animationDelay: '150ms' }} />
+                  <span className="w-[3px] h-3 bg-blue-400 rounded-full now-playing-bar" style={{ animationDelay: '300ms' }} />
+                  <span className="w-[3px] h-5 bg-cyan-400 rounded-full now-playing-bar" style={{ animationDelay: '100ms' }} />
                 </div>
               )}
             </div>
@@ -463,9 +463,9 @@ export default function Player() {
               )}
               {isPlaying && (
                 <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 flex gap-[2px]">
-                  <span className="w-[2px] h-2.5 bg-blue-400 rounded-full animate-pulse" />
-                  <span className="w-[2px] h-3.5 bg-blue-400 rounded-full animate-pulse" style={{ animationDelay: '150ms' }} />
-                  <span className="w-[2px] h-2 bg-blue-400 rounded-full animate-pulse" style={{ animationDelay: '300ms' }} />
+                  <span className="w-[2px] h-2.5 bg-blue-400 rounded-full now-playing-bar" />
+                  <span className="w-[2px] h-3.5 bg-blue-400 rounded-full now-playing-bar" style={{ animationDelay: '150ms' }} />
+                  <span className="w-[2px] h-2 bg-blue-400 rounded-full now-playing-bar" style={{ animationDelay: '300ms' }} />
                 </div>
               )}
             </div>
