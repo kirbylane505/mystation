@@ -366,18 +366,31 @@ export default function Navbar() {
             </span>
           </Link>
 
-          {/* Menu Toggle */}
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="w-11 h-11 rounded-full bg-white/10 flex items-center justify-center"
-          >
-            {mobileMenuOpen ? <X size={20} className="text-white" /> : <Menu size={20} className="text-white" />}
-          </button>
+          {/* Cart + Search for mobile top bar */}
+          <div className="flex items-center gap-2">
+            <Link
+              href="/search"
+              className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center"
+            >
+              <Search size={18} className="text-white/60" />
+            </Link>
+            <button
+              onClick={() => useCartStore.getState().openCart()}
+              className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center relative"
+            >
+              <ShoppingBag size={18} className="text-white/60" />
+              {useCartStore.getState().getItemCount() > 0 && (
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 rounded-full text-white text-[10px] font-bold flex items-center justify-center">
+                  {useCartStore.getState().getItemCount()}
+                </span>
+              )}
+            </button>
+          </div>
         </div>
 
-        {/* Mobile Menu Dropdown */}
+        {/* Mobile Menu Dropdown — slides up from bottom tab bar */}
         {mobileMenuOpen && (
-          <div className="absolute top-16 left-0 right-0 bg-mystation-navy backdrop-blur-xl border-b border-white/10 p-4 space-y-2 max-h-[calc(100vh-5rem)] overflow-y-auto">
+          <div className="fixed bottom-14 left-0 right-0 bg-mystation-navy/98 backdrop-blur-xl border-t border-white/10 p-4 space-y-2 max-h-[60vh] overflow-y-auto z-[449]">
             {/* Core Nav Items */}
             {navItems.map((item) => {
               const Icon = item.icon;
@@ -501,6 +514,44 @@ export default function Navbar() {
             </div>
           </div>
         )}
+      </nav>
+
+      {/* Mobile Bottom Tab Bar — persistent, Spotify-style */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-[450] bg-[#0a0f1a]/98 backdrop-blur-2xl border-t border-white/[0.06]">
+        <div className="flex items-center justify-around h-14 px-1">
+          {[
+            { href: '/', icon: Home, label: 'Home' },
+            { href: '/music', icon: Music, label: 'Music' },
+            { href: '/search', icon: Search, label: 'Search' },
+            { href: '/merch', icon: ShoppingBag, label: 'Merch' },
+          ].map((item) => {
+            const Icon = item.icon;
+            const isActive = pathname === item.href;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="flex flex-col items-center justify-center w-16 h-full gap-0.5"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <Icon size={20} className={isActive ? 'text-blue-400' : 'text-white/40'} />
+                <span className={`text-[10px] font-medium ${isActive ? 'text-blue-400' : 'text-white/40'}`}>
+                  {item.label}
+                </span>
+              </Link>
+            );
+          })}
+          {/* More tab — opens hamburger menu */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="flex flex-col items-center justify-center w-16 h-full gap-0.5"
+          >
+            <MoreHorizontal size={20} className={mobileMenuOpen ? 'text-blue-400' : 'text-white/40'} />
+            <span className={`text-[10px] font-medium ${mobileMenuOpen ? 'text-blue-400' : 'text-white/40'}`}>
+              More
+            </span>
+          </button>
+        </div>
       </nav>
 
     </>

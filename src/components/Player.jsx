@@ -170,7 +170,7 @@ export default function Player() {
   // ========================================
   if (!currentTrack) {
     return (
-      <div className="fixed bottom-0 left-0 right-0 h-16 md:h-20 bg-[#0a0f1a]/98 backdrop-blur-2xl border-t border-white/[0.06] flex items-center justify-center z-[500]">
+      <div className="fixed bottom-14 md:bottom-0 left-0 right-0 h-16 md:h-20 bg-[#0a0f1a]/98 backdrop-blur-2xl border-t border-white/[0.06] flex items-center justify-center z-[500]">
         <p className="text-white/25 flex items-center gap-2.5 text-sm">
           <Music size={16} />
           Select a track to play
@@ -394,7 +394,7 @@ export default function Player() {
     <>
       {/* MOBILE MINI PLAYER */}
       <div
-        className="md:hidden fixed bottom-0 left-0 right-0 z-[500] bg-[#0a0f1a]/98 backdrop-blur-2xl border-t border-white/[0.06]"
+        className="md:hidden fixed bottom-14 left-0 right-0 z-[500] bg-[#0a0f1a]/98 backdrop-blur-2xl border-t border-white/[0.06]"
         onClick={() => setExpanded(true)}
       >
         {/* Progress line on top */}

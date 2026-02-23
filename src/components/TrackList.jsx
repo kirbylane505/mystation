@@ -208,7 +208,7 @@ export default function TrackList({ trackIds, showAlbum = true, showNumber = tru
 
     {/* Comment Modal — portaled to body to escape parent transforms */}
     {commentTrack && mounted && createPortal(
-      <div className="fixed inset-0 z-[600] flex items-end md:items-center justify-center pb-[72px] md:pb-0" onClick={() => setCommentTrack(null)}>
+      <div className="fixed inset-0 z-[600] flex items-end md:items-center justify-center pb-[128px] md:pb-0" onClick={() => setCommentTrack(null)}>
         <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
         <div
           className="relative w-full md:w-[420px] md:max-h-[80vh] max-h-[65vh] rounded-t-2xl md:rounded-2xl border border-white/10 bg-[#0d1117] shadow-2xl overflow-hidden flex flex-col animate-slide-up"
