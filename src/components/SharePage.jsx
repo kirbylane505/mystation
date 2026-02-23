@@ -84,7 +84,7 @@ export default function SharePage() {
       {/* Floating Share Button */}
       <button
         onClick={handleShare}
-        className="fixed bottom-24 right-4 z-40 w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 hover:scale-110 transition-all active:scale-95"
+        className="fixed bottom-32 md:bottom-24 right-4 z-40 w-11 h-11 md:w-12 md:h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 hover:scale-110 transition-all active:scale-95"
         aria-label={shareLabel}
       >
         <Share2 className="w-5 h-5 text-white" />

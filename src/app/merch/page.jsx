@@ -334,11 +334,11 @@ export default function MerchPage() {
   const { addItem, openCart } = useCartStore();
   const { queue, setQueue } = usePlayerStore();
 
-  // Auto-play "Love On The Lawn" when entering merch — LOCKED
-  // Only if nothing is already playing (don't interrupt active music)
+  // Queue "Love On The Lawn" for merch page — ready to play on user tap
+  // Does NOT auto-play — just loads the queue so player shows the track
   useEffect(() => {
     const state = usePlayerStore.getState();
-    if (state.isPlaying) return; // Don't interrupt active playback
+    if (state.isPlaying || state.currentTrack) return; // Don't interrupt active or queued playback
     const lotlTrack = {
       id: 138,
       title: "Love On The Lawn",
@@ -352,11 +352,16 @@ export default function MerchPage() {
       audioFile: '/audio/grammy-nights/04-love-on-the-lawn.mp3',
       isNew: true,
     };
-    // Queue merch track first, then new releases after it
     const officialTracks = getOfficialTracks();
     const newReleaseTracks = officialTracks.filter(t => t.isNew && t.id !== 138);
     const fullQueue = [lotlTrack, ...newReleaseTracks];
-    setQueue(fullQueue, 0);
+    // Set queue + track without auto-playing
+    usePlayerStore.setState({
+      queue: fullQueue,
+      queueIndex: 0,
+      currentTrack: fullQueue[0],
+      isPlaying: false,
+    });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {

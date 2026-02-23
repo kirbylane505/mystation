@@ -74,10 +74,10 @@ function EventCard({ event }) {
               src={event.cover_image_url}
               alt={event.name}
               className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+              onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; }}
             />
-          ) : (
-            <EventImagePlaceholder name={event.name} />
-          )}
+          ) : null}
+          <EventImagePlaceholder name={event.name} />
 
           {/* Gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
