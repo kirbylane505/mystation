@@ -1,7 +1,7 @@
 /**
- * MYSTATION - Founding Member Marquee Banner
- * Glossy scrolling marquee with live founding member count.
- * Only renders after data loads — never flashes incomplete.
+ * MYSTATION - LOTL Promo Marquee Banner
+ * First 250 subscribers who stay until Aug 1 get FREE LOTL 2026 ticket.
+ * Glossy scrolling marquee with live count.
  * Dismissible per session — returns on next visit.
  */
 
@@ -50,7 +50,7 @@ export default function FoundingMemberBanner() {
 
   // Build marquee text
   const spotText = remaining === 1 ? '1 Spot Left' : `${remaining} Spots Left`;
-  const segment = `\u00A0\u00A0\u00A0\u2727 FOUNDING MEMBER — First Month FREE \u2727\u00A0\u00A0\u00A0\u2022\u00A0\u00A0\u00A0Only ${spotText} of 26 \u2022\u00A0\u00A0\u00A0Claim Yours Now \u2022`;
+  const segment = `\u00A0\u00A0\u00A0\u2727 FREE LOTL TICKET — Subscribe & Stay Until Aug 1st \u2727\u00A0\u00A0\u00A0\u2022\u00A0\u00A0\u00A0${spotText} of 250 \u2022\u00A0\u00A0\u00A0Love on the Lawn 2026 \u2022\u00A0\u00A0\u00A0Year 5 \u2022`;
 
   // Repeat enough times for seamless scroll
   const repeated = Array(8).fill(segment).join('');

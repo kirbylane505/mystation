@@ -407,11 +407,12 @@ export async function sendOrderStatusUpdate({ customerName, customerEmail, order
 export async function sendNewSignupAlert({ customerName, customerEmail, subscriberNumber, isFreeSlot }) {
   if (!resend) { console.warn('Resend not configured — skipping signup alert'); return { success: false }; }
   try {
-    const spotsLeft = Math.max(0, 26 - subscriberNumber);
+    const spotsLeft = Math.max(0, 250 - subscriberNumber);
+    const lotlEligible = subscriberNumber <= 250;
     const { data, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: ADMIN_EMAIL,
-      subject: `NEW SIGNUP${isFreeSlot ? ' (FREE SLOT)' : ''} — ${customerName || customerEmail}`,
+      subject: `NEW SIGNUP (#${subscriberNumber}) — ${customerName || customerEmail}`,
       html: `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; background: #0a0e1a; color: #fff; padding: 32px; border-radius: 16px;">
           <div style="text-align: center; margin-bottom: 24px;">
@@ -422,11 +423,11 @@ export async function sendNewSignupAlert({ customerName, customerEmail, subscrib
             <h3 style="color: #3b82f6; margin: 0 0 12px 0;">Details</h3>
             <p style="margin: 6px 0; color: #e2e8f0;">Name: <strong>${customerName || 'Not provided'}</strong></p>
             <p style="margin: 6px 0; color: #e2e8f0;">Email: <strong>${customerEmail}</strong></p>
-            <p style="margin: 6px 0; color: ${isFreeSlot ? '#22c55e' : '#f59e0b'};">Type: <strong>${isFreeSlot ? 'FREE TRIAL (First 26)' : 'Paid Subscriber'}</strong></p>
+            <p style="margin: 6px 0; color: ${lotlEligible ? '#22c55e' : '#f59e0b'};">LOTL Ticket: <strong>${lotlEligible ? 'ELIGIBLE (if subscribed until Aug 1)' : 'Not eligible — 250 slots filled'}</strong></p>
           </div>
           <div style="background: #1a1f36; padding: 20px; border-radius: 12px; text-align: center;">
-            <p style="color: #64748b; font-size: 12px; margin: 0 0 4px;">Free Spots Remaining</p>
-            <p style="color: ${spotsLeft > 0 ? '#22c55e' : '#ef4444'}; font-size: 36px; font-weight: 900; margin: 0;">${spotsLeft} / 26</p>
+            <p style="color: #64748b; font-size: 12px; margin: 0 0 4px;">LOTL Ticket Spots Remaining</p>
+            <p style="color: ${spotsLeft > 0 ? '#22c55e' : '#ef4444'}; font-size: 36px; font-weight: 900; margin: 0;">${spotsLeft} / 250</p>
           </div>
           <div style="text-align: center; margin-top: 24px; padding-top: 16px; border-top: 1px solid #2a2f46;">
             <p style="color: #64748b; font-size: 12px;">MyStation Signup Alert</p>

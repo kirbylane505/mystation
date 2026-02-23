@@ -1,6 +1,6 @@
 /**
  * MYSTATION - Subscribe API
- * First 26 subscribers get free first month, then $4.99/mo
+ * First 250 subscribers who stay subscribed until Aug 1 get a FREE ticket to LOTL 2026
  * Tracks subscriber count server-side
  */
 
@@ -8,7 +8,7 @@ import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
 import { sendNewSignupAlert } from '@/lib/email';
 
-const FREE_SLOTS = 26;
+const LOTL_SLOTS = 250;
 
 export async function POST(request) {
   try {
@@ -58,50 +58,40 @@ export async function POST(request) {
       .select('*', { count: 'exact', head: true });
 
     const subscriberNumber = (count || 0) + 1;
-    const isFree = subscriberNumber <= FREE_SLOTS;
+    const lotlEligible = subscriberNumber <= LOTL_SLOTS;
 
-    if (isFree) {
-      // Free slot! Create subscriber record
-      const freeUntil = new Date();
-      freeUntil.setMonth(freeUntil.getMonth() + 1);
+    // Create subscriber record
+    await supabase.from('subscribers').upsert({
+      email: email.toLowerCase(),
+      status: 'active',
+      tier: 'supporter',
+      is_free_trial: false,
+      subscriber_number: subscriberNumber,
+      created_at: new Date().toISOString(),
+    }, { onConflict: 'email' });
 
-      await supabase.from('subscribers').upsert({
-        email: email.toLowerCase(),
-        status: 'active',
-        tier: 'supporter',
-        is_free_trial: true,
-        subscriber_number: subscriberNumber,
-        free_until: freeUntil.toISOString(),
-        created_at: new Date().toISOString(),
-      }, { onConflict: 'email' });
+    // Fire-and-forget: Alert Mike
+    sendNewSignupAlert({
+      customerName: email.split('@')[0],
+      customerEmail: email.toLowerCase(),
+      subscriberNumber,
+      isFreeSlot: lotlEligible,
+    }).catch(() => {});
 
-      // Fire-and-forget: Alert Mike about new founding member
-      sendNewSignupAlert({
-        customerName: email.split('@')[0],
-        customerEmail: email.toLowerCase(),
-        subscriberNumber,
-        isFreeSlot: true,
-      }).catch(() => {});
+    const lotlMessage = lotlEligible
+      ? ` Stay subscribed until Aug 1 for a FREE ticket to Love on the Lawn 2026!`
+      : '';
 
-      return NextResponse.json({
-        success: true,
-        isFree: true,
-        subscriberNumber,
-        freeUntil: freeUntil.toISOString(),
-        message: `You're subscriber #${subscriberNumber}! First month FREE.`,
-        remainingFreeSlots: FREE_SLOTS - subscriberNumber,
-      });
-    }
-
-    // Not free — redirect to Stripe
     return NextResponse.json({
       success: true,
       isFree: false,
       subscriberNumber,
-      message: 'Free slots filled. Subscribe for $4.99/mo.',
+      lotlEligible,
+      message: `You're subscriber #${subscriberNumber}!${lotlMessage}`,
       stripeUrl: 'https://buy.stripe.com/5kQbJ3fyX0l0gLafHd1oI00',
       premiumUrl: 'https://buy.stripe.com/bJe00lcmL2t8cuUcv11oI01',
       diamondUrl: 'https://buy.stripe.com/6oUbJ3euT5FkdyYgLh1oI02',
+      remaining: Math.max(0, LOTL_SLOTS - subscriberNumber),
     });
   } catch (err) {
     console.error('Subscribe error:', err);
@@ -112,12 +102,12 @@ export async function POST(request) {
   }
 }
 
-// Check how many free slots remain
+// Check how many LOTL promo slots remain
 export async function GET() {
   try {
     const supabase = getSupabaseAdmin();
     if (!supabase) {
-      return NextResponse.json({ freeSlots: FREE_SLOTS, taken: 0, remaining: FREE_SLOTS });
+      return NextResponse.json({ lotlSlots: LOTL_SLOTS, taken: 0, remaining: LOTL_SLOTS });
     }
 
     const { count } = await supabase
@@ -126,11 +116,11 @@ export async function GET() {
 
     const taken = count || 0;
     return NextResponse.json({
-      freeSlots: FREE_SLOTS,
+      lotlSlots: LOTL_SLOTS,
       taken,
-      remaining: Math.max(0, FREE_SLOTS - taken),
+      remaining: Math.max(0, LOTL_SLOTS - taken),
     });
   } catch {
-    return NextResponse.json({ freeSlots: FREE_SLOTS, taken: 0, remaining: FREE_SLOTS });
+    return NextResponse.json({ lotlSlots: LOTL_SLOTS, taken: 0, remaining: LOTL_SLOTS });
   }
 }
