@@ -29,9 +29,8 @@ export default function HomePage() {
       .then(data => {
         const products = Array.isArray(data) ? data : data.data || data.products || [];
         const withImages = products.filter(p => {
-          // Prefer product-only flat-lay (index 1) — EXCEPT slides (top-down = backwards logo)
-          const isSlide = (p.title || '').toLowerCase().includes('slide');
-          const img = isSlide ? (p.images?.find(i => i.is_default) || p.images?.[0]) : (p.images?.[1] || p.images?.find(i => i.is_default) || p.images?.[0]);
+          // ALWAYS use front-facing image — logo must be visible on every product
+          const img = p.images?.find(i => i.is_default) || p.images?.[0];
           return img?.src;
         });
         setFreshMerch(withImages.slice(0, 4));
@@ -299,9 +298,8 @@ export default function HomePage() {
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {freshMerch.map((product) => {
-            // Product-only flat-lay (index 1) — EXCEPT slides (top-down = backwards logo)
-            const isSlide = (product.title || '').toLowerCase().includes('slide');
-            const img = isSlide ? (product.images?.find(i => i.is_default) || product.images?.[0]) : (product.images?.[1] || product.images?.find(i => i.is_default) || product.images?.[0]);
+            // ALWAYS use front-facing image — logo must be visible on every product
+            const img = product.images?.find(i => i.is_default) || product.images?.[0];
             const price = product.variants?.find(v => v.is_enabled)?.price;
             const priceStr = price ? `$${(price / 100).toFixed(2)}` : '';
             return (
