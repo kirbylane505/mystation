@@ -2,19 +2,35 @@
 
 import { useState, useCallback } from 'react';
 import { Share2, Check, Copy, X } from 'lucide-react';
+import { usePlayerStore } from '@/store/playerStore';
 
 export default function SharePage() {
   const [showMenu, setShowMenu] = useState(false);
   const [copied, setCopied] = useState(false);
+  const currentTrack = usePlayerStore(s => s.currentTrack);
+
+  // If a track is playing, share the song URL. Otherwise share the page URL.
+  const getShareData = useCallback(() => {
+    if (currentTrack?.id) {
+      const url = `https://mystationlive.com/song/${currentTrack.id}`;
+      const title = `${currentTrack.title} - Mike Page`;
+      const text = `Listen to "${currentTrack.title}" by Mike Page on MyStation! #MikePage #MyStation #IDMG`;
+      return { url, title, text };
+    }
+    return {
+      url: window.location.href,
+      title: document.title.replace(' | MyStation', ''),
+      text: `Check this out on MyStation`,
+    };
+  }, [currentTrack]);
 
   const handleShare = useCallback(async () => {
-    const url = window.location.href;
-    const title = document.title.replace(' | MyStation', '');
+    const { url, title, text } = getShareData();
 
     // Mobile: native share sheet
     if (navigator.share) {
       try {
-        await navigator.share({ title, url, text: `Check this out on MyStation: ${title}` });
+        await navigator.share({ title, url, text });
         return;
       } catch (e) {
         if (e.name === 'AbortError') return;
@@ -23,17 +39,18 @@ export default function SharePage() {
 
     // Desktop: show share menu
     setShowMenu(true);
-  }, []);
+  }, [getShareData]);
 
   const copyLink = useCallback(async () => {
+    const { url } = getShareData();
     try {
-      await navigator.clipboard.writeText(window.location.href);
+      await navigator.clipboard.writeText(url);
       setCopied(true);
       setTimeout(() => { setCopied(false); setShowMenu(false); }, 1500);
     } catch {
       // Fallback
       const input = document.createElement('input');
-      input.value = window.location.href;
+      input.value = url;
       document.body.appendChild(input);
       input.select();
       document.execCommand('copy');
@@ -41,12 +58,13 @@ export default function SharePage() {
       setCopied(true);
       setTimeout(() => { setCopied(false); setShowMenu(false); }, 1500);
     }
-  }, []);
+  }, [getShareData]);
 
   const shareVia = useCallback((platform) => {
-    const url = encodeURIComponent(window.location.href);
-    const title = encodeURIComponent(document.title.replace(' | MyStation', ''));
-    const text = encodeURIComponent(`Check this out on MyStation`);
+    const { url: rawUrl, title: rawTitle, text: rawText } = getShareData();
+    const url = encodeURIComponent(rawUrl);
+    const title = encodeURIComponent(rawTitle);
+    const text = encodeURIComponent(rawText);
 
     const links = {
       twitter: `https://twitter.com/intent/tweet?url=${url}&text=${text}`,
@@ -57,7 +75,9 @@ export default function SharePage() {
 
     window.open(links[platform], '_blank', 'width=600,height=400');
     setShowMenu(false);
-  }, []);
+  }, [getShareData]);
+
+  const shareLabel = currentTrack?.id ? 'Share This Song' : 'Share This Page';
 
   return (
     <>
@@ -65,7 +85,7 @@ export default function SharePage() {
       <button
         onClick={handleShare}
         className="fixed bottom-24 right-4 z-40 w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 hover:scale-110 transition-all active:scale-95"
-        aria-label="Share this page"
+        aria-label={shareLabel}
       >
         <Share2 className="w-5 h-5 text-white" />
       </button>
@@ -79,7 +99,12 @@ export default function SharePage() {
             onClick={e => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-5">
-              <h3 className="text-white font-bold text-lg">Share This Page</h3>
+              <div>
+                <h3 className="text-white font-bold text-lg">{shareLabel}</h3>
+                {currentTrack?.title && (
+                  <p className="text-white/50 text-sm">{currentTrack.title}</p>
+                )}
+              </div>
               <button onClick={() => setShowMenu(false)} className="text-white/40 hover:text-white">
                 <X className="w-5 h-5" />
               </button>
