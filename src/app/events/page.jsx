@@ -202,7 +202,7 @@ function MerchMarquee() {
             id: `py-${p.id}`,
             name: p.title || p.name,
             price: p.price || (p.variants?.[0]?.price ? `$${(p.variants[0].price / 100).toFixed(0)}` : null),
-            image: p.images?.[0]?.src || p.thumbnail_url,
+            image: p.images?.[1]?.src || p.images?.[0]?.src || p.thumbnail_url,
             slug: (p.title || p.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
           })).filter(p => p.image));
         }

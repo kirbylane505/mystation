@@ -12,7 +12,7 @@ const resend = process.env.RESEND_API_KEY
   ? new Resend(process.env.RESEND_API_KEY)
   : null;
 
-const ADMIN_EMAIL = 'mystationllc1@gmail.com';
+const ADMIN_EMAIL = ['mystationllc1@gmail.com', 'idmgatl@gmail.com'];
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'MyStation <onboarding@resend.dev>';
 
 /**
@@ -501,7 +501,7 @@ export async function sendLOTLTicketEmail({ customerEmail, subscriberNumber, tic
       html: `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; background: #0a0e1a; color: #fff; padding: 0; border-radius: 16px; overflow: hidden;">
           <div style="background: linear-gradient(135deg, #059669 0%, #10b981 50%, #34d399 100%); padding: 40px 32px; text-align: center;">
-            <p style="font-size: 48px; margin: 0;">🎪</p>
+            <img src="https://mystationlive.com/images/lotl-day-logo.png" alt="Love on the Lawn Day" width="180" height="180" style="margin: 0 auto 12px; display: block; border-radius: 12px;" />
             <h1 style="color: #fff; margin: 12px 0 0; font-size: 32px; font-weight: 900;">LOVE ON THE LAWN</h1>
             <p style="color: rgba(255,255,255,0.9); font-size: 18px; margin: 4px 0 0; font-weight: 600;">2026 — YEAR 5</p>
             <p style="color: rgba(255,255,255,0.7); font-size: 14px; margin: 8px 0 0;">September 5, 2026 | Elgin, IL</p>

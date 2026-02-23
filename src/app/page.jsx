@@ -29,7 +29,8 @@ export default function HomePage() {
       .then(data => {
         const products = Array.isArray(data) ? data : data.data || data.products || [];
         const withImages = products.filter(p => {
-          const img = p.images?.find(i => i.is_default) || p.images?.[0];
+          // Prefer product-only flat-lay (index 1) over model shot (index 0/default)
+          const img = p.images?.[1] || p.images?.find(i => i.is_default) || p.images?.[0];
           return img?.src;
         });
         setFreshMerch(withImages.slice(0, 4));
@@ -297,7 +298,8 @@ export default function HomePage() {
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {freshMerch.map((product) => {
-            const img = product.images?.find(i => i.is_default) || product.images?.[0];
+            // Product-only flat-lay (index 1) — no human legs
+            const img = product.images?.[1] || product.images?.find(i => i.is_default) || product.images?.[0];
             const price = product.variants?.find(v => v.is_enabled)?.price;
             const priceStr = price ? `$${(price / 100).toFixed(2)}` : '';
             return (
