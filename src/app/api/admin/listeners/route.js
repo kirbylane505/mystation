@@ -12,7 +12,7 @@ export async function GET(request) {
     // Admin auth check
     const { searchParams } = new URL(request.url);
     const key = searchParams.get('key');
-    const adminKey = process.env.ADMIN_KEY || 'ms-admin-2026';
+    const adminKey = process.env.ADMIN_KEY;
 
     if (key !== adminKey) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

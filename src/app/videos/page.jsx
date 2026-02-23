@@ -59,11 +59,15 @@ export default function VideosPage() {
 
           {/* Stats Card */}
           <div className="glass rounded-2xl p-6 flex gap-8">
-            <div className="text-center">
-              <p className="text-3xl font-bold gradient-text">{totalViews.toLocaleString()}</p>
-              <p className="text-white/40 text-sm">MyStation Views</p>
-            </div>
-            <div className="w-px bg-white/10" />
+            {totalViews > 0 && (
+              <>
+                <div className="text-center">
+                  <p className="text-3xl font-bold gradient-text">{totalViews.toLocaleString()}</p>
+                  <p className="text-white/40 text-sm">MyStation Views</p>
+                </div>
+                <div className="w-px bg-white/10" />
+              </>
+            )}
             <div className="text-center">
               <p className="text-3xl font-bold text-white">{videos.length}</p>
               <p className="text-white/40 text-sm">Videos</p>

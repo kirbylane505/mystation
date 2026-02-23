@@ -558,13 +558,15 @@ export default function EventDetailPage() {
 
           {/* Stats Row */}
           <div className="flex flex-wrap gap-4">
-            <div className="glass rounded-xl px-5 py-3 flex items-center gap-3">
-              <Ticket size={20} className="text-blue-400" />
-              <div>
-                <p className="text-white font-black text-lg">{totalSold.toLocaleString()}</p>
-                <p className="text-white/40 text-xs">Tickets Sold</p>
+            {totalSold > 0 && (
+              <div className="glass rounded-xl px-5 py-3 flex items-center gap-3">
+                <Ticket size={20} className="text-blue-400" />
+                <div>
+                  <p className="text-white font-black text-lg">{totalSold.toLocaleString()}</p>
+                  <p className="text-white/40 text-xs">Tickets Sold</p>
+                </div>
               </div>
-            </div>
+            )}
             <div className="glass rounded-xl px-5 py-3 flex items-center gap-3">
               <Users size={20} className="text-green-400" />
               <div>

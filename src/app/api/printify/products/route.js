@@ -92,6 +92,8 @@ export async function GET() {
       success: true,
       count: products.length,
       products
+    }, {
+      headers: { 'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600' },
     });
   } catch (error) {
     console.error('Printify products fetch error:', error);

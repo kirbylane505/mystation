@@ -264,7 +264,7 @@ function KidsCard({ item, idx }) {
       style={{ animationDelay: `${idx * 0.08}s` }}>
       <a href={item.link} target="_blank" rel="noopener noreferrer" className="block">
         <div className="aspect-square relative overflow-hidden bg-white">
-          <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+          <Image src={item.image} alt={item.name} fill sizes="(max-width: 768px) 50vw, 25vw" className="object-cover group-hover:scale-110 transition-transform duration-700" />
           <div className="absolute top-4 left-4 px-3 py-1 text-xs font-bold rounded-full z-10 bg-pink-500 text-white">{item.badge || 'KIDS'}</div>
         </div>
         <div className="p-4">
@@ -843,7 +843,7 @@ export default function MerchPage() {
             <div className={`relative w-full max-w-lg transition-all duration-1000 ${heroVisible ? 'opacity-100' : 'opacity-0 -translate-x-16'}`}>
               <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-pink-500/20 rounded-3xl blur-2xl" />
               <div className="relative rounded-3xl overflow-hidden border border-white/20 shadow-2xl merch-float" style={{ animationDuration: '6s' }}>
-                <img src="/images/merch/idmg-black-hoodie.jpg" alt="IDMG The Label" className="w-full h-auto transition-transform duration-700 hover:scale-110" />
+                <Image src="/images/merch/idmg-black-hoodie.jpg" alt="IDMG The Label" width={800} height={800} className="w-full h-auto transition-transform duration-700 hover:scale-110" />
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
                   <p className="text-white/60 text-sm font-medium uppercase tracking-wider">Official Collection</p>
                   <p className="text-white font-black text-2xl">IDMG The Label</p>

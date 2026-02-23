@@ -304,9 +304,9 @@ export default function HomePage() {
             const priceStr = price ? `$${(price / 100).toFixed(2)}` : '';
             return (
               <Link key={product.id} href={`/merch/${product.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}`} className="glass rounded-2xl p-4 hover:border-blue-500/30 transition-all group">
-                <div className="aspect-square bg-gradient-to-br from-white/5 to-white/10 rounded-xl mb-3 flex items-center justify-center border border-white/10 overflow-hidden">
+                <div className="aspect-square bg-gradient-to-br from-white/5 to-white/10 rounded-xl mb-3 relative border border-white/10 overflow-hidden">
                   {img?.src ? (
-                    <img src={img.src} alt={product.title} className="w-full h-full object-contain p-2" />
+                    <Image src={img.src} alt={product.title} fill sizes="(max-width: 768px) 50vw, 25vw" className="object-contain p-2" />
                   ) : (
                     <ShoppingBag size={32} className="text-white/30" />
                   )}

@@ -1461,7 +1461,8 @@ export const playlists = [
     title: "Top Hits",
     description: "Highest rated tracks from REmo analysis",
     trackIds: [2, 3, 4, 5, 6, 7, 8, 9], // 75+ hit scores
-    coverGradient: "from-green-500 to-emerald-700"
+    coverGradient: "from-green-500 to-emerald-700",
+    emoji: "\uD83D\uDD25"
   }
 ];
 

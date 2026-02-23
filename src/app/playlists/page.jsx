@@ -269,7 +269,7 @@ export default function PlaylistsPage() {
           <div className="w-40 h-40 sm:w-48 sm:h-48 rounded-2xl overflow-hidden shrink-0 bg-gradient-to-br from-purple-600/30 to-blue-600/30">
             {(openPlaylist.coverArt || (openPlaylist.tracks.length > 0 && getTrackArt(openPlaylist.tracks[0]))) ? (
               <div className="relative w-full h-full">
-                <img src={openPlaylist.coverArt || getTrackArt(openPlaylist.tracks[0])} alt={openPlaylist.name} className="w-full h-full object-cover" onError={(e) => { e.target.style.display = 'none'; }} />
+                <img src={openPlaylist.coverArt || getTrackArt(openPlaylist.tracks[0])} alt={openPlaylist.name} className="w-full h-full object-cover" loading="lazy" onError={(e) => { e.target.style.display = 'none'; }} />
               </div>
             ) : (
               <div className="w-full h-full flex items-center justify-center">
@@ -370,7 +370,7 @@ export default function PlaylistsPage() {
                     className="relative w-10 h-10 rounded-lg overflow-hidden shrink-0"
                   >
                     {getTrackArt(track) ? (
-                      <img src={getTrackArt(track)} alt="" className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }} />
+                      <img src={getTrackArt(track)} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }} />
                     ) : null}
                     <div className={`absolute inset-0 bg-gradient-to-br from-blue-600/40 to-purple-900/60 flex items-center justify-center ${getTrackArt(track) ? 'hidden' : ''}`}>
                       <Music size={14} className="text-blue-400/60" />

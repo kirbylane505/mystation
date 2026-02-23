@@ -19,11 +19,11 @@ export default function InstallPWA() {
     // Already installed as PWA
     if (window.matchMedia('(display-mode: standalone)').matches) return;
 
-    // Dismissed today already
+    // Dismissed recently — stay gone for 7 days
     const dismissed = localStorage.getItem('pwa-dismissed');
     if (dismissed) {
       const dismissedAt = parseInt(dismissed, 10);
-      if (Date.now() - dismissedAt < 24 * 60 * 60 * 1000) return;
+      if (Date.now() - dismissedAt < 7 * 24 * 60 * 60 * 1000) return;
     }
 
     const handler = (e) => {
@@ -35,15 +35,24 @@ export default function InstallPWA() {
     window.addEventListener('beforeinstallprompt', handler);
 
     // Show banner after 3s for all browsers (prompt or not)
-    const timer = setTimeout(() => {
+    const showTimer = setTimeout(() => {
       const d = localStorage.getItem('pwa-dismissed');
-      if (!d || Date.now() - parseInt(d, 10) > 24 * 60 * 60 * 1000) {
+      if (!d || Date.now() - parseInt(d, 10) > 7 * 24 * 60 * 60 * 1000) {
         setShowBanner(true);
       }
     }, 3000);
 
+    // Auto-dismiss after 8 seconds of showing
+    const autoHideTimer = setTimeout(() => {
+      setShowBanner((prev) => {
+        if (prev) localStorage.setItem('pwa-dismissed', String(Date.now()));
+        return false;
+      });
+    }, 11000); // 3s delay + 8s visible = 11s total
+
     return () => {
-      clearTimeout(timer);
+      clearTimeout(showTimer);
+      clearTimeout(autoHideTimer);
       window.removeEventListener('beforeinstallprompt', handler);
     };
   }, []);

@@ -32,8 +32,8 @@ export default function ListenersPage() {
     setLoading(true);
     try {
       const key = typeof window !== 'undefined'
-        ? new URLSearchParams(window.location.search).get('key') || 'ms-admin-2026'
-        : 'ms-admin-2026';
+        ? new URLSearchParams(window.location.search).get('key')
+        : null;
 
       const res = await fetch(`/api/admin/listeners?key=${key}`);
       const json = await res.json();

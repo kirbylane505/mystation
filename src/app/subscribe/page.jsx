@@ -274,7 +274,7 @@ export default function SubscribePage() {
                     <span className="text-white/40 text-sm">/mo</span>
                   </div>
 
-                  <ul className="space-y-2">
+                  <ul className="space-y-2 mb-4">
                     {tier.features.map((f, i) => (
                       <li key={i} className="flex items-start gap-2 text-sm">
                         <Check size={14} className={`mt-0.5 shrink-0 ${isSelected ? 'text-green-400' : 'text-white/30'}`} />
@@ -282,6 +282,15 @@ export default function SubscribePage() {
                       </li>
                     ))}
                   </ul>
+
+                  <a
+                    href={STRIPE_LINKS[tier.id]}
+                    onClick={(e) => e.stopPropagation()}
+                    className={`w-full py-3 bg-gradient-to-r ${tier.btnClass} text-white font-bold rounded-xl hover:opacity-90 transition flex items-center justify-center gap-2 text-sm shadow-lg`}
+                  >
+                    <CreditCard size={16} />
+                    Subscribe — ${tier.price}/mo
+                  </a>
                 </button>
               );
             })}
