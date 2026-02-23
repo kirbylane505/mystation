@@ -489,6 +489,78 @@ export async function sendCancelAlert({ customerEmail, reason }) {
 }
 
 /**
+ * Send FREE LOTL 2026 ticket to eligible subscriber
+ */
+export async function sendLOTLTicketEmail({ customerEmail, subscriberNumber, ticketCode }) {
+  if (!resend) { console.warn('Resend not configured — skipping LOTL ticket'); return { success: false }; }
+  try {
+    const { data, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: customerEmail,
+      subject: `YOUR FREE TICKET — Love on the Lawn 2026, Year 5!`,
+      html: `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; background: #0a0e1a; color: #fff; padding: 0; border-radius: 16px; overflow: hidden;">
+          <div style="background: linear-gradient(135deg, #059669 0%, #10b981 50%, #34d399 100%); padding: 40px 32px; text-align: center;">
+            <p style="font-size: 48px; margin: 0;">🎪</p>
+            <h1 style="color: #fff; margin: 12px 0 0; font-size: 32px; font-weight: 900;">LOVE ON THE LAWN</h1>
+            <p style="color: rgba(255,255,255,0.9); font-size: 18px; margin: 4px 0 0; font-weight: 600;">2026 — YEAR 5</p>
+            <p style="color: rgba(255,255,255,0.7); font-size: 14px; margin: 8px 0 0;">September 5, 2026 | Elgin, IL</p>
+          </div>
+
+          <div style="padding: 32px;">
+            <div style="text-align: center; margin-bottom: 24px;">
+              <p style="color: #22c55e; font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; margin: 0;">Your Free Ticket</p>
+            </div>
+
+            <div style="background: linear-gradient(135deg, #064e3b, #065f46); border: 2px solid #10b981; border-radius: 16px; padding: 24px; text-align: center; margin-bottom: 24px;">
+              <p style="color: #6ee7b7; font-size: 12px; margin: 0 0 8px; text-transform: uppercase; letter-spacing: 3px;">Ticket Code</p>
+              <p style="color: #fff; font-size: 32px; font-weight: 900; margin: 0; letter-spacing: 4px; font-family: monospace;">${ticketCode}</p>
+              <p style="color: #6ee7b7; font-size: 12px; margin: 8px 0 0;">General Admission — 1 Person</p>
+            </div>
+
+            <div style="background: #1a1f36; padding: 20px; border-radius: 12px; margin-bottom: 24px;">
+              <p style="color: #e2e8f0; font-size: 14px; line-height: 1.6; margin: 0;">
+                Thank you for being a loyal MyStation subscriber. You believed in us from the beginning — Member #${subscriberNumber}. You stayed. You streamed. You supported independent music.
+              </p>
+              <p style="color: #e2e8f0; font-size: 14px; line-height: 1.6; margin: 16px 0 0;">
+                This ticket is yours. No strings. Pull up to Love on the Lawn 2026, show this code at the gate, and enjoy Year 5 on us.
+              </p>
+              <p style="color: #3b82f6; font-size: 14px; font-weight: 700; margin: 16px 0 0;">
+                — The MyStation Family
+              </p>
+            </div>
+
+            <div style="background: #1a1f36; padding: 16px; border-radius: 12px; margin-bottom: 16px;">
+              <p style="color: #64748b; font-size: 12px; margin: 0 0 8px; text-transform: uppercase; letter-spacing: 1px;">Event Details</p>
+              <p style="color: #e2e8f0; font-size: 13px; margin: 4px 0;">📅 September 5, 2026</p>
+              <p style="color: #e2e8f0; font-size: 13px; margin: 4px 0;">📍 Festival Park, 132 S. Grove Ave, Elgin, IL</p>
+              <p style="color: #e2e8f0; font-size: 13px; margin: 4px 0;">🎵 Love on the Lawn Day — Year 5</p>
+              <p style="color: #e2e8f0; font-size: 13px; margin: 4px 0;">🌐 lotlfest.com</p>
+            </div>
+          </div>
+
+          <div style="text-align: center; padding: 16px 32px 24px; border-top: 1px solid #2a2f46;">
+            <p style="color: #64748b; font-size: 11px; margin: 0;">MyStation | mystationlive.com</p>
+            <p style="color: #64748b; font-size: 11px; margin: 4px 0;">Present this email or ticket code at the gate for entry.</p>
+          </div>
+        </div>
+      `,
+    });
+
+    if (error) {
+      console.error('Failed to send LOTL ticket:', error);
+      return { success: false, error };
+    }
+
+    console.log('LOTL ticket sent to:', customerEmail, 'code:', ticketCode);
+    return { success: true, emailId: data?.id };
+  } catch (err) {
+    console.error('Email service error (LOTL ticket):', err);
+    return { success: false, error: err.message };
+  }
+}
+
+/**
  * Send welcome email to new subscriber with their password
  */
 export async function sendWelcomeEmail({ customerName, customerEmail, password }) {
