@@ -1422,6 +1422,20 @@ export const albums = [
     description: "Mike Page's 2014 debut album. 13 tracks dedicated to Young Shezzy. Distributed via TuneCore / P.A.G.E.M.U.S.I.C."
   },
   {
+    id: 'singles-2026',
+    title: "Singles",
+    subtitle: "2026 Releases",
+    artist: "Mike Page",
+    year: 2026,
+    trackCount: 37,
+    coverGradient: "from-blue-500 via-blue-700 to-indigo-900",
+    coverEmoji: "🎤",
+    coverImage: "/images/idmg-the-label.jpg",
+    isNew: true,
+    trackIds: [],
+    description: "Mike Page's 2026 singles collection. New music dropping every week."
+  },
+  {
     id: 'vault',
     title: "The Vault",
     subtitle: "Exclusive Collection",
@@ -1430,6 +1444,7 @@ export const albums = [
     trackCount: vaultTrackIds.length,
     coverGradient: "from-red-600 via-red-800 to-black",
     coverEmoji: "🔒",
+    coverImage: "/images/idmg-the-label.jpg",
     isNew: true,
     isExclusive: true,
     isLocked: true,

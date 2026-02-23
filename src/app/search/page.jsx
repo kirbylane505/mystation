@@ -246,7 +246,7 @@ function SearchPageInner() {
 
         {/* Results */}
         {!searched && !loading && (
-          <div className="text-center py-12">
+          <div className="text-center py-12 pb-24">
             <div className="w-20 h-20 mx-auto mb-4 bg-white/5 rounded-full flex items-center justify-center">
               <Search size={36} className="text-white/20" />
             </div>
@@ -256,7 +256,7 @@ function SearchPageInner() {
             {/* Trending Searches */}
             <div className="max-w-lg mx-auto">
               <p className="text-white/20 text-xs uppercase tracking-wider mb-3">Trending</p>
-              <div className="flex flex-wrap justify-center gap-2">
+              <div className="flex flex-wrap justify-center gap-2 pb-8">
                 {['Mike Page', 'Drake', 'Kendrick Lamar', 'Future', 'The Weeknd', 'Tyler, The Creator', 'SZA', 'Metro Boomin'].map((artist) => (
                   <button
                     key={artist}

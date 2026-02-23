@@ -13,6 +13,7 @@ const ExtensionBridge = dynamic(() => import('@/components/ExtensionBridge'), { 
 const SharePage = dynamic(() => import('@/components/SharePage'), { ssr: false });
 const IDMGBadge = dynamic(() => import('@/components/IDMGBadge'), { ssr: false });
 const InstallPWA = dynamic(() => import('@/components/InstallPWA'), { ssr: false });
+const WelcomeToast = dynamic(() => import('@/components/WelcomeToast'), { ssr: false });
 
 export default function LazyUtilities() {
   return (
@@ -23,6 +24,7 @@ export default function LazyUtilities() {
       <SharePage />
       <IDMGBadge />
       <InstallPWA />
+      <WelcomeToast />
     </>
   );
 }
