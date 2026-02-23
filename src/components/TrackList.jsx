@@ -13,6 +13,7 @@ import { Play, Pause, Clock, Music, ExternalLink, MessageCircle } from 'lucide-r
 import { tracks } from '@/data/tracks';
 import { ShareButton } from './ShareTrack';
 import SongReactions from './SongReactions';
+import TrackHeart from './TrackHeart';
 import CommentSection from './CommentSection';
 
 // Memoized track row — only re-renders when its own state changes
@@ -42,6 +43,9 @@ const TrackRow = memo(function TrackRow({ track, index, isCurrentTrack, isPlayin
           </p>
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
+          <div onClick={(e) => e.stopPropagation()}>
+            <TrackHeart itemId={`track-${track.id}`} size={16} />
+          </div>
           <div onClick={(e) => e.stopPropagation()}>
             <SongReactions trackId={track.id} size="xs" />
           </div>
@@ -116,6 +120,9 @@ const TrackRow = memo(function TrackRow({ track, index, isCurrentTrack, isPlayin
           )}
         </div>
         <div className="col-span-1 flex items-center justify-end gap-3">
+          <div onClick={(e) => e.stopPropagation()} className="flex items-center">
+            <TrackHeart itemId={`track-${track.id}`} size={18} />
+          </div>
           <div onClick={(e) => e.stopPropagation()} className="flex items-center">
             <SongReactions trackId={track.id} size="sm" />
           </div>

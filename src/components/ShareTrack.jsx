@@ -22,7 +22,7 @@ export default function ShareTrack({ track }) {
 
   // Share message - title prominent, encourages engagement back on site
   const shareTitle = `${track.title} - Mike Page`;
-  const shareText = `🎵 "${track.title}" - Mike Page\n\nTap to listen & drop a 🔥 if it's fire!`;
+  const shareText = `🎵 "${track.title}" - Mike Page\n\nYou subscribing means the world to me. Independent PAGE, I'm nothing without you.`;
 
   // Open share modal - always show our custom modal with SMS/Email/Copy options
   const handleShare = (e) => {
