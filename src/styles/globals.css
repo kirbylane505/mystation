@@ -10,6 +10,15 @@
   --blue-light: #60a5fa;
   --accent: #1e40af;
   --black: #030712;
+
+  /* Z-index scale */
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-nav: 300;
+  --z-modal: 400;
+  --z-player: 500;
+  --z-overlay: 600;
+  --z-toast: 700;
 }
 
 * {

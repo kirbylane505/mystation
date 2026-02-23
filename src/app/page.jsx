@@ -101,7 +101,7 @@ export default function HomePage() {
       </div>
 
       {/* New Releases */}
-      <section className="max-w-screen-xl mx-auto px-6 py-12">
+      <section className="max-w-screen-xl mx-auto px-6 py-16">
         <div className="flex items-center justify-between mb-10">
           <div>
             <h2 className="text-3xl font-bold text-white mb-2">New Releases</h2>
@@ -117,7 +117,7 @@ export default function HomePage() {
       </section>
 
       {/* Albums Grid */}
-      <section className="max-w-screen-xl mx-auto px-6 py-20">
+      <section className="max-w-screen-xl mx-auto px-6 py-16">
         <div className="flex items-center justify-between mb-10">
           <div>
             <h2 className="text-3xl font-bold text-white mb-2">Albums & Projects</h2>
@@ -270,7 +270,7 @@ export default function HomePage() {
       </section>
 
       {/* Trending This Week */}
-      <section className="max-w-screen-xl mx-auto px-6 py-12">
+      <section className="max-w-screen-xl mx-auto px-6 py-16">
         <div className="flex items-center justify-between mb-10">
           <div>
             <h2 className="text-3xl font-bold text-white mb-2">Trending This Week 🔥</h2>
@@ -401,7 +401,7 @@ export default function HomePage() {
       </section>
 
       {/* LOTL Countdown */}
-      <section className="max-w-screen-xl mx-auto px-6 py-10">
+      <section className="max-w-screen-xl mx-auto px-6 py-16">
         <LOTLCountdown variant="compact" />
       </section>
 

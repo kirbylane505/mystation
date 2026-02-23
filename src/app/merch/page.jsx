@@ -1390,7 +1390,7 @@ export default function MerchPage() {
       <AnimatePresence>
         {toast && (
           <motion.div
-            className="fixed bottom-6 right-6 z-[60] flex items-center gap-3 px-5 py-4 bg-gray-900 border border-green-500/30 rounded-2xl shadow-2xl shadow-green-500/10 max-w-sm"
+            className="fixed bottom-28 right-6 z-[700] flex items-center gap-3 px-5 py-4 bg-gray-900 border border-green-500/30 rounded-2xl shadow-2xl shadow-green-500/10 max-w-sm"
             initial={{ opacity: 0, y: 50, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.9 }}

@@ -119,7 +119,7 @@ export default function Navbar() {
   return (
     <>
       {/* Floating Glass Navbar - Desktop */}
-      <nav className="fixed top-6 left-1/2 -translate-x-1/2 z-50 hidden md:block">
+      <nav className="fixed top-6 left-1/2 -translate-x-1/2 z-[300] hidden md:block">
         <div className="flex items-center gap-1 px-2 py-2 bg-white/10 backdrop-blur-xl rounded-full border border-white/20 shadow-2xl shadow-black/20">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 px-4 py-2 rounded-full hover:bg-white/10 transition">
@@ -354,7 +354,7 @@ export default function Navbar() {
       </nav>
 
       {/* Mobile Navbar */}
-      <nav className="fixed top-0 left-0 right-0 z-50 md:hidden bg-mystation-navy/90 backdrop-blur-xl border-b border-white/10">
+      <nav className="fixed top-0 left-0 right-0 z-[300] md:hidden bg-mystation-navy/90 backdrop-blur-xl border-b border-white/10">
         <div className="flex items-center justify-between px-4 h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
