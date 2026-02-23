@@ -191,15 +191,136 @@ export default function MusicPageClient({ initialTrackId, autoplay = false }) {
 
   const allPlaylists = [...playlists, ...userPlaylists];
 
+  // Pick a featured album for hero (rotate based on day)
+  const heroAlbums = albums.filter(a => a.coverImage && a.id !== 'vault');
+  const heroAlbum = heroAlbums[Math.floor(Date.now() / 86400000) % heroAlbums.length] || heroAlbums[0];
+
+  const handlePlayAll = () => {
+    const playable = musicTracks.filter(t => !t.streamOnly && t.audioFile);
+    if (playable.length > 0) {
+      setQueue(playable, 0);
+      play();
+    }
+  };
+
+  const handleShuffleAll = () => {
+    const playable = musicTracks.filter(t => !t.streamOnly && t.audioFile);
+    const shuffled = [...playable].sort(() => Math.random() - 0.5);
+    if (shuffled.length > 0) {
+      setQueue(shuffled, 0);
+      play();
+    }
+  };
+
+  const handlePlayAlbum = (albumId) => {
+    const albumTracks = musicTracks.filter(t => t.albumId === albumId && !t.streamOnly && t.audioFile);
+    if (albumTracks.length > 0) {
+      setQueue(albumTracks, 0);
+      play();
+    }
+  };
+
   return (
-    <div className="min-h-screen pt-8 pb-32">
-      <div className="max-w-screen-xl mx-auto px-6">
-        {/* Header */}
+    <div className="min-h-screen pb-32">
+      <div className="max-w-screen-xl mx-auto px-4 md:px-6">
+
+        {/* === HERO SECTION === */}
+        <div className="relative rounded-2xl md:rounded-3xl overflow-hidden mb-8 mt-4">
+          {/* Background gradient */}
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-900/80 via-mystation-darker/90 to-purple-900/60" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(96,165,250,0.15),transparent_60%)]" />
+
+          <div className="relative z-10 flex flex-col md:flex-row items-center gap-6 md:gap-10 p-6 md:p-10">
+            {/* Album art grid */}
+            <div className="grid grid-cols-2 gap-2 w-40 md:w-52 shrink-0">
+              {heroAlbums.slice(0, 4).map((a, i) => (
+                <div key={a.id} className={`aspect-square rounded-lg overflow-hidden border border-white/10 ${i === 0 ? 'shadow-lg shadow-blue-500/20' : ''}`}>
+                  <img src={a.coverImage} alt={a.title} className="w-full h-full object-cover" />
+                </div>
+              ))}
+            </div>
+
+            {/* Hero text */}
+            <div className="flex-1 text-center md:text-left">
+              <p className="text-blue-400 text-sm font-semibold uppercase tracking-wider mb-2">Mike Page Collection</p>
+              <h1 className="text-3xl md:text-5xl font-black text-white mb-3 leading-tight">
+                {musicTracks.length} Tracks.<br className="hidden md:block" /> All Free.
+              </h1>
+              <p className="text-white/50 text-sm md:text-base mb-6 max-w-md">
+                Stream the full catalog — every donation supports youth music programs through the Mike Page Foundation.
+              </p>
+              <div className="flex flex-wrap gap-3 justify-center md:justify-start">
+                <button
+                  onClick={handlePlayAll}
+                  className="flex items-center gap-2 px-6 py-3 bg-blue-500 hover:bg-blue-400 text-white font-bold rounded-full transition active:scale-95 shadow-lg shadow-blue-500/25"
+                >
+                  <Play size={18} fill="currentColor" />
+                  Play All
+                </button>
+                <button
+                  onClick={handleShuffleAll}
+                  className="flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-full transition active:scale-95 backdrop-blur"
+                >
+                  <Shuffle size={18} />
+                  Shuffle
+                </button>
+              </div>
+            </div>
+
+            {/* Stats column */}
+            <div className="hidden lg:flex flex-col gap-4">
+              <div className="glass rounded-xl px-5 py-3 text-center">
+                <p className="text-2xl font-black text-white">{albums.filter(a => a.id !== 'vault').length}</p>
+                <p className="text-white/40 text-xs uppercase tracking-wider">Albums</p>
+              </div>
+              <div className="glass rounded-xl px-5 py-3 text-center">
+                <p className="text-2xl font-black text-white">{musicTracks.length}</p>
+                <p className="text-white/40 text-xs uppercase tracking-wider">Tracks</p>
+              </div>
+              <div className="glass rounded-xl px-5 py-3 text-center">
+                <p className="text-2xl font-black text-purple-400">{vaultTracks.length}</p>
+                <p className="text-white/40 text-xs uppercase tracking-wider">Vault</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* === ALBUMS HORIZONTAL SCROLL === */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">Browse Music</h1>
-          <p className="text-white/60">
-            {musicTracks.length} tracks • Free to stream • Support the Foundation
-          </p>
+          <h2 className="text-xl font-bold text-white mb-4">Albums</h2>
+          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+            {albums.filter(a => a.id !== 'vault').map(album => {
+              const albumTrackCount = musicTracks.filter(t => t.albumId === album.id).length;
+              return (
+                <button
+                  key={album.id}
+                  onClick={() => { setFilterAlbum(album.title); setSortBy('default'); setActiveTab('music'); }}
+                  className="flex-shrink-0 w-36 md:w-44 group text-left"
+                >
+                  <div className="relative aspect-square rounded-xl overflow-hidden mb-2 border border-white/10 group-hover:border-blue-500/50 transition shadow-lg">
+                    {album.coverImage ? (
+                      <img src={album.coverImage} alt={album.title} className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
+                    ) : (
+                      <div className={`w-full h-full bg-gradient-to-br ${album.coverGradient || 'from-blue-600 to-purple-700'} flex items-center justify-center`}>
+                        <span className="text-4xl">{album.coverEmoji || '🎵'}</span>
+                      </div>
+                    )}
+                    {/* Play overlay */}
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                      <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center shadow-lg shadow-blue-500/30">
+                        <Play size={20} className="text-white ml-0.5" fill="white" />
+                      </div>
+                    </div>
+                    {album.isNew && (
+                      <span className="absolute top-2 left-2 bg-blue-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">New</span>
+                    )}
+                  </div>
+                  <p className="text-white font-semibold text-sm truncate">{album.title}</p>
+                  <p className="text-white/40 text-xs">{albumTrackCount} tracks • {album.year}</p>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Tab Switcher */}
@@ -377,78 +498,82 @@ export default function MusicPageClient({ initialTrackId, autoplay = false }) {
               </div>
             </div>
 
-            {/* Playlists Section */}
-            <div className="mb-12">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-2xl font-bold text-white">Playlists</h2>
-                  <button
-                    onClick={() => setShowPlaylistModal(true)}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition"
-                  >
-                    <Plus size={18} />
-                    Create Playlist
-                  </button>
-                </div>
-                <div className="flex gap-4 overflow-x-auto pb-4">
-                  {allPlaylists.map(playlist => (
-                    <button
-                      key={playlist.id}
-                      onClick={() => handleOpenPlaylist(playlist)}
-                      className="flex-shrink-0 w-48 glass rounded-xl p-4 hover:bg-white/10 transition cursor-pointer group text-left"
-                    >
-                      <div className={`w-full aspect-square bg-gradient-to-br ${playlist.coverGradient || 'from-blue-500/30 to-purple-500/30'} rounded-lg mb-3 flex items-center justify-center relative overflow-hidden`}>
-                        <span className="text-4xl">{playlist.emoji || ''}</span>
-                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
-                          <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
-                            <Play size={20} className="text-white ml-1" fill="white" />
-                          </div>
-                        </div>
-                      </div>
-                      <h4 className="font-semibold text-white">{playlist.title || playlist.name}</h4>
-                      <p className="text-white/60 text-sm">{playlist.trackIds?.length || 0} tracks</p>
-                    </button>
-                  ))}
-
-                  {allPlaylists.length === 0 && (
-                    <div className="flex-shrink-0 w-48 glass rounded-xl p-4 border-2 border-dashed border-white/20 flex flex-col items-center justify-center text-center">
-                      <Music size={32} className="text-white/30 mb-2" />
-                      <p className="text-white/50 text-sm">No playlists yet</p>
-                      <p className="text-white/30 text-xs">Click &quot;Create Playlist&quot; to start</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-            {/* Quick Actions */}
-            <div className="flex flex-wrap gap-3 mb-8">
-                <button
-                  onClick={() => setSortBy('shuffle')}
-                  className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-sm transition"
-                >
-                  <Shuffle size={16} />
-                  Shuffle All
-                </button>
+            {/* Quick Filter Chips */}
+            <div className="flex flex-wrap gap-2 mb-6">
                 <button
                   onClick={() => { setFilterYear('all'); setFilterAlbum('all'); setSortBy('year-new'); }}
-                  className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-sm transition"
+                  className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-blue-500/20 to-blue-600/20 border border-blue-500/30 hover:border-blue-400/60 text-blue-300 rounded-full text-sm font-medium transition"
                 >
-                  <TrendingUp size={16} />
-                  Latest Releases
+                  <TrendingUp size={14} />
+                  Latest
                 </button>
                 <button
                   onClick={() => { setFilterAlbum("Cindy's Son"); setSortBy('default'); }}
-                  className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-sm transition"
+                  className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-amber-500/20 to-orange-600/20 border border-amber-500/30 hover:border-amber-400/60 text-amber-300 rounded-full text-sm font-medium transition"
                 >
-                  <Disc size={16} />
+                  <Disc size={14} />
                   Cindy&apos;s Son
                 </button>
                 <button
                   onClick={() => { setFilterAlbum("Shezzy Knew It"); setSortBy('default'); }}
-                  className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-sm transition"
+                  className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-emerald-500/20 to-green-600/20 border border-emerald-500/30 hover:border-emerald-400/60 text-emerald-300 rounded-full text-sm font-medium transition"
                 >
-                  <Disc size={16} />
+                  <Disc size={14} />
                   Shezzy Knew It
                 </button>
+                {years.slice(0, 3).map(year => (
+                  <button
+                    key={year}
+                    onClick={() => { setFilterYear(String(year)); setFilterAlbum('all'); setSortBy('default'); }}
+                    className="px-4 py-2 bg-white/5 border border-white/10 hover:border-white/30 text-white/60 hover:text-white rounded-full text-sm font-medium transition"
+                  >
+                    {year}
+                  </button>
+                ))}
+              </div>
+
+            {/* Playlists Section */}
+            <div className="mb-8">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-bold text-white">Playlists</h2>
+                  <button
+                    onClick={() => setShowPlaylistModal(true)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-full text-xs font-medium transition"
+                  >
+                    <Plus size={14} />
+                    Create
+                  </button>
+                </div>
+                <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-hide">
+                  {allPlaylists.map(playlist => (
+                    <button
+                      key={playlist.id}
+                      onClick={() => handleOpenPlaylist(playlist)}
+                      className="flex-shrink-0 w-40 md:w-44 group text-left"
+                    >
+                      <div className={`w-full aspect-square bg-gradient-to-br ${playlist.coverGradient || 'from-blue-500/30 to-purple-500/30'} rounded-xl mb-2 flex items-center justify-center relative overflow-hidden border border-white/10 group-hover:border-blue-500/50 transition shadow-lg`}>
+                        <span className="text-4xl">{playlist.emoji || ''}</span>
+                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                          <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center shadow-lg">
+                            <Play size={20} className="text-white ml-0.5" fill="white" />
+                          </div>
+                        </div>
+                      </div>
+                      <p className="font-semibold text-white text-sm truncate">{playlist.title || playlist.name}</p>
+                      <p className="text-white/40 text-xs">{playlist.trackIds?.length || 0} tracks</p>
+                    </button>
+                  ))}
+
+                  {allPlaylists.length === 0 && (
+                    <button
+                      onClick={() => setShowPlaylistModal(true)}
+                      className="flex-shrink-0 w-40 md:w-44 aspect-square glass rounded-xl border-2 border-dashed border-white/15 hover:border-blue-500/40 flex flex-col items-center justify-center text-center transition"
+                    >
+                      <Plus size={24} className="text-white/30 mb-2" />
+                      <p className="text-white/40 text-xs">Create your first playlist</p>
+                    </button>
+                  )}
+                </div>
               </div>
 
             {/* Results */}
