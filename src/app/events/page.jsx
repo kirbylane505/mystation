@@ -400,7 +400,7 @@ export default function EventsPage() {
       </div>
 
       {/* ─── SECTION 1: LOTL HERO ─────────────────────────────── */}
-      <section className="relative min-h-[100vh] flex flex-col overflow-hidden">
+      <section className="relative min-h-[85vh] md:min-h-[100vh] flex flex-col overflow-hidden">
         {/* Animated orbs */}
         <div className="bg-orb w-[600px] h-[600px] bg-green-500 top-[-200px] left-[-150px] opacity-20 z-[2]" />
         <div className="bg-orb w-[500px] h-[500px] bg-emerald-500 bottom-[-150px] right-[-200px] opacity-15 z-[2]" style={{ animationDelay: '-5s' }} />
