@@ -18,7 +18,7 @@ export async function generateMetadata({ params }) {
 
   const album = albums.find(a => a.id === track.albumId);
   const title = `${track.title}${track.featured ? ` ft. ${track.featured}` : ''} - Mike Page`;
-  const description = `Stream "${track.title}" by Mike Page${track.featured ? ` ft. ${track.featured}` : ''}${track.producer ? ` | Prod. ${track.producer}` : ''} | ${track.album} (${track.year}) | Free on MyStation`;
+  const description = `🎵 "${track.title}" - Mike Page. You subscribing means the world to me. Independent PAGE, I'm nothing without you.`;
   const url = `https://mystationlive.com/song/${track.id}`;
   const ogParams = new URLSearchParams({
     title: track.title,
