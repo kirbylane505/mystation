@@ -14,15 +14,6 @@ import { useUserStore, usePlayerStore } from '@/store/playerStore';
 
 // ============ DONATE / SUBSCRIBE POPUP (every 7 min) ============
 function DonatePopup({ onClose }) {
-  const [freeSlots, setFreeSlots] = useState(null);
-
-  useEffect(() => {
-    fetch('/api/subscription/subscribe')
-      .then(r => r.json())
-      .then(d => setFreeSlots(d.remaining))
-      .catch(() => {});
-  }, []);
-
   return (
     <div className="fixed inset-0 z-[90] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fadeIn" onClick={onClose}>
       <div
@@ -47,18 +38,17 @@ function DonatePopup({ onClose }) {
           </p>
         </div>
 
-        {/* Free slots urgency banner */}
-        {freeSlots !== null && freeSlots > 0 && (
-          <div className="px-8 pb-4">
-            <div className="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/30 rounded-xl p-3 text-center">
-              <p className="text-yellow-300 text-sm font-bold">
-                <Sparkles size={14} className="inline mr-1" />
-                Only {freeSlots} FREE spots left!
-              </p>
-              <p className="text-white/50 text-xs">First 26 subscribers get their first month FREE</p>
-            </div>
+        {/* Free month + LOTL ticket promo */}
+        <div className="px-8 pb-4">
+          <div className="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/30 rounded-xl p-3 text-center">
+            <p className="text-yellow-300 text-sm font-bold">
+              <Sparkles size={14} className="inline mr-1" />
+              Your First Month is FREE!
+            </p>
+            <p className="text-white/50 text-xs">Every new subscriber gets their first 30 days free</p>
+            <p className="text-green-400 text-xs font-bold mt-1">First 250 subscribers get a FREE ticket to Love on the Lawn!</p>
           </div>
-        )}
+        </div>
 
         <div className="px-8 pb-4 space-y-3">
           {/* Subscribe */}

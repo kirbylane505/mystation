@@ -181,7 +181,7 @@ export default function SubscribePage() {
           <p className="text-white/60 text-lg md:text-xl max-w-2xl mx-auto mb-2">
             MyStation isn't just for music. It's for ANYBODY with a hustle, a talent, or a dream.
           </p>
-          <p className="text-white/40 text-sm">First month FREE. Cancel anytime.</p>
+          <p className="text-white/40 text-sm">First month FREE for everyone. Cancel anytime.</p>
         </div>
 
         {/* Use Cases Grid */}
@@ -296,7 +296,7 @@ export default function SubscribePage() {
               <CreditCard size={20} />
               Subscribe — ${tiers.find(t => t.id === selectedTier)?.price}/mo
             </a>
-            <p className="text-white/30 text-xs text-center mt-3">First month FREE. Cancel anytime. All proceeds support youth & community programs.</p>
+            <p className="text-white/30 text-xs text-center mt-3">First month FREE for everyone. Cancel anytime. All proceeds support youth & community programs.</p>
           </div>
         </div>
 

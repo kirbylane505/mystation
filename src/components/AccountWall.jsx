@@ -2,7 +2,7 @@
  * MYSTATION - Account Wall
  * Sign in, sign up, or enter access code overlay.
  * Shows only when triggered from navbar sign-in button (showAccountWall).
- * First 26 signups get first month free.
+ * Every new subscriber gets first month free (30-day Stripe trial).
  */
 
 'use client';
@@ -144,7 +144,7 @@ export default function AccountWall() {
       }).catch(() => {});
 
       if (data.isFreeSlot) {
-        // First 26 — they got a free month
+        // Free month — every new subscriber gets 30-day trial
         subscribe(cleanEmail, 'regular');
         setFreeSignupSlots(data.freeSignupSlots || 0);
         setSuccessMsg(`Welcome! You're member #${data.subscriberNumber} — first month FREE!`);
@@ -290,7 +290,7 @@ export default function AccountWall() {
                   className="w-full py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold rounded-xl hover:opacity-90 transition disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30"
                 >
                   {loading ? <Loader2 size={20} className="animate-spin" /> : (
-                    freeSignupSlotsRemaining > 0 ? 'Sign Up — First Month FREE' : 'Sign Up — $4.99/mo'
+                    'Sign Up — First Month FREE'
                   )}
                 </button>
               </form>
