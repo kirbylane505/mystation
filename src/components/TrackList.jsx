@@ -42,17 +42,17 @@ const TrackRow = memo(function TrackRow({ track, index, isCurrentTrack, isPlayin
             Mike Page{track.featured ? ` ft. ${track.featured}` : ''}{track.producer ? ` • ${track.producer}` : ''}
           </p>
         </div>
-        <div className="flex items-center gap-1.5 shrink-0">
-          <div onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center gap-0.5 shrink-0">
+          <div className="p-2.5 -m-1" onClick={(e) => e.stopPropagation()}>
             <TrackHeart itemId={`track-${track.id}`} size={16} />
           </div>
-          <div onClick={(e) => e.stopPropagation()}>
+          <div className="p-2.5 -m-1" onClick={(e) => e.stopPropagation()}>
             <SongReactions trackId={track.id} size="xs" />
           </div>
           {showComments && (
             <button
               onClick={(e) => { e.stopPropagation(); onCommentClick(track); }}
-              className="p-1.5 text-white/40 hover:text-blue-400 transition"
+              className="p-3 -m-1 text-white/40 hover:text-blue-400 transition"
             >
               <MessageCircle size={16} />
             </button>

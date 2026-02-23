@@ -231,7 +231,7 @@ function SearchPageInner() {
             {query && (
               <button
                 onClick={() => { setQuery(''); searchRef.current?.focus(); }}
-                className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/10 rounded-full flex items-center justify-center text-white/60 hover:text-white hover:bg-white/20 transition"
+                className="absolute right-4 top-1/2 -translate-y-1/2 w-11 h-11 bg-white/10 rounded-full flex items-center justify-center text-white/60 hover:text-white hover:bg-white/20 transition"
               >
                 <X size={16} />
               </button>
@@ -598,7 +598,7 @@ function TrackRow({
         {/* Add to Playlist */}
         <button
           onClick={onAddToPlaylist}
-          className={`w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center transition-all duration-200 shrink-0 ${
+          className={`w-11 h-11 rounded-lg flex items-center justify-center transition-all duration-200 shrink-0 ${
             addedFeedback
               ? 'bg-green-500 text-white scale-110'
               : 'bg-white/[0.06] text-white/30 hover:bg-white/15 hover:text-white'
@@ -614,7 +614,7 @@ function TrackRow({
             href={track.spotifyUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-white/[0.03] flex items-center justify-center text-white/20 hover:text-green-400 hover:bg-green-500/10 transition shrink-0"
+            className="w-11 h-11 rounded-lg bg-white/[0.03] flex items-center justify-center text-white/20 hover:text-green-400 hover:bg-green-500/10 transition shrink-0"
             title="Open in Spotify"
           >
             <ExternalLink size={13} />

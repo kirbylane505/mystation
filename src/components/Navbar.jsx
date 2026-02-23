@@ -369,7 +369,7 @@ export default function Navbar() {
           {/* Menu Toggle */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center"
+            className="w-11 h-11 rounded-full bg-white/10 flex items-center justify-center"
           >
             {mobileMenuOpen ? <X size={20} className="text-white" /> : <Menu size={20} className="text-white" />}
           </button>
