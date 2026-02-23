@@ -445,7 +445,9 @@ export default function MerchPage() {
             const prices = enabledVariants.map(v => v.price / 100).filter(pr => pr > 0);
             const startingPrice = prices.length > 0 ? Math.min(...prices) : null;
             // Prefer product-only flat-lay (index 1) — no human model
-            const flatLay = (p.images || [])[1];
+            // EXCEPT slides: images[1] is top-down (backwards logo), use default (context-2 angle)
+            const isSlide = (p.title || '').toLowerCase().includes('slide');
+            const flatLay = isSlide ? null : (p.images || [])[1];
             const defaultImg = (p.images || []).find(img => img.is_default);
             const firstImg = (p.images || [])[0];
             const image = flatLay?.src || defaultImg?.src || firstImg?.src || null;
