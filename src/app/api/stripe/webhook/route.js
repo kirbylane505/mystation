@@ -13,7 +13,7 @@ import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import { printful } from '@/lib/printful';
 import { printify } from '@/lib/printify';
-import { sendSaleAlert, sendOrderConfirmation, sendNewSignupAlert } from '@/lib/email';
+import { sendSaleAlert, sendOrderConfirmation, sendNewSignupAlert, sendCancelAlert } from '@/lib/email';
 import { tagSubscriber } from '@/lib/kit';
 import { createHmac } from 'crypto';
 
@@ -511,6 +511,13 @@ async function handleSubscriptionCanceled(subscription) {
       .eq('email', email);
 
     console.log('Subscription marked canceled for:', email);
+
+    // Alert Mike
+    sendCancelAlert({
+      customerEmail: email,
+      reason: 'Subscription canceled',
+    }).catch(() => {});
+
   } catch (err) {
     console.error('subscription.deleted handler error:', err);
   }
@@ -602,6 +609,15 @@ async function handleSubscriptionUpdated(subscription) {
       .eq('email', email);
 
     console.log('Subscription updated for:', email, '→', subscription.status);
+
+    // Alert Mike on non-active status changes
+    if (!isActive) {
+      sendCancelAlert({
+        customerEmail: email,
+        reason: `Status changed to: ${subscription.status}`,
+      }).catch(() => {});
+    }
+
   } catch (err) {
     console.error('subscription.updated handler error:', err);
   }

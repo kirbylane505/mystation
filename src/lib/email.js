@@ -449,6 +449,45 @@ export async function sendNewSignupAlert({ customerName, customerEmail, subscrib
 }
 
 /**
+ * Send admin alert when someone cancels/unsubscribes
+ */
+export async function sendCancelAlert({ customerEmail, reason }) {
+  if (!resend) { console.warn('Resend not configured — skipping cancel alert'); return { success: false }; }
+  try {
+    const { data, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: ADMIN_EMAIL,
+      subject: `UNSUBSCRIBED — ${customerEmail}`,
+      html: `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; background: #0a0e1a; color: #fff; padding: 32px; border-radius: 16px;">
+          <div style="text-align: center; margin-bottom: 24px;">
+            <h1 style="color: #ef4444; margin: 0; font-size: 28px;">UNSUBSCRIBED</h1>
+          </div>
+          <div style="background: #1a1f36; padding: 20px; border-radius: 12px; margin-bottom: 16px;">
+            <p style="margin: 6px 0; color: #e2e8f0;">Email: <strong>${customerEmail}</strong></p>
+            <p style="margin: 6px 0; color: #94a3b8;">Reason: ${reason || 'Canceled subscription'}</p>
+          </div>
+          <div style="text-align: center; margin-top: 24px; padding-top: 16px; border-top: 1px solid #2a2f46;">
+            <p style="color: #64748b; font-size: 12px;">MyStation Cancel Alert</p>
+          </div>
+        </div>
+      `,
+    });
+
+    if (error) {
+      console.error('Failed to send cancel alert:', error);
+      return { success: false, error };
+    }
+
+    console.log('Cancel alert sent:', data?.id);
+    return { success: true, emailId: data?.id };
+  } catch (err) {
+    console.error('Email service error (cancel alert):', err);
+    return { success: false, error: err.message };
+  }
+}
+
+/**
  * Send welcome email to new subscriber with their password
  */
 export async function sendWelcomeEmail({ customerName, customerEmail, password }) {
