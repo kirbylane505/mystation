@@ -21,6 +21,7 @@ import EmpireWelcome from '@/components/EmpireWelcome';
 import Script from 'next/script';
 import { Toaster } from 'sonner';
 import FoundingMemberBanner from '@/components/FoundingMemberBanner';
+import PageTransition from '@/components/PageTransition';
 import CashAppThankYou from '@/components/CashAppThankYou';
 import SubscriberThankYou from '@/components/SubscriberThankYou';
 
@@ -126,7 +127,7 @@ export default function RootLayout({ children }) {
           <main className="pt-20 md:pt-24 pb-40">
             <FoundingMemberBanner />
             <Suspense><ReferralDetector /></Suspense>
-            {children}
+            <PageTransition>{children}</PageTransition>
           </main>
           <Player />
           <AudioPlayer />
