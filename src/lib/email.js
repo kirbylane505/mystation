@@ -3,7 +3,7 @@
  * Uses Resend for transactional emails
  *
  * Required env: RESEND_API_KEY
- * Admin notifications go to: mystationlive@gmail.com
+ * Admin notifications go to: mystationllc1@gmail.com (Resend account owner)
  */
 
 import { Resend } from 'resend';
@@ -12,7 +12,7 @@ const resend = process.env.RESEND_API_KEY
   ? new Resend(process.env.RESEND_API_KEY)
   : null;
 
-const ADMIN_EMAIL = 'mystationlive@gmail.com';
+const ADMIN_EMAIL = 'mystationllc1@gmail.com';
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'MyStation <onboarding@resend.dev>';
 
 /**
