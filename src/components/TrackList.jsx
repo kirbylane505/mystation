@@ -17,7 +17,7 @@ import TrackHeart from './TrackHeart';
 import CommentSection from './CommentSection';
 import Image from 'next/image';
 
-const IDMG_LOGO = '/images/idmg-the-label.jpg';
+const IDMG_LOGO = '/images/idmg-logo-white.png';
 
 function getTrackArt(track) {
   if (track.coverArt) return track.coverArt;
@@ -26,7 +26,7 @@ function getTrackArt(track) {
 }
 
 function artClass(src) {
-  return src === IDMG_LOGO ? 'object-contain p-1.5 bg-white' : 'object-cover';
+  return src === IDMG_LOGO ? 'object-contain p-1.5 bg-[#0a1628]' : 'object-cover';
 }
 
 // Memoized track row — only re-renders when its own state changes

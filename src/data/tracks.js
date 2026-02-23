@@ -1430,7 +1430,7 @@ export const albums = [
     trackCount: 37,
     coverGradient: "from-blue-500 via-blue-700 to-indigo-900",
     coverEmoji: "🎤",
-    coverImage: "/images/idmg-the-label.jpg",
+    coverImage: "/images/idmg-logo-white.png",
     isNew: true,
     trackIds: [],
     description: "Mike Page's 2026 singles collection. New music dropping every week."
@@ -1444,7 +1444,7 @@ export const albums = [
     trackCount: vaultTrackIds.length,
     coverGradient: "from-red-600 via-red-800 to-black",
     coverEmoji: "🔒",
-    coverImage: "/images/idmg-the-label.jpg",
+    coverImage: "/images/idmg-logo-white.png",
     isNew: true,
     isExclusive: true,
     isLocked: true,

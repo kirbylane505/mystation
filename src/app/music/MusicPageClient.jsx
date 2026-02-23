@@ -17,6 +17,8 @@ import {
   Lock, Unlock, ShieldCheck, Loader2
 } from 'lucide-react';
 
+const IDMG_LOGO = '/images/idmg-logo-white.png';
+
 export default function MusicPageClient({ initialTrackId, autoplay = false }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterYear, setFilterYear] = useState('all');
@@ -235,7 +237,7 @@ export default function MusicPageClient({ initialTrackId, autoplay = false }) {
             <div className="grid grid-cols-2 gap-2 w-40 md:w-52 shrink-0">
               {heroAlbums.slice(0, 4).map((a, i) => (
                 <div key={a.id} className={`aspect-square rounded-lg overflow-hidden border border-white/10 ${i === 0 ? 'shadow-lg shadow-blue-500/20' : ''}`}>
-                  <img src={a.coverImage} alt={a.title} className="w-full h-full object-cover" />
+                  <img src={a.coverImage} alt={a.title} className={`w-full h-full ${a.coverImage === IDMG_LOGO ? 'object-contain p-2 bg-[#0a1628]' : 'object-cover'}`} />
                 </div>
               ))}
             </div>
@@ -299,7 +301,7 @@ export default function MusicPageClient({ initialTrackId, autoplay = false }) {
                 >
                   <div className="relative aspect-square rounded-xl overflow-hidden mb-2 border border-white/10 group-hover:border-blue-500/50 transition shadow-lg">
                     {album.coverImage ? (
-                      <img src={album.coverImage} alt={album.title} className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
+                      <img src={album.coverImage} alt={album.title} className={`w-full h-full ${album.coverImage === IDMG_LOGO ? 'object-contain p-3 bg-[#0a1628]' : 'object-cover'} group-hover:scale-105 transition duration-300`} />
                     ) : (
                       <div className={`w-full h-full bg-gradient-to-br ${album.coverGradient || 'from-blue-600 to-purple-700'} flex items-center justify-center`}>
                         <span className="text-4xl">{album.coverEmoji || '🎵'}</span>

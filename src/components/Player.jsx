@@ -34,7 +34,7 @@ function useIsIOS() {
   return ios;
 }
 
-const IDMG_LOGO = '/images/idmg-the-label.jpg';
+const IDMG_LOGO = '/images/idmg-logo-white.png';
 
 // Get album cover art for a track
 function getAlbumArt(track) {
@@ -44,9 +44,9 @@ function getAlbumArt(track) {
   return album?.coverImage || IDMG_LOGO;
 }
 
-// Use object-contain + padding for IDMG logo so it's fully readable
+// Circle logo on dark bg — fits any container perfectly
 function artClass(src) {
-  return src === IDMG_LOGO ? 'object-contain p-2 bg-white' : 'object-cover';
+  return src === IDMG_LOGO ? 'object-contain p-2 bg-[#0a1628]' : 'object-cover';
 }
 
 function formatTime(seconds) {
@@ -186,7 +186,7 @@ export default function Player() {
         <div className="h-full flex items-center justify-between px-4 md:px-6">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg overflow-hidden border border-white/[0.08] shrink-0 relative">
-              <Image src={IDMG_LOGO} alt="IDMG" fill className="object-contain p-2 bg-white" />
+              <Image src={IDMG_LOGO} alt="IDMG" fill className="object-contain p-2 bg-[#0a1628]" />
             </div>
             <div>
               <p className="text-white/60 text-sm font-medium">Mike Page</p>

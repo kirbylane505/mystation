@@ -21,7 +21,7 @@ export default function Image() {
         }}
       >
         <img
-          src="https://mystationlive.com/images/idmg-the-label.jpg"
+          src="https://mystationlive.com/images/idmg-logo-white.png"
           width="220"
           height="220"
           style={{

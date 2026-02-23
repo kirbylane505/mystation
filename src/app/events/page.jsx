@@ -215,7 +215,7 @@ function MerchMarquee() {
             price: p.price || p.retail_price,
             image: p.thumbnail_url || p.image,
             slug: (p.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
-          })).filter(p => p.image && !p.image.includes('idmg-the-label') && !p.image.includes('mpf-logo') && !p.image.includes('lotl-logo') && !p.image.includes('idmg-logo')));
+          })).filter(p => p.image && !p.image.includes('idmg-the-label') && !p.image.includes('idmg-logo-white') && !p.image.includes('mpf-logo') && !p.image.includes('lotl-logo') && !p.image.includes('idmg-logo')));
         }
 
         // Deduplicate: one per product type (ignore brand/color)
