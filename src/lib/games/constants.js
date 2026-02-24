@@ -116,6 +116,26 @@ export const GAME_TYPES = {
     color: '#d97706',
     turnBased: true,
   },
+  maze: {
+    id: 'maze',
+    name: 'Maze HQ',
+    description: 'Navigate the neon maze before time runs out. Think fast!',
+    minPlayers: 1,
+    maxPlayers: 4,
+    icon: '🌀',
+    color: '#06b6d4',
+    turnBased: false,
+  },
+  quiz: {
+    id: 'quiz',
+    name: 'Black History Quiz',
+    description: 'Test your knowledge of Black history, culture & achievement!',
+    minPlayers: 1,
+    maxPlayers: 8,
+    icon: '🧠',
+    color: '#eab308',
+    turnBased: false,
+  },
 };
 
 // Player token colors for board games
@@ -158,4 +178,7 @@ export const GAME_POINTS = {
   winStreak5: 250,
   perfectBlackjack: 100, // natural 21
   spadesNilMade: 50,
+  quizPerfect: 200, // all 10 correct
+  quizStreak7: 150, // 7+ streak
+  mazeFastClear: 100, // under half time limit
 };

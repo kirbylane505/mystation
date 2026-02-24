@@ -34,6 +34,27 @@ function useIsIOS() {
   return ios;
 }
 
+// Detect landscape orientation on mobile (for game mode)
+function useIsLandscapeGame() {
+  const [isLandscape, setIsLandscape] = useState(false);
+  useEffect(() => {
+    const check = () => {
+      const landscape = window.matchMedia('(orientation: landscape)').matches;
+      const isMobile = window.innerWidth < 1024 && ('ontouchstart' in window);
+      const inLounge = window.location.pathname.includes('/lounge');
+      setIsLandscape(landscape && isMobile && inLounge);
+    };
+    check();
+    window.addEventListener('resize', check);
+    window.addEventListener('orientationchange', check);
+    return () => {
+      window.removeEventListener('resize', check);
+      window.removeEventListener('orientationchange', check);
+    };
+  }, []);
+  return isLandscape;
+}
+
 const IDMG_LOGO = '/images/idmg-logo-white.png';
 
 // Get album cover art for a track
@@ -70,6 +91,57 @@ export default function Player() {
   const [showAlarmModal, setShowAlarmModal] = useState(false);
   const [showSleepTimer, setShowSleepTimer] = useState(false);
   const [mp3Loading, setMp3Loading] = useState(false);
+
+  // Landscape game mode — draggable pill
+  const isLandscapeGame = useIsLandscapeGame();
+  const dragRef = useRef(null);
+  const dragStartRef = useRef(null);
+  const [dragPos, setDragPos] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('ms-player-pos');
+        if (saved) return JSON.parse(saved);
+      } catch {}
+    }
+    return { x: 12, y: 12 };
+  });
+
+  // Save drag position
+  useEffect(() => {
+    if (isLandscapeGame) {
+      try { localStorage.setItem('ms-player-pos', JSON.stringify(dragPos)); } catch {}
+    }
+  }, [dragPos, isLandscapeGame]);
+
+  // Touch drag handlers for landscape pill
+  const onDragStart = useCallback((e) => {
+    const touch = e.touches[0];
+    dragStartRef.current = { x: touch.clientX - dragPos.x, y: touch.clientY - dragPos.y };
+  }, [dragPos]);
+
+  const onDragMove = useCallback((e) => {
+    if (!dragStartRef.current) return;
+    e.preventDefault();
+    const touch = e.touches[0];
+    const newX = touch.clientX - dragStartRef.current.x;
+    const newY = touch.clientY - dragStartRef.current.y;
+    const maxX = window.innerWidth - 180;
+    const maxY = window.innerHeight - 56;
+    setDragPos({ x: Math.max(0, Math.min(maxX, newX)), y: Math.max(0, Math.min(maxY, newY)) });
+  }, []);
+
+  const onDragEnd = useCallback(() => {
+    if (!dragStartRef.current) return;
+    dragStartRef.current = null;
+    // Snap to nearest corner/edge
+    setDragPos(prev => {
+      const midX = window.innerWidth / 2;
+      const midY = window.innerHeight / 2;
+      const snapX = prev.x < midX ? 12 : window.innerWidth - 192;
+      const snapY = prev.y < midY ? 12 : window.innerHeight - 68;
+      return { x: snapX, y: snapY };
+    });
+  }, []);
 
   // Mini player progress refs (direct DOM, zero re-renders)
   const miniProgressRef = useRef(null);
@@ -411,10 +483,39 @@ export default function Player() {
   }
 
   // ========================================
-  // MOBILE MINI PLAYER
+  // LANDSCAPE GAME MODE — Draggable Pill Player
   // ========================================
+  if (isLandscapeGame && currentTrack) {
+    return (
+      <div
+        ref={dragRef}
+        className="fixed z-[9998] flex items-center gap-2 px-3 py-2 bg-[#0a0f1a]/95 backdrop-blur-xl border border-white/10 rounded-full shadow-2xl shadow-black/60"
+        style={{ left: dragPos.x, top: dragPos.y, touchAction: 'none', transition: dragStartRef.current ? 'none' : 'left 0.3s ease, top 0.3s ease' }}
+        onTouchStart={onDragStart}
+        onTouchMove={onDragMove}
+        onTouchEnd={onDragEnd}
+      >
+        <div className="w-9 h-9 rounded-full overflow-hidden border border-white/10 shrink-0 relative">
+          <Image src={albumArt} alt="" fill className={artClass(albumArt)} />
+        </div>
+        <button
+          onClick={togglePlay}
+          className="w-9 h-9 bg-white rounded-full flex items-center justify-center shrink-0 active:scale-90 transition"
+        >
+          {isPlaying
+            ? <Pause size={14} className="text-black" fill="black" />
+            : <Play size={14} className="text-black ml-0.5" fill="black" />
+          }
+        </button>
+        <button onClick={nextTrack} className="text-white/50 p-1 active:text-white">
+          <SkipForward size={16} fill="currentColor" />
+        </button>
+      </div>
+    );
+  }
+
   // ========================================
-  // DESKTOP PLAYER
+  // MOBILE MINI PLAYER + DESKTOP PLAYER
   // ========================================
   return (
     <>

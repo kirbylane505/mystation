@@ -123,6 +123,14 @@ export function applySlidesLaddersMove(state, playerId) {
 /**
  * Sanitize state for client — Slides & Ladders has no hidden info
  */
+/**
+ * AI auto-roll — just needs to return 'roll' action (dice is random anyway)
+ * Returns: 'roll'
+ */
+export function aiRoll() {
+  return 'roll';
+}
+
 export function sanitizeSlidesLaddersState(state) {
   return {
     gameType: 'slidesLadders',

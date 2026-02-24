@@ -233,3 +233,109 @@ export function sanitizePoolState(state) {
   // Pool has no hidden information — return as-is
   return { ...state };
 }
+
+/**
+ * AI Shot Calculator — finds best ball-to-pocket angle with slight random error
+ * Returns: { angle, power } for the cue stick
+ */
+export function calculateAiShot(state) {
+  const cueBall = state.balls.find(b => b.id === 0 && !b.pocketed);
+  if (!cueBall) return { angle: 0, power: 12 };
+
+  const aiPlayer = state.turnOrder[state.currentPlayerIndex];
+  const assignment = state.assignments[aiPlayer];
+
+  // Pocket positions (corner + side pockets)
+  const pockets = [
+    { x: BORDER, y: BORDER },
+    { x: TABLE_W / 2, y: BORDER - 4 },
+    { x: TABLE_W - BORDER, y: BORDER },
+    { x: BORDER, y: TABLE_H - BORDER },
+    { x: TABLE_W / 2, y: TABLE_H - BORDER + 4 },
+    { x: TABLE_W - BORDER, y: TABLE_H - BORDER },
+  ];
+
+  // Get target balls
+  const targetBalls = state.balls.filter(b => {
+    if (b.pocketed || b.id === 0) return false;
+    if (!assignment) return b.id !== 8; // no assignment yet — hit anything except 8
+    if (assignment === 'solids') {
+      const allSolidsPocketed = state.pocketedSolids.length >= 7;
+      return allSolidsPocketed ? b.id === 8 : (b.id >= 1 && b.id <= 7);
+    } else {
+      const allStripesPocketed = state.pocketedStripes.length >= 7;
+      return allStripesPocketed ? b.id === 8 : (b.id >= 9 && b.id <= 15);
+    }
+  });
+
+  if (targetBalls.length === 0) {
+    // Defensive shot — hit any non-pocketed ball
+    const anyBall = state.balls.find(b => !b.pocketed && b.id !== 0);
+    if (!anyBall) return { angle: Math.random() * Math.PI * 2, power: 10 };
+    const dx = anyBall.x - cueBall.x;
+    const dy = anyBall.y - cueBall.y;
+    return { angle: Math.atan2(dy, dx), power: 8 + Math.random() * 4 };
+  }
+
+  // Score each ball-pocket combination — pick the easiest shot
+  let bestScore = -Infinity;
+  let bestAngle = 0;
+  let bestPower = 12;
+
+  for (const ball of targetBalls) {
+    for (const pocket of pockets) {
+      // Ghost ball position: where cue ball needs to be to send target ball into pocket
+      const ballToPocketDx = pocket.x - ball.x;
+      const ballToPocketDy = pocket.y - ball.y;
+      const ballToPocketDist = Math.sqrt(ballToPocketDx ** 2 + ballToPocketDy ** 2);
+      if (ballToPocketDist < 1) continue;
+
+      const normX = ballToPocketDx / ballToPocketDist;
+      const normY = ballToPocketDy / ballToPocketDist;
+
+      // Ghost ball position (contact point)
+      const ghostX = ball.x - normX * BALL_R * 2;
+      const ghostY = ball.y - normY * BALL_R * 2;
+
+      // Angle from cue ball to ghost position
+      const cueToDx = ghostX - cueBall.x;
+      const cueToDy = ghostY - cueBall.y;
+      const cueToDist = Math.sqrt(cueToDx ** 2 + cueToDy ** 2);
+
+      if (cueToDist < BALL_R * 2) continue; // too close
+
+      // Score: prefer shorter shots, straighter shots, closer to pocket
+      const straightness = Math.abs(Math.atan2(cueToDy, cueToDx) - Math.atan2(-normY, -normX));
+      const adjustedStraightness = Math.min(straightness, Math.PI * 2 - straightness);
+      const score = (1 / (cueToDist + 1)) * (1 / (adjustedStraightness + 0.1)) * (1 / (ballToPocketDist + 1));
+
+      // Check for obstructing balls (simplified — just check if any ball is near the line)
+      let obstructed = false;
+      for (const other of state.balls) {
+        if (other.pocketed || other.id === ball.id || other.id === 0) continue;
+        // Point-to-line distance
+        const t = Math.max(0, Math.min(1, ((other.x - cueBall.x) * cueToDx + (other.y - cueBall.y) * cueToDy) / (cueToDist * cueToDist)));
+        const projX = cueBall.x + t * cueToDx;
+        const projY = cueBall.y + t * cueToDy;
+        const dist = Math.sqrt((other.x - projX) ** 2 + (other.y - projY) ** 2);
+        if (dist < BALL_R * 2.5) { obstructed = true; break; }
+      }
+
+      const finalScore = obstructed ? score * 0.1 : score;
+
+      if (finalScore > bestScore) {
+        bestScore = finalScore;
+        bestAngle = Math.atan2(cueToDy, cueToDx);
+        bestPower = Math.min(20, Math.max(8, cueToDist * 0.04 + 8));
+      }
+    }
+  }
+
+  // Add slight random error for realism (medium difficulty)
+  const errorRange = 0.06; // ~3.4 degrees
+  bestAngle += (Math.random() - 0.5) * errorRange;
+  bestPower += (Math.random() - 0.5) * 3;
+  bestPower = Math.max(6, Math.min(20, bestPower));
+
+  return { angle: bestAngle, power: bestPower };
+}

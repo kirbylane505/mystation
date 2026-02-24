@@ -136,7 +136,7 @@ export const useGameStore = create((set, get) => ({
     }
   },
 
-  startGame: async () => {
+  startGame: async (options = {}) => {
     const { room, myPlayerId } = get();
     if (!room) return;
 
@@ -144,7 +144,7 @@ export const useGameStore = create((set, get) => ({
       const res = await fetch('/api/lounge/start', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ roomId: room.id, playerId: myPlayerId }),
+        body: JSON.stringify({ roomId: room.id, playerId: myPlayerId, withBots: options.withBots }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to start');

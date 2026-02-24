@@ -278,10 +278,34 @@ export default function DominoesGame({ gameState, myPlayerId, onMove, players })
     prevChainLenRef.current = chainLen;
   }, [gameState?.chain?.length]);
 
+  // AI auto-play — when it's the bot's turn
+  useEffect(() => {
+    if (!gameState || gameState.phase !== 'playing') return;
+    const currentPid = gameState.currentPlayerId;
+    if (!currentPid?.startsWith?.('ai_')) return;
+
+    const timer = setTimeout(async () => {
+      const { aiPlay } = await import('@/lib/games/dominoes');
+      // Reconstruct enough state for AI (it needs hands + chain + boneyard info)
+      const fakeState = {
+        hands: { [currentPid]: gameState.myHand || [] }, // server sends bot's hand as myHand when it's their turn
+        chain: gameState.chain || [],
+        leftEnd: gameState.leftEnd,
+        rightEnd: gameState.rightEnd,
+        boneyard: { length: gameState.boneyardCount || 0 },
+      };
+      const move = aiPlay(fakeState, currentPid);
+      if (onMove) onMove(move.action, { tileId: move.tileId, end: move.end });
+    }, 1000 + Math.random() * 500);
+    return () => clearTimeout(timer);
+  }, [gameState?.currentPlayerId, gameState?.turnCount, gameState?.phase, onMove]);
+
   if (!gameState) return null;
 
   const isMyTurn = gameState.currentPlayerId === myPlayerId;
-  const currentPlayerName = players?.find(p => p.user_id === gameState.currentPlayerId)?.display_name || 'Player';
+  const isBotTurn = gameState.currentPlayerId?.startsWith?.('ai_');
+  const currentPlayerName = isBotTurn ? 'CPU'
+    : (players?.find(p => p.user_id === gameState.currentPlayerId)?.display_name || 'Player');
   const myHand = gameState.myHand || [];
   const chain = gameState.chain || [];
   const isFirstMove = chain.length === 0;

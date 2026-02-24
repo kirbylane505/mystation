@@ -5,7 +5,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import BoardGrid from './board/BoardGrid';
 import DiceRoller from './board/DiceRoller';
 import { PLAYER_COLORS } from '@/lib/games/constants';
@@ -16,7 +16,20 @@ export default function SlidesLaddersGame({ gameState, myPlayerId, onRoll, playe
   if (!gameState) return null;
 
   const isMyTurn = gameState.currentPlayerId === myPlayerId;
-  const currentPlayerName = players?.find(p => p.user_id === gameState.currentPlayerId)?.display_name || 'Player';
+  const isBotTurn = gameState.currentPlayerId?.startsWith?.('ai_') && gameState.phase === 'playing';
+  const currentPlayerName = players?.find(p => p.user_id === gameState.currentPlayerId)?.display_name
+    || (gameState.currentPlayerId?.startsWith?.('ai_') ? 'CPU' : 'Player');
+
+  // AI auto-roll with 1.5s delay
+  useEffect(() => {
+    if (!isBotTurn || rolling) return;
+    const timer = setTimeout(async () => {
+      setRolling(true);
+      await onRoll();
+      setTimeout(() => setRolling(false), 1000);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [isBotTurn, rolling, onRoll, gameState.turnCount]);
 
   const handleRoll = async () => {
     if (!isMyTurn || rolling) return;

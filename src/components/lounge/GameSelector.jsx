@@ -8,7 +8,7 @@
 import { GAME_TYPES } from '@/lib/games/constants';
 import { Lock } from 'lucide-react';
 
-const gameOrder = ['blackjack', 'slidesLadders', 'pool', 'spades', 'dominoes'];
+const gameOrder = ['blackjack', 'slidesLadders', 'pool', 'spades', 'dominoes', 'maze', 'quiz'];
 
 export default function GameSelector({ onSelect }) {
   return (

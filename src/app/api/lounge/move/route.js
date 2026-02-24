@@ -12,6 +12,7 @@ import { applySlidesLaddersMove, sanitizeSlidesLaddersState } from '@/lib/games/
 import { applyPoolMove, sanitizePoolState } from '@/lib/games/pool';
 import { applySpadesMove, sanitizeSpadesState } from '@/lib/games/spades';
 import { applyDominoesMove, sanitizeDominoesState } from '@/lib/games/dominoes';
+import { applyMazeMove, sanitizeMazeState } from '@/lib/games/maze';
 
 export async function POST(request) {
   try {
@@ -71,6 +72,9 @@ export async function POST(request) {
         break;
       case 'dominoes':
         result = applyDominoesMove(gameState, playerId, action, moveData);
+        break;
+      case 'maze':
+        result = applyMazeMove(gameState, playerId, action);
         break;
       default:
         return NextResponse.json({ error: 'Game type not supported' }, { status: 400 });
@@ -158,6 +162,9 @@ export async function POST(request) {
         break;
       case 'dominoes':
         broadcastState = sanitizeDominoesState(newState, '__broadcast__');
+        break;
+      case 'maze':
+        broadcastState = sanitizeMazeState(newState, '__broadcast__');
         break;
     }
 
@@ -263,6 +270,16 @@ async function awardGamePoints(supabase, room, gameState) {
         if (gameState.winner === userId) {
           isWinner = true;
           pointsEarned = GAME_POINTS.gameWin;
+        }
+      } else if (room.game_type === 'maze') {
+        if (gameState.winner === userId) {
+          isWinner = true;
+          pointsEarned = GAME_POINTS.gameWin;
+          // Bonus for clearing under half the time limit
+          const player = gameState.players?.[userId];
+          if (player?.finishTime && player.finishTime < (gameState.timeLimit * 1000) / 2) {
+            pointsEarned += GAME_POINTS.mazeFastClear || 0;
+          }
         }
       }
 

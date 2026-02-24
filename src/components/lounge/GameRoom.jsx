@@ -18,8 +18,10 @@ import SlidesLaddersGame from './SlidesLaddersGame';
 import PoolGame from './PoolGame';
 import SpadesGame from './SpadesGame';
 import DominoesGame from './DominoesGame';
+import MazeGame from './MazeGame';
+import QuizGame from './QuizGame';
 import { GAME_TYPES } from '@/lib/games/constants';
-import { Users, Share2, Play, LogOut, Loader2 } from 'lucide-react';
+import { Users, Share2, Play, LogOut, Loader2, Bot } from 'lucide-react';
 
 export default function GameRoom() {
   const [showInvite, setShowInvite] = useState(false);
@@ -108,7 +110,7 @@ export default function GameRoom() {
                 {players.length} player{players.length !== 1 ? 's' : ''} in room
               </p>
 
-              <div className="flex items-center justify-center gap-3">
+              <div className="flex items-center justify-center gap-3 flex-wrap">
                 {!isHost && (
                   <button
                     data-testid="ready-btn"
@@ -132,6 +134,17 @@ export default function GameRoom() {
                   >
                     <Play size={18} />
                     Start Game
+                  </button>
+                )}
+
+                {isHost && players.length === 1 && gameConfig?.turnBased && (
+                  <button
+                    data-testid="play-vs-bot-btn"
+                    onClick={() => startGame({ withBots: true })}
+                    className="flex items-center gap-2 px-6 py-3 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl font-bold transition shadow-lg shadow-indigo-500/20"
+                  >
+                    <Bot size={18} />
+                    Play vs Bot
                   </button>
                 )}
               </div>
@@ -174,6 +187,18 @@ export default function GameRoom() {
                 myPlayerId={myPlayerId}
                 onMove={submitMove}
                 players={players}
+              />
+            ) : room.game_type === 'maze' ? (
+              <MazeGame
+                gameState={gameState}
+                myPlayerId={myPlayerId}
+                onMove={submitMove}
+              />
+            ) : room.game_type === 'quiz' ? (
+              <QuizGame
+                gameState={gameState}
+                myPlayerId={myPlayerId}
+                onMove={submitMove}
               />
             ) : (
               <div className="text-white/50">Loading game...</div>

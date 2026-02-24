@@ -11,10 +11,11 @@ import { initSlidesLadders, sanitizeSlidesLaddersState } from '@/lib/games/slide
 import { initPool, sanitizePoolState } from '@/lib/games/pool';
 import { initSpades, sanitizeSpadesState } from '@/lib/games/spades';
 import { initDominoes, sanitizeDominoesState } from '@/lib/games/dominoes';
+import { initMaze, startMaze, sanitizeMazeState } from '@/lib/games/maze';
 
 export async function POST(request) {
   try {
-    const { roomId, playerId } = await request.json();
+    const { roomId, playerId, withBots } = await request.json();
 
     const supabase = getSupabaseAdmin();
     if (!supabase) {
@@ -53,10 +54,12 @@ export async function POST(request) {
       }, { status: 400 });
     }
 
-    // Check all players ready (host is auto-ready)
-    const notReady = players.filter(p => !p.ready && p.user_id !== room.host_id);
-    if (notReady.length > 0) {
-      return NextResponse.json({ error: 'Not all players are ready' }, { status: 400 });
+    // Check all players ready (host is auto-ready, skip check for solo bot games)
+    if (!withBots) {
+      const notReady = players.filter(p => !p.ready && p.user_id !== room.host_id);
+      if (notReady.length > 0) {
+        return NextResponse.json({ error: 'Not all players are ready' }, { status: 400 });
+      }
     }
 
     // Initialize game based on type
@@ -94,6 +97,12 @@ export async function POST(request) {
         const domIds = [...playerIds];
         if (domIds.length < 2) domIds.push('ai_opponent');
         gameState = initDominoes(domIds);
+        break;
+      }
+      case 'maze': {
+        // Maze is real-time, all players move simultaneously
+        const mazeState = initMaze(playerIds, 'medium');
+        gameState = startMaze(mazeState); // auto-start the timer
         break;
       }
       default:
@@ -134,6 +143,9 @@ export async function POST(request) {
         break;
       case 'dominoes':
         broadcastState = sanitizeDominoesState(gameState, '__broadcast__');
+        break;
+      case 'maze':
+        broadcastState = sanitizeMazeState(gameState, '__broadcast__');
         break;
     }
 

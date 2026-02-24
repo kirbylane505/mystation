@@ -663,8 +663,25 @@ export default function PoolGame({ gameState, myPlayerId, onMove, players }) {
   }, [gameState]);
 
   const currentTurnPlayer = gameState?.turnOrder?.[gameState?.currentPlayerIndex];
-  const isAiOpponent = currentTurnPlayer === 'ai_opponent';
+  const isAiOpponent = currentTurnPlayer?.startsWith?.('ai_');
   const isMyTurn = gameState && (currentTurnPlayer === myPlayerId || isAiOpponent);
+
+  // AI auto-shot — when it's the bot's turn, calculate and fire after delay
+  useEffect(() => {
+    if (!isAiOpponent || shooting || !gameState || gameState.phase !== 'playing') return;
+    const timer = setTimeout(async () => {
+      const { calculateAiShot } = await import('@/lib/games/pool');
+      const cue = ballsRef.current.find(b => b.id === 0 && !b.pocketed);
+      if (!cue) return;
+      const shot = calculateAiShot(gameState);
+      cue.vx = Math.cos(shot.angle) * shot.power;
+      cue.vy = Math.sin(shot.angle) * shot.power;
+      playCueStrike(shot.power);
+      setShooting(true);
+      setPocketedThisShot([]);
+    }, 1200 + Math.random() * 800); // 1.2-2s thinking delay
+    return () => clearTimeout(timer);
+  }, [isAiOpponent, shooting, gameState]);
 
   // Canvas mouse position
   const getCanvasPos = useCallback((e) => {
@@ -979,7 +996,7 @@ export default function PoolGame({ gameState, myPlayerId, onMove, players }) {
       </div>
 
       {/* Pool table */}
-      <div className="relative w-full max-w-[900px] aspect-[2/1] rounded-2xl overflow-hidden shadow-[0_8px_40px_rgba(0,0,0,0.6)] border border-amber-900/30">
+      <div className="relative w-full aspect-[2/1] rounded-2xl overflow-hidden shadow-[0_8px_40px_rgba(0,0,0,0.6)] border border-amber-900/30">
         <canvas
           ref={canvasRef}
           width={TW}

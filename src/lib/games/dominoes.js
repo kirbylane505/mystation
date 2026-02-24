@@ -368,6 +368,54 @@ export function applyDominoesMove(state, playerId, action, data = {}) {
 /**
  * Sanitize state for client — hide other players' hands + boneyard
  */
+/**
+ * AI play for dominoes — picks highest-value playable tile, draws if stuck
+ * Returns: { action: 'play'|'draw'|'pass', tileId?, end? }
+ */
+export function aiPlay(state, playerId) {
+  const hand = state.hands[playerId];
+  if (!hand || hand.length === 0) return { action: 'pass' };
+
+  // First tile — play the highest double, or highest pip tile
+  if (state.chain.length === 0) {
+    const doubles = hand.filter(t => t.a === t.b).sort((a, b) => b.a - a.a);
+    const tile = doubles.length > 0 ? doubles[0] : hand.sort((a, b) => (b.a + b.b) - (a.a + a.b))[0];
+    return { action: 'play', tileId: tile.id, end: 'right' };
+  }
+
+  // Find all playable tiles
+  const playable = [];
+  for (const tile of hand) {
+    if (tile.a === state.leftEnd || tile.b === state.leftEnd) {
+      playable.push({ tile, end: 'left', value: tile.a + tile.b });
+    }
+    if (tile.a === state.rightEnd || tile.b === state.rightEnd) {
+      // Avoid duplicate if both ends match the same tile
+      if (!playable.find(p => p.tile.id === tile.id)) {
+        playable.push({ tile, end: 'right', value: tile.a + tile.b });
+      } else {
+        // Also playable on right — pick the end that gives better value
+        playable.push({ tile, end: 'right', value: tile.a + tile.b });
+      }
+    }
+  }
+
+  if (playable.length > 0) {
+    // Sort by highest pip value first (dump high-value tiles early)
+    playable.sort((a, b) => b.value - a.value);
+    const best = playable[0];
+    return { action: 'play', tileId: best.tile.id, end: best.end };
+  }
+
+  // No playable tile — draw from boneyard if available
+  if (state.boneyard.length > 0) {
+    return { action: 'draw' };
+  }
+
+  // No boneyard — pass
+  return { action: 'pass' };
+}
+
 export function sanitizeDominoesState(state, playerId) {
   const handCounts = {};
   for (const pid of state.playerOrder) {
