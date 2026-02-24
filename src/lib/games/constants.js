@@ -116,16 +116,6 @@ export const GAME_TYPES = {
     color: '#d97706',
     turnBased: true,
   },
-  connect4: {
-    id: 'connect4',
-    name: 'Connect 4',
-    description: 'Drop discs, connect four in a row. Classic strategy!',
-    minPlayers: 1,
-    maxPlayers: 2,
-    icon: '🔴',
-    color: '#ef4444',
-    turnBased: true,
-  },
   quiz: {
     id: 'quiz',
     name: 'Black History Quiz',
@@ -180,5 +170,4 @@ export const GAME_POINTS = {
   spadesNilMade: 50,
   quizPerfect: 200, // all 10 correct
   quizStreak7: 150, // 7+ streak
-  connect4Perfect: 100, // win with minimum moves (7)
 };

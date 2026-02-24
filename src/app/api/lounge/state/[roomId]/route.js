@@ -10,7 +10,6 @@ import { sanitizeSlidesLaddersState } from '@/lib/games/slidesLadders';
 import { sanitizePoolState } from '@/lib/games/pool';
 import { sanitizeSpadesState } from '@/lib/games/spades';
 import { sanitizeDominoesState } from '@/lib/games/dominoes';
-import { sanitizeConnect4State } from '@/lib/games/connect4';
 import { sanitizeQuizState } from '@/lib/games/quiz';
 
 export async function GET(request, { params }) {
@@ -67,9 +66,6 @@ export async function GET(request, { params }) {
         break;
       case 'dominoes':
         gameState = sanitizeDominoesState(stateRow.state, playerId);
-        break;
-      case 'connect4':
-        gameState = sanitizeConnect4State(stateRow.state, playerId);
         break;
       case 'quiz':
         gameState = sanitizeQuizState(stateRow.state, playerId);

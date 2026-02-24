@@ -18,7 +18,6 @@ import SlidesLaddersGame from './SlidesLaddersGame';
 import PoolGame from './PoolGame';
 import SpadesGame from './SpadesGame';
 import DominoesGame from './DominoesGame';
-import Connect4Game from './Connect4Game';
 import QuizGame from './QuizGame';
 import { GAME_TYPES } from '@/lib/games/constants';
 import { Users, Share2, Play, LogOut, Loader2, Bot, Eye } from 'lucide-react';
@@ -193,13 +192,6 @@ export default function GameRoom() {
               />
             ) : room.game_type === 'dominoes' ? (
               <DominoesGame
-                gameState={gameState}
-                myPlayerId={myPlayerId}
-                onMove={handleMove}
-                players={players}
-              />
-            ) : room.game_type === 'connect4' ? (
-              <Connect4Game
                 gameState={gameState}
                 myPlayerId={myPlayerId}
                 onMove={handleMove}

@@ -11,7 +11,6 @@ import { initSlidesLadders, sanitizeSlidesLaddersState } from '@/lib/games/slide
 import { initPool, sanitizePoolState } from '@/lib/games/pool';
 import { initSpades, sanitizeSpadesState } from '@/lib/games/spades';
 import { initDominoes, sanitizeDominoesState } from '@/lib/games/dominoes';
-import { initConnect4, sanitizeConnect4State } from '@/lib/games/connect4';
 import { initQuiz, sanitizeQuizState } from '@/lib/games/quiz';
 
 export async function POST(request) {
@@ -100,12 +99,6 @@ export async function POST(request) {
         gameState = initDominoes(domIds);
         break;
       }
-      case 'connect4': {
-        const c4Ids = [...playerIds];
-        if (c4Ids.length < 2) c4Ids.push('ai_opponent');
-        gameState = initConnect4(c4Ids);
-        break;
-      }
       case 'quiz': {
         const quizOptions = room.settings || {};
         gameState = initQuiz(playerIds, quizOptions);
@@ -149,9 +142,6 @@ export async function POST(request) {
         break;
       case 'dominoes':
         broadcastState = sanitizeDominoesState(gameState, '__broadcast__');
-        break;
-      case 'connect4':
-        broadcastState = sanitizeConnect4State(gameState);
         break;
       case 'quiz':
         broadcastState = sanitizeQuizState(gameState, '__broadcast__');

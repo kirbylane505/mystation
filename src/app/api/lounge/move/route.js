@@ -12,7 +12,6 @@ import { applySlidesLaddersMove, sanitizeSlidesLaddersState } from '@/lib/games/
 import { applyPoolMove, sanitizePoolState } from '@/lib/games/pool';
 import { applySpadesMove, sanitizeSpadesState } from '@/lib/games/spades';
 import { applyDominoesMove, sanitizeDominoesState } from '@/lib/games/dominoes';
-import { applyConnect4Move, sanitizeConnect4State } from '@/lib/games/connect4';
 import { applyQuizMove, sanitizeQuizState } from '@/lib/games/quiz';
 
 export async function POST(request) {
@@ -73,9 +72,6 @@ export async function POST(request) {
         break;
       case 'dominoes':
         result = applyDominoesMove(gameState, playerId, action, moveData);
-        break;
-      case 'connect4':
-        result = applyConnect4Move(gameState, playerId, action, moveData);
         break;
       case 'quiz':
         result = applyQuizMove(gameState, playerId, action, moveData);
@@ -166,9 +162,6 @@ export async function POST(request) {
         break;
       case 'dominoes':
         broadcastState = sanitizeDominoesState(newState, '__broadcast__');
-        break;
-      case 'connect4':
-        broadcastState = sanitizeConnect4State(newState);
         break;
       case 'quiz':
         broadcastState = sanitizeQuizState(newState, '__broadcast__');
@@ -339,15 +332,6 @@ async function awardGamePoints(supabase, room, gameState) {
             pointsEarned += GAME_POINTS.quizStreak7 || 0;
           }
         }
-      } else if (room.game_type === 'connect4') {
-        if (gameState.winner === userId) {
-          isWinner = true;
-          pointsEarned = GAME_POINTS.gameWin;
-          // Bonus for winning with minimum moves (7 drops = fastest possible win)
-          if (gameState.moveCount <= 8) {
-            pointsEarned += GAME_POINTS.connect4Perfect || 0;
-          }
-        }
       }
 
       // Upsert stats
@@ -426,10 +410,6 @@ function getGameEventMessage(gameType, action, result, state, playerId) {
         const pData = state.players?.[playerId];
         if (pData?.streak >= 5) return `${pData.streak} in a row! On fire!`;
       }
-      return null;
-
-    case 'connect4':
-      if (state.winner === playerId) return 'Connect 4! You win!';
       return null;
 
     case 'spades':
