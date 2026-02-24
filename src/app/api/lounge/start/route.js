@@ -12,6 +12,7 @@ import { initPool, sanitizePoolState } from '@/lib/games/pool';
 import { initSpades, sanitizeSpadesState } from '@/lib/games/spades';
 import { initDominoes, sanitizeDominoesState } from '@/lib/games/dominoes';
 import { initMaze, startMaze, sanitizeMazeState } from '@/lib/games/maze';
+import { initQuiz, sanitizeQuizState } from '@/lib/games/quiz';
 
 export async function POST(request) {
   try {
@@ -105,6 +106,11 @@ export async function POST(request) {
         gameState = startMaze(mazeState); // auto-start the timer
         break;
       }
+      case 'quiz': {
+        const quizOptions = room.settings || {};
+        gameState = initQuiz(playerIds, quizOptions);
+        break;
+      }
       default:
         return NextResponse.json({ error: 'Game type not yet implemented' }, { status: 400 });
     }
@@ -146,6 +152,9 @@ export async function POST(request) {
         break;
       case 'maze':
         broadcastState = sanitizeMazeState(gameState, '__broadcast__');
+        break;
+      case 'quiz':
+        broadcastState = sanitizeQuizState(gameState, '__broadcast__');
         break;
     }
 

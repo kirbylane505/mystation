@@ -215,4 +215,92 @@ export function getQuizResults(state) {
     .sort((a, b) => b.score - a.score);
 }
 
+/**
+ * Unified move handler for quiz (matches API pattern)
+ * @param {object} state - current game state
+ * @param {string} playerId - the player
+ * @param {string} action - 'answer' | 'next'
+ * @param {object} data - { answerIndex } for answer action
+ * @returns {{ state, valid, error?, moveDetails? }}
+ */
+export function applyQuizMove(state, playerId, action, data = {}) {
+  if (state.phase === 'finished') {
+    return { state, valid: false, error: 'Game is finished' };
+  }
+
+  switch (action) {
+    case 'answer': {
+      if (state.phase !== 'question') {
+        return { state, valid: false, error: 'Not in question phase' };
+      }
+      if (typeof data.answerIndex !== 'number' || data.answerIndex < 0 || data.answerIndex > 3) {
+        return { state, valid: false, error: 'Invalid answer index' };
+      }
+      const newState = submitAnswer(state, playerId, data.answerIndex);
+      // Check if all players answered — auto-advance to reveal
+      const allAnswered = state.playerOrder.every(pid => {
+        const p = newState.players[pid];
+        return p.answers.find(a => a.questionId === newState.questions[newState.currentQuestion].id);
+      });
+      const finalState = allAnswered ? nextQuestion(newState) : newState;
+      return { state: finalState, valid: true, moveDetails: { action: 'answer', playerId, answerIndex: data.answerIndex } };
+    }
+    case 'next': {
+      const newState = nextQuestion(state);
+      return { state: newState, valid: true, moveDetails: { action: 'next' } };
+    }
+    default:
+      return { state, valid: false, error: `Unknown quiz action: ${action}` };
+  }
+}
+
+/**
+ * Sanitize quiz state for broadcast or per-player view
+ * Hide future question answers during question phase to prevent cheating
+ */
+export function sanitizeQuizState(state, playerId) {
+  // Strip correct answer from current question during question phase
+  const sanitizedQuestions = state.questions.map((q, idx) => {
+    if (idx > state.currentQuestion) {
+      // Future questions — hide answer
+      return { ...q, answer: undefined };
+    }
+    if (idx === state.currentQuestion && state.phase === 'question') {
+      // Current question in question phase — hide answer
+      return { ...q, answer: undefined };
+    }
+    return q; // Past/revealed questions — show answer
+  });
+
+  // For broadcast, show scores but not individual answer details
+  if (playerId === '__broadcast__') {
+    const players = {};
+    for (const [pid, data] of Object.entries(state.players)) {
+      players[pid] = {
+        score: data.score,
+        streak: data.streak,
+        longestStreak: data.longestStreak,
+        answeredCount: data.answers.length,
+      };
+    }
+    return { ...state, questions: sanitizedQuestions, players };
+  }
+
+  // For specific player, show their full answers but others' scores only
+  const players = {};
+  for (const [pid, data] of Object.entries(state.players)) {
+    if (pid === playerId) {
+      players[pid] = data; // full data for requesting player
+    } else {
+      players[pid] = {
+        score: data.score,
+        streak: data.streak,
+        longestStreak: data.longestStreak,
+        answeredCount: data.answers.length,
+      };
+    }
+  }
+  return { ...state, questions: sanitizedQuestions, players };
+}
+
 export { categories, getStreakMultiplier };

@@ -21,12 +21,12 @@ import DominoesGame from './DominoesGame';
 import MazeGame from './MazeGame';
 import QuizGame from './QuizGame';
 import { GAME_TYPES } from '@/lib/games/constants';
-import { Users, Share2, Play, LogOut, Loader2, Bot } from 'lucide-react';
+import { Users, Share2, Play, LogOut, Loader2, Bot, Eye } from 'lucide-react';
 
 export default function GameRoom() {
   const [showInvite, setShowInvite] = useState(false);
   const {
-    room, players, gameState, myPlayerId,
+    room, players, gameState, myPlayerId, isSpectator,
     toggleReady, startGame, leaveRoom, fetchGameState, submitMove,
   } = useGameStore();
 
@@ -46,11 +46,13 @@ export default function GameRoom() {
 
   if (!room) return null;
 
-  const isHost = room.host_id === myPlayerId;
-  const allReady = players.filter(p => p.user_id !== room.host_id).every(p => p.ready);
+  const isHost = !isSpectator && room.host_id === myPlayerId;
+  const allReady = players.filter(p => p.user_id !== room.host_id && p.seat !== -1 && p.role !== 'spectator').every(p => p.ready);
   const gameConfig = GAME_TYPES[room.game_type];
   const minPlayers = gameConfig?.minPlayers || 1;
   const canStart = isHost && allReady && players.length >= minPlayers;
+  const spectatorNoop = () => {}; // spectators can't make moves
+  const handleMove = isSpectator ? spectatorNoop : submitMove;
   const isPlaying = room.status === 'playing';
   const isFinished = room.status === 'finished' || gameState?.phase === 'finished';
 
@@ -96,6 +98,14 @@ export default function GameRoom() {
             </button>
           </div>
         </div>
+
+        {/* Spectator Banner */}
+        {isSpectator && (
+          <div className="flex items-center gap-2 px-4 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-indigo-300 text-sm mb-4">
+            <Eye size={14} />
+            You&apos;re watching this game as a spectator
+          </div>
+        )}
 
         {/* Game Content */}
         <div className="flex-1 bg-white/[0.02] rounded-2xl border border-white/10 p-6 flex items-center justify-center min-h-[400px]">
@@ -159,46 +169,46 @@ export default function GameRoom() {
               <BlackjackGame
                 gameState={gameState}
                 myPlayerId={myPlayerId}
-                onMove={submitMove}
+                onMove={handleMove}
               />
             ) : room.game_type === 'slidesLadders' ? (
               <SlidesLaddersGame
                 gameState={gameState}
                 myPlayerId={myPlayerId}
-                onRoll={() => submitMove('roll')}
+                onRoll={() => handleMove('roll')}
                 players={players}
               />
             ) : room.game_type === 'pool' ? (
               <PoolGame
                 gameState={gameState}
                 myPlayerId={myPlayerId}
-                onMove={submitMove}
+                onMove={handleMove}
                 players={players}
               />
             ) : room.game_type === 'spades' ? (
               <SpadesGame
                 gameState={gameState}
                 myPlayerId={myPlayerId}
-                onMove={submitMove}
+                onMove={handleMove}
               />
             ) : room.game_type === 'dominoes' ? (
               <DominoesGame
                 gameState={gameState}
                 myPlayerId={myPlayerId}
-                onMove={submitMove}
+                onMove={handleMove}
                 players={players}
               />
             ) : room.game_type === 'maze' ? (
               <MazeGame
                 gameState={gameState}
                 myPlayerId={myPlayerId}
-                onMove={submitMove}
+                onMove={handleMove}
               />
             ) : room.game_type === 'quiz' ? (
               <QuizGame
                 gameState={gameState}
                 myPlayerId={myPlayerId}
-                onMove={submitMove}
+                onMove={handleMove}
               />
             ) : (
               <div className="text-white/50">Loading game...</div>

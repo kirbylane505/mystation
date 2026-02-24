@@ -11,6 +11,7 @@ import { sanitizePoolState } from '@/lib/games/pool';
 import { sanitizeSpadesState } from '@/lib/games/spades';
 import { sanitizeDominoesState } from '@/lib/games/dominoes';
 import { sanitizeMazeState } from '@/lib/games/maze';
+import { sanitizeQuizState } from '@/lib/games/quiz';
 
 export async function GET(request, { params }) {
   try {
@@ -69,6 +70,9 @@ export async function GET(request, { params }) {
         break;
       case 'maze':
         gameState = sanitizeMazeState(stateRow.state, playerId);
+        break;
+      case 'quiz':
+        gameState = sanitizeQuizState(stateRow.state, playerId);
         break;
       default:
         gameState = stateRow.state;

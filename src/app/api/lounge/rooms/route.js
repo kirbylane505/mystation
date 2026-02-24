@@ -53,7 +53,7 @@ export async function GET() {
 
 export async function POST(request) {
   try {
-    const { gameType, displayName } = await request.json();
+    const { gameType, displayName, playerId: clientPlayerId } = await request.json();
 
     if (!gameType || !GAME_TYPES[gameType]) {
       return NextResponse.json({ error: 'Invalid game type' }, { status: 400 });
@@ -69,7 +69,7 @@ export async function POST(request) {
     }
 
     const code = generateRoomCode();
-    const userId = `user_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    const userId = clientPlayerId || `user_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     const name = (displayName || 'Player').slice(0, 20);
 
     // Create room

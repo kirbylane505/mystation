@@ -13,6 +13,7 @@ import { applyPoolMove, sanitizePoolState } from '@/lib/games/pool';
 import { applySpadesMove, sanitizeSpadesState } from '@/lib/games/spades';
 import { applyDominoesMove, sanitizeDominoesState } from '@/lib/games/dominoes';
 import { applyMazeMove, sanitizeMazeState } from '@/lib/games/maze';
+import { applyQuizMove, sanitizeQuizState } from '@/lib/games/quiz';
 
 export async function POST(request) {
   try {
@@ -75,6 +76,9 @@ export async function POST(request) {
         break;
       case 'maze':
         result = applyMazeMove(gameState, playerId, action);
+        break;
+      case 'quiz':
+        result = applyQuizMove(gameState, playerId, action, moveData);
         break;
       default:
         return NextResponse.json({ error: 'Game type not supported' }, { status: 400 });
@@ -166,14 +170,62 @@ export async function POST(request) {
       case 'maze':
         broadcastState = sanitizeMazeState(newState, '__broadcast__');
         break;
+      case 'quiz':
+        broadcastState = sanitizeQuizState(newState, '__broadcast__');
+        break;
     }
 
     const event = newState.phase === 'finished' ? 'game:end' : 'game:state';
+
+    // For games with hidden info, send personalized state per player
+    const hiddenInfoGames = ['blackjack', 'spades', 'dominoes', 'quiz'];
+    if (hiddenInfoGames.includes(room.game_type)) {
+      const { data: roomPlayers } = await supabase
+        .from('game_players')
+        .select('user_id')
+        .eq('room_id', roomId);
+
+      for (const rp of (roomPlayers || [])) {
+        let personalState;
+        switch (room.game_type) {
+          case 'blackjack': personalState = sanitizeBlackjackState(newState, rp.user_id); break;
+          case 'spades': personalState = sanitizeSpadesState(newState, rp.user_id); break;
+          case 'dominoes': personalState = sanitizeDominoesState(newState, rp.user_id); break;
+          case 'quiz': personalState = sanitizeQuizState(newState, rp.user_id); break;
+        }
+        channel.send({
+          type: 'broadcast',
+          event: `${event}:${rp.user_id}`,
+          payload: { gameState: personalState },
+        });
+      }
+    }
+
+    // Also send generic broadcast for spectators + games without hidden info
     channel.send({
       type: 'broadcast',
       event,
       payload: { gameState: broadcastState },
     });
+
+    // Send game event message to chat channel
+    const gameEvent = getGameEventMessage(room.game_type, action, result, newState, playerId);
+    if (gameEvent) {
+      const chatChannel = supabase.channel(`chat:${roomId}`);
+      chatChannel.send({
+        type: 'broadcast',
+        event: 'chat:message',
+        payload: {
+          message: {
+            id: `event_${Date.now()}`,
+            sender: 'system',
+            senderId: 'system',
+            text: gameEvent,
+            timestamp: new Date().toISOString(),
+          },
+        },
+      });
+    }
 
     return NextResponse.json({ ok: true, moveDetails: result.moveDetails });
   } catch (err) {
@@ -271,6 +323,22 @@ async function awardGamePoints(supabase, room, gameState) {
           isWinner = true;
           pointsEarned = GAME_POINTS.gameWin;
         }
+      } else if (room.game_type === 'quiz') {
+        const results = Object.entries(gameState.players)
+          .sort((a, b) => b[1].score - a[1].score);
+        if (results[0] && results[0][0] === userId) {
+          isWinner = true;
+          pointsEarned = GAME_POINTS.gameWin;
+          // Perfect quiz bonus
+          const pData = gameState.players[userId];
+          if (pData.answers.length === gameState.questions.length && pData.answers.every(a => a.correct)) {
+            pointsEarned += GAME_POINTS.quizPerfect || 0;
+          }
+          // 7+ streak bonus
+          if (pData.longestStreak >= 7) {
+            pointsEarned += GAME_POINTS.quizStreak7 || 0;
+          }
+        }
       } else if (room.game_type === 'maze') {
         if (gameState.winner === userId) {
           isWinner = true;
@@ -327,5 +395,49 @@ async function awardGamePoints(supabase, room, gameState) {
     }
   } catch (err) {
     console.error('Award points error:', err);
+  }
+}
+
+/**
+ * Generate game event messages for notable plays
+ */
+function getGameEventMessage(gameType, action, result, state, playerId) {
+  const details = result.moveDetails || {};
+
+  switch (gameType) {
+    case 'blackjack':
+      if (action === 'hit' && state.results?.[playerId]?.outcome === 'blackjack') return 'Blackjack! 21!';
+      if (action === 'hit' && state.results?.[playerId]?.outcome === 'bust') return 'Bust! Over 21.';
+      return null;
+
+    case 'slidesLadders':
+      if (details.rolledSix) return 'Rolled a 6! Extra turn!';
+      if (details.hitLadder) return 'Hit a ladder! Climbing up!';
+      if (details.hitSlide) return 'Hit a slide! Going down!';
+      if (state.winner === playerId) return 'Reached 100! Winner!';
+      return null;
+
+    case 'dominoes':
+      if (action === 'play' && details.isDouble) return 'Slammed a double!';
+      if (state.phase === 'finished') return 'Dominoes! Game over!';
+      return null;
+
+    case 'quiz':
+      if (action === 'answer' && details.answerIndex !== undefined) {
+        const pData = state.players?.[playerId];
+        if (pData?.streak >= 5) return `${pData.streak} in a row! On fire!`;
+      }
+      return null;
+
+    case 'maze':
+      if (state.winner === playerId) return 'Found the exit! Maze completed!';
+      return null;
+
+    case 'spades':
+      if (details.booksTaken) return `Won the book!`;
+      return null;
+
+    default:
+      return null;
   }
 }

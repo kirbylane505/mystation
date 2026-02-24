@@ -9,7 +9,7 @@ import { GAME_TYPES } from '@/lib/games/constants';
 
 export async function POST(request) {
   try {
-    const { code, displayName } = await request.json();
+    const { code, displayName, playerId: clientPlayerId } = await request.json();
 
     if (!code) {
       return NextResponse.json({ error: 'Room code required' }, { status: 400 });
@@ -46,7 +46,7 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Room is full' }, { status: 400 });
     }
 
-    const userId = `user_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    const userId = clientPlayerId || `user_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     const name = (displayName || 'Player').slice(0, 20);
 
     // Add player
