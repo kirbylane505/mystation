@@ -15,6 +15,7 @@ import { ShareButton } from './ShareTrack';
 import SongReactions from './SongReactions';
 import TrackHeart from './TrackHeart';
 import CommentSection from './CommentSection';
+import AddToPlaylist from './AddToPlaylist';
 import Image from 'next/image';
 
 const IDMG_LOGO = '/images/idmg-logo-white.png';
@@ -73,6 +74,9 @@ const TrackRow = memo(function TrackRow({ track, index, isCurrentTrack, isPlayin
               <MessageCircle size={16} />
             </button>
           )}
+          <div className="p-1 -m-1" onClick={(e) => e.stopPropagation()}>
+            <AddToPlaylist track={track} size={16} />
+          </div>
         </div>
       </div>
 
@@ -154,6 +158,9 @@ const TrackRow = memo(function TrackRow({ track, index, isCurrentTrack, isPlayin
               <MessageCircle size={16} />
             </button>
           )}
+          <div onClick={(e) => e.stopPropagation()} className="flex items-center">
+            <AddToPlaylist track={track} size={16} />
+          </div>
           <div onClick={(e) => e.stopPropagation()} className="flex items-center">
             <ShareButton track={track} />
           </div>
