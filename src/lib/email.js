@@ -13,7 +13,7 @@ const resend = process.env.RESEND_API_KEY
   : null;
 
 const ADMIN_EMAIL = ['mystationllc1@gmail.com', 'idmgatl@gmail.com'];
-const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'MyStation <onboarding@resend.dev>';
+const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'MyStation <notifications@mystationlive.com>';
 
 /**
  * Send admin alert when a new sale comes in
