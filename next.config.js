@@ -14,6 +14,7 @@ const nextConfig = {
       { protocol: 'https', hostname: 'cdns-images.dzcdn.net' },
       { protocol: 'https', hostname: 'api.deezer.com' },
       { protocol: 'https', hostname: 'images.printify.com' },
+      { protocol: 'https', hostname: 'images-api.printify.com' },
       { protocol: 'https', hostname: 'cdn.printful.com' },
       { protocol: 'https', hostname: 'mystation.app' },
       { protocol: 'https', hostname: 'idmg.live' },

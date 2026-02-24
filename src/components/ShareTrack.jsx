@@ -5,7 +5,8 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Share2, Mail, MessageCircle, Link2, Check, X, Music, Loader2 } from 'lucide-react';
 import { shareMP3 } from '@/lib/shareAudio';
 
@@ -113,10 +114,10 @@ export default function ShareTrack({ track }) {
         <Share2 size={16} />
       </button>
 
-      {/* Share Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowModal(false)}>
-          <div className="glass rounded-2xl max-w-md w-full animate-scale-in" onClick={(e) => e.stopPropagation()}>
+      {/* Share Modal — Portal to document.body to escape parent CSS transforms */}
+      {showModal && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[10000] flex items-center justify-center p-4" onClick={() => setShowModal(false)}>
+          <div className="glass rounded-2xl max-w-md w-full animate-scale-in max-h-[85vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-white/10">
               <div>
@@ -238,7 +239,8 @@ export default function ShareTrack({ track }) {
               </p>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
