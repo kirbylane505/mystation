@@ -11,7 +11,7 @@ import { initSlidesLadders, sanitizeSlidesLaddersState } from '@/lib/games/slide
 import { initPool, sanitizePoolState } from '@/lib/games/pool';
 import { initSpades, sanitizeSpadesState } from '@/lib/games/spades';
 import { initDominoes, sanitizeDominoesState } from '@/lib/games/dominoes';
-import { initMaze, startMaze, sanitizeMazeState } from '@/lib/games/maze';
+import { initConnect4, sanitizeConnect4State } from '@/lib/games/connect4';
 import { initQuiz, sanitizeQuizState } from '@/lib/games/quiz';
 
 export async function POST(request) {
@@ -100,10 +100,10 @@ export async function POST(request) {
         gameState = initDominoes(domIds);
         break;
       }
-      case 'maze': {
-        // Maze is real-time, all players move simultaneously
-        const mazeState = initMaze(playerIds, 'medium');
-        gameState = startMaze(mazeState); // auto-start the timer
+      case 'connect4': {
+        const c4Ids = [...playerIds];
+        if (c4Ids.length < 2) c4Ids.push('ai_opponent');
+        gameState = initConnect4(c4Ids);
         break;
       }
       case 'quiz': {
@@ -150,8 +150,8 @@ export async function POST(request) {
       case 'dominoes':
         broadcastState = sanitizeDominoesState(gameState, '__broadcast__');
         break;
-      case 'maze':
-        broadcastState = sanitizeMazeState(gameState, '__broadcast__');
+      case 'connect4':
+        broadcastState = sanitizeConnect4State(gameState);
         break;
       case 'quiz':
         broadcastState = sanitizeQuizState(gameState, '__broadcast__');

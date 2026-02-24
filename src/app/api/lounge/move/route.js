@@ -12,7 +12,7 @@ import { applySlidesLaddersMove, sanitizeSlidesLaddersState } from '@/lib/games/
 import { applyPoolMove, sanitizePoolState } from '@/lib/games/pool';
 import { applySpadesMove, sanitizeSpadesState } from '@/lib/games/spades';
 import { applyDominoesMove, sanitizeDominoesState } from '@/lib/games/dominoes';
-import { applyMazeMove, sanitizeMazeState } from '@/lib/games/maze';
+import { applyConnect4Move, sanitizeConnect4State } from '@/lib/games/connect4';
 import { applyQuizMove, sanitizeQuizState } from '@/lib/games/quiz';
 
 export async function POST(request) {
@@ -74,8 +74,8 @@ export async function POST(request) {
       case 'dominoes':
         result = applyDominoesMove(gameState, playerId, action, moveData);
         break;
-      case 'maze':
-        result = applyMazeMove(gameState, playerId, action);
+      case 'connect4':
+        result = applyConnect4Move(gameState, playerId, action, moveData);
         break;
       case 'quiz':
         result = applyQuizMove(gameState, playerId, action, moveData);
@@ -167,8 +167,8 @@ export async function POST(request) {
       case 'dominoes':
         broadcastState = sanitizeDominoesState(newState, '__broadcast__');
         break;
-      case 'maze':
-        broadcastState = sanitizeMazeState(newState, '__broadcast__');
+      case 'connect4':
+        broadcastState = sanitizeConnect4State(newState);
         break;
       case 'quiz':
         broadcastState = sanitizeQuizState(newState, '__broadcast__');
@@ -339,14 +339,13 @@ async function awardGamePoints(supabase, room, gameState) {
             pointsEarned += GAME_POINTS.quizStreak7 || 0;
           }
         }
-      } else if (room.game_type === 'maze') {
+      } else if (room.game_type === 'connect4') {
         if (gameState.winner === userId) {
           isWinner = true;
           pointsEarned = GAME_POINTS.gameWin;
-          // Bonus for clearing under half the time limit
-          const player = gameState.players?.[userId];
-          if (player?.finishTime && player.finishTime < (gameState.timeLimit * 1000) / 2) {
-            pointsEarned += GAME_POINTS.mazeFastClear || 0;
+          // Bonus for winning with minimum moves (7 drops = fastest possible win)
+          if (gameState.moveCount <= 8) {
+            pointsEarned += GAME_POINTS.connect4Perfect || 0;
           }
         }
       }
@@ -429,8 +428,8 @@ function getGameEventMessage(gameType, action, result, state, playerId) {
       }
       return null;
 
-    case 'maze':
-      if (state.winner === playerId) return 'Found the exit! Maze completed!';
+    case 'connect4':
+      if (state.winner === playerId) return 'Connect 4! You win!';
       return null;
 
     case 'spades':

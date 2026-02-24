@@ -10,7 +10,7 @@ import { GAME_TYPES } from '@/lib/games/constants';
 import { Lock, Trophy, Gamepad2 } from 'lucide-react';
 import TournamentList from './TournamentList';
 
-const gameOrder = ['blackjack', 'slidesLadders', 'pool', 'spades', 'dominoes', 'maze', 'quiz'];
+const gameOrder = ['blackjack', 'slidesLadders', 'pool', 'spades', 'dominoes', 'connect4', 'quiz'];
 
 export default function GameSelector({ onSelect, onJoinRoom }) {
   const [tab, setTab] = useState('games'); // games | tournaments
