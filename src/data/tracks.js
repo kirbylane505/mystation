@@ -550,6 +550,21 @@ export const tracks = [
     genre: 'Trap',
     producer: 'The Cubist'
   },
+  {
+    id: 167,
+    title: "Sometime I",
+    artist: "Mike Page",
+    album: "Coming Soon",
+    year: 2026,
+    duration: "2:54",
+    trackNumber: 37,
+    albumId: 'singles-2026',
+    audioFile: '/audio/Mike Page - Sometime I_MASTERED.mp3',
+    isNew: true,
+    hitScore: 90,
+    genre: 'Trap',
+    producer: 'The Cubist'
+  },
   // ========================================
   // GRAMMY NIGHTS VOL. 1 - VB & MP (PRIVATE)
   // Access: MP2026 (Mike Page), VB2026 (Vincent Berry)
