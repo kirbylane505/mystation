@@ -223,24 +223,24 @@ export default function AlbumHeadliner() {
             className="mb-8 sm:mb-10"
             style={{ animation: 'scaleIn 0.8s 0.3s ease-out both' }}
           >
-            {/* Cover Tabs */}
-            <div className="flex gap-1 mb-3 mx-auto" style={{ maxWidth: '340px' }}>
+            {/* Cover Tabs — 3D Raised */}
+            <div className="flex gap-3 mb-5 mx-auto justify-center" style={{ maxWidth: '380px' }}>
               <button
                 onClick={() => setCoverSide('front')}
-                className={`flex-1 py-2 text-xs font-bold tracking-wider uppercase rounded-t-lg transition-all ${
+                className={`px-6 py-2.5 text-xs font-black tracking-[0.15em] uppercase rounded-full transition-all duration-300 ${
                   coverSide === 'front'
-                    ? 'bg-white/10 text-[#C9A84C] border-b-2 border-[#C9A84C]'
-                    : 'bg-white/5 text-white/30 hover:text-white/50'
+                    ? 'bg-[#C9A84C] text-black shadow-[0_4px_20px_rgba(201,168,76,0.4),0_2px_4px_rgba(0,0,0,0.3)] scale-105'
+                    : 'bg-white/5 text-white/40 border border-white/10 hover:text-white/70 hover:border-white/20 hover:bg-white/10 shadow-[0_2px_8px_rgba(0,0,0,0.3)]'
                 }`}
               >
                 Front Cover
               </button>
               <button
                 onClick={() => setCoverSide('back')}
-                className={`flex-1 py-2 text-xs font-bold tracking-wider uppercase rounded-t-lg transition-all ${
+                className={`px-6 py-2.5 text-xs font-black tracking-[0.15em] uppercase rounded-full transition-all duration-300 ${
                   coverSide === 'back'
-                    ? 'bg-white/10 text-[#C9A84C] border-b-2 border-[#C9A84C]'
-                    : 'bg-white/5 text-white/30 hover:text-white/50'
+                    ? 'bg-[#C9A84C] text-black shadow-[0_4px_20px_rgba(201,168,76,0.4),0_2px_4px_rgba(0,0,0,0.3)] scale-105'
+                    : 'bg-white/5 text-white/40 border border-white/10 hover:text-white/70 hover:border-white/20 hover:bg-white/10 shadow-[0_2px_8px_rgba(0,0,0,0.3)]'
                 }`}
               >
                 Back Cover
