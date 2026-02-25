@@ -251,8 +251,8 @@ export default function AlbumHeadliner() {
             <div
               className="relative mx-auto rounded-2xl overflow-hidden border-2 border-[#C9A84C]/30"
               style={{
-                width: 'min(340px, 70vw)',
-                height: 'min(340px, 70vw)',
+                width: 'min(500px, 80vw)',
+                height: 'min(500px, 80vw)',
                 animation: 'goldGlowPulse 4s ease-in-out infinite, breathe 6s ease-in-out infinite',
               }}
             >
@@ -262,7 +262,7 @@ export default function AlbumHeadliner() {
                   : '/images/albums/idmg-mixtape-tracklist.png'}
                 alt={coverSide === 'front' ? 'IDMG Mixtape 2026 — Front Cover' : 'IDMG Mixtape 2026 — Tracklist'}
                 fill
-                sizes="(max-width: 768px) 70vw, 340px"
+                sizes="(max-width: 768px) 80vw, 500px"
                 className="object-cover"
                 priority
               />
