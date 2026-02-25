@@ -281,14 +281,14 @@ export default function AlbumHeadliner() {
             </div>
           </div>
 
-          {/* Countdown (pre-release) */}
-          {!isReleased && (
+          {/* Countdown to full mixtape drop */}
+          {(
             <div
               className="mb-8"
               style={{ animation: 'slideUp 0.8s 0.7s ease-out both' }}
             >
               <p className="text-[#C9A84C] text-xs font-black tracking-[0.3em] uppercase mb-4 text-center">
-                Drops February 27, 2026
+                Full Mixtape Drops February 27, 2026
               </p>
               <div className="flex justify-center gap-3 sm:gap-4">
                 {[
