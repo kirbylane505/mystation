@@ -91,7 +91,7 @@ function setupMediaSession(track, handlers) {
     artist: track.featured ? `Mike Page ft. ${track.featured}` : 'Mike Page',
     album: track.album || 'MyStation',
     artwork: [
-      { src: track.coverArt || '/images/idmg-logo-white.png', sizes: '512x512', type: 'image/png' },
+      { src: track.albumArt || track.coverArt || '/images/idmg-logo-white.png', sizes: '512x512', type: 'image/jpeg' },
     ]
   });
 
