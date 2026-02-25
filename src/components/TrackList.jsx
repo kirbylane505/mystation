@@ -40,7 +40,7 @@ const TrackRow = memo(function TrackRow({ track, index, isCurrentTrack, isPlayin
     >
       {/* Mobile Layout */}
       <div className="flex md:hidden items-center gap-2.5 px-3 py-2">
-        <div className="relative w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-white/5">
+        <div className="relative w-12 h-12 rounded-lg overflow-hidden shrink-0 border border-white/5">
           <Image src={getTrackArt(track)} alt="" fill className={artClass(getTrackArt(track))} />
           {isPlayingThis ? (
             <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
@@ -107,7 +107,7 @@ const TrackRow = memo(function TrackRow({ track, index, isCurrentTrack, isPlayin
         )}
         <div className={showNumber ? 'col-span-5' : 'col-span-6'}>
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-lg overflow-hidden shrink-0 border border-white/5 relative">
+            <div className="w-14 h-14 rounded-lg overflow-hidden shrink-0 border border-white/5 relative">
               <Image src={getTrackArt(track)} alt="" fill className={artClass(getTrackArt(track))} />
               {track.streamOnly ? (
                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
