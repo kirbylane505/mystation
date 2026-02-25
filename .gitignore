@@ -7,9 +7,15 @@ out/
 
 # Env files
 .env*.local
+.env.check
+.env.prod
+.env.vercel
 
 # Vercel
 .vercel
+
+# Cloudflare
+.wrangler/
 
 # OS
 .DS_Store
