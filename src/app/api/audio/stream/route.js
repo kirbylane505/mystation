@@ -117,6 +117,15 @@ export async function GET(request) {
     return new Response('Access Denied', { status: 403 });
   }
 
+  // Block isComingSoon tracks at stream level (belt-and-suspenders with client filter)
+  try {
+    const { tracks } = await import('@/data/tracks');
+    const blocked = tracks.find(t => t.audioFile === audioPath && t.isComingSoon);
+    if (blocked) {
+      return new Response('Track not yet available', { status: 403 });
+    }
+  } catch { /* don't block stream on import failure */ }
+
   // Log this stream — fire and forget, don't await
   const rangeHeader = request.headers.get('range');
   if (!rangeHeader) {

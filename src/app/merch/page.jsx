@@ -8,7 +8,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShoppingBag, Heart, Truck, Shield, Package, X, Loader2, Check, Ticket, Sparkles, Search, ChevronDown, ExternalLink } from 'lucide-react';
+import { ShoppingBag, Heart, Truck, Shield, Package, X, Loader2, Check, Ticket, Sparkles, Search, ChevronDown, ExternalLink, ArrowLeft } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
 import { usePlayerStore } from '@/store/playerStore';
 import { generateSlug } from '@/lib/merch-utils';
@@ -334,16 +334,16 @@ export default function MerchPage() {
   const { addItem, openCart } = useCartStore();
   const { queue, setQueue } = usePlayerStore();
 
-  // Queue "Love On The Lawn" for merch page — ready to play on user tap
+  // Queue "Never Let The Money" for merch page — ready to play on user tap
   // Does NOT auto-play — just loads the queue so player shows the track
   useEffect(() => {
     const state = usePlayerStore.getState();
     if (state.isPlaying || state.currentTrack) return; // Don't interrupt active or queued playback
     const lotlTrack = {
       id: 138,
-      title: "Love On The Lawn",
-      artist: "Mike Page",
-      featured: "Vincent Berry II",
+      title: "Never Let The Money",
+      artist: "Vincent Berry II",
+      featured: "Mike Page",
       album: "Coming Soon",
       year: 2026,
       duration: "3:48",
@@ -836,6 +836,14 @@ export default function MerchPage() {
         select option { background: #1a1a2e; color: #fff; }
         [data-rmiz-modal-overlay] { background: rgba(0,0,0,0.85) !important; }
       `}</style>
+
+      {/* ============ BACK BUTTON ============ */}
+      <div className="max-w-screen-xl mx-auto px-6 pt-6">
+        <Link href="/" className="inline-flex items-center gap-2 text-white/50 hover:text-white text-sm font-medium transition-colors">
+          <ArrowLeft size={16} />
+          Back to MyStation
+        </Link>
+      </div>
 
       {/* ============ HERO ============ */}
       <section ref={heroRef} className="relative overflow-hidden">

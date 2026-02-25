@@ -101,18 +101,18 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="min-h-screen py-6 sm:py-12">
+    <div className="min-h-screen py-6 sm:py-12 pb-44">
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
         {/* Header */}
         <div className="mb-6 sm:mb-8">
           <Link
             href="/merch"
-            className="inline-flex items-center gap-2 text-white/60 hover:text-white transition mb-3 sm:mb-4 text-sm sm:text-base"
+            className="inline-flex items-center gap-2 text-white/60 hover:text-white transition mb-3 sm:mb-4 text-sm sm:text-base bg-white/5 px-4 py-2 rounded-full border border-white/10 hover:bg-white/10"
           >
             <ChevronLeft size={18} />
-            Back to Shop
+            Continue Shopping
           </Link>
-          <h1 className="text-2xl sm:text-3xl font-bold text-white">Checkout</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white mt-4">Checkout</h1>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-6 sm:gap-8">

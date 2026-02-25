@@ -87,6 +87,7 @@ function VolumeIcon({ volume, muted, size = 18 }) {
 export default function Player() {
   const [mounted, setMounted] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [minimized, setMinimized] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [showAlarmModal, setShowAlarmModal] = useState(false);
   const [showSleepTimer, setShowSleepTimer] = useState(false);
@@ -519,10 +520,23 @@ export default function Player() {
   // ========================================
   return (
     <>
+      {/* MINIMIZED TAB — tap to restore player */}
+      {minimized && (
+        <button
+          onClick={() => setMinimized(false)}
+          className="fixed bottom-16 right-4 md:bottom-2 md:right-4 z-[501] flex items-center gap-2 px-3 py-2 bg-[#0a0f1a]/95 backdrop-blur-xl border border-white/10 rounded-full shadow-xl shadow-black/40 active:scale-95 transition-all"
+        >
+          <div className="w-7 h-7 rounded-full overflow-hidden border border-white/10 shrink-0 relative">
+            <Image src={albumArt} alt="" fill className={artClass(albumArt)} />
+          </div>
+          <ChevronUp size={16} className="text-white/60" />
+        </button>
+      )}
+
       {/* MOBILE MINI PLAYER */}
       <div
-        className="md:hidden fixed bottom-14 left-0 right-0 z-[500] bg-[#0a0f1a]/98 backdrop-blur-2xl border-t border-white/[0.06]"
-        onClick={() => setExpanded(true)}
+        className={`md:hidden fixed bottom-14 left-0 right-0 z-[500] bg-[#0a0f1a]/98 backdrop-blur-2xl border-t border-white/[0.06] transition-transform duration-300 ${minimized ? 'translate-y-full' : 'translate-y-0'}`}
+        onClick={() => !minimized && setExpanded(true)}
       >
         {/* Progress line on top */}
         <div className="h-[2px] bg-white/[0.06]">
@@ -573,11 +587,20 @@ export default function Player() {
           >
             <SkipForward size={20} fill="currentColor" />
           </button>
+
+          {/* Hide Player */}
+          <button
+            onClick={(e) => { e.stopPropagation(); setMinimized(true); }}
+            className="text-white/30 shrink-0 p-1 active:text-white transition"
+            aria-label="Hide player"
+          >
+            <ChevronDown size={18} />
+          </button>
         </div>
       </div>
 
       {/* DESKTOP PLAYER */}
-      <div className="hidden md:block fixed bottom-0 left-0 right-0 h-[88px] bg-[#0a0f1a]/98 backdrop-blur-2xl border-t border-white/[0.06] z-[500]">
+      <div className={`hidden md:block fixed bottom-0 left-0 right-0 h-[88px] bg-[#0a0f1a]/98 backdrop-blur-2xl border-t border-white/[0.06] z-[500] transition-transform duration-300 ${minimized ? 'translate-y-full' : 'translate-y-0'}`}>
         <div className="max-w-screen-2xl mx-auto h-full px-5 flex items-center gap-5">
 
           {/* Left — Track Info */}
@@ -736,6 +759,15 @@ export default function Player() {
 
             {/* Voice Command */}
             <VoiceCommand />
+
+            {/* Hide Player */}
+            <button
+              onClick={() => setMinimized(true)}
+              className="text-white/30 hover:text-white/60 transition p-1.5"
+              title="Hide Player"
+            >
+              <ChevronDown size={16} />
+            </button>
           </div>
         </div>
       </div>

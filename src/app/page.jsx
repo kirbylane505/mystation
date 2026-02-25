@@ -6,6 +6,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import AlbumHeadliner from '@/components/AlbumHeadliner';
 import Hero from '@/components/Hero';
 import TrackList from '@/components/TrackList';
 import EmailCapture from '@/components/EmailCapture';
@@ -86,6 +87,9 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen">
+      {/* IDMG Mixtape Headliner — TOP OF PAGE */}
+      <AlbumHeadliner />
+
       {/* Hero Section */}
       <Hero />
 

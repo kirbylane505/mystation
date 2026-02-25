@@ -34,7 +34,7 @@ export default function Cart() {
         <>
           {/* Backdrop */}
           <motion.div
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10001]"
             onClick={closeCart}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -44,7 +44,7 @@ export default function Cart() {
 
           {/* Cart Drawer */}
           <motion.div
-            className="fixed right-0 top-0 h-full w-full max-w-md bg-gray-900 border-l border-white/10 z-50 flex flex-col"
+            className="fixed right-0 top-0 h-full w-full max-w-md bg-gray-900 border-l border-white/10 z-[10001] flex flex-col"
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}

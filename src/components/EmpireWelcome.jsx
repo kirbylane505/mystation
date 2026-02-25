@@ -2,7 +2,7 @@
  * MYSTATION - Empire Welcome
  * When visitors arrive from LOTL or MyTicketsLive (?ref=empire),
  * show a welcome modal with options: Shop Merch, Get Tickets, Subscribe
- * Auto-plays "Love On The Lawn" track
+ * Auto-plays "Never Let The Money" track
  */
 
 'use client';
@@ -16,9 +16,9 @@ import Link from 'next/link';
 // LOTL track — public single (ID 138)
 const LOTL_TRACK = {
   id: 138,
-  title: "Love On The Lawn",
-  artist: "Mike Page",
-  featured: "Vincent Berry II",
+  title: "Never Let The Money",
+  artist: "Vincent Berry II",
+  featured: "Mike Page",
   album: "Coming Soon",
   year: 2026,
   duration: "3:48",
@@ -78,7 +78,7 @@ export default function EmpireWelcome() {
                 <span className="text-[#D4AF37] text-xs font-bold tracking-wider uppercase">Welcome to MyStation</span>
               </div>
               <h2 className="text-2xl font-bold text-white mb-2">
-                Love on the Lawn
+                Never Let The Money
                 <span className="text-[#D4AF37]"> is Playing</span>
               </h2>
               <p className="text-white/40 text-sm">
@@ -150,8 +150,8 @@ export default function EmpireWelcome() {
                 <span className="w-0.5 h-3.5 bg-[#D4AF37] rounded-full animate-pulse" style={{ animationDelay: '450ms' }} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-white/60 text-xs truncate">Now Playing — <span className="text-[#D4AF37]">Love On The Lawn</span></p>
-                <p className="text-white/30 text-[10px]">Mike Page ft. Vincent Berry II</p>
+                <p className="text-white/60 text-xs truncate">Now Playing — <span className="text-[#D4AF37]">Never Let The Money</span></p>
+                <p className="text-white/30 text-[10px]">Vincent Berry II ft. Mike Page</p>
               </div>
             </div>
           </div>

@@ -183,11 +183,14 @@ export default function TrackList({ trackIds, showAlbum = true, showNumber = tru
   useEffect(() => { setMounted(true); }, []);
 
   // Preserve trackIds order (filter loses intended ordering)
-  const displayTracks = trackIds
+  // Filter out isComingSoon tracks — they are locked and not playable
+  const displayTracks = (trackIds
     ? trackIds.map(id => tracks.find(t => t.id === id)).filter(Boolean)
-    : tracks;
+    : tracks
+  ).filter(t => !t.isComingSoon);
 
   const handleTrackClick = useCallback((track, index) => {
+    if (track.isComingSoon) return; // locked track
     if (track.streamOnly) {
       window.open(track.spotify || track.apple, '_blank');
       return;

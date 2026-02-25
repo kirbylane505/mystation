@@ -472,7 +472,7 @@ export default function MerchProductPage({ params }) {
             )}
 
             {/* Add to Cart + Share */}
-            <div className="flex gap-3 mb-8">
+            <div className="flex gap-3 mb-3">
               <button
                 onClick={handleAddToCart}
                 disabled={!selectedVariant || addedToCart}
@@ -498,6 +498,26 @@ export default function MerchProductPage({ params }) {
                 <Share2 size={20} />
               </button>
             </div>
+
+            {/* Go to Checkout — shows after adding to cart */}
+            {addedToCart && (
+              <div className="flex gap-3 mb-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <Link
+                  href="/checkout"
+                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 rounded-full font-bold text-base bg-white text-black hover:bg-white/90 transition-all"
+                >
+                  Checkout Now
+                  <ChevronRight size={18} />
+                </Link>
+                <button
+                  onClick={openCart}
+                  className="flex items-center justify-center gap-2 px-5 py-3.5 rounded-full font-bold text-sm bg-white/10 text-white border border-white/10 hover:bg-white/20 transition-all"
+                >
+                  View Cart
+                </button>
+              </div>
+            )}
+            {!addedToCart && <div className="mb-8" />}
 
             {/* Trust Badges */}
             <div className="grid grid-cols-3 gap-4 mb-8">

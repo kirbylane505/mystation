@@ -566,6 +566,206 @@ export const tracks = [
     producer: 'The Cubist'
   },
   // ========================================
+  // IDMG MIXTAPE 2026 — Executive Produced by The Cubist & Mike Page
+  // Drops February 27, 2026
+  // ========================================
+  {
+    id: 500,
+    title: "I Want This One",
+    artist: "Mike Page",
+    featured: "Vincent Berry",
+    album: "IDMG Mixtape",
+    year: 2026,
+    duration: "3:26",
+    trackNumber: 1,
+    albumId: 'idmg-mixtape',
+    audioFile: '/audio/grammy-nights/02-i-want-this-one.mp3',
+    isComingSoon: true,
+    hitScore: 94,
+    genre: 'Hip-Hop',
+    producer: 'The Cubist'
+  },
+  {
+    id: 501,
+    title: "R.U.N or R U Out",
+    artist: "Mike Page",
+    featured: "Vincent Berry",
+    album: "IDMG Mixtape",
+    year: 2026,
+    duration: "3:30",
+    trackNumber: 2,
+    albumId: 'idmg-mixtape',
+    audioFile: '/audio/grammy-nights/03-run-or-r-u-out.mp3',
+    isComingSoon: true,
+    hitScore: 93,
+    genre: 'Hip-Hop',
+    producer: 'The Cubist & Shawn Hibbler'
+  },
+  {
+    id: 502,
+    title: "Having My Way",
+    artist: "Mike Page",
+    featured: "Varro",
+    album: "IDMG Mixtape",
+    year: 2026,
+    duration: "3:07",
+    trackNumber: 3,
+    albumId: 'idmg-mixtape',
+    audioFile: '/audio/singles/Mike Page - Having My Way_MASTERED.mp3',
+    isComingSoon: true,
+    hitScore: 92,
+    genre: 'Hip-Hop',
+    producer: 'The Cubist'
+  },
+  {
+    id: 503,
+    title: "Be Alright",
+    artist: "Mike Page",
+    featured: "Nyvira",
+    album: "IDMG Mixtape",
+    year: 2026,
+    trackNumber: 4,
+    albumId: 'idmg-mixtape',
+    audioFile: '/audio/idmg-mixtape/04-be-alright.mp3',
+    isComingSoon: true,
+    hitScore: 93,
+    genre: 'R&B',
+    producer: 'The Cubist'
+  },
+  {
+    id: 504,
+    title: "I Might",
+    artist: "Mike Page",
+    album: "IDMG Mixtape",
+    year: 2026,
+    trackNumber: 5,
+    albumId: 'idmg-mixtape',
+    audioFile: '/audio/idmg-mixtape/05-i-might.mp3',
+    isComingSoon: true,
+    hitScore: 91,
+    genre: 'Hip-Hop',
+    producer: 'The Cubist'
+  },
+  {
+    id: 505,
+    title: "No Weapon",
+    artist: "King Deazel",
+    featured: "Mike Page",
+    album: "IDMG Mixtape",
+    year: 2026,
+    trackNumber: 6,
+    albumId: 'idmg-mixtape',
+    audioFile: '/audio/01 iDMG No Weapon Final1.mp3',
+    isComingSoon: true,
+    hitScore: 95,
+    genre: 'Hip-Hop',
+    producer: 'The Cubist'
+  },
+  {
+    id: 506,
+    title: "I Been On Some Shit",
+    artist: "King Deazel",
+    album: "IDMG Mixtape",
+    year: 2026,
+    trackNumber: 7,
+    albumId: 'idmg-mixtape',
+    audioFile: '/audio/idmg-mixtape/07-i-been-on-some-shit.mp3',
+    isComingSoon: true,
+    hitScore: 93,
+    genre: 'Hip-Hop',
+    producer: 'The Cubist & Jack Thomas'
+  },
+  {
+    id: 507,
+    title: "God Loves Us",
+    artist: "Mike Page",
+    featured: "Sha Berry",
+    album: "IDMG Mixtape",
+    year: 2026,
+    trackNumber: 8,
+    albumId: 'idmg-mixtape',
+    audioFile: '/audio/idmg-mixtape/08-god-loves-us.mp3',
+    isComingSoon: true,
+    hitScore: 92,
+    genre: 'Hip-Hop',
+    producer: 'The Cubist'
+  },
+  {
+    id: 508,
+    title: "F.I.L.A.",
+    artist: "KOH",
+    featured: "Mike Page",
+    album: "IDMG Mixtape",
+    year: 2026,
+    trackNumber: 9,
+    albumId: 'idmg-mixtape',
+    audioFile: '/audio/idmg-mixtape/09-fila.mp3',
+    isComingSoon: true,
+    hitScore: 91,
+    genre: 'Hip-Hop',
+    producer: 'The Cubist'
+  },
+  {
+    id: 509,
+    title: "Heavens Gate",
+    artist: "Mike Page",
+    featured: "Varro",
+    album: "IDMG Mixtape",
+    year: 2026,
+    trackNumber: 10,
+    albumId: 'idmg-mixtape',
+    audioFile: '/audio/idmg-mixtape/10-heavens-gate.mp3',
+    isComingSoon: true,
+    hitScore: 92,
+    genre: 'Hip-Hop',
+    producer: 'The Cubist'
+  },
+  {
+    id: 510,
+    title: "Thats Facts",
+    artist: "Mike Page",
+    album: "IDMG Mixtape",
+    year: 2026,
+    trackNumber: 11,
+    albumId: 'idmg-mixtape',
+    audioFile: '/audio/idmg-mixtape/11-thats-facts.mp3',
+    isComingSoon: true,
+    hitScore: 91,
+    genre: 'Hip-Hop',
+    producer: 'The Cubist'
+  },
+  {
+    id: 511,
+    title: "Never Let The Money",
+    artist: "Mike Page",
+    featured: "Vincent Berry",
+    album: "IDMG Mixtape",
+    year: 2026,
+    duration: "3:10",
+    trackNumber: 12,
+    albumId: 'idmg-mixtape',
+    audioFile: '/audio/grammy-nights/06-never-let-the-money.mp3',
+    isComingSoon: true,
+    hitScore: 94,
+    genre: 'Hip-Hop',
+    producer: 'The Cubist'
+  },
+  {
+    id: 512,
+    title: "Crash Out",
+    artist: "Mike Page",
+    album: "IDMG Mixtape",
+    year: 2026,
+    duration: "2:23",
+    trackNumber: 13,
+    albumId: 'idmg-mixtape',
+    audioFile: '/audio/singles/Mike Page - Crash Out_MASTERED.mp3',
+    isComingSoon: true,
+    hitScore: 92,
+    genre: 'Hip-Hop',
+    producer: 'The Cubist'
+  },
+  // ========================================
   // GRAMMY NIGHTS VOL. 1 - VB & MP (PRIVATE)
   // Access: MP2026 (Mike Page), VB2026 (Vincent Berry)
   // ========================================
@@ -1405,7 +1605,26 @@ const shezzyTrackIds = shezzyTracks.map(t => t.id);
 const grammyNightsTracks = tracks.filter(t => t.albumId === 'grammy-nights' && t.id >= 200);
 const grammyNightsTrackIds = grammyNightsTracks.map(t => t.id);
 
+const idmgMixtapeTracks = tracks.filter(t => t.albumId === 'idmg-mixtape');
+const idmgMixtapeTrackIds = idmgMixtapeTracks.map(t => t.id);
+
 export const albums = [
+  {
+    id: 'idmg-mixtape',
+    title: "IDMG Mixtape",
+    subtitle: "Executive Produced by The Cubist & Mike Page",
+    artist: "IDMG",
+    year: 2026,
+    trackCount: idmgMixtapeTrackIds.length,
+    coverGradient: "from-zinc-900 via-neutral-800 to-black",
+    coverEmoji: "🎤",
+    coverImage: "/images/albums/idmg-mixtape-cover.png",
+    isNew: true,
+    isFeatured: true,
+    trackIds: idmgMixtapeTrackIds,
+    description: "Thirteen tracks built from the ground up with no compromises. Executive Produced by The Cubist & Mike Page. Featuring Vincent Berry, King Deazel, Varro, Nyvira, Sha Berry, and KOH. Mastered by IDMG OPUS. © 2026 Impossible Dreamz Music Group.",
+    releaseDate: '2026-02-27',
+  },
   {
     id: 'cindys-son',
     title: "Cindy's Son",

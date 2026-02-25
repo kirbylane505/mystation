@@ -77,7 +77,7 @@ export async function middleware(request) {
   const { pathname, searchParams } = request.nextUrl;
 
   // Admin pages — allow through (each page handles its own auth client-side)
-  if (pathname.startsWith('/admin/analytics') || pathname.startsWith('/admin/orders') || pathname.startsWith('/admin/check-in') || pathname.startsWith('/admin/listeners')) {
+  if (pathname.startsWith('/admin/analytics') || pathname.startsWith('/admin/orders') || pathname.startsWith('/admin/merch-orders') || pathname.startsWith('/admin/check-in') || pathname.startsWith('/admin/listeners') || pathname.startsWith('/admin/fans')) {
     // Allow page load — auth happens client-side via admin key
   }
 
