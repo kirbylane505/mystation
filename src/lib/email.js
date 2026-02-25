@@ -321,25 +321,69 @@ export async function sendDailyAnalyticsReport(report) {
 }
 
 /**
- * Send admin alert for failed orders
+ * Send URGENT admin alert for failed print orders
+ * Includes full customer + item details so Mike can manually fulfill
  */
-export async function sendOrderFailedAlert({ orderId, provider, error: orderError, customerEmail }) {
+export async function sendOrderFailedAlert({ provider, error: orderError, customerName, customerEmail, items, total, shippingAddress, stripeSessionId, printfulItems, printifyItems }) {
   if (!resend) { console.warn('Resend not configured — skipping order failed alert'); return { success: false }; }
   try {
+    const address = shippingAddress
+      ? `${shippingAddress.line1 || ''}${shippingAddress.line2 ? ', ' + shippingAddress.line2 : ''}, ${shippingAddress.city || ''}, ${shippingAddress.state || ''} ${shippingAddress.postal_code || ''}`
+      : 'NOT PROVIDED — check Stripe dashboard';
+
+    const itemRows = (items || []).map(i =>
+      `<p style="margin: 4px 0; color: #e2e8f0;">${i.name} x${i.quantity} — $${(i.amount / 100).toFixed(2)}</p>`
+    ).join('') || '<p style="color: #94a3b8;">No item details available</p>';
+
+    const printfulData = printfulItems ? `<p style="color: #94a3b8; font-size: 12px; word-break: break-all;">Printful metadata: ${JSON.stringify(printfulItems)}</p>` : '';
+    const printifyData = printifyItems ? `<p style="color: #94a3b8; font-size: 12px; word-break: break-all;">Printify metadata: ${JSON.stringify(printifyItems)}</p>` : '';
+
     await resend.emails.send({
       from: FROM_EMAIL,
       to: ADMIN_EMAIL,
-      subject: `ORDER FAILED — ${provider} #${orderId}`,
+      subject: `URGENT: ORDER FAILED — ${provider} — ${customerName || customerEmail} — $${((total || 0) / 100).toFixed(2)}`,
       html: `
-        <div style="font-family: -apple-system, sans-serif; max-width: 600px; margin: 0 auto; background: #0a0e1a; color: #fff; padding: 32px; border-radius: 16px;">
-          <h1 style="color: #ef4444; text-align: center;">ORDER FAILED</h1>
-          <div style="background: #1a1f36; padding: 20px; border-radius: 12px;">
-            <p style="color: #e2e8f0;">Provider: <strong>${provider}</strong></p>
-            <p style="color: #e2e8f0;">Order ID: <strong>${orderId}</strong></p>
-            <p style="color: #e2e8f0;">Customer: <strong>${customerEmail || 'Unknown'}</strong></p>
-            <p style="color: #ef4444;">Error: ${orderError || 'Unknown error'}</p>
+        <div style="font-family: -apple-system, sans-serif; max-width: 600px; margin: 0 auto; background: #0a0e1a; color: #fff; padding: 32px; border-radius: 16px; border: 2px solid #ef4444;">
+          <div style="text-align: center; margin-bottom: 24px;">
+            <h1 style="color: #ef4444; margin: 0; font-size: 28px;">ORDER FAILED</h1>
+            <p style="color: #f87171; font-size: 14px; margin: 8px 0;">Customer paid but ${provider} order was NOT created</p>
+            <p style="color: #fbbf24; font-size: 16px; font-weight: 700; margin: 8px 0;">ACTION REQUIRED: Manually submit to ${provider}</p>
           </div>
-          <p style="color: #94a3b8; text-align: center; margin-top: 16px;">Check Stripe dashboard and ${provider} dashboard immediately.</p>
+
+          <div style="background: #1a1f36; padding: 20px; border-radius: 12px; margin-bottom: 16px;">
+            <h3 style="color: #ef4444; margin: 0 0 12px 0;">Error</h3>
+            <p style="color: #fca5a5; margin: 0; font-family: monospace; font-size: 13px;">${orderError || 'Unknown error — check server logs'}</p>
+          </div>
+
+          <div style="background: #1a1f36; padding: 20px; border-radius: 12px; margin-bottom: 16px;">
+            <h3 style="color: #3b82f6; margin: 0 0 12px 0;">Customer</h3>
+            <p style="margin: 4px 0; color: #e2e8f0;"><strong>${customerName || 'Unknown'}</strong></p>
+            <p style="margin: 4px 0; color: #94a3b8;">${customerEmail || 'No email'}</p>
+          </div>
+
+          <div style="background: #1a1f36; padding: 20px; border-radius: 12px; margin-bottom: 16px;">
+            <h3 style="color: #3b82f6; margin: 0 0 12px 0;">Items (${provider})</h3>
+            ${itemRows}
+            <hr style="border-color: #2a2f46; margin: 12px 0;" />
+            <p style="color: #22c55e; font-weight: 700; text-align: right; font-size: 18px; margin: 0;">Total: $${((total || 0) / 100).toFixed(2)}</p>
+          </div>
+
+          <div style="background: #1a1f36; padding: 20px; border-radius: 12px; margin-bottom: 16px;">
+            <h3 style="color: #3b82f6; margin: 0 0 12px 0;">Ship To</h3>
+            <p style="margin: 0; color: #e2e8f0;">${address}</p>
+          </div>
+
+          <div style="background: #1a1f36; padding: 20px; border-radius: 12px; margin-bottom: 16px;">
+            <h3 style="color: #3b82f6; margin: 0 0 12px 0;">Debug Info</h3>
+            <p style="color: #94a3b8; font-size: 12px; margin: 4px 0;">Stripe Session: ${stripeSessionId || 'N/A'}</p>
+            ${printfulData}
+            ${printifyData}
+          </div>
+
+          <div style="text-align: center; margin-top: 24px; padding-top: 16px; border-top: 1px solid #ef4444;">
+            <p style="color: #f87171; font-size: 14px; font-weight: 700;">Go to ${provider} dashboard and create this order manually NOW</p>
+            <p style="color: #64748b; font-size: 12px; margin-top: 8px;">MyStation Order Safety Net</p>
+          </div>
         </div>
       `,
     });
@@ -748,6 +792,78 @@ export async function sendTicketConfirmation({ customerName, customerEmail, orde
     return { success: true, emailId: data?.id };
   } catch (err) {
     console.error('Ticket confirmation email error:', err);
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * Send VIP thank you email when a customer spends $100+
+ */
+export async function sendBigSpenderThankYou({ customerName, customerEmail, total, items }) {
+  if (!resend) { console.warn('Resend not configured — skipping big spender email'); return { success: false }; }
+  try {
+    const firstName = (customerName || '').split(' ')[0] || 'there';
+    const itemList = (items || []).map(i =>
+      `<p style="margin: 4px 0; color: #e2e8f0;">${i.name} x${i.quantity}</p>`
+    ).join('');
+
+    const { data, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: customerEmail,
+      subject: `Thank You for Your Support — MyStation`,
+      html: `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; background: #0a0e1a; color: #fff; padding: 0; border-radius: 16px; overflow: hidden;">
+          <div style="background: linear-gradient(135deg, #1e3a5f 0%, #3b82f6 50%, #6366f1 100%); padding: 40px 32px; text-align: center;">
+            <h1 style="color: #fff; margin: 0; font-size: 32px; font-weight: 900;">THANK YOU</h1>
+            <p style="color: rgba(255,255,255,0.9); font-size: 18px; margin: 8px 0 0; font-weight: 600;">${firstName}, you're amazing.</p>
+          </div>
+
+          <div style="padding: 32px;">
+            <p style="color: #e2e8f0; font-size: 16px; line-height: 1.6; margin: 0 0 20px;">
+              We just wanted to take a moment to say <strong style="color: #22c55e;">thank you</strong>. Your $${(total / 100).toFixed(2)} order means the world to us. Every purchase directly supports independent music and the Mike Page Foundation.
+            </p>
+
+            ${itemList ? `
+            <div style="background: #1a1f36; padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+              <h3 style="color: #3b82f6; margin: 0 0 12px 0;">Your Order</h3>
+              ${itemList}
+              <hr style="border-color: #2a2f46; margin: 12px 0;" />
+              <p style="color: #22c55e; font-weight: 700; text-align: right; font-size: 18px; margin: 0;">Total: $${(total / 100).toFixed(2)}</p>
+            </div>
+            ` : ''}
+
+            <div style="background: linear-gradient(135deg, #064e3b, #065f46); border: 1px solid #10b981; border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 20px;">
+              <p style="color: #6ee7b7; font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; margin: 0 0 8px;">VIP Perk</p>
+              <p style="color: #fff; font-size: 16px; margin: 0;">You've earned <strong>free shipping</strong> on your next order. Just reply to this email when you're ready to shop again.</p>
+            </div>
+
+            <p style="color: #f59e0b; font-size: 18px; font-weight: 700; text-align: center; margin: 24px 0; font-style: italic;">
+              Independence lives in you.
+            </p>
+
+            <div style="text-align: center; margin-bottom: 24px;">
+              <a href="https://mystationlive.com/merch" style="display: inline-block; background: #3b82f6; color: #fff; padding: 14px 32px; border-radius: 12px; text-decoration: none; font-weight: 700; margin: 0 8px;">Shop More</a>
+              <a href="https://mystationlive.com/music" style="display: inline-block; background: #22c55e; color: #fff; padding: 14px 32px; border-radius: 12px; text-decoration: none; font-weight: 700; margin: 0 8px;">Stream Music</a>
+            </div>
+          </div>
+
+          <div style="text-align: center; padding: 16px 32px 24px; border-top: 1px solid #2a2f46;">
+            <p style="color: #64748b; font-size: 12px; margin: 0;">Every purchase supports the Mike Page Foundation 501(c)(3)</p>
+            <p style="color: #64748b; font-size: 12px; margin: 4px 0;">MyStation — by IDMG</p>
+          </div>
+        </div>
+      `,
+    });
+
+    if (error) {
+      console.error('Failed to send big spender thank you:', error);
+      return { success: false, error };
+    }
+
+    console.log('Big spender thank you sent to:', customerEmail, '($' + (total / 100).toFixed(2) + ')');
+    return { success: true, emailId: data?.id };
+  } catch (err) {
+    console.error('Email service error (big spender):', err);
     return { success: false, error: err.message };
   }
 }

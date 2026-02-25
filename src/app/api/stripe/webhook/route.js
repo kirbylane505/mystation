@@ -13,7 +13,7 @@ import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import { printful } from '@/lib/printful';
 import { printify } from '@/lib/printify';
-import { sendSaleAlert, sendOrderConfirmation, sendNewSignupAlert, sendCancelAlert } from '@/lib/email';
+import { sendSaleAlert, sendOrderConfirmation, sendNewSignupAlert, sendCancelAlert, sendBigSpenderThankYou, sendOrderFailedAlert } from '@/lib/email';
 import { tagSubscriber } from '@/lib/kit';
 import { createHmac } from 'crypto';
 
@@ -107,12 +107,11 @@ async function handleCheckoutCompleted(session, stripe) {
       expand: ['line_items', 'line_items.data.price.product', 'customer_details'],
     });
 
-    // Extract shipping address
+    // Extract shipping address (may be null for some checkouts)
     const shipping = fullSession.shipping_details || fullSession.customer_details;
-    if (!shipping || !shipping.address) {
-      console.error('No shipping address found in session');
-      // Still mark as processed but log the issue
-      return;
+    const hasShipping = shipping && shipping.address;
+    if (!hasShipping) {
+      console.warn('No shipping address found in session — emails will still be sent');
     }
 
     // Check if this is a merch order (not subscription)
@@ -136,135 +135,217 @@ async function handleCheckoutCompleted(session, stripe) {
       return;
     }
 
-    // Build Printful order
-    const printfulOrder = {
-      external_id: session.id,
-      recipient: {
-        name: shipping.name || fullSession.customer_details?.name || 'Customer',
-        address1: shipping.address.line1,
-        address2: shipping.address.line2 || '',
-        city: shipping.address.city,
-        state_code: shipping.address.state,
-        country_code: shipping.address.country,
-        zip: shipping.address.postal_code,
-        email: fullSession.customer_details?.email || session.customer_email,
-        phone: fullSession.customer_details?.phone || '',
-      },
-      items: [],
-    };
-
-    // Get order metadata if available (contains Printful variant IDs)
+    // Get order metadata
     const metadata = session.metadata || {};
-
-    // Try to get items from metadata first
-    if (metadata.printful_items) {
-      try {
-        const printfulItems = JSON.parse(metadata.printful_items);
-        printfulOrder.items = printfulItems.map(item => ({
-          sync_variant_id: item.sync_variant_id,
-          quantity: item.quantity,
-        }));
-      } catch (e) {
-        console.error('Failed to parse printful_items metadata:', e);
-      }
-    }
-
-    // If no items from metadata, try to match by product name
-    if (printfulOrder.items.length === 0) {
-      // Fetch store products to match by name
-      try {
-        const storeProducts = await printful.getStoreProducts();
-
-        for (const item of merchItems) {
-          const productName = item.description || item.price?.product?.name || '';
-
-          // Find matching Printful product
-          for (const storeProduct of storeProducts) {
-            const fullProduct = await printful.getStoreProduct(storeProduct.id);
-
-            // Check sync variants
-            for (const variant of fullProduct.sync_variants || []) {
-              if (variant.name.toLowerCase().includes(productName.toLowerCase()) ||
-                  productName.toLowerCase().includes(variant.name.toLowerCase())) {
-                printfulOrder.items.push({
-                  sync_variant_id: variant.id,
-                  quantity: item.quantity,
-                });
-                break;
-              }
-            }
-          }
-        }
-      } catch (e) {
-        console.error('Failed to match products with Printful:', e);
-      }
-    }
-
-    // Create order on Printful
-    let printfulResult = null;
-    if (printfulOrder.items.length > 0) {
-      console.log('Creating Printful order:', JSON.stringify(printfulOrder, null, 2));
-
-      const order = await printful.createOrder(printfulOrder, true); // confirm=true to submit immediately
-
-      console.log('Printful order created:', order.id);
-      console.log('Printful status:', order.status);
-
-      printfulResult = { printfulOrderId: order.id, status: order.status };
-    } else {
-      console.log('No Printful items in this order');
-    }
-
-    // Create order on Printify
-    let printifyResult = null;
-    if (metadata.printify_items) {
-      try {
-        const printifyItems = JSON.parse(metadata.printify_items);
-        if (printifyItems.length > 0) {
-          const printifyOrder = {
-            external_id: session.id,
-            label: `MyStation Order ${session.id.slice(-8)}`,
-            line_items: printifyItems.map(item => ({
-              product_id: item.product_id,
-              variant_id: item.variant_id,
-              quantity: item.quantity,
-            })),
-            shipping_method: 1,
-            address_to: {
-              first_name: (shipping.name || '').split(' ')[0] || 'Customer',
-              last_name: (shipping.name || '').split(' ').slice(1).join(' ') || '',
-              email: fullSession.customer_details?.email || session.customer_email || '',
-              phone: fullSession.customer_details?.phone || '',
-              country: shipping.address.country || 'US',
-              region: shipping.address.state || '',
-              address1: shipping.address.line1 || '',
-              address2: shipping.address.line2 || '',
-              city: shipping.address.city || '',
-              zip: shipping.address.postal_code || '',
-            },
-          };
-
-          console.log('Creating Printify order:', JSON.stringify(printifyOrder, null, 2));
-
-          const order = await printify.createOrder(printifyOrder, true); // confirm=true sends to production
-
-          console.log('Printify order created:', order.id);
-          printifyResult = { printifyOrderId: order.id, sent_to_production: order.sent_to_production };
-        }
-      } catch (e) {
-        console.error('Failed to create Printify order:', e);
-      }
-    }
-
-    // Send email notifications BEFORE returning (don't block on failures)
     const customerEmail = fullSession.customer_details?.email || session.customer_email;
-    const customerName = shipping.name || fullSession.customer_details?.name || 'Customer';
+    const customerName = shipping?.name || fullSession.customer_details?.name || 'Customer';
     const totalAmount = fullSession.amount_total || 0;
+
+    // Parse print provider items from metadata
+    let parsedPrintfulItems = null;
+    let parsedPrintifyItems = null;
+    try { if (metadata.printful_items) parsedPrintfulItems = JSON.parse(metadata.printful_items); } catch (e) { console.error('Failed to parse printful_items:', e); }
+    try { if (metadata.printify_items) parsedPrintifyItems = JSON.parse(metadata.printify_items); } catch (e) { console.error('Failed to parse printify_items:', e); }
+
+    // ========================================
+    // ORDER TRACKING — Log to merch_orders
+    // ========================================
+    let orderRecordId = null;
+    try {
+      const { getSupabaseAdmin } = await import('@/lib/supabaseAdmin');
+      const supabase = getSupabaseAdmin();
+      if (supabase) {
+        const { data: orderRecord } = await supabase.from('merch_orders').insert({
+          stripe_session_id: session.id,
+          customer_email: customerEmail || 'unknown',
+          customer_name: customerName,
+          items: merchItems.map(i => ({ name: i.description || i.price?.product?.name, quantity: i.quantity, amount: i.amount_total })),
+          shipping_address: shipping?.address || null,
+          total_cents: totalAmount,
+          printful_items: parsedPrintfulItems,
+          printify_items: parsedPrintifyItems,
+          printful_status: parsedPrintfulItems ? 'pending' : 'none',
+          printify_status: parsedPrintifyItems ? 'pending' : 'none',
+          status: 'pending',
+        }).select('id').single();
+        orderRecordId = orderRecord?.id;
+        console.log('Order logged to merch_orders:', orderRecordId);
+      }
+    } catch (e) {
+      console.error('Failed to log order to merch_orders (non-blocking):', e.message);
+    }
+
+    // Helper to update order record
+    async function updateOrderRecord(updates) {
+      if (!orderRecordId) return;
+      try {
+        const { getSupabaseAdmin } = await import('@/lib/supabaseAdmin');
+        const supabase = getSupabaseAdmin();
+        if (supabase) {
+          await supabase.from('merch_orders').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', orderRecordId);
+        }
+      } catch (e) { console.error('Failed to update merch_orders:', e.message); }
+    }
+
+    // Build email items list (used by both success and fail alerts)
     const itemsForEmail = merchItems.map(item => ({
       name: item.description || item.price?.product?.name || 'Merch Item',
       quantity: item.quantity,
       amount: item.amount_total || item.price?.unit_amount * item.quantity || 0,
     }));
+
+    // ========================================
+    // PRINTFUL ORDER — with retry + fail alert
+    // ========================================
+    let printfulResult = null;
+    if (parsedPrintfulItems && parsedPrintfulItems.length > 0 && hasShipping) {
+      const printfulOrder = {
+        external_id: session.id,
+        recipient: {
+          name: shipping.name || fullSession.customer_details?.name || 'Customer',
+          address1: shipping.address.line1,
+          address2: shipping.address.line2 || '',
+          city: shipping.address.city,
+          state_code: shipping.address.state,
+          country_code: shipping.address.country,
+          zip: shipping.address.postal_code,
+          email: customerEmail,
+          phone: fullSession.customer_details?.phone || '',
+        },
+        items: parsedPrintfulItems.map(item => ({
+          sync_variant_id: item.sync_variant_id,
+          quantity: item.quantity,
+        })),
+      };
+
+      // Try up to 2 times
+      for (let attempt = 1; attempt <= 2; attempt++) {
+        try {
+          console.log(`Creating Printful order (attempt ${attempt}):`, JSON.stringify(printfulOrder, null, 2));
+          const order = await printful.createOrder(printfulOrder, true);
+          console.log('Printful order created:', order.id, 'status:', order.status);
+          printfulResult = { printfulOrderId: order.id, status: order.status };
+          await updateOrderRecord({ printful_order_id: String(order.id), printful_status: order.status || 'created' });
+          break; // Success — exit retry loop
+        } catch (e) {
+          console.error(`Printful order attempt ${attempt} failed:`, e.message);
+          if (attempt === 2) {
+            // FINAL FAILURE — alert Mike
+            const errorMsg = e.message || 'Unknown Printful error';
+            await updateOrderRecord({ printful_status: 'failed', printful_error: errorMsg });
+            sendOrderFailedAlert({
+              provider: 'Printful',
+              error: errorMsg,
+              customerName, customerEmail,
+              items: itemsForEmail,
+              total: totalAmount,
+              shippingAddress: shipping?.address,
+              stripeSessionId: session.id,
+              printfulItems: parsedPrintfulItems,
+            }).catch(err => console.error('Printful fail alert email error:', err));
+          } else {
+            // Wait 2 seconds before retry
+            await new Promise(r => setTimeout(r, 2000));
+          }
+        }
+      }
+    } else if (parsedPrintfulItems && !hasShipping) {
+      // Has Printful items but no shipping — alert
+      sendOrderFailedAlert({
+        provider: 'Printful',
+        error: 'No shipping address provided — cannot create print order',
+        customerName, customerEmail,
+        items: itemsForEmail,
+        total: totalAmount,
+        shippingAddress: null,
+        stripeSessionId: session.id,
+        printfulItems: parsedPrintfulItems,
+      }).catch(err => console.error('Printful no-shipping alert error:', err));
+      await updateOrderRecord({ printful_status: 'failed', printful_error: 'No shipping address' });
+    }
+
+    // ========================================
+    // PRINTIFY ORDER — with retry + fail alert
+    // ========================================
+    let printifyResult = null;
+    if (parsedPrintifyItems && parsedPrintifyItems.length > 0 && hasShipping) {
+      const printifyOrder = {
+        external_id: session.id,
+        label: `MyStation Order ${session.id.slice(-8)}`,
+        line_items: parsedPrintifyItems.map(item => ({
+          product_id: item.product_id,
+          variant_id: item.variant_id,
+          quantity: item.quantity,
+        })),
+        shipping_method: 1,
+        send_shipping_notification: true,
+        address_to: {
+          first_name: (shipping.name || '').split(' ')[0] || 'Customer',
+          last_name: (shipping.name || '').split(' ').slice(1).join(' ') || '',
+          email: customerEmail || '',
+          phone: fullSession.customer_details?.phone || '',
+          country: shipping.address.country || 'US',
+          region: shipping.address.state || '',
+          address1: shipping.address.line1 || '',
+          address2: shipping.address.line2 || '',
+          city: shipping.address.city || '',
+          zip: shipping.address.postal_code || '',
+        },
+      };
+
+      // Try up to 2 times
+      for (let attempt = 1; attempt <= 2; attempt++) {
+        try {
+          console.log(`Creating Printify order (attempt ${attempt}):`, JSON.stringify(printifyOrder, null, 2));
+          const order = await printify.createOrder(printifyOrder, true);
+          console.log('Printify order created:', order.id);
+          printifyResult = { printifyOrderId: order.id, sent_to_production: order.sent_to_production };
+          await updateOrderRecord({ printify_order_id: order.id, printify_status: 'created' });
+          break; // Success
+        } catch (e) {
+          console.error(`Printify order attempt ${attempt} failed:`, e.message);
+          if (attempt === 2) {
+            const errorMsg = e.message || 'Unknown Printify error';
+            await updateOrderRecord({ printify_status: 'failed', printify_error: errorMsg });
+            sendOrderFailedAlert({
+              provider: 'Printify',
+              error: errorMsg,
+              customerName, customerEmail,
+              items: itemsForEmail,
+              total: totalAmount,
+              shippingAddress: shipping?.address,
+              stripeSessionId: session.id,
+              printifyItems: parsedPrintifyItems,
+            }).catch(err => console.error('Printify fail alert email error:', err));
+          } else {
+            await new Promise(r => setTimeout(r, 2000));
+          }
+        }
+      }
+    } else if (parsedPrintifyItems && !hasShipping) {
+      sendOrderFailedAlert({
+        provider: 'Printify',
+        error: 'No shipping address provided — cannot create print order',
+        customerName, customerEmail,
+        items: itemsForEmail,
+        total: totalAmount,
+        shippingAddress: null,
+        stripeSessionId: session.id,
+        printifyItems: parsedPrintifyItems,
+      }).catch(err => console.error('Printify no-shipping alert error:', err));
+      await updateOrderRecord({ printify_status: 'failed', printify_error: 'No shipping address' });
+    }
+
+    // Update overall order status
+    const overallStatus = (!parsedPrintfulItems || printfulResult) && (!parsedPrintifyItems || printifyResult)
+      ? 'fulfilled'
+      : (printfulResult || printifyResult) ? 'partial' : 'failed';
+    await updateOrderRecord({ status: overallStatus });
+
+    // ========================================
+    // EMAILS — ALWAYS fire, no matter what
+    // ERR-0034: NEVER return/skip before this
+    // ========================================
 
     // Admin sale alert
     sendSaleAlert({
@@ -272,7 +353,7 @@ async function handleCheckoutCompleted(session, stripe) {
       customerEmail,
       items: itemsForEmail,
       total: totalAmount,
-      shippingAddress: shipping.address,
+      shippingAddress: shipping?.address || null,
       sessionId: session.id,
       printfulOrderId: printfulResult?.printfulOrderId,
       printifyOrderId: printifyResult?.printifyOrderId,
@@ -287,6 +368,16 @@ async function handleCheckoutCompleted(session, stripe) {
         total: totalAmount,
         sessionId: session.id,
       }).catch(err => console.error('Order confirmation email failed:', err));
+    }
+
+    // $100+ VIP thank you email
+    if (customerEmail && totalAmount >= 10000) {
+      sendBigSpenderThankYou({
+        customerName,
+        customerEmail,
+        total: totalAmount,
+        items: itemsForEmail,
+      }).catch(err => console.error('Big spender thank you email failed:', err));
     }
 
     // Tag as merch buyer in Kit (fire-and-forget)
