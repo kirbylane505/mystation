@@ -21,6 +21,7 @@ import Image from 'next/image';
 const IDMG_LOGO = '/images/idmg-logo-white.png';
 
 function getTrackArt(track) {
+  if (track.albumArt) return track.albumArt;
   if (track.coverArt) return track.coverArt;
   const album = albums.find(a => a.id === track.albumId);
   return album?.coverImage || IDMG_LOGO;
