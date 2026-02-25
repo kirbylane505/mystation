@@ -94,6 +94,13 @@ export async function POST(request) {
 async function handleCheckoutCompleted(session, stripe) {
   console.log('Processing checkout session:', session.id);
 
+  // Skip MyTicketsLive checkout sessions — they have their own webhook
+  const meta = session.metadata || {};
+  if (meta.eventSlug || meta.orderNumber?.startsWith('MTIX-') || meta.type === 'bundle' || meta.bundle_slug) {
+    console.log('Skipping MyTicketsLive session:', session.id);
+    return;
+  }
+
   try {
     // Get full session with line items
     const fullSession = await stripe.checkout.sessions.retrieve(session.id, {
