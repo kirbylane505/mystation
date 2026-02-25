@@ -228,6 +228,15 @@ export async function DELETE(request) {
   }
 }
 
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;');
+}
+
 async function notifyAdmin(comment, trackTitle) {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) return;
@@ -235,17 +244,21 @@ async function notifyAdmin(comment, trackTitle) {
   const { Resend } = await import('resend');
   const resend = new Resend(apiKey);
 
+  const safeName = escapeHtml(comment.name);
+  const safeMessage = escapeHtml(comment.message);
+  const safeTitle = escapeHtml(trackTitle || 'Unknown Track');
+
   await resend.emails.send({
     from: process.env.RESEND_FROM_EMAIL || 'MyStation <notifications@mystationlive.com>',
     to: 'mystationllc@gmail.com',
-    subject: `New Comment on "${trackTitle || 'a track'}" \u2014 ${comment.name}`,
+    subject: `New Comment on "${safeTitle}" \u2014 ${safeName}`,
     html: `
       <div style="font-family:-apple-system,sans-serif;max-width:500px;margin:0 auto;background:#0a0e1a;color:#fff;padding:24px;border-radius:16px;">
         <h2 style="color:#3b82f6;margin:0 0 8px;">New Comment</h2>
-        <p style="color:#94a3b8;margin:0 0 16px;">on "${trackTitle || 'Unknown Track'}"</p>
+        <p style="color:#94a3b8;margin:0 0 16px;">on "${safeTitle}"</p>
         <div style="background:#1a1f36;padding:16px;border-radius:12px;margin-bottom:16px;">
-          <p style="color:#e2e8f0;margin:0 0 4px;font-weight:700;">${comment.name}</p>
-          <p style="color:#e2e8f0;margin:0;font-size:16px;">${comment.message}</p>
+          <p style="color:#e2e8f0;margin:0 0 4px;font-weight:700;">${safeName}</p>
+          <p style="color:#e2e8f0;margin:0;font-size:16px;">${safeMessage}</p>
         </div>
         <p style="color:#475569;font-size:12px;text-align:center;">Reply at mystationlive.com</p>
       </div>

@@ -6,15 +6,23 @@
 
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
+import { timingSafeEqual } from 'crypto';
+
+function verifyAdminKey(key) {
+  const adminKey = process.env.ADMIN_KEY;
+  if (!adminKey || !key) return false;
+  try {
+    return timingSafeEqual(Buffer.from(key), Buffer.from(adminKey));
+  } catch { return false; }
+}
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const limit = Math.min(parseInt(searchParams.get('limit') || '50', 10), 200);
 
-  // Admin auth — header or query param
+  // Admin auth — header or query param (timing-safe)
   const key = request.headers.get('x-admin-key') || searchParams.get('key');
-  const adminKey = process.env.ADMIN_KEY;
-  if (!adminKey || key !== adminKey) {
+  if (!verifyAdminKey(key)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

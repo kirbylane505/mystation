@@ -6,21 +6,29 @@
 
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
+import { timingSafeEqual } from 'crypto';
+
+function verifyAdminKey(key) {
+  const adminKey = process.env.ADMIN_KEY;
+  if (!adminKey || !key) return false;
+  try {
+    return timingSafeEqual(Buffer.from(key), Buffer.from(adminKey));
+  } catch { return false; }
+}
 
 const resend = process.env.RESEND_API_KEY
   ? new Resend(process.env.RESEND_API_KEY)
   : null;
 
-const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'MyStation <onboarding@resend.dev>';
+const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'MyStation <notifications@mystationlive.com>';
 
 export async function POST(request) {
   try {
     const body = await request.json();
     const { email, subject, message, key } = body;
 
-    // Admin auth
-    const adminKey = process.env.ADMIN_KEY;
-    if (!adminKey || key !== adminKey) {
+    // Admin auth (timing-safe)
+    if (!verifyAdminKey(key)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
