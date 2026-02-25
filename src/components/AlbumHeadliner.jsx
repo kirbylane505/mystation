@@ -9,7 +9,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Play, Music, ChevronDown, ChevronUp, ExternalLink } from 'lucide-react';
+import { Play, Music, ChevronDown, ChevronUp, ExternalLink, Lock } from 'lucide-react';
 import { usePlayerStore } from '@/store/playerStore';
 import { tracks } from '@/data/tracks';
 
@@ -422,26 +422,30 @@ export default function AlbumHeadliner() {
         <div className="relative max-w-screen-xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
 
           {/* Tracklist Header */}
-          <div className="flex items-center gap-3 mb-8">
-            <div className="h-px flex-1 bg-gradient-to-r from-[#C9A84C]/30 to-transparent" />
-            <h3 className="text-white/60 text-xs font-black tracking-[0.3em] uppercase">Tracklist</h3>
-            <div className="h-px flex-1 bg-gradient-to-l from-[#C9A84C]/30 to-transparent" />
+          <div className="flex items-center gap-4 mb-10">
+            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-[#C9A84C]/40 to-[#C9A84C]/20" />
+            <div className="flex items-center gap-3">
+              <div className="w-1.5 h-1.5 rounded-full bg-[#C9A84C]" />
+              <h3 className="text-white text-sm font-black tracking-[0.3em] uppercase">Tracklist</h3>
+              <div className="w-1.5 h-1.5 rounded-full bg-[#C9A84C]" />
+            </div>
+            <div className="h-px flex-1 bg-gradient-to-l from-transparent via-[#C9A84C]/40 to-[#C9A84C]/20" />
           </div>
 
           {/* Mobile tracklist toggle */}
-          <div className="lg:hidden mb-4">
+          <div className="lg:hidden mb-6">
             <button
               onClick={() => setShowTracklist(!showTracklist)}
-              className="w-full flex items-center justify-center gap-2 py-3 text-white/50 text-sm font-medium hover:text-white/80 transition border border-white/10 rounded-xl"
+              className="w-full flex items-center justify-center gap-2.5 py-4 text-[#C9A84C]/80 text-sm font-bold hover:text-[#C9A84C] transition-all border border-[#C9A84C]/20 hover:border-[#C9A84C]/40 rounded-2xl backdrop-blur-sm bg-[#C9A84C]/5"
             >
               <Music size={16} />
-              <span>{showTracklist ? 'Hide' : 'View'} Full Tracklist</span>
+              <span>{showTracklist ? 'Hide' : 'View'} Full Tracklist ({TRACKLIST.length} Tracks)</span>
               {showTracklist ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
             </button>
           </div>
 
           {/* Tracklist Grid */}
-          <div className={`grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-0 ${showTracklist ? 'block' : 'hidden lg:grid'}`}>
+          <div className={`grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-3 ${showTracklist ? 'grid' : 'hidden lg:grid'}`}>
             {TRACKLIST.map((track, i) => {
               const trackObj = tracks.find(t => t.id === MIXTAPE_TRACK_IDS[i]);
               const isLocked = trackObj?.isComingSoon;
@@ -453,47 +457,67 @@ export default function AlbumHeadliner() {
                   key={track.num}
                   onClick={() => handlePlayTrack(i)}
                   disabled={isLocked}
-                  className={`relative flex items-center gap-4 py-4 px-4 rounded-xl text-left transition-all group overflow-hidden ${
-                    isLocked ? 'opacity-40 cursor-not-allowed' : 'hover:bg-[#C9A84C]/5'
-                  } ${isCurrentTrack ? 'bg-[#C9A84C]/10' : ''}`}
+                  className={`relative flex items-center gap-3 sm:gap-4 py-3.5 sm:py-4 px-4 sm:px-5 rounded-2xl text-left transition-all duration-300 group overflow-hidden border ${
+                    isLocked
+                      ? 'opacity-50 cursor-not-allowed border-white/5 bg-white/[0.02]'
+                      : isCurrentTrack
+                        ? 'border-[#C9A84C]/30 bg-[#C9A84C]/10 shadow-[0_0_20px_rgba(201,168,76,0.1)]'
+                        : 'border-white/5 bg-white/[0.02] hover:border-[#C9A84C]/20 hover:bg-[#C9A84C]/5 hover:shadow-[0_0_15px_rgba(201,168,76,0.05)]'
+                  }`}
                 >
                   {/* Gold hover sweep */}
                   {!isLocked && (
-                    <div className="absolute inset-0 bg-gradient-to-r from-[#C9A84C]/0 via-[#C9A84C]/5 to-[#C9A84C]/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-[#C9A84C]/0 via-[#C9A84C]/[0.03] to-[#C9A84C]/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   )}
 
-                  <span className={`relative w-8 text-center text-sm font-mono ${
-                    isCurrentTrack ? 'text-[#C9A84C]' : 'text-white/20 group-hover:text-white/40'
-                  }`}>
+                  {/* Track number / play indicator */}
+                  <div className={`relative w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                    isCurrentTrack
+                      ? 'bg-[#C9A84C]/20'
+                      : isLocked
+                        ? 'bg-white/5'
+                        : 'bg-white/5 group-hover:bg-[#C9A84C]/15'
+                  } transition-all duration-300`}>
                     {isCurrentlyPlaying ? (
-                      <span className="flex items-center justify-center gap-0.5">
-                        <span className="w-0.5 h-3 bg-[#C9A84C] rounded-full animate-pulse" />
-                        <span className="w-0.5 h-4 bg-[#C9A84C] rounded-full animate-pulse" style={{ animationDelay: '75ms' }} />
-                        <span className="w-0.5 h-2 bg-[#C9A84C] rounded-full animate-pulse" style={{ animationDelay: '150ms' }} />
+                      <span className="flex items-center justify-center gap-[3px]">
+                        <span className="w-[3px] h-3 bg-[#C9A84C] rounded-full animate-pulse" />
+                        <span className="w-[3px] h-4.5 bg-[#C9A84C] rounded-full animate-pulse" style={{ animationDelay: '75ms' }} />
+                        <span className="w-[3px] h-2.5 bg-[#C9A84C] rounded-full animate-pulse" style={{ animationDelay: '150ms' }} />
                       </span>
                     ) : !isLocked ? (
                       <>
-                        <span className="group-hover:hidden">{String(track.num).padStart(2, '0')}</span>
-                        <Play size={14} className="hidden group-hover:block mx-auto text-[#C9A84C]" fill="#C9A84C" />
+                        <span className={`text-sm font-bold group-hover:hidden ${isCurrentTrack ? 'text-[#C9A84C]' : 'text-white/30'}`}>
+                          {String(track.num).padStart(2, '0')}
+                        </span>
+                        <Play size={16} className="hidden group-hover:block text-[#C9A84C]" fill="#C9A84C" />
                       </>
                     ) : (
-                      String(track.num).padStart(2, '0')
+                      <span className="text-sm font-bold text-white/20">{String(track.num).padStart(2, '0')}</span>
                     )}
-                  </span>
-
-                  <div className="relative flex-1 min-w-0">
-                    <p className={`text-sm font-semibold truncate ${
-                      isLocked ? 'text-white/30' : isCurrentTrack ? 'text-[#C9A84C]' : 'text-white/80 group-hover:text-white'
-                    }`}>
-                      {track.title}
-                    </p>
-                    <p className="text-xs text-white/30 truncate">{track.credit}</p>
                   </div>
 
+                  {/* Track info */}
+                  <div className="relative flex-1 min-w-0">
+                    <p className={`text-sm sm:text-[15px] font-bold truncate leading-tight ${
+                      isLocked ? 'text-white/30' : isCurrentTrack ? 'text-[#C9A84C]' : 'text-white/90 group-hover:text-white'
+                    } transition-colors`}>
+                      {track.title}
+                    </p>
+                    <p className={`text-xs truncate mt-0.5 ${isLocked ? 'text-white/15' : 'text-white/35 group-hover:text-white/50'} transition-colors`}>
+                      {track.credit}
+                    </p>
+                  </div>
+
+                  {/* Duration / Lock badge */}
                   {isLocked ? (
-                    <span className="relative text-xs text-white/20">Feb 27</span>
+                    <span className="relative flex items-center gap-1.5 text-xs text-white/20 bg-white/5 px-3 py-1.5 rounded-full flex-shrink-0">
+                      <Lock size={10} />
+                      Feb 27
+                    </span>
                   ) : trackObj?.duration ? (
-                    <span className="relative text-xs text-white/20">{trackObj.duration}</span>
+                    <span className={`relative text-xs font-medium tabular-nums flex-shrink-0 ${isCurrentTrack ? 'text-[#C9A84C]/70' : 'text-white/25 group-hover:text-white/40'} transition-colors`}>
+                      {trackObj.duration}
+                    </span>
                   ) : null}
                 </button>
               );
