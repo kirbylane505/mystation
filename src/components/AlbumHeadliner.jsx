@@ -57,7 +57,7 @@ export default function AlbumHeadliner() {
   const currentTrack = usePlayerStore(s => s.currentTrack);
   const isPlaying = usePlayerStore(s => s.isPlaying);
   const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-  const [isReleased, setIsReleased] = useState(false);
+  const [isReleased, setIsReleased] = useState(true);
   const [showTracklist, setShowTracklist] = useState(false);
   const [showFullBio, setShowFullBio] = useState(false);
   const [coverSide, setCoverSide] = useState('front');
