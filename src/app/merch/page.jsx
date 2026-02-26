@@ -235,13 +235,44 @@ function ProductCard({ item, idx, onQuickView }) {
         </div>
         <div className="p-4">
           <h3 className="text-base font-bold text-white mb-1 group-hover:text-blue-300 transition-colors duration-300">{item.name}</h3>
-          <p className="text-white/40 text-xs mb-2">{item.description}</p>
+          {/* Color swatches */}
+          {item.colors && item.colors.length > 1 && (
+            <div className="flex items-center gap-1.5 mb-2">
+              {item.colors.slice(0, 6).map((color, i) => {
+                const hex = resolveColorHex(color);
+                return hex ? (
+                  <div key={i} className="w-4 h-4 rounded-full border border-white/20 flex-shrink-0" style={{ backgroundColor: hex }} title={color} />
+                ) : (
+                  <div key={i} className="w-4 h-4 rounded-full border border-white/20 flex-shrink-0 bg-gradient-to-br from-gray-400 to-gray-600" title={color} />
+                );
+              })}
+              {item.colors.length > 6 && (
+                <span className="text-white/40 text-[10px] font-medium ml-0.5">+{item.colors.length - 6}</span>
+              )}
+            </div>
+          )}
+          {/* Size range */}
+          {item.sizes && item.sizes.length > 1 && (
+            <p className="text-white/40 text-[11px] font-medium mb-2">
+              Sizes: {item.sizes[0]} – {item.sizes[item.sizes.length - 1]}
+            </p>
+          )}
+          {item.sizes && item.sizes.length === 1 && (
+            <p className="text-white/40 text-[11px] font-medium mb-2">
+              {item.sizes[0] === 'One size' || item.sizes[0] === 'OS' ? 'One Size' : `Size: ${item.sizes[0]}`}
+            </p>
+          )}
           <div className="flex items-center justify-between">
             <span className="text-lg font-black text-white">
               {item.startingPrice ? `$${item.startingPrice.toFixed(2)}` : '---'}
             </span>
             <span className="px-3 py-1 bg-blue-500 text-white text-xs font-bold rounded-full group-hover:bg-blue-400 transition-colors duration-300">
-              {item.sizeCount > 1 ? `${item.sizeCount} sizes` : item.colorCount > 1 ? `${item.colorCount} colors` : item.synced > 1 ? `${item.synced} options` : 'Buy Now'}
+              {item.sizeCount > 1 && item.colorCount > 1
+                ? `${item.sizeCount} sizes · ${item.colorCount} colors`
+                : item.sizeCount > 1 ? `${item.sizeCount} sizes`
+                : item.colorCount > 1 ? `${item.colorCount} colors`
+                : item.synced > 1 ? `${item.synced} options`
+                : 'Shop Now'}
             </span>
           </div>
         </div>
@@ -397,9 +428,10 @@ export default function MerchPage() {
             filtered.map(async (p) => {
               let startingPrice = null;
               let previewImage = null;
+              let detailData = null;
               try {
                 const detailRes = await fetch(`/api/printful/products/${p.id}`);
-                const detailData = await detailRes.json();
+                detailData = await detailRes.json();
                 if (detailData.success && detailData.product?.sync_variants) {
                   const variants = detailData.product.sync_variants;
                   const prices = variants
@@ -411,6 +443,19 @@ export default function MerchPage() {
                   previewImage = previewFile?.preview_url || null;
                 }
               } catch {}
+              // Parse variants for size/color info
+              let pfSizes = [], pfColors = [];
+              if (detailData?.success && detailData?.product?.sync_variants) {
+                const svs = detailData.product.sync_variants;
+                const sizeSet = new Set(), colorSet = new Set();
+                for (const v of svs) {
+                  const { size, color } = parseVariantTitle(v.name || '');
+                  if (size) sizeSet.add(size);
+                  if (color) colorSet.add(color);
+                }
+                pfSizes = SIZE_ORDER.filter(s => sizeSet.has(s)).concat([...sizeSet].filter(s => !SIZE_ORDER.includes(s)));
+                pfColors = [...colorSet].sort();
+              }
               return {
                 id: p.id,
                 name: p.name,
@@ -420,6 +465,10 @@ export default function MerchPage() {
                 printfulImage: previewImage || p.thumbnail_url,
                 variants: p.variants,
                 synced: p.synced,
+                sizeCount: pfSizes.length,
+                colorCount: pfColors.length,
+                sizes: pfSizes,
+                colors: pfColors,
                 badge: getBadge(p.name),
                 startingPrice,
                 provider: 'printful',
@@ -475,6 +524,8 @@ export default function MerchPage() {
               synced: enabledVariants.length,
               sizeCount: varInfo.sizes.length,
               colorCount: varInfo.colors.length,
+              sizes: varInfo.sizes,
+              colors: varInfo.colors,
               badge: getBadge(name) || 'NEW',
               startingPrice,
               provider: 'printify',
