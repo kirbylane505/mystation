@@ -11,13 +11,23 @@ import { useState, useEffect } from 'react';
 import { useUserStore, usePlayerStore } from '@/store/playerStore';
 import { X } from 'lucide-react';
 
+// Urgency countdown — spots decrease by 10/day from this baseline
+const URGENCY_START = new Date('2026-02-25T00:00:00');
+const DAILY_DECREASE = 10;
+const FLOOR = 3; // Never show 0 — always "almost gone"
+
 export default function FoundingMemberBanner() {
   const [remaining, setRemaining] = useState(null);
+  const [realRemaining, setRealRemaining] = useState(null);
   const [ready, setReady] = useState(false);
   const [dismissed, setDismissed] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const isSubscribed = useUserStore(s => s.isSubscribed);
 
   useEffect(() => {
+    // Check admin
+    try { setIsAdmin(sessionStorage.getItem('ADMIN_KEY') === 'mpf2026'); } catch {}
+
     // Check if dismissed this session
     const d = sessionStorage.getItem('founding-banner-dismissed');
     if (d) { setDismissed(true); return; }
@@ -27,8 +37,14 @@ export default function FoundingMemberBanner() {
       .then(r => r.json())
       .then(data => {
         if (data.remaining > 0) {
-          setRemaining(data.remaining);
-          // Small delay so it fades in cleanly
+          // Real count for admin
+          setRealRemaining(data.remaining);
+
+          // Urgency math — decrease by 10/day from baseline
+          const daysPassed = Math.max(0, Math.floor((Date.now() - URGENCY_START.getTime()) / 86400000));
+          const urgencyCount = Math.max(FLOOR, data.remaining - (daysPassed * DAILY_DECREASE));
+          setRemaining(urgencyCount);
+
           requestAnimationFrame(() => setReady(true));
         }
       })
@@ -102,6 +118,13 @@ export default function FoundingMemberBanner() {
             </span>
           </div>
         </div>
+
+        {/* Admin real count — only Mike sees this */}
+        {isAdmin && realRemaining !== null && (
+          <div className="shrink-0 px-2 py-0.5 bg-black/40 rounded text-[9px] text-green-400 font-mono mr-1" title="Real subscriber count">
+            Real: {realRemaining}
+          </div>
+        )}
 
         {/* CTA pill — right side */}
         <div className="shrink-0 flex items-center gap-1.5 mr-2">
