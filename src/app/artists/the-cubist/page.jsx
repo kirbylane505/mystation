@@ -272,10 +272,10 @@ export default function CubistPage() {
           <h2 className="text-2xl font-black text-white mb-3">Contact The Cubist</h2>
           <p className="text-white/50 mb-6">For beats, features, bookings & business inquiries</p>
           <a
-            href="mailto:idmgatl@gmail.com"
+            href="mailto:booking@mystationlive.com"
             className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-amber-500 to-red-500 text-white font-bold rounded-full hover:shadow-lg hover:shadow-amber-500/30 transition-all hover:scale-105 text-lg"
           >
-            ✉ idmgatl@gmail.com
+            ✉ booking@mystationlive.com
           </a>
         </div>
       </section>
