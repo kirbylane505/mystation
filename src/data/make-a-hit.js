@@ -8,16 +8,16 @@
 export const makeAHitTracks = [
   {
     id: 'hit-1',
-    title: 'Sometime I',
-    audioFile: '/audio/Impossible Dreamz 2024 113_Mike Page_1.wav',
+    title: 'Unconditionally',
+    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/Mike%20Page%20-%20Unconditionally_MASTERED.m4a',
     producer: 'The Cubist',
-    bpm: 140,
-    key: 'C minor',
-    mood: 'Reflective / Hard',
-    openVerse: 2, // Second verse is open
-    verseOpen: true, // Set to false when verse is taken
+    bpm: 120,
+    key: 'E minor',
+    mood: 'Smooth / Chill',
+    openVerse: 2,
+    verseOpen: true,
     price: 500,
-    description: 'Hard-hitting trap track with an open second verse. Perfect for artists who want to showcase their lyrical ability.',
+    description: 'Smooth hip-hop groove with an open second verse. Perfect for artists who bring that real, soulful energy.',
   },
   {
     id: 'hit-2',

@@ -812,6 +812,22 @@ export const tracks = [
     genre: 'Hip-Hop',
     producer: 'The Cubist'
   },
+  {
+    id: 184,
+    title: "Unconditionally",
+    artist: "Mike Page",
+    album: "Unconditionally",
+    year: 2026,
+    duration: "2:00",
+    trackNumber: 54,
+    albumId: 'singles-2026',
+    albumArt: '/images/idmg-logo-white.png',
+    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/Mike%20Page%20-%20Unconditionally_MASTERED.m4a',
+    isNew: true,
+    hitScore: 90,
+    genre: 'Hip-Hop',
+    producer: 'The Cubist'
+  },
   // ========================================
   // IDMG MIXTAPE 2026 — Executive Produced by The Cubist & Mike Page
   // Drops February 27, 2026
@@ -1895,7 +1911,7 @@ export const albums = [
     subtitle: "2026 Releases",
     artist: "Mike Page",
     year: 2026,
-    trackCount: 53,
+    trackCount: 54,
     coverGradient: "from-blue-500 via-blue-700 to-indigo-900",
     coverEmoji: "🎤",
     coverImage: "/images/idmg-logo-white.png",
