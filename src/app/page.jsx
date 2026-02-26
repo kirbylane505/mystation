@@ -13,7 +13,7 @@ import EmailCapture from '@/components/EmailCapture';
 import LOTLCountdown from '@/components/LOTLCountdown';
 import { tracks, albums, getOfficialTracks, getNonVaultTracks } from '@/data/tracks';
 import { usePlayerStore } from '@/store/playerStore';
-import { Play, ExternalLink, Headphones, ChevronLeft, Shuffle, ShoppingBag, Gamepad2 } from 'lucide-react';
+import { Play, ExternalLink, Headphones, ChevronLeft, Shuffle, ShoppingBag, Gamepad2, Film } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 

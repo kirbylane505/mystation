@@ -293,41 +293,73 @@ export default function MusicPageClient({ initialTrackId, autoplay = false }) {
           </div>
         </div>
 
-        {/* === ALBUMS HORIZONTAL SCROLL === */}
-        <div className="mb-8">
-          <h2 className="text-xl font-bold text-white mb-4">Albums</h2>
-          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
-            {albums.filter(a => a.id !== 'vault').map(album => {
-              const albumTrackCount = musicTracks.filter(t => t.albumId === album.id).length;
-              return (
-                <button
-                  key={album.id}
-                  onClick={() => { setFilterAlbum(album.title); setSortBy('default'); setActiveTab('music'); }}
-                  className="flex-shrink-0 w-36 md:w-44 group text-left"
-                >
-                  <div className="relative aspect-square rounded-xl overflow-hidden mb-2 border border-white/10 group-hover:border-blue-500/50 transition shadow-lg">
-                    {album.coverImage ? (
-                      <img src={album.coverImage} alt={album.title} className={`w-full h-full ${album.coverImage === IDMG_LOGO ? 'object-contain p-3 bg-[#0a1628]' : 'object-cover'} group-hover:scale-105 transition duration-300`} />
-                    ) : (
-                      <div className={`w-full h-full bg-gradient-to-br ${album.coverGradient || 'from-blue-600 to-purple-700'} flex items-center justify-center`}>
-                        <span className="text-4xl">{album.coverEmoji || '🎵'}</span>
+        {/* === ALBUMS + FEATURED VIDEO === */}
+        <div className="mb-8 grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
+          {/* Albums Grid */}
+          <div>
+            <h2 className="text-xl font-bold text-white mb-4">Albums</h2>
+            <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+              {albums.filter(a => a.id !== 'vault').map(album => {
+                const albumTrackCount = musicTracks.filter(t => t.albumId === album.id).length;
+                return (
+                  <button
+                    key={album.id}
+                    onClick={() => { setFilterAlbum(album.title); setSortBy('default'); setActiveTab('music'); }}
+                    className="flex-shrink-0 w-36 md:w-44 group text-left"
+                  >
+                    <div className="relative aspect-square rounded-xl overflow-hidden mb-2 border border-white/10 group-hover:border-blue-500/50 transition shadow-lg">
+                      {album.coverImage ? (
+                        <img src={album.coverImage} alt={album.title} className={`w-full h-full ${album.coverImage === IDMG_LOGO ? 'object-contain p-3 bg-[#0a1628]' : 'object-cover'} group-hover:scale-105 transition duration-300`} />
+                      ) : (
+                        <div className={`w-full h-full bg-gradient-to-br ${album.coverGradient || 'from-blue-600 to-purple-700'} flex items-center justify-center`}>
+                          <span className="text-4xl">{album.coverEmoji || '🎵'}</span>
+                        </div>
+                      )}
+                      {/* Play overlay */}
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                        <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center shadow-lg shadow-blue-500/30">
+                          <Play size={20} className="text-white ml-0.5" fill="white" />
+                        </div>
                       </div>
-                    )}
-                    {/* Play overlay */}
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
-                      <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center shadow-lg shadow-blue-500/30">
-                        <Play size={20} className="text-white ml-0.5" fill="white" />
-                      </div>
+                      {album.isNew && (
+                        <span className="absolute top-2 left-2 bg-blue-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">New</span>
+                      )}
                     </div>
-                    {album.isNew && (
-                      <span className="absolute top-2 left-2 bg-blue-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">New</span>
-                    )}
-                  </div>
-                  <p className="text-white font-semibold text-sm truncate">{album.title}</p>
-                  <p className="text-white/40 text-xs">{albumTrackCount} tracks • {album.year}</p>
-                </button>
-              );
-            })}
+                    <p className="text-white font-semibold text-sm truncate">{album.title}</p>
+                    <p className="text-white/40 text-xs">{albumTrackCount} tracks • {album.year}</p>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Featured Video — To The Money */}
+          <div className="hidden lg:block">
+            <h2 className="text-xl font-bold text-white mb-4">Official Video</h2>
+            <div className="glass rounded-2xl overflow-hidden border border-white/10">
+              <div className="aspect-video">
+                <iframe
+                  src="https://www.youtube.com/embed/DC9CGQN_DI8?rel=0"
+                  title="Mike Page - To The Money (Official 4K Video)"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="w-full h-full"
+                />
+              </div>
+              <div className="p-4">
+                <p className="text-white font-bold text-sm">To The Money</p>
+                <p className="text-white/40 text-xs">Mike Page — Official 4K Video</p>
+                <a
+                  href="https://www.youtube.com/watch?v=DC9CGQN_DI8"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 mt-3 text-blue-400 hover:text-blue-300 text-xs font-medium transition"
+                >
+                  Watch on YouTube
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                </a>
+              </div>
+            </div>
           </div>
         </div>
 
