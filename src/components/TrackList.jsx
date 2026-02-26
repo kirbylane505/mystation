@@ -8,7 +8,7 @@
 
 import { useState, memo, useCallback, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { usePlayerStore } from '@/store/playerStore';
+import { usePlayerStore, isAlbumGated } from '@/store/playerStore';
 import { Play, Pause, Clock, Music, ExternalLink, MessageCircle } from 'lucide-react';
 import { tracks, albums } from '@/data/tracks';
 import { ShareButton } from './ShareTrack';
@@ -198,9 +198,14 @@ export default function TrackList({ trackIds, showAlbum = true, showNumber = tru
     }
     if (currentTrack?.id === track.id) {
       togglePlay();
-    } else {
-      setQueue(displayTracks, index);
+      return;
     }
+    // Album gate — 2 free songs per album for non-subscribers
+    if (isAlbumGated(track)) {
+      usePlayerStore.getState().openSubscribeModal(track);
+      return;
+    }
+    setQueue(displayTracks, index);
   }, [currentTrack?.id, togglePlay, setQueue, displayTracks]);
 
   const handleCommentClick = useCallback((track) => {

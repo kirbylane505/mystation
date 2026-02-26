@@ -35,6 +35,9 @@ export const usePlayerStore = create(
   showSubscribeModal: false,
   pendingTrack: null, // Track waiting to play after subscription
 
+  // Album gate — tracks played per album for non-subscribers (session only, not persisted)
+  albumPlays: {}, // { albumId: [trackId1, trackId2] }
+
   // Show account wall (triggered from navbar sign-in button)
   showAccountWall: false,
 
@@ -88,6 +91,30 @@ export const usePlayerStore = create(
   }),
 
   setShowAccountWall: (show) => set({ showAccountWall: show }),
+
+  // Album gate helpers
+  recordAlbumPlay: (track) => {
+    if (!track?.albumId) return;
+    set((state) => {
+      const plays = { ...state.albumPlays };
+      const albumTracks = plays[track.albumId] || [];
+      if (!albumTracks.includes(track.id)) {
+        plays[track.albumId] = [...albumTracks, track.id];
+      }
+      return { albumPlays: plays };
+    });
+  },
+
+  initAlbumPlays: () => {
+    if (typeof document === 'undefined') return;
+    try {
+      const match = document.cookie.match(/ms-album-plays=([^;]+)/);
+      if (match) {
+        const plays = JSON.parse(decodeURIComponent(match[1]));
+        set({ albumPlays: plays });
+      }
+    } catch {}
+  },
 
   // Return to last played track
   returnToLastPlayed: () => {
@@ -302,3 +329,29 @@ export const useUserStore = create(
     }
   )
 );
+
+// Check if a track is blocked by the album gate
+// Returns true if BLOCKED, false if allowed
+const FREE_SONGS_PER_ALBUM = 2;
+const EXEMPT_ALBUM_IDS = ['singles-2026'];
+
+export function isAlbumGated(track) {
+  if (!track?.albumId) return false;
+  if (EXEMPT_ALBUM_IDS.includes(track.albumId)) return false;
+
+  // Subscribers & friends bypass completely
+  const cookies = typeof document !== 'undefined' ? document.cookie : '';
+  if (cookies.includes('mystation-sub=')) return false;
+  if (cookies.includes('mystation-friend=')) return false;
+  if (cookies.includes('mystation-auth=')) return false;
+
+  // Check album plays
+  const { albumPlays } = usePlayerStore.getState();
+  const played = albumPlays[track.albumId] || [];
+
+  // Allow replay of already-played tracks
+  if (played.includes(track.id)) return false;
+
+  // Block if at limit
+  return played.length >= FREE_SONGS_PER_ALBUM;
+}

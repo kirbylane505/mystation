@@ -172,8 +172,15 @@ export default function SubscribeModal() {
               </>
             ) : (
               <>
-                <h2 className="text-xl font-bold text-white mb-1">Join the MyStation Family</h2>
-                <p className="text-white/60 text-sm">Pick your plan to unlock unlimited streaming.</p>
+                <h2 className="text-xl font-bold text-white mb-1">Subscribe FREE — First Month On Us</h2>
+                <div className="space-y-1 mt-2">
+                  <p className="text-white/70 text-sm flex items-center justify-center gap-1.5">
+                    <Check size={14} className="text-green-400 shrink-0" /> Unlock ALL 100+ tracks instantly
+                  </p>
+                  <p className="text-[#D4AF37] text-sm font-semibold flex items-center justify-center gap-1.5">
+                    <span className="text-base">🎫</span> Stay through August = FREE LOTL ticket ($20 value)
+                  </p>
+                </div>
               </>
             )}
           </div>
@@ -240,11 +247,11 @@ export default function SubscribeModal() {
                 ) : (
                   <>
                     <CreditCard size={18} />
-                    Subscribe — ${tiers.find(t => t.id === selectedTier)?.price}/mo
+                    Start Free Trial — ${tiers.find(t => t.id === selectedTier)?.price}/mo after
                   </>
                 )}
               </button>
-              <p className="text-white/30 text-xs text-center mt-2">Cancel anytime. All proceeds support youth & community programs.</p>
+              <p className="text-white/30 text-xs text-center mt-2">First month FREE. Cancel anytime. All proceeds support youth & community programs.</p>
             </div>
 
             {/* Pending track preview */}

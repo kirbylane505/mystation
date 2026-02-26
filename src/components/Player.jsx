@@ -84,6 +84,38 @@ function VolumeIcon({ volume, muted, size = 18 }) {
   return <Volume2 size={size} className="text-white/60" />;
 }
 
+function LOTLBadge() {
+  const [show, setShow] = useState(false);
+  const [months, setMonths] = useState(0);
+
+  useEffect(() => {
+    const isSub = document.cookie.includes('mystation-sub=');
+    if (!isSub) { setShow(false); return; }
+    const now = new Date();
+    const target = new Date(2026, 7, 31); // Aug 31, 2026
+    if (now > target) {
+      setMonths(-1);
+    } else {
+      const diff = (target.getFullYear() - now.getFullYear()) * 12 + (target.getMonth() - now.getMonth());
+      setMonths(diff);
+    }
+    setShow(true);
+  }, []);
+
+  if (!show) return null;
+
+  return (
+    <div className="px-3 py-1.5 bg-gradient-to-r from-[#D4AF37]/10 to-[#D4AF37]/5 border-t border-[#D4AF37]/20">
+      <p className="text-[11px] text-[#D4AF37] text-center font-medium truncate">
+        {months < 0
+          ? '🎫 You earned a FREE LOTL ticket! Check your email.'
+          : `🎫 ${months} month${months !== 1 ? 's' : ''} to your FREE LOTL ticket!`
+        }
+      </p>
+    </div>
+  );
+}
+
 export default function Player() {
   const [mounted, setMounted] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -597,6 +629,7 @@ export default function Player() {
             <ChevronDown size={18} />
           </button>
         </div>
+        <LOTLBadge />
       </div>
 
       {/* DESKTOP PLAYER */}

@@ -7,7 +7,7 @@
 'use client';
 
 import { useEffect, useRef, useCallback } from 'react';
-import { usePlayerStore, useUserStore } from '@/store/playerStore';
+import { usePlayerStore, useUserStore, isAlbumGated } from '@/store/playerStore';
 import { useEngagementStore } from '@/store/engagementStore';
 import { progressBridge } from '@/lib/progressBridge';
 
@@ -159,6 +159,13 @@ export default function AudioPlayer() {
         body: JSON.stringify({ trackId: track.id })
       });
       if (!resp.ok) {
+        if (resp.status === 403) {
+          const data = await resp.json().catch(() => ({}));
+          if (data.error === 'album_limit') {
+            storeActionsRef.current.openSubscribeModal(track);
+            storeActionsRef.current.pause();
+          }
+        }
         return null;
       }
       const { token } = await resp.json();
@@ -174,6 +181,9 @@ export default function AudioPlayer() {
     const audio = getGlobalAudio();
     if (!audio || isAudioInitialized) return;
     isAudioInitialized = true;
+
+    // Load album play history from cookie
+    usePlayerStore.getState().initAlbumPlays();
 
     setupIOSAudioUnlock();
 
@@ -350,8 +360,18 @@ export default function AudioPlayer() {
       return;
     }
 
+    // Album gate — block if non-subscriber hit album limit
+    if (isAlbumGated(currentTrack)) {
+      audio.pause();
+      pause();
+      storeActionsRef.current.openSubscribeModal(currentTrack);
+      lastTrackIdRef.current = null;
+      return;
+    }
+
     if (playing) {
       incrementPlayCount(currentTrack.id);
+      usePlayerStore.getState().recordAlbumPlay(currentTrack);
     }
 
     lastTrackIdRef.current = currentTrack.id;

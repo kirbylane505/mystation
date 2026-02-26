@@ -1,7 +1,7 @@
 /**
  * MYSTATION - Audio Token API
- * Access hierarchy: sub > friend > vault > auth > open (no timer)
- * All non-vault tracks are free to stream — no browse timer, no lockout.
+ * Access hierarchy: sub > friend > vault > auth > album gate (2 free per album)
+ * Non-subscribers get 2 free songs per album. Singles stay free.
  */
 
 import { NextResponse } from 'next/server';
@@ -38,6 +38,16 @@ function timingSafeEqual(a, b) {
 function parseCookie(cookieStr, name) {
   const match = cookieStr.match(new RegExp(`${name}=([^;]+)`));
   return match ? decodeURIComponent(match[1]) : null;
+}
+
+// Album gate — non-subscribers get 2 free songs per album
+const FREE_SONGS_PER_ALBUM = 2;
+const EXEMPT_ALBUM_IDS = ['singles-2026']; // singles stay free — promotional
+
+function getAlbumPlays(cookieStr) {
+  const val = parseCookie(cookieStr, 'ms-album-plays');
+  if (!val) return {};
+  try { return JSON.parse(val); } catch { return {}; }
 }
 
 // Verify subscription cookie (HMAC-signed, 30-day expiry)
@@ -113,7 +123,36 @@ export async function POST(request) {
       return grantToken(track);
     }
 
-    // 5. Open access — all non-vault tracks are free to stream
+    // 5. Album gate — non-subscribers get 2 free songs per album
+    const albumId = track.albumId;
+    if (albumId && !EXEMPT_ALBUM_IDS.includes(albumId)) {
+      const albumPlays = getAlbumPlays(cookieStr);
+      const played = albumPlays[albumId] || [];
+
+      // Allow if this track was already played (replay OK) or under limit
+      if (!played.includes(track.id) && played.length >= FREE_SONGS_PER_ALBUM) {
+        return NextResponse.json(
+          { error: 'album_limit', albumId, limit: FREE_SONGS_PER_ALBUM },
+          { status: 403 }
+        );
+      }
+
+      // Track this play in cookie
+      if (!played.includes(track.id)) {
+        played.push(track.id);
+        albumPlays[albumId] = played;
+      }
+      const response = await grantToken(track);
+      response.cookies.set('ms-album-plays', JSON.stringify(albumPlays), {
+        path: '/',
+        maxAge: 30 * 24 * 60 * 60,
+        httpOnly: false,
+        sameSite: 'lax',
+      });
+      return response;
+    }
+
+    // 6. Open access — singles and tracks without albumId
     return grantToken(track);
   } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
