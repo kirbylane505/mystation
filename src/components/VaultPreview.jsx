@@ -180,7 +180,7 @@ export default function VaultPreview() {
               {/* Blurred play count for locked state */}
               {!hasAccess && (
                 <div className="text-white/20 text-sm blur-sm select-none">
-                  {Math.floor(Math.random() * 500 + 100)} plays
+                  {((track.id * 127 + 83) % 500) + 100} plays
                 </div>
               )}
             </div>

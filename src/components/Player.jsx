@@ -97,15 +97,15 @@ export default function Player() {
   const isLandscapeGame = useIsLandscapeGame();
   const dragRef = useRef(null);
   const dragStartRef = useRef(null);
-  const [dragPos, setDragPos] = useState(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const saved = localStorage.getItem('ms-player-pos');
-        if (saved) return JSON.parse(saved);
-      } catch {}
-    }
-    return { x: 12, y: 12 };
-  });
+  const [dragPos, setDragPos] = useState({ x: 12, y: 12 });
+
+  // Restore saved position after mount (avoids hydration mismatch)
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('ms-player-pos');
+      if (saved) setDragPos(JSON.parse(saved));
+    } catch {}
+  }, []);
 
   // Save drag position
   useEffect(() => {

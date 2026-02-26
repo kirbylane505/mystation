@@ -42,21 +42,29 @@ export default function HomePage() {
   // Get official tracks only
   const officialTracks = getOfficialTracks();
 
-  // New releases - official tracks marked as isNew (shuffled each visit)
+  // Deterministic seeded shuffle — same result on server & client (changes daily)
+  // Eliminates hydration mismatch that caused visible track reordering glitch
+  const daySeed = Math.floor(Date.now() / 86400000);
+
+  // New releases - official tracks marked as isNew (shuffled daily)
   const [newReleases] = useState(() => {
     const newTracks = officialTracks.filter(t => t.isNew);
+    let seed = daySeed;
     for (let i = newTracks.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
+      seed = (seed * 16807) % 2147483647;
+      const j = seed % (i + 1);
       [newTracks[i], newTracks[j]] = [newTracks[j], newTracks[i]];
     }
     return newTracks.map(t => t.id);
   });
 
-  // Trending this week - top non-vault official tracks (shuffled each visit)
+  // Trending this week - top non-vault official tracks (shuffled daily)
   const [trendingTracks] = useState(() => {
     const trending = getNonVaultTracks().slice();
+    let seed = daySeed + 7919;
     for (let i = trending.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
+      seed = (seed * 16807) % 2147483647;
+      const j = seed % (i + 1);
       [trending[i], trending[j]] = [trending[j], trending[i]];
     }
     return trending.slice(0, 6).map(t => t.id);

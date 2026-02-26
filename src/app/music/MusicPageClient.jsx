@@ -29,7 +29,8 @@ export default function MusicPageClient({ initialTrackId, autoplay = false }) {
   const [userPlaylists, setUserPlaylists] = useState([]);
   const [activePlaylist, setActivePlaylist] = useState(null);
   const [activeTab, setActiveTab] = useState('music');
-  const [shuffleSeed] = useState(() => Math.random());
+  // Deterministic seed — same on server & client, changes daily (no hydration mismatch)
+  const [shuffleSeed] = useState(() => (Math.floor(Date.now() / 86400000) % 10000) / 10000);
   const [accessCode, setAccessCode] = useState('');
   const [accessError, setAccessError] = useState('');
   const [accessLoading, setAccessLoading] = useState(false);
@@ -149,7 +150,12 @@ export default function MusicPageClient({ initialTrackId, autoplay = false }) {
       filteredTracks = [...filteredTracks].sort((a, b) => (b.bpm || 0) - (a.bpm || 0));
       break;
     case 'shuffle':
-      filteredTracks = [...filteredTracks].sort(() => Math.random() - 0.5);
+      // Use seeded sort to prevent re-shuffling on every re-render
+      filteredTracks = [...filteredTracks].sort((a, b) => {
+        const hashA = ((a.id * 2654435761 + shuffleSeed * 9999999) >>> 0) % 1000;
+        const hashB = ((b.id * 2654435761 + shuffleSeed * 9999999) >>> 0) % 1000;
+        return hashA - hashB;
+      });
       break;
     default:
       // Default: shuffle on each page visit using stable seed
