@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createHmac } from 'crypto';
+import { verifyAdminKey } from '@/lib/rateLimit';
 
 /**
  * GET /api/rewards?email=...&sig=...
@@ -17,8 +18,7 @@ export async function GET(request) {
 
   // Verify the request comes from the owner of this email
   // Accept either x-admin-key header (admin access) or subscription cookie presence
-  const adminKey = request.headers.get('x-admin-key');
-  const isAdmin = process.env.ADMIN_KEY && adminKey === process.env.ADMIN_KEY;
+  const isAdmin = verifyAdminKey(request);
   const cookies = request.headers.get('cookie') || '';
   const hasSubscription = cookies.includes('mystation-session');
 

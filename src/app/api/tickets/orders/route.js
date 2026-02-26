@@ -6,16 +6,22 @@
  */
 
 import { NextResponse } from 'next/server';
+import { timingSafeEqual } from 'crypto';
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
 
 const AUDIO_SECRET = process.env.AUDIO_SECRET;
 
+function verifyKey(key) {
+  if (!AUDIO_SECRET || !key || key.length !== AUDIO_SECRET.length) return false;
+  try { return timingSafeEqual(Buffer.from(key), Buffer.from(AUDIO_SECRET)); } catch { return false; }
+}
+
 export async function GET(request) {
   try {
-    // Admin auth — accept key via header or query param
+    // Admin auth — timing-safe comparison
     const { searchParams } = new URL(request.url);
     const key = request.headers.get('x-admin-key') || searchParams.get('key');
-    if (!AUDIO_SECRET || key !== AUDIO_SECRET) {
+    if (!verifyKey(key)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

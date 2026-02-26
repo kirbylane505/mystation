@@ -8,12 +8,18 @@ import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { generateReferralCode } from '@/lib/referral';
 import { addSubscriber } from '@/lib/kit';
+import { createRateLimiter, isValidEmail } from '@/lib/rateLimit';
+
+const emailCaptureLimiter = createRateLimiter('email-capture', 5, 3600000); // 5 per IP per hour
 
 export async function POST(request) {
+  const limited = emailCaptureLimiter(request);
+  if (limited) return limited;
+
   try {
     const { email, source } = await request.json();
 
-    if (!email || !email.includes('@')) {
+    if (!email || !isValidEmail(email)) {
       return NextResponse.json({ error: 'Invalid email' }, { status: 400 });
     }
 

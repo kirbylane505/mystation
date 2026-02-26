@@ -1,11 +1,11 @@
 import { printful } from '@/lib/printful';
+import { verifyAdminKey } from '@/lib/rateLimit';
 
 export const dynamic = 'force-dynamic';
 
-// Admin auth check — header only (never accept key in URL query params — leaks in logs/history)
+// Admin auth check — timing-safe comparison (prevents timing attacks)
 function isAuthorized(request) {
-  const key = request.headers.get('x-admin-key');
-  return process.env.ADMIN_KEY && key === process.env.ADMIN_KEY;
+  return verifyAdminKey(request);
 }
 
 /**

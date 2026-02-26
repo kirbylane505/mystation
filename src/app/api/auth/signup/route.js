@@ -9,8 +9,10 @@ import { createHmac } from 'crypto';
 import { signUp } from '@/lib/supabase';
 import { sendWelcomeEmail, sendNewSignupAlert } from '@/lib/email';
 import { addSubscriber } from '@/lib/kit';
+import { createRateLimiter, isValidEmail } from '@/lib/rateLimit';
 
 const AUDIO_SECRET = process.env.AUDIO_SECRET;
+const signupLimiter = createRateLimiter('signup', 3, 3600000); // 3 per IP per hour
 
 function createAuthCookie(email) {
   const timestamp = Date.now();
@@ -20,12 +22,15 @@ function createAuthCookie(email) {
 }
 
 export async function POST(request) {
+  const limited = signupLimiter(request);
+  if (limited) return limited;
+
   try {
     const { email, password, name } = await request.json();
 
-    if (!email || !password) {
+    if (!email || !password || !isValidEmail(email)) {
       return NextResponse.json(
-        { success: false, error: 'Email and password required' },
+        { success: false, error: 'Valid email and password required' },
         { status: 400 }
       );
     }
@@ -98,11 +103,10 @@ export async function POST(request) {
       console.error('First-26 check error:', err);
     }
 
-    // Send welcome email with password (fire-and-forget)
+    // Send welcome email (fire-and-forget) — NEVER include password in emails
     sendWelcomeEmail({
       customerName: name || cleanEmail.split('@')[0],
       customerEmail: cleanEmail,
-      password,
     }).catch(err => console.error('Welcome email failed:', err));
 
     // Send admin signup alert (fire-and-forget)

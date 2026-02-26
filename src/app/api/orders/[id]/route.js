@@ -1,9 +1,9 @@
 import { printful } from '@/lib/printful';
+import { verifyAdminKey } from '@/lib/rateLimit';
 
-// Admin auth check — header only (never accept key in URL query params)
+// Admin auth check — timing-safe comparison
 function isAuthorized(request) {
-  const key = request.headers.get('x-admin-key');
-  return process.env.ADMIN_KEY && key === process.env.ADMIN_KEY;
+  return verifyAdminKey(request);
 }
 
 /**

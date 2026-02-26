@@ -6,7 +6,7 @@
 
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
-import { createHmac, randomUUID } from 'crypto';
+import { createHmac, randomUUID, timingSafeEqual } from 'crypto';
 
 const AUDIO_SECRET = process.env.AUDIO_SECRET;
 
@@ -20,9 +20,16 @@ function generateQRCode(ticketId) {
 
 export async function POST(request) {
   try {
-    // Admin auth
+    // Admin auth — timing-safe comparison
     const key = request.headers.get('x-admin-key');
-    if (!AUDIO_SECRET || key !== AUDIO_SECRET) {
+    if (!AUDIO_SECRET || !key || key.length !== AUDIO_SECRET.length) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    try {
+      if (!timingSafeEqual(Buffer.from(key), Buffer.from(AUDIO_SECRET))) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+    } catch {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

@@ -1932,16 +1932,7 @@ export const albums = [
   }
 ];
 
-export const playlists = [
-  {
-    id: 'top-hits',
-    title: "Top Hits",
-    description: "Highest rated tracks from REmo analysis",
-    trackIds: [2, 3, 4, 5, 6, 7, 8, 9], // 75+ hit scores
-    coverGradient: "from-green-500 to-emerald-700",
-    emoji: "\uD83D\uDD25"
-  }
-];
+export const playlists = [];
 
 export const artistInfo = {
   name: "Mike Page",

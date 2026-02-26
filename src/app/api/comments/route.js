@@ -23,6 +23,7 @@
  */
 
 import { NextResponse } from 'next/server';
+import { timingSafeEqual } from 'crypto';
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
 
 // Rate limit: max 5 comments per IP per 10 minutes (in-memory, best-effort)
@@ -44,7 +45,12 @@ function checkRateLimit(ip) {
 
 function isValidAdminKey(key) {
   const adminKey = process.env.ADMIN_KEY;
-  return adminKey && key === adminKey;
+  if (!adminKey || !key || key.length !== adminKey.length) return false;
+  try {
+    return timingSafeEqual(Buffer.from(key), Buffer.from(adminKey));
+  } catch {
+    return false;
+  }
 }
 
 function mapRow(row) {
@@ -143,7 +149,7 @@ export async function POST(request) {
     if (!isAdmin && !cleanName) {
       return NextResponse.json({ error: 'Name required' }, { status: 400 });
     }
-    const cleanMessage = message.trim().slice(0, 500);
+    const cleanMessage = escapeHtml(message.trim().slice(0, 500));
 
     const supabase = getSupabaseAdmin();
     if (!supabase) {

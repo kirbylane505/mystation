@@ -5,14 +5,19 @@
 
 import { NextResponse } from 'next/server';
 import { createHmac } from 'crypto';
+import { createRateLimiter, isValidEmail } from '@/lib/rateLimit';
 
 const AUDIO_SECRET = process.env.AUDIO_SECRET;
+const trialLimiter = createRateLimiter('trial', 3, 3600000); // 3 per IP per hour
 
 export async function POST(request) {
+  const limited = trialLimiter(request);
+  if (limited) return limited;
+
   try {
     const { email } = await request.json();
 
-    if (!email || !email.includes('@')) {
+    if (!email || !isValidEmail(email)) {
       return NextResponse.json({ error: 'Invalid email' }, { status: 400 });
     }
 

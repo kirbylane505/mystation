@@ -6,8 +6,10 @@
 import { NextResponse } from 'next/server';
 import { createHmac } from 'crypto';
 import { signIn } from '@/lib/supabase';
+import { createRateLimiter, isValidEmail } from '@/lib/rateLimit';
 
 const AUDIO_SECRET = process.env.AUDIO_SECRET;
+const loginLimiter = createRateLimiter('login', 10, 900000); // 10 per IP per 15 min
 
 function createAuthCookie(email) {
   const timestamp = Date.now();
@@ -17,12 +19,15 @@ function createAuthCookie(email) {
 }
 
 export async function POST(request) {
+  const limited = loginLimiter(request);
+  if (limited) return limited;
+
   try {
     const { email, password } = await request.json();
 
-    if (!email || !password) {
+    if (!email || !password || !isValidEmail(email)) {
       return NextResponse.json(
-        { success: false, error: 'Email and password required' },
+        { success: false, error: 'Valid email and password required' },
         { status: 400 }
       );
     }

@@ -7,14 +7,19 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
 import { sendNewSignupAlert } from '@/lib/email';
+import { createRateLimiter, isValidEmail } from '@/lib/rateLimit';
 
 const LOTL_SLOTS = 250;
+const subscribeLimiter = createRateLimiter('subscribe', 3, 3600000); // 3 per IP per hour
 
 export async function POST(request) {
+  const limited = subscribeLimiter(request);
+  if (limited) return limited;
+
   try {
     const { email } = await request.json();
 
-    if (!email || !email.includes('@')) {
+    if (!email || !isValidEmail(email)) {
       return NextResponse.json(
         { success: false, error: 'Valid email required' },
         { status: 400 }

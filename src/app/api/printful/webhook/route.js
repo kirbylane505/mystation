@@ -23,7 +23,8 @@ export async function POST(request) {
         return Response.json({ error: 'Invalid webhook signature' }, { status: 401 });
       }
     } else if (process.env.NODE_ENV === 'production') {
-      console.warn('[Printful Webhook] PRINTFUL_WEBHOOK_SECRET not set — accepting without verification');
+      console.error('[Printful Webhook] PRINTFUL_WEBHOOK_SECRET not set — REJECTING in production');
+      return Response.json({ error: 'Webhook verification not configured' }, { status: 500 });
     }
 
     const payload = JSON.parse(rawBody);

@@ -8,7 +8,7 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
 import { sendLOTLTicketEmail } from '@/lib/email';
-import { createHmac } from 'crypto';
+import { createHmac, timingSafeEqual } from 'crypto';
 
 function generateTicketCode(email, number) {
   const hash = createHmac('sha256', 'lotl2026-mystation')
@@ -25,9 +25,19 @@ export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const adminKey = searchParams.get('key');
 
-  const isAuthed =
-    authHeader === `Bearer ${process.env.CRON_SECRET}` ||
-    adminKey === process.env.ADMIN_KEY;
+  // Timing-safe comparisons for both auth methods
+  let cronValid = false;
+  if (authHeader && process.env.CRON_SECRET) {
+    const expected = `Bearer ${process.env.CRON_SECRET}`;
+    if (authHeader.length === expected.length) {
+      try { cronValid = timingSafeEqual(Buffer.from(authHeader), Buffer.from(expected)); } catch {}
+    }
+  }
+  let keyValid = false;
+  if (adminKey && process.env.ADMIN_KEY && adminKey.length === process.env.ADMIN_KEY.length) {
+    try { keyValid = timingSafeEqual(Buffer.from(adminKey), Buffer.from(process.env.ADMIN_KEY)); } catch {}
+  }
+  const isAuthed = cronValid || keyValid;
 
   if (!isAuthed) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
