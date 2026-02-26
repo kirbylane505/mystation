@@ -828,6 +828,22 @@ export const tracks = [
     genre: 'Hip-Hop',
     producer: 'The Cubist'
   },
+  {
+    id: 185,
+    title: "Hope Yo Soul",
+    artist: "Mike Page",
+    album: "Hope Yo Soul",
+    year: 2026,
+    duration: "3:50",
+    trackNumber: 55,
+    albumId: 'singles-2026',
+    albumArt: '/images/idmg-logo-white.png',
+    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/Mike%20Page%20-%20Hope%20Yo%20Soul_MASTERED.m4a',
+    isNew: true,
+    hitScore: 91,
+    genre: 'Hip-Hop',
+    producer: 'The Cubist'
+  },
   // ========================================
   // IDMG MIXTAPE 2026 — Executive Produced by The Cubist & Mike Page
   // Drops February 27, 2026
@@ -1911,7 +1927,7 @@ export const albums = [
     subtitle: "2026 Releases",
     artist: "Mike Page",
     year: 2026,
-    trackCount: 54,
+    trackCount: 55,
     coverGradient: "from-blue-500 via-blue-700 to-indigo-900",
     coverEmoji: "🎤",
     coverImage: "/images/idmg-logo-white.png",
