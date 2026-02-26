@@ -684,22 +684,6 @@ export const tracks = [
     producer: 'Mike Page'
   },
   {
-    id: 175,
-    title: "Dick Gregory",
-    artist: "Mike Page",
-    album: "Dick Gregory / They Lied",
-    year: 2022,
-    duration: "3:00",
-    trackNumber: 45,
-    albumId: 'singles-2026',
-    albumArt: '/images/singles/dick-gregory.jpg',
-    audioFile: '/audio/Mike Page - dick-gregory_MASTERED.mp3',
-    isNew: true,
-    hitScore: 87,
-    genre: 'Hip-Hop',
-    producer: 'Mike Page'
-  },
-  {
     id: 176,
     title: "Remain A Hunnid Proof",
     artist: "Mike Page",
