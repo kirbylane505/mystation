@@ -9,11 +9,7 @@ import {
   Heart, Shield, ListMusic, Radio
 } from 'lucide-react';
 
-const STRIPE_LINKS = {
-  regular: 'https://buy.stripe.com/5kQbJ3fyX0l0gLafHd1oI00',
-  premium: 'https://buy.stripe.com/bJe00lcmL2t8cuUcv11oI01',
-  diamond: 'https://buy.stripe.com/6oUbJ3euT5FkdyYgLh1oI02',
-};
+// Checkout Sessions replace Payment Links — full server control
 
 const USE_CASES = [
   {
@@ -112,6 +108,52 @@ const DIAMOND_FEATURES = [
 
 export default function SubscribePage() {
   const [selectedTier, setSelectedTier] = useState('diamond');
+  const [subscribing, setSubscribing] = useState(null);
+  const [emailInput, setEmailInput] = useState('');
+  const [needsEmail, setNeedsEmail] = useState(null);
+
+  const handleSubscribe = async (tierId) => {
+    setSubscribing(tierId);
+    try {
+      // Try to get email from localStorage first
+      const email = localStorage.getItem('mystation-email') || '';
+
+      if (!email) {
+        setNeedsEmail(tierId);
+        setSubscribing(null);
+        return;
+      }
+
+      localStorage.setItem('mystation-selected-tier', tierId);
+
+      const res = await fetch('/api/subscription/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tier: tierId, email }),
+      });
+      const data = await res.json();
+
+      if (data.alreadySubscribed) {
+        window.location.href = '/account';
+        return;
+      }
+
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch (err) {
+      console.error('Checkout error:', err);
+    } finally {
+      setSubscribing(null);
+    }
+  };
+
+  const handleEmailSubmit = async (tierId) => {
+    if (!emailInput || !emailInput.includes('@')) return;
+    localStorage.setItem('mystation-email', emailInput);
+    setNeedsEmail(null);
+    await handleSubscribe(tierId);
+  };
 
   const tiers = [
     {
@@ -283,17 +325,34 @@ export default function SubscribePage() {
                     ))}
                   </ul>
 
-                  <a
-                    href={STRIPE_LINKS[tier.id]}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      localStorage.setItem('mystation-selected-tier', tier.id);
-                    }}
-                    className={`w-full py-3 bg-gradient-to-r ${tier.btnClass} text-white font-bold rounded-xl hover:opacity-90 transition flex items-center justify-center gap-2 text-sm shadow-lg`}
-                  >
-                    <CreditCard size={16} />
-                    Subscribe — ${tier.price}/mo
-                  </a>
+                  {needsEmail === tier.id ? (
+                    <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+                      <input
+                        type="email"
+                        value={emailInput}
+                        onChange={(e) => setEmailInput(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleEmailSubmit(tier.id)}
+                        placeholder="Your email"
+                        className="flex-1 px-3 py-2 bg-white/10 rounded-lg text-white text-sm border border-white/20 focus:outline-none focus:border-white/40"
+                        autoFocus
+                      />
+                      <button
+                        onClick={() => handleEmailSubmit(tier.id)}
+                        className={`px-4 py-2 bg-gradient-to-r ${tier.btnClass} text-white font-bold rounded-lg text-sm`}
+                      >
+                        Go
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleSubscribe(tier.id); }}
+                      disabled={subscribing === tier.id}
+                      className={`w-full py-3 bg-gradient-to-r ${tier.btnClass} text-white font-bold rounded-xl hover:opacity-90 transition flex items-center justify-center gap-2 text-sm shadow-lg disabled:opacity-50`}
+                    >
+                      <CreditCard size={16} />
+                      {subscribing === tier.id ? 'Loading...' : `Subscribe — $${tier.price}/mo`}
+                    </button>
+                  )}
                 </button>
               );
             })}
@@ -301,14 +360,14 @@ export default function SubscribePage() {
 
           {/* Subscribe Button */}
           <div className="max-w-md mx-auto mt-8">
-            <a
-              href={STRIPE_LINKS[selectedTier]}
-              onClick={() => localStorage.setItem('mystation-selected-tier', selectedTier)}
-              className={`w-full py-4 bg-gradient-to-r ${tiers.find(t => t.id === selectedTier)?.btnClass} text-white font-bold rounded-xl hover:opacity-90 transition flex items-center justify-center gap-2 shadow-lg text-lg`}
+            <button
+              onClick={() => handleSubscribe(selectedTier)}
+              disabled={subscribing === selectedTier}
+              className={`w-full py-4 bg-gradient-to-r ${tiers.find(t => t.id === selectedTier)?.btnClass} text-white font-bold rounded-xl hover:opacity-90 transition flex items-center justify-center gap-2 shadow-lg text-lg disabled:opacity-50`}
             >
               <CreditCard size={20} />
-              Subscribe — ${tiers.find(t => t.id === selectedTier)?.price}/mo
-            </a>
+              {subscribing === selectedTier ? 'Loading...' : `Subscribe — $${tiers.find(t => t.id === selectedTier)?.price}/mo`}
+            </button>
             <p className="text-white/30 text-xs text-center mt-3">First month FREE for everyone. Cancel anytime. All proceeds support youth & community programs.</p>
           </div>
         </div>

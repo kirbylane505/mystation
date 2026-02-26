@@ -1,24 +1,36 @@
 /**
  * MYSTATION - Account Page
- * Subscription status, manage/cancel via Stripe Customer Portal
+ * Subscription status, tier display, upgrade/downgrade, manage via Stripe Portal
  */
 
 'use client';
 
 import { useState } from 'react';
 import { useUserStore, usePlayerStore } from '@/store/playerStore';
-import { CreditCard, Crown, Music, ExternalLink, Loader2 } from 'lucide-react';
+import { CreditCard, Crown, Music, ExternalLink, Loader2, Star, Gem, Headphones, ArrowUp, Zap } from 'lucide-react';
 import Link from 'next/link';
 
+const TIER_CONFIG = {
+  diamond: { name: 'Diamond', price: '$14.99', icon: Gem, gradient: 'from-amber-500 to-yellow-500', textColor: 'text-amber-400', level: 3 },
+  premium: { name: 'Premium', price: '$9.99', icon: Star, gradient: 'from-purple-500 to-indigo-500', textColor: 'text-purple-400', level: 2 },
+  supporter: { name: 'Supporter', price: '$4.99', icon: Headphones, gradient: 'from-blue-500 to-blue-600', textColor: 'text-blue-400', level: 1 },
+  regular: { name: 'Supporter', price: '$4.99', icon: Headphones, gradient: 'from-blue-500 to-blue-600', textColor: 'text-blue-400', level: 1 },
+  free: { name: 'Free', price: '$0', icon: Music, gradient: 'from-gray-500 to-gray-600', textColor: 'text-white/40', level: 0 },
+};
+
 export default function AccountPage() {
-  const { isSubscribed, supporterTier } = useUserStore();
+  const { isSubscribed, supporterTier, email } = useUserStore();
   const [loading, setLoading] = useState(false);
+  const [upgrading, setUpgrading] = useState(null);
+
+  const currentTier = isSubscribed ? (supporterTier || 'supporter') : 'free';
+  const config = TIER_CONFIG[currentTier] || TIER_CONFIG.free;
+  const TierIcon = config.icon;
 
   const handleManageSubscription = async () => {
-    const email = useUserStore.getState().email;
-    if (!email) {
-      // No email stored — just link to subscription checkout
-      window.location.href = 'https://buy.stripe.com/5kQbJ3fyX0l0gLafHd1oI00';
+    const userEmail = useUserStore.getState().email;
+    if (!userEmail) {
+      window.location.href = '/subscribe';
       return;
     }
 
@@ -27,44 +39,74 @@ export default function AccountPage() {
       const res = await fetch('/api/subscription/portal', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email,
-          returnUrl: window.location.href,
-        }),
+        body: JSON.stringify({ email: userEmail, returnUrl: window.location.href }),
       });
       const data = await res.json();
       if (data.url) {
         window.location.href = data.url;
       } else {
-        // Fallback — open subscription page
-        window.location.href = 'https://buy.stripe.com/5kQbJ3fyX0l0gLafHd1oI00';
+        window.location.href = '/subscribe';
       }
-    } catch (err) {
-      window.location.href = 'https://buy.stripe.com/5kQbJ3fyX0l0gLafHd1oI00';
+    } catch {
+      window.location.href = '/subscribe';
     } finally {
       setLoading(false);
     }
   };
 
+  const handleUpgrade = async (newTier) => {
+    const userEmail = useUserStore.getState().email;
+    if (!userEmail) {
+      window.location.href = '/subscribe';
+      return;
+    }
+
+    setUpgrading(newTier);
+    try {
+      const res = await fetch('/api/subscription/upgrade', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: userEmail, newTier }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        useUserStore.getState().subscribe(userEmail, newTier);
+        window.location.reload();
+      } else {
+        alert(data.error || 'Upgrade failed — try again or contact support.');
+      }
+    } catch {
+      alert('Network error — please try again.');
+    } finally {
+      setUpgrading(null);
+    }
+  };
+
+  // Build upgrade options
+  const currentLevel = config.level;
+  const upgradeOptions = [];
+  if (isSubscribed && currentLevel < 2) upgradeOptions.push({ tier: 'premium', ...TIER_CONFIG.premium });
+  if (isSubscribed && currentLevel < 3) upgradeOptions.push({ tier: 'diamond', ...TIER_CONFIG.diamond });
+
   return (
     <div className="min-h-screen">
-      <div className="max-w-2xl mx-auto px-6 py-12">
+      <div className="max-w-2xl mx-auto px-6 py-12 pb-32">
         <h1 className="text-3xl font-black text-white mb-2">Account</h1>
         <p className="text-white/50 mb-10">Manage your MyStation subscription</p>
 
-        {/* Subscription Status */}
+        {/* Current Plan */}
         <div className="glass rounded-2xl p-6 mb-6 border border-white/10">
           <div className="flex items-center gap-4 mb-6">
-            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${isSubscribed ? 'bg-gradient-to-br from-indigo-500 to-purple-600' : 'bg-white/10'}`}>
-              {isSubscribed ? <Crown size={28} className="text-white" /> : <Music size={28} className="text-white/40" />}
+            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center bg-gradient-to-br ${config.gradient}`}>
+              <TierIcon size={28} className="text-white" />
             </div>
             <div>
               <h2 className="text-xl font-bold text-white">
-                {isSubscribed ? `MyStation ${supporterTier === 'diamond' ? 'Diamond' : supporterTier === 'premium' ? 'Premium' : 'Regular'}` : 'Free Plan'}
+                MyStation {config.name}
               </h2>
               <p className="text-white/50 text-sm">
                 {isSubscribed
-                  ? `${supporterTier === 'diamond' ? '$14.99' : supporterTier === 'premium' ? '$9.99' : '$4.99'}/month — Unlimited streaming`
+                  ? `${config.price}/month — Unlimited streaming`
                   : '4 free songs per session'
                 }
               </p>
@@ -80,6 +122,24 @@ export default function AccountPage() {
               <div className={`w-2 h-2 rounded-full ${isSubscribed ? 'bg-green-400' : 'bg-white/30'}`} />
               <span className="text-white/70 text-sm">Background playback</span>
             </div>
+            {currentLevel >= 2 && (
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 rounded-full bg-green-400" />
+                <span className="text-white/70 text-sm">Spotify Search — 100M+ songs</span>
+              </div>
+            )}
+            {currentLevel >= 3 && (
+              <>
+                <div className="flex items-center gap-3">
+                  <div className="w-2 h-2 rounded-full bg-green-400" />
+                  <span className="text-white/70 text-sm">Your Own Station — upload & sell</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-2 h-2 rounded-full bg-green-400" />
+                  <span className="text-white/70 text-sm">Full Vault + Grammy Nights access</span>
+                </div>
+              </>
+            )}
             <div className="flex items-center gap-3">
               <div className={`w-2 h-2 rounded-full ${isSubscribed ? 'bg-green-400' : 'bg-white/30'}`} />
               <span className="text-white/70 text-sm">Support the Mike Page Foundation</span>
@@ -99,14 +159,60 @@ export default function AccountPage() {
               )}
             </button>
           ) : (
-            <button
-              onClick={() => usePlayerStore.getState().openSubscribeModal()}
+            <Link
+              href="/subscribe"
               className="w-full flex items-center justify-center gap-2 py-3.5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl font-bold hover:shadow-lg hover:shadow-indigo-500/30 transition"
             >
               <Crown size={18} /> Subscribe — Plans from $4.99/mo
-            </button>
+            </Link>
           )}
         </div>
+
+        {/* Upgrade Options */}
+        {upgradeOptions.length > 0 && (
+          <div className="mb-6">
+            <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+              <ArrowUp size={18} className="text-green-400" /> Upgrade Your Plan
+            </h3>
+            <div className="space-y-3">
+              {upgradeOptions.map((opt) => {
+                const OptIcon = opt.icon;
+                return (
+                  <div key={opt.tier} className={`glass rounded-2xl p-5 border border-white/10 hover:border-white/20 transition`}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br ${opt.gradient}`}>
+                          <OptIcon size={20} className="text-white" />
+                        </div>
+                        <div>
+                          <p className="font-bold text-white">{opt.name}</p>
+                          <p className="text-white/40 text-sm">{opt.price}/month</p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => handleUpgrade(opt.tier)}
+                        disabled={upgrading === opt.tier}
+                        className={`px-5 py-2.5 bg-gradient-to-r ${opt.gradient} text-white font-bold rounded-xl text-sm hover:opacity-90 transition disabled:opacity-50 flex items-center gap-2`}
+                      >
+                        {upgrading === opt.tier ? (
+                          <><Loader2 size={14} className="animate-spin" /> Upgrading...</>
+                        ) : (
+                          <><Zap size={14} /> Upgrade</>
+                        )}
+                      </button>
+                    </div>
+                    {opt.tier === 'premium' && (
+                      <p className="text-white/40 text-xs mt-2 ml-13">+ Spotify Search, DJ Turntables, Fan Zone, Early drops</p>
+                    )}
+                    {opt.tier === 'diamond' && (
+                      <p className="text-white/40 text-xs mt-2 ml-13">+ Your Own Station, Vault, Grammy Nights, 10% off merch</p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Quick Links */}
         <div className="glass rounded-2xl p-6 border border-white/10">

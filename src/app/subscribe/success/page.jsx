@@ -76,7 +76,9 @@ export default function SubscribeSuccessPage() {
   const { subscribe } = useUserStore();
 
   useEffect(() => {
-    const selectedTier = localStorage.getItem('mystation-selected-tier') || 'regular';
+    const params = new URLSearchParams(window.location.search);
+    const tierFromUrl = params.get('tier');
+    const selectedTier = tierFromUrl || localStorage.getItem('mystation-selected-tier') || 'regular';
     setTier(selectedTier);
 
     // Set server-side subscription session cookie
@@ -86,8 +88,20 @@ export default function SubscribeSuccessPage() {
       body: JSON.stringify({ action: 'activate', tier: selectedTier }),
     }).catch((err) => console.error('Session cookie failed:', err));
 
+    // Get email from localStorage
+    const storedEmail = localStorage.getItem('mystation-email') || '';
+
+    // Register subscriber with backend (tier-aware)
+    if (storedEmail) {
+      fetch('/api/subscription/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: storedEmail, tier: selectedTier }),
+      }).catch(() => {});
+    }
+
     // Mark user as subscribed in client store
-    subscribe('subscriber@mystation.com', selectedTier);
+    subscribe(storedEmail || 'subscriber@mystation.com', selectedTier);
     localStorage.removeItem('mystation-selected-tier');
 
     // Animate in after brief pause

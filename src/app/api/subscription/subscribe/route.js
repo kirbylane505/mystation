@@ -17,7 +17,7 @@ export async function POST(request) {
   if (limited) return limited;
 
   try {
-    const { email } = await request.json();
+    const { email, tier } = await request.json();
 
     if (!email || !isValidEmail(email)) {
       return NextResponse.json(
@@ -30,14 +30,10 @@ export async function POST(request) {
 
     // Check if Supabase is available
     if (!supabase) {
-      // Fallback: direct to Stripe
       return NextResponse.json({
         success: true,
         isFree: false,
         message: 'Redirecting to payment',
-        stripeUrl: 'https://buy.stripe.com/5kQbJ3fyX0l0gLafHd1oI00',
-      premiumUrl: 'https://buy.stripe.com/bJe00lcmL2t8cuUcv11oI01',
-      diamondUrl: 'https://buy.stripe.com/6oUbJ3euT5FkdyYgLh1oI02',
       });
     }
 
@@ -69,7 +65,7 @@ export async function POST(request) {
     await supabase.from('subscribers').upsert({
       email: email.toLowerCase(),
       status: 'active',
-      tier: 'supporter',
+      tier: tier || 'supporter',
       is_free_trial: false,
       subscriber_number: subscriberNumber,
       created_at: new Date().toISOString(),
@@ -93,9 +89,6 @@ export async function POST(request) {
       subscriberNumber,
       lotlEligible,
       message: `You're subscriber #${subscriberNumber}!${lotlMessage}`,
-      stripeUrl: 'https://buy.stripe.com/5kQbJ3fyX0l0gLafHd1oI00',
-      premiumUrl: 'https://buy.stripe.com/bJe00lcmL2t8cuUcv11oI01',
-      diamondUrl: 'https://buy.stripe.com/6oUbJ3euT5FkdyYgLh1oI02',
       remaining: Math.max(0, LOTL_SLOTS - subscriberNumber),
     });
   } catch (err) {

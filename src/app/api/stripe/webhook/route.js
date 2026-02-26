@@ -101,6 +101,13 @@ async function handleCheckoutCompleted(session, stripe) {
     return;
   }
 
+  // --- SUBSCRIPTION CHECKOUT ---
+  // If mode is 'subscription', handle subscriber registration (NOT merch)
+  if (session.mode === 'subscription') {
+    await handleSubscriptionCheckout(session, stripe);
+    return;
+  }
+
   try {
     // Get full session with line items
     const fullSession = await stripe.checkout.sessions.retrieve(session.id, {
@@ -490,6 +497,87 @@ async function handleCheckoutCompleted(session, stripe) {
 }
 
 /**
+ * Handle subscription checkout — store Stripe IDs, register subscriber
+ * Called when session.mode === 'subscription' (NOT merch orders)
+ */
+async function handleSubscriptionCheckout(session, stripe) {
+  const customerEmail = session.customer_details?.email || session.customer_email;
+  if (!customerEmail) {
+    console.log('Subscription checkout: no email found');
+    return;
+  }
+
+  const email = customerEmail.toLowerCase();
+  const tier = session.metadata?.tier || 'supporter';
+  const customerId = session.customer;
+  const subscriptionId = session.subscription;
+
+  console.log(`New subscription: ${email} → ${tier} (customer: ${customerId}, sub: ${subscriptionId})`);
+
+  try {
+    const { getSupabaseAdmin } = await import('@/lib/supabaseAdmin');
+    const supabase = getSupabaseAdmin();
+    if (!supabase) return;
+
+    // Get subscription details for period end
+    let currentPeriodEnd = null;
+    if (subscriptionId) {
+      const sub = await stripe.subscriptions.retrieve(subscriptionId);
+      currentPeriodEnd = new Date(sub.current_period_end * 1000).toISOString();
+    }
+
+    // Count for subscriber number
+    const { count } = await supabase
+      .from('subscribers')
+      .select('*', { count: 'exact', head: true });
+    const subscriberNumber = (count || 0) + 1;
+
+    // Upsert subscriber with Stripe IDs (handles both pre- and post-migration schema)
+    const fullRow = {
+      email,
+      status: 'active',
+      tier,
+      stripe_customer_id: customerId,
+      stripe_subscription_id: subscriptionId,
+      current_period_end: currentPeriodEnd,
+      cancel_at_period_end: false,
+      subscriber_number: subscriberNumber,
+      created_at: new Date().toISOString(),
+    };
+    const { error: upsertErr } = await supabase.from('subscribers').upsert(fullRow, { onConflict: 'email' });
+    if (upsertErr) {
+      // Columns may not exist yet — fall back to base columns only
+      console.warn('Full upsert failed (migration pending?), falling back:', upsertErr.message);
+      await supabase.from('subscribers').upsert({
+        email, status: 'active', tier,
+        subscriber_number: subscriberNumber,
+        created_at: new Date().toISOString(),
+      }, { onConflict: 'email' });
+    }
+
+    // Also update user_trials
+    await supabase.from('user_trials').upsert({
+      email,
+      stripe_sub_active: true,
+      purchased_sub_until: currentPeriodEnd,
+    }, { onConflict: 'email' });
+
+    // Alert Mike + tag in Kit
+    sendNewSignupAlert({
+      customerName: session.customer_details?.name || email.split('@')[0],
+      customerEmail: email,
+      subscriberNumber,
+      isFreeSlot: subscriberNumber <= 250,
+    }).catch(() => {});
+
+    tagSubscriber(email, `subscriber-${tier}`).catch(() => {});
+
+  } catch (err) {
+    console.error('Subscription checkout handler error:', err);
+  }
+}
+
+/**
  * Handle invoice.paid — auto-renewal success
  * Extends subscription for another 30 days
  */
@@ -579,42 +667,48 @@ async function handleInvoicePaid(invoice) {
  * Marks subscription as canceled in Supabase
  */
 async function handleSubscriptionCanceled(subscription) {
-  const customerEmail = subscription.metadata?.email;
-
-  // Try to get email from customer object if not in metadata
-  let email = customerEmail;
-  if (!email) {
-    console.log('subscription.deleted: No email in metadata, subscription:', subscription.id);
-    return;
-  }
-
-  email = email.toLowerCase();
-  console.log('Subscription canceled for:', email);
+  console.log('Subscription canceled:', subscription.id);
 
   try {
     const { getSupabaseAdmin } = await import('@/lib/supabaseAdmin');
     const supabase = getSupabaseAdmin();
     if (!supabase) return;
 
-    // Mark as canceled in subscribers
-    await supabase
+    // Find by stripe_subscription_id first, fall back to metadata email
+    let email;
+    const { data: subscriber, error: lookupErr } = await supabase
       .from('subscribers')
-      .update({ status: 'canceled' })
-      .eq('email', email);
+      .select('email')
+      .eq('stripe_subscription_id', subscription.id)
+      .single();
 
-    // Mark stripe_sub_active = false in user_trials
+    email = (!lookupErr && subscriber?.email) ? subscriber.email : subscription.metadata?.email;
+    if (!email) {
+      console.log('subscription.deleted: Cannot find subscriber for:', subscription.id);
+      return;
+    }
+
+    email = email.toLowerCase();
+    console.log('Subscription canceled for:', email);
+
+    const { error: cancelErr } = await supabase
+      .from('subscribers')
+      .update({ status: 'canceled', cancel_at_period_end: false })
+      .eq('email', email);
+    if (cancelErr) {
+      // cancel_at_period_end column may not exist yet
+      await supabase
+        .from('subscribers')
+        .update({ status: 'canceled' })
+        .eq('email', email);
+    }
+
     await supabase
       .from('user_trials')
       .update({ stripe_sub_active: false })
       .eq('email', email);
 
-    console.log('Subscription marked canceled for:', email);
-
-    // Alert Mike
-    sendCancelAlert({
-      customerEmail: email,
-      reason: 'Subscription canceled',
-    }).catch(() => {});
+    sendCancelAlert({ customerEmail: email, reason: 'Subscription canceled' }).catch(() => {});
 
   } catch (err) {
     console.error('subscription.deleted handler error:', err);
@@ -685,33 +779,76 @@ async function registerNewSubscriber(customerEmail, amountCents) {
  * Handle customer.subscription.updated — status changes (past_due, active, etc.)
  */
 async function handleSubscriptionUpdated(subscription) {
-  const customerEmail = subscription.metadata?.email;
-  if (!customerEmail) return;
-
-  const email = customerEmail.toLowerCase();
-  const isActive = subscription.status === 'active';
+  console.log('Subscription updated:', subscription.id, 'status:', subscription.status);
 
   try {
     const { getSupabaseAdmin } = await import('@/lib/supabaseAdmin');
     const supabase = getSupabaseAdmin();
     if (!supabase) return;
 
-    await supabase
+    // Find subscriber by stripe_subscription_id (may not exist pre-migration)
+    let subscriber = null;
+    const { data: subById, error: subByIdErr } = await supabase
       .from('subscribers')
-      .update({ status: isActive ? 'active' : subscription.status })
-      .eq('email', email);
+      .select('email, tier')
+      .eq('stripe_subscription_id', subscription.id)
+      .single();
+
+    if (!subByIdErr && subById) {
+      subscriber = subById;
+    } else {
+      // Fall back to metadata email (for legacy or pre-migration subscriptions)
+      const metaEmail = subscription.metadata?.email;
+      if (!metaEmail) {
+        console.log('subscription.updated: No subscriber found for sub:', subscription.id);
+        return;
+      }
+      // Update by email instead
+      const isActive = subscription.status === 'active' || subscription.status === 'trialing';
+      await supabase
+        .from('subscribers')
+        .update({ status: isActive ? 'active' : subscription.status })
+        .eq('email', metaEmail.toLowerCase());
+      return;
+    }
+
+    // Detect new tier from price
+    const { tierFromPriceId } = await import('@/lib/tiers');
+    const priceId = subscription.items?.data?.[0]?.price?.id;
+    const newTier = priceId ? tierFromPriceId(priceId) : subscriber.tier;
+    const isActive = subscription.status === 'active' || subscription.status === 'trialing';
+
+    // Try full update with new columns, fall back to base columns
+    const fullUpdate = {
+      tier: newTier,
+      status: isActive ? 'active' : subscription.status,
+      current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+      cancel_at_period_end: subscription.cancel_at_period_end || false,
+    };
+    const { error: updateErr } = await supabase
+      .from('subscribers')
+      .update(fullUpdate)
+      .eq('stripe_subscription_id', subscription.id);
+    if (updateErr) {
+      // Columns may not exist yet — fall back to base update
+      await supabase
+        .from('subscribers')
+        .update({ tier: newTier, status: isActive ? 'active' : subscription.status })
+        .eq('email', subscriber.email);
+    }
 
     await supabase
       .from('user_trials')
       .update({ stripe_sub_active: isActive })
-      .eq('email', email);
+      .eq('email', subscriber.email);
 
-    console.log('Subscription updated for:', email, '→', subscription.status);
+    if (newTier !== subscriber.tier) {
+      console.log(`Tier changed: ${subscriber.email} ${subscriber.tier} → ${newTier}`);
+    }
 
-    // Alert Mike on non-active status changes
     if (!isActive) {
       sendCancelAlert({
-        customerEmail: email,
+        customerEmail: subscriber.email,
         reason: `Status changed to: ${subscription.status}`,
       }).catch(() => {});
     }
