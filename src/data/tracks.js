@@ -780,6 +780,22 @@ export const tracks = [
     genre: 'Hip-Hop',
     producer: 'Mike Page'
   },
+  {
+    id: 182,
+    title: "Do You Mind If I",
+    artist: "Mike Page",
+    album: "Do You Mind If I",
+    year: 2026,
+    duration: "4:14",
+    trackNumber: 52,
+    albumId: 'singles-2026',
+    albumArt: '/images/idmg-logo-white.png',
+    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/Mike%20Page%20-%20Do%20You%20Mind%20If%20I_MASTERED.m4a',
+    isNew: true,
+    hitScore: 91,
+    genre: 'Hip-Hop',
+    producer: 'The Cubist'
+  },
   // ========================================
   // IDMG MIXTAPE 2026 — Executive Produced by The Cubist & Mike Page
   // Drops February 27, 2026
@@ -1863,7 +1879,7 @@ export const albums = [
     subtitle: "2026 Releases",
     artist: "Mike Page",
     year: 2026,
-    trackCount: 51,
+    trackCount: 52,
     coverGradient: "from-blue-500 via-blue-700 to-indigo-900",
     coverEmoji: "🎤",
     coverImage: "/images/idmg-logo-white.png",
