@@ -855,7 +855,6 @@ export const tracks = [
     trackNumber: 4,
     albumId: 'idmg-mixtape',
     audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/idmg-mixtape/04-be-alright.m4a',
-    isComingSoon: true,
     hitScore: 93,
     genre: 'R&B',
     producer: 'The Cubist'
@@ -869,7 +868,6 @@ export const tracks = [
     trackNumber: 5,
     albumId: 'idmg-mixtape',
     audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/idmg-mixtape/05-i-might.m4a',
-    isComingSoon: true,
     hitScore: 91,
     genre: 'Hip-Hop',
     producer: 'The Cubist'
@@ -884,7 +882,6 @@ export const tracks = [
     trackNumber: 6,
     albumId: 'idmg-mixtape',
     audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/idmg-mixtape/06-no-weapon.m4a',
-    isComingSoon: true,
     hitScore: 95,
     genre: 'Hip-Hop',
     producer: 'The Cubist'
@@ -898,7 +895,6 @@ export const tracks = [
     trackNumber: 7,
     albumId: 'idmg-mixtape',
     audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/idmg-mixtape/07-i-been-on-some-shit.m4a',
-    isComingSoon: true,
     hitScore: 93,
     genre: 'Hip-Hop',
     producer: 'The Cubist & Jack Thomas'
@@ -913,7 +909,6 @@ export const tracks = [
     trackNumber: 8,
     albumId: 'idmg-mixtape',
     audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/idmg-mixtape/08-god-loves-us.m4a',
-    isComingSoon: true,
     hitScore: 92,
     genre: 'Hip-Hop',
     producer: 'The Cubist'
@@ -928,7 +923,6 @@ export const tracks = [
     trackNumber: 9,
     albumId: 'idmg-mixtape',
     audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/idmg-mixtape/09-fila.m4a',
-    isComingSoon: true,
     hitScore: 91,
     genre: 'Hip-Hop',
     producer: 'The Cubist'
@@ -943,7 +937,6 @@ export const tracks = [
     trackNumber: 10,
     albumId: 'idmg-mixtape',
     audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/idmg-mixtape/10-heavens-gate.m4a',
-    isComingSoon: true,
     hitScore: 92,
     genre: 'Hip-Hop',
     producer: 'The Cubist'
@@ -957,7 +950,6 @@ export const tracks = [
     trackNumber: 11,
     albumId: 'idmg-mixtape',
     audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/idmg-mixtape/11-thats-facts.m4a',
-    isComingSoon: true,
     hitScore: 91,
     genre: 'Hip-Hop',
     producer: 'The Cubist'
@@ -973,7 +965,6 @@ export const tracks = [
     trackNumber: 12,
     albumId: 'idmg-mixtape',
     audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/idmg-mixtape/12-never-let-the-money.m4a',
-    isComingSoon: true,
     hitScore: 94,
     genre: 'Hip-Hop',
     producer: 'The Cubist'
@@ -988,7 +979,6 @@ export const tracks = [
     trackNumber: 13,
     albumId: 'idmg-mixtape',
     audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/idmg-mixtape/13-crash-out.m4a',
-    isComingSoon: true,
     hitScore: 92,
     genre: 'Hip-Hop',
     producer: 'The Cubist'
