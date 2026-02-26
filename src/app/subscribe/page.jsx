@@ -285,7 +285,10 @@ export default function SubscribePage() {
 
                   <a
                     href={STRIPE_LINKS[tier.id]}
-                    onClick={(e) => e.stopPropagation()}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      localStorage.setItem('mystation-selected-tier', tier.id);
+                    }}
                     className={`w-full py-3 bg-gradient-to-r ${tier.btnClass} text-white font-bold rounded-xl hover:opacity-90 transition flex items-center justify-center gap-2 text-sm shadow-lg`}
                   >
                     <CreditCard size={16} />
@@ -300,6 +303,7 @@ export default function SubscribePage() {
           <div className="max-w-md mx-auto mt-8">
             <a
               href={STRIPE_LINKS[selectedTier]}
+              onClick={() => localStorage.setItem('mystation-selected-tier', selectedTier)}
               className={`w-full py-4 bg-gradient-to-r ${tiers.find(t => t.id === selectedTier)?.btnClass} text-white font-bold rounded-xl hover:opacity-90 transition flex items-center justify-center gap-2 shadow-lg text-lg`}
             >
               <CreditCard size={20} />

@@ -81,7 +81,7 @@ export async function POST(request) {
       customerEmail: email.toLowerCase(),
       subscriberNumber,
       isFreeSlot: lotlEligible,
-    }).catch(() => {});
+    }).catch((err) => console.error('Signup alert email failed:', err));
 
     const lotlMessage = lotlEligible
       ? ` Stay subscribed until Aug 1 for a FREE ticket to Love on the Lawn 2026!`

@@ -673,8 +673,8 @@ async function registerNewSubscriber(customerEmail, amountCents) {
       customerName: email.split('@')[0],
       customerEmail: email,
       subscriberNumber,
-      isFreeSlot: subscriberNumber <= 26,
-    }).catch(() => {});
+      isFreeSlot: subscriberNumber <= 250,
+    }).catch((err) => console.error('Signup alert email failed:', err));
 
   } catch (err) {
     console.error('registerNewSubscriber error:', err);
