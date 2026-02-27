@@ -844,6 +844,22 @@ export const tracks = [
     genre: 'Hip-Hop',
     producer: 'The Cubist'
   },
+  {
+    id: 186,
+    title: "Prayed 4 Tonight",
+    artist: "Mike Page",
+    album: "Prayed 4 Tonight",
+    year: 2026,
+    duration: "3:39",
+    trackNumber: 56,
+    albumId: 'singles-2026',
+    albumArt: '/images/idmg-logo-white.png',
+    audioFile: '/audio/singles/Mike%20Page%20-%20Prayed%204%20Tonight_MASTERED.m4a',
+    isNew: true,
+    hitScore: 93,
+    genre: 'Alternative Rap',
+    producer: 'The Cubist'
+  },
   // ========================================
   // IDMG MIXTAPE 2026 — Executive Produced by The Cubist & Mike Page
   // Drops February 27, 2026
@@ -1927,7 +1943,7 @@ export const albums = [
     subtitle: "2026 Releases",
     artist: "Mike Page",
     year: 2026,
-    trackCount: 55,
+    trackCount: 56,
     coverGradient: "from-blue-500 via-blue-700 to-indigo-900",
     coverEmoji: "🎤",
     coverImage: "/images/idmg-logo-white.png",
