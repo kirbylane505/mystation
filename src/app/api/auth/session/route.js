@@ -68,6 +68,14 @@ export async function GET() {
           path: '/',
           maxAge: 365 * 24 * 60 * 60,
         });
+        // Client-readable flag so isGated() can see subscription status
+        response.cookies.set('mystation-sub-flag', '1', {
+          httpOnly: false,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          path: '/',
+          maxAge: 365 * 24 * 60 * 60,
+        });
         return response;
       }
     }

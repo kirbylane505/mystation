@@ -43,6 +43,7 @@ export default function SubscribeModal() {
   }
   // Also check cookie directly (belt-and-suspenders — cookie is source of truth)
   if (typeof document !== 'undefined' && (
+    document.cookie.includes('mystation-sub-flag=') ||
     document.cookie.includes('mystation-sub=') ||
     document.cookie.includes('mystation-friend=') ||
     document.cookie.includes('mystation-auth=')

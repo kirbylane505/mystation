@@ -54,6 +54,7 @@ export default function FoundingMemberBanner() {
   // Don't render for subscribers — they're already in. No need to see this.
   // Also check cookie directly (Zustand might not be hydrated yet)
   const hasSub = typeof document !== 'undefined' && (
+    document.cookie.includes('mystation-sub-flag=') ||
     document.cookie.includes('mystation-sub=') ||
     document.cookie.includes('mystation-friend=') ||
     document.cookie.includes('mystation-auth=')

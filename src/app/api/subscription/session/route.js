@@ -25,6 +25,14 @@ export async function POST(request) {
         maxAge: 365 * 24 * 60 * 60, // 365 days — subscribers remembered forever
         path: '/',
       });
+      // Client-readable flag so isGated() can see subscription status
+      response.cookies.set('mystation-sub-flag', '1', {
+        httpOnly: false,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 365 * 24 * 60 * 60,
+        path: '/',
+      });
 
       return response;
     }
@@ -32,6 +40,7 @@ export async function POST(request) {
     if (action === 'deactivate') {
       const response = NextResponse.json({ success: true });
       response.cookies.delete('mystation-sub');
+      response.cookies.delete('mystation-sub-flag');
       return response;
     }
 

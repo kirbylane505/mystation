@@ -191,6 +191,7 @@ export default function TimedPopups() {
     // Don't show donate popup to subscribers — check both Zustand state AND cookies
     const donateInterval = setInterval(() => {
       const hasSub = typeof document !== 'undefined' && (
+        document.cookie.includes('mystation-sub-flag=') ||
         document.cookie.includes('mystation-sub=') ||
         document.cookie.includes('mystation-friend=') ||
         document.cookie.includes('mystation-auth=')

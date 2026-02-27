@@ -104,6 +104,14 @@ export async function GET(request) {
               maxAge: 365 * 24 * 60 * 60,
               path: '/',
             });
+            // Client-readable flag so isGated() can see subscription status
+            response.cookies.set('mystation-sub-flag', '1', {
+              httpOnly: false,
+              secure: true,
+              sameSite: 'lax',
+              maxAge: 365 * 24 * 60 * 60,
+              path: '/',
+            });
             return response;
           }
 

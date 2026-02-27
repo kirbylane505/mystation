@@ -34,9 +34,10 @@ export async function POST(request) {
 
     if (isValid) {
       const response = NextResponse.json({ success: true, message: 'Welcome to the family!' });
-      // Set permanent friend access cookie (365 days, httpOnly)
+      // Set permanent friend access cookie (365 days)
+      // NOT httpOnly — client-side isGated() needs to read this cookie
       response.cookies.set('mystation-friend', 'true', {
-        httpOnly: true,
+        httpOnly: false,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
         maxAge: 365 * 24 * 60 * 60, // 1 year

@@ -83,7 +83,7 @@ export const usePlayerStore = create(
   openSubscribeModal: (pendingTrack = null) => {
     // Check cookies first — subscribers never see the modal
     const cookies = typeof document !== 'undefined' ? document.cookie : '';
-    if (cookies.includes('mystation-sub=') || cookies.includes('mystation-friend=') || cookies.includes('mystation-auth=')) {
+    if (cookies.includes('mystation-sub-flag=') || cookies.includes('mystation-sub=') || cookies.includes('mystation-friend=') || cookies.includes('mystation-auth=')) {
       // Subscriber — play the track directly instead of showing modal
       if (pendingTrack) {
         set({ currentTrack: pendingTrack, isPlaying: true, lastPlayedTrack: pendingTrack });
@@ -354,7 +354,8 @@ export function isGated(track) {
 
   // Subscribers & friends bypass completely (cookie = source of truth)
   const cookies = typeof document !== 'undefined' ? document.cookie : '';
-  if (cookies.includes('mystation-sub=')) return false;
+  if (cookies.includes('mystation-sub-flag=')) return false; // Client-readable sub flag
+  if (cookies.includes('mystation-sub=')) return false; // httpOnly sub (server sees, client may not)
   if (cookies.includes('mystation-friend=')) return false;
   if (cookies.includes('mystation-auth=')) return false;
 
