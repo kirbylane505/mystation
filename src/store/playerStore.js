@@ -35,8 +35,8 @@ export const usePlayerStore = create(
   showSubscribeModal: false,
   pendingTrack: null, // Track waiting to play after subscription
 
-  // Album gate — tracks played per album for non-subscribers (session only, not persisted)
-  albumPlays: {}, // { albumId: [trackId1, trackId2] }
+  // Universal gate — track IDs played by non-subscribers (session only, not persisted)
+  freePlays: [], // [trackId1, trackId2]
 
   // Show account wall (triggered from navbar sign-in button)
   showAccountWall: false,
@@ -92,26 +92,22 @@ export const usePlayerStore = create(
 
   setShowAccountWall: (show) => set({ showAccountWall: show }),
 
-  // Album gate helpers
-  recordAlbumPlay: (track) => {
-    if (!track?.albumId) return;
+  // Universal gate helpers
+  recordFreePlay: (track) => {
+    if (!track?.id) return;
     set((state) => {
-      const plays = { ...state.albumPlays };
-      const albumTracks = plays[track.albumId] || [];
-      if (!albumTracks.includes(track.id)) {
-        plays[track.albumId] = [...albumTracks, track.id];
-      }
-      return { albumPlays: plays };
+      if (state.freePlays.includes(track.id)) return state;
+      return { freePlays: [...state.freePlays, track.id] };
     });
   },
 
-  initAlbumPlays: () => {
+  initFreePlays: () => {
     if (typeof document === 'undefined') return;
     try {
-      const match = document.cookie.match(/ms-album-plays=([^;]+)/);
+      const match = document.cookie.match(/ms-free-plays=([^;]+)/);
       if (match) {
         const plays = JSON.parse(decodeURIComponent(match[1]));
-        set({ albumPlays: plays });
+        set({ freePlays: plays });
       }
     } catch {}
   },
@@ -330,14 +326,12 @@ export const useUserStore = create(
   )
 );
 
-// Check if a track is blocked by the album gate
+// Check if a track is blocked by the universal 2-song gate
 // Returns true if BLOCKED, false if allowed
-const FREE_SONGS_PER_ALBUM = 2;
-const EXEMPT_ALBUM_IDS = ['singles-2026'];
+const FREE_SONGS_TOTAL = 2;
 
-export function isAlbumGated(track) {
-  if (!track?.albumId) return false;
-  if (EXEMPT_ALBUM_IDS.includes(track.albumId)) return false;
+export function isGated(track) {
+  if (!track?.id) return false;
 
   // Subscribers & friends bypass completely
   const cookies = typeof document !== 'undefined' ? document.cookie : '';
@@ -345,13 +339,15 @@ export function isAlbumGated(track) {
   if (cookies.includes('mystation-friend=')) return false;
   if (cookies.includes('mystation-auth=')) return false;
 
-  // Check album plays
-  const { albumPlays } = usePlayerStore.getState();
-  const played = albumPlays[track.albumId] || [];
+  // Check total free plays
+  const { freePlays } = usePlayerStore.getState();
 
   // Allow replay of already-played tracks
-  if (played.includes(track.id)) return false;
+  if (freePlays.includes(track.id)) return false;
 
   // Block if at limit
-  return played.length >= FREE_SONGS_PER_ALBUM;
+  return freePlays.length >= FREE_SONGS_TOTAL;
 }
+
+// Backward compat alias
+export const isAlbumGated = isGated;

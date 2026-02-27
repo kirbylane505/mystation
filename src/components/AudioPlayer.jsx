@@ -7,7 +7,7 @@
 'use client';
 
 import { useEffect, useRef, useCallback } from 'react';
-import { usePlayerStore, useUserStore, isAlbumGated } from '@/store/playerStore';
+import { usePlayerStore, useUserStore, isGated } from '@/store/playerStore';
 import { useEngagementStore } from '@/store/engagementStore';
 import { progressBridge } from '@/lib/progressBridge';
 
@@ -161,7 +161,7 @@ export default function AudioPlayer() {
       if (!resp.ok) {
         if (resp.status === 403) {
           const data = await resp.json().catch(() => ({}));
-          if (data.error === 'album_limit') {
+          if (data.error === 'free_limit' || data.error === 'album_limit') {
             storeActionsRef.current.openSubscribeModal(track);
             storeActionsRef.current.pause();
           }
@@ -182,8 +182,8 @@ export default function AudioPlayer() {
     if (!audio || isAudioInitialized) return;
     isAudioInitialized = true;
 
-    // Load album play history from cookie
-    usePlayerStore.getState().initAlbumPlays();
+    // Load free play history from cookie
+    usePlayerStore.getState().initFreePlays();
 
     setupIOSAudioUnlock();
 
@@ -360,8 +360,8 @@ export default function AudioPlayer() {
       return;
     }
 
-    // Album gate — block if non-subscriber hit album limit
-    if (isAlbumGated(currentTrack)) {
+    // Universal gate — block if non-subscriber hit 2-song limit
+    if (isGated(currentTrack)) {
       audio.pause();
       pause();
       storeActionsRef.current.openSubscribeModal(currentTrack);
@@ -371,7 +371,7 @@ export default function AudioPlayer() {
 
     if (playing) {
       incrementPlayCount(currentTrack.id);
-      usePlayerStore.getState().recordAlbumPlay(currentTrack);
+      usePlayerStore.getState().recordFreePlay(currentTrack);
     }
 
     lastTrackIdRef.current = currentTrack.id;

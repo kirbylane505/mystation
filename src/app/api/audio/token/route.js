@@ -1,7 +1,7 @@
 /**
  * MYSTATION - Audio Token API
- * Access hierarchy: sub > friend > vault > auth > album gate (2 free per album)
- * Non-subscribers get 2 free songs per album. Singles stay free.
+ * Access hierarchy: sub > friend > vault > auth > universal gate (2 free songs total)
+ * Non-subscribers get 2 free songs site-wide, then must subscribe.
  */
 
 import { NextResponse } from 'next/server';
@@ -40,14 +40,13 @@ function parseCookie(cookieStr, name) {
   return match ? decodeURIComponent(match[1]) : null;
 }
 
-// Album gate — non-subscribers get 2 free songs per album
-const FREE_SONGS_PER_ALBUM = 2;
-const EXEMPT_ALBUM_IDS = ['singles-2026']; // singles stay free — promotional
+// Universal gate — non-subscribers get 2 free songs total, site-wide
+const FREE_SONGS_TOTAL = 2;
 
-function getAlbumPlays(cookieStr) {
-  const val = parseCookie(cookieStr, 'ms-album-plays');
-  if (!val) return {};
-  try { return JSON.parse(val); } catch { return {}; }
+function getFreePlays(cookieStr) {
+  const val = parseCookie(cookieStr, 'ms-free-plays');
+  if (!val) return [];
+  try { return JSON.parse(val); } catch { return []; }
 }
 
 // Verify subscription cookie (HMAC-signed, 30-day expiry)
@@ -123,37 +122,32 @@ export async function POST(request) {
       return grantToken(track);
     }
 
-    // 5. Album gate — non-subscribers get 2 free songs per album
-    const albumId = track.albumId;
-    if (albumId && !EXEMPT_ALBUM_IDS.includes(albumId)) {
-      const albumPlays = getAlbumPlays(cookieStr);
-      const played = albumPlays[albumId] || [];
+    // 5. Universal gate — non-subscribers get 2 free songs total
+    const freePlays = getFreePlays(cookieStr);
 
-      // Allow if this track was already played (replay OK) or under limit
-      if (!played.includes(track.id) && played.length >= FREE_SONGS_PER_ALBUM) {
-        return NextResponse.json(
-          { error: 'album_limit', albumId, limit: FREE_SONGS_PER_ALBUM },
-          { status: 403 }
-        );
-      }
-
-      // Track this play in cookie
-      if (!played.includes(track.id)) {
-        played.push(track.id);
-        albumPlays[albumId] = played;
-      }
-      const response = await grantToken(track);
-      response.cookies.set('ms-album-plays', JSON.stringify(albumPlays), {
-        path: '/',
-        maxAge: 30 * 24 * 60 * 60,
-        httpOnly: false,
-        sameSite: 'lax',
-      });
-      return response;
+    // Allow replay of already-played tracks
+    if (freePlays.includes(track.id)) {
+      return grantToken(track);
     }
 
-    // 6. Open access — singles and tracks without albumId
-    return grantToken(track);
+    // Block if at limit
+    if (freePlays.length >= FREE_SONGS_TOTAL) {
+      return NextResponse.json(
+        { error: 'free_limit', limit: FREE_SONGS_TOTAL, played: freePlays.length },
+        { status: 403 }
+      );
+    }
+
+    // Track this play in cookie
+    freePlays.push(track.id);
+    const response = await grantToken(track);
+    response.cookies.set('ms-free-plays', JSON.stringify(freePlays), {
+      path: '/',
+      maxAge: 30 * 24 * 60 * 60,
+      httpOnly: false,
+      sameSite: 'lax',
+    });
+    return response;
   } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }

@@ -8,7 +8,7 @@
 
 import { useState, memo, useCallback, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { usePlayerStore, isAlbumGated } from '@/store/playerStore';
+import { usePlayerStore, isGated } from '@/store/playerStore';
 import { Play, Pause, Clock, Music, ExternalLink, MessageCircle } from 'lucide-react';
 import { tracks, albums } from '@/data/tracks';
 import { ShareButton } from './ShareTrack';
@@ -200,8 +200,8 @@ export default function TrackList({ trackIds, showAlbum = true, showNumber = tru
       togglePlay();
       return;
     }
-    // Album gate — 2 free songs per album for non-subscribers
-    if (isAlbumGated(track)) {
+    // Universal gate — 2 free songs total for non-subscribers
+    if (isGated(track)) {
       usePlayerStore.getState().openSubscribeModal(track);
       return;
     }
