@@ -9,6 +9,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useGameStore } from '@/store/gameStore';
 import GameSelector from '@/components/lounge/GameSelector';
+import GameModeModal from '@/components/lounge/GameModeModal';
 import RoomBrowser from '@/components/lounge/RoomBrowser';
 import OnlineUsers from '@/components/lounge/OnlineUsers';
 import { Gamepad2, Plus, Hash, Loader2, Trophy, Flame, Star, Users } from 'lucide-react';
@@ -55,14 +56,15 @@ export default function LoungePage() {
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center">
+            <div className="relative w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg shadow-purple-500/20">
               <Gamepad2 size={24} className="text-white" />
+              <div className="absolute -inset-1 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl blur-lg opacity-30" />
             </div>
-            <h1 className="text-3xl md:text-4xl font-black text-white">
+            <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight">
               Kickback Lounge
             </h1>
           </div>
-          <p className="text-white/50">
+          <p className="text-white/40 text-sm md:text-base">
             Play classic games with friends. Music never stops.
           </p>
         </div>
@@ -73,15 +75,19 @@ export default function LoungePage() {
       {/* Quick Stats Bar */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
         {[
-          { icon: Trophy, label: 'Wins', value: '0', color: 'yellow' },
-          { icon: Flame, label: 'Win Streak', value: '0', color: 'orange' },
-          { icon: Star, label: 'Points', value: '0', color: 'blue' },
-          { icon: Users, label: 'Games Played', value: '0', color: 'purple' },
-        ].map(({ icon: Icon, label, value, color }) => (
-          <div key={label} className="p-4 bg-white/[0.03] rounded-xl border border-white/10">
+          { icon: Trophy, label: 'Wins', value: '0', color: 'yellow', gradient: 'from-yellow-500/10 to-transparent' },
+          { icon: Flame, label: 'Win Streak', value: '0', color: 'orange', gradient: 'from-orange-500/10 to-transparent' },
+          { icon: Star, label: 'Points', value: '0', color: 'blue', gradient: 'from-blue-500/10 to-transparent' },
+          { icon: Users, label: 'Games Played', value: '0', color: 'purple', gradient: 'from-purple-500/10 to-transparent' },
+        ].map(({ icon: Icon, label, value, color, gradient }, idx) => (
+          <div
+            key={label}
+            className={`p-4 bg-gradient-to-br ${gradient} rounded-xl border border-white/[0.06] hover:border-white/15 transition-all duration-300 hover:-translate-y-0.5`}
+            style={{ animation: `loungeFadeUp 0.4s ease-out ${idx * 0.1}s both` }}
+          >
             <div className="flex items-center gap-2 mb-1">
               <Icon size={14} className={`text-${color}-400`} />
-              <span className="text-white/40 text-xs">{label}</span>
+              <span className="text-white/35 text-xs font-medium">{label}</span>
             </div>
             <span className="text-white font-bold text-xl">{value}</span>
           </div>
@@ -111,24 +117,16 @@ export default function LoungePage() {
               <Plus size={18} className="text-blue-400" />
               Create a Game
             </h2>
-            <GameSelector onSelect={(game) => setSelectedGame(game)} />
+            <GameSelector onSelect={(game) => setSelectedGame(game)} onJoinRoom={handleJoinFromBrowser} />
 
-            {selectedGame && (
-              <div className="mt-4 flex items-center gap-3">
-                <span className="text-white/50 text-sm">
-                  Selected: <span className="text-white font-medium">{selectedGame}</span>
-                </span>
-                <button
-                  data-testid="create-room-btn"
-                  onClick={handleCreateRoom}
-                  disabled={loading || !displayName.trim()}
-                  className="flex items-center gap-2 px-6 py-2.5 bg-blue-500 hover:bg-blue-600 disabled:bg-white/10 disabled:text-white/30 text-white rounded-xl font-bold transition"
-                >
-                  {loading ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
-                  Create Room
-                </button>
-              </div>
-            )}
+            {/* Game Mode Modal — replaces old "Selected: X / Create Room" flow */}
+            <GameModeModal
+              gameKey={selectedGame}
+              isOpen={!!selectedGame}
+              onClose={() => setSelectedGame(null)}
+              displayName={displayName}
+              onNameChange={setDisplayName}
+            />
           </div>
 
           {/* Join by Code */}
@@ -158,7 +156,7 @@ export default function LoungePage() {
         </div>
 
         {/* Right: Open Rooms */}
-        <div>
+        <div data-section="open-rooms">
           <h2 className="text-white font-bold text-lg mb-4 flex items-center gap-2">
             <Users size={18} className="text-purple-400" />
             Open Rooms

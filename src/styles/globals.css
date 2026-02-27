@@ -940,4 +940,39 @@ img {
   }
 }
 
+/* ==========================================
+   KICKBACK LOUNGE — Premium Animations
+   ========================================== */
+
+@keyframes loungeFloat {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-14px); }
+}
+
+@keyframes loungeGlow {
+  0%, 100% { opacity: 0.15; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(1.15); }
+}
+
+@keyframes loungeFadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes loungeOrbit {
+  from { transform: rotate(0deg) translateX(60px) rotate(0deg); }
+  to { transform: rotate(360deg) translateX(60px) rotate(-360deg); }
+}
+
+@keyframes loungeBorderGlow {
+  0%, 100% { border-color: rgba(255, 255, 255, 0.1); }
+  50% { border-color: var(--game-color, rgba(59, 130, 246, 0.3)); }
+}
+
+@keyframes loungeReady {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
 /* Force rebuild Thu Feb 13 00:00:00 EST 2026 */
