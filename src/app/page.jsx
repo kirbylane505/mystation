@@ -25,39 +25,30 @@ export default function HomePage() {
   const [freshMerch, setFreshMerch] = useState([]);
 
   useEffect(() => {
+    // Curated Fresh Merch — 4 diverse product types (hoodie, tee, slides, cap)
+    const FEATURED_IDS = [
+      '698accdc759ccd31ed0aa5bf', // IDMG Black Jogger Hoodie
+      '698fe47ce5a844a8860774cb', // LOTL 2026 Festival Tee
+      '69952666759bd0e55b041956', // LOTL Day White Strap Slides
+      '69892f2696c78124040164fc', // LOTL Festival Snapback Cap
+    ];
     fetch('/api/printify/products')
       .then(r => r.json())
       .then(data => {
         const products = Array.isArray(data) ? data : data.data || data.products || [];
-        // Filter: must have image, skip "Custom" builder products
-        const withImages = products.filter(p => {
-          const img = p.images?.find(i => i.is_default) || p.images?.[0];
-          if (!img?.src) return false;
-          // Skip custom merch builder products — they flood the feed
-          if (p.title?.toLowerCase().startsWith('custom ')) return false;
-          return true;
-        });
-        // Diversity: pick one per product type — strip colors to detect same item in diff colors
-        const COLORS = /\b(white|black|navy|blue|red|gold|green|pink|purple|gray|grey|cream|brown|orange|yellow|maroon|teal|burgundy|charcoal|heather)\b/gi;
-        const seen = new Set();
-        const diverse = [];
-        for (const p of withImages) {
-          // Strip color words + extra whitespace to get the base product identity
-          const base = (p.title || '').replace(COLORS, '').replace(/\s+/g, ' ').trim().toLowerCase();
-          if (!seen.has(base)) {
-            seen.add(base);
-            diverse.push(p);
-          }
-          if (diverse.length >= 4) break;
+        // Pick curated products in order, fall back to first 4 with images
+        const curated = FEATURED_IDS
+          .map(id => products.find(p => p.id === id))
+          .filter(Boolean);
+        if (curated.length >= 4) {
+          setFreshMerch(curated);
+        } else {
+          const withImages = products.filter(p => {
+            const img = p.images?.find(i => i.is_default) || p.images?.[0];
+            return img?.src && !p.title?.toLowerCase().startsWith('custom ');
+          });
+          setFreshMerch(withImages.slice(0, 4));
         }
-        // Fallback: if not enough diverse, fill from remaining
-        if (diverse.length < 4) {
-          for (const p of withImages) {
-            if (!diverse.includes(p)) diverse.push(p);
-            if (diverse.length >= 4) break;
-          }
-        }
-        setFreshMerch(diverse);
       })
       .catch(() => {});
   }, []);
