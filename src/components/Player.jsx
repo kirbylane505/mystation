@@ -803,6 +803,7 @@ export default function Player() {
             </button>
           </div>
         </div>
+        <LOTLBadge />
       </div>
 
       {/* Modals */}
