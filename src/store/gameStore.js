@@ -187,7 +187,8 @@ export const useGameStore = create((set, get) => ({
         set({ error: result.error });
         return;
       }
-      // State arrives via personalized broadcast — no need to fetch
+      // Fetch updated state as fallback — broadcast can be unreliable
+      get().fetchGameState();
     } catch (err) {
       // silently handle move errors
     }
