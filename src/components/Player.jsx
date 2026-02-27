@@ -295,7 +295,7 @@ export default function Player() {
             </div>
             <div>
               <p className="text-white/60 text-sm font-medium">Mike Page</p>
-              <p className="text-white/30 text-xs">73 tracks ready to stream</p>
+              <p className="text-white/30 text-xs">100+ tracks ready to stream</p>
             </div>
           </div>
           <button

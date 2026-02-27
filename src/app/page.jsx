@@ -29,12 +29,34 @@ export default function HomePage() {
       .then(r => r.json())
       .then(data => {
         const products = Array.isArray(data) ? data : data.data || data.products || [];
+        // Filter: must have image, skip "Custom" builder products
         const withImages = products.filter(p => {
-          // ALWAYS use front-facing image — logo must be visible on every product
           const img = p.images?.find(i => i.is_default) || p.images?.[0];
-          return img?.src;
+          if (!img?.src) return false;
+          // Skip custom merch builder products — they flood the feed
+          if (p.title?.toLowerCase().startsWith('custom ')) return false;
+          return true;
         });
-        setFreshMerch(withImages.slice(0, 4));
+        // Diversity: pick one per product type (Hoodie, Tee, Cap, etc.)
+        const seen = new Set();
+        const diverse = [];
+        for (const p of withImages) {
+          // Extract base type from title (first word or two)
+          const type = p.title?.split(/\s*[—–-]\s*/)[0]?.trim().toLowerCase() || '';
+          if (!seen.has(type)) {
+            seen.add(type);
+            diverse.push(p);
+          }
+          if (diverse.length >= 4) break;
+        }
+        // Fallback: if not enough diverse, fill from remaining
+        if (diverse.length < 4) {
+          for (const p of withImages) {
+            if (!diverse.includes(p)) diverse.push(p);
+            if (diverse.length >= 4) break;
+          }
+        }
+        setFreshMerch(diverse);
       })
       .catch(() => {});
   }, []);
