@@ -876,6 +876,22 @@ export const tracks = [
     genre: 'Hip-Hop',
     producer: 'The Cubist'
   },
+  {
+    id: 188,
+    title: "Terry Pettis Story",
+    artist: "Mike Page",
+    album: "Terry Pettis Story",
+    year: 2026,
+    duration: "2:00",
+    trackNumber: 58,
+    albumId: 'singles-2026',
+    albumArt: '/images/idmg-logo-white.png',
+    audioFile: '/audio/singles/Mike%20Page%20-%20Terry%20Pettis%20Story_MASTERED.m4a',
+    isNew: true,
+    hitScore: 92,
+    genre: 'Hip-Hop',
+    producer: 'The Cubist'
+  },
   // ========================================
   // IDMG MIXTAPE 2026 — Executive Produced by The Cubist & Mike Page
   // Drops February 27, 2026
@@ -1959,7 +1975,7 @@ export const albums = [
     subtitle: "2026 Releases",
     artist: "Mike Page",
     year: 2026,
-    trackCount: 57,
+    trackCount: 58,
     coverGradient: "from-blue-500 via-blue-700 to-indigo-900",
     coverEmoji: "🎤",
     coverImage: "/images/idmg-logo-white.png",
