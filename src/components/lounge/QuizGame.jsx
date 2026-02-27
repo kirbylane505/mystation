@@ -94,6 +94,34 @@ export default function QuizGame({ gameState: serverState, myPlayerId, onMove })
     hasAnsweredRef.current = false;
   }, [state?.currentQuestion]);
 
+  // Server mode: set animations when reveal state arrives with answer visible
+  useEffect(() => {
+    if (!state || state.phase !== 'reveal' || isLocal) return;
+
+    const currentQ = state.questions?.[state.currentQuestion];
+    if (!currentQ || currentQ.answer === undefined) return;
+
+    const pid = myPlayerId || 'local_player';
+    const player = state.players?.[pid];
+    const myAnswer = player?.answers?.find(a => a.questionId === currentQ.id);
+
+    if (myAnswer) {
+      setSelectedAnswer(myAnswer.answerIndex);
+      setAnimateCorrect(currentQ.answer);
+      if (!myAnswer.correct) {
+        setAnimateWrong(myAnswer.answerIndex);
+        setShowDidYouKnow(true);
+      }
+      setPointsEarned(myAnswer.points || 0);
+      hasAnsweredRef.current = true;
+    } else {
+      // Didn't answer (time expired)
+      setAnimateCorrect(currentQ.answer);
+      setShowDidYouKnow(true);
+      hasAnsweredRef.current = true;
+    }
+  }, [state?.phase, state?.currentQuestion, isLocal, myPlayerId]);
+
   const handleTimeExpired = useCallback(() => {
     if (hasAnsweredRef.current) return;
     hasAnsweredRef.current = true;
@@ -104,8 +132,11 @@ export default function QuizGame({ gameState: serverState, myPlayerId, onMove })
       setLocalState(revealed);
       setShowDidYouKnow(true);
       setAnimateCorrect(localState.questions[localState.currentQuestion].answer);
+    } else if (!isLocal) {
+      // Server mode — advance to reveal when time expires without answering
+      onMove?.('next');
     }
-  }, [isLocal, localState]);
+  }, [isLocal, localState, onMove]);
 
   const handleAnswer = useCallback((answerIndex) => {
     if (!state || state.phase !== 'question' || hasAnsweredRef.current) return;
@@ -135,13 +166,9 @@ export default function QuizGame({ gameState: serverState, myPlayerId, onMove })
       const revealed = nextQuestion(updated);
       setLocalState(revealed);
     } else {
-      // Server mode — send move
-      onMove?.({ type: 'answer', answerIndex });
-      setAnimateCorrect(currentQ.answer);
-      if (!correct) {
-        setAnimateWrong(answerIndex);
-        setShowDidYouKnow(true);
-      }
+      // Server mode — send move (action string + data object)
+      // Animations set when reveal state arrives via broadcast
+      onMove?.('answer', { answerIndex });
     }
   }, [state, isLocal, localState, myPlayerId, onMove]);
 
@@ -152,7 +179,7 @@ export default function QuizGame({ gameState: serverState, myPlayerId, onMove })
       const next = nextQuestion(localState);
       setLocalState(next);
     } else {
-      onMove?.({ type: 'next' });
+      onMove?.('next');
     }
   }, [state, isLocal, localState, onMove]);
 
