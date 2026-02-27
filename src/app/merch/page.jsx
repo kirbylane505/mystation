@@ -490,7 +490,7 @@ export default function MerchPage() {
 
         // === PRINTIFY PRODUCTS ===
         if (printifyData.success && !printifyData.demo) {
-          const HIDDEN_PRINTIFY = ['jogger', 'sweatpant', 'track pant', 'bike short', 'legging', 'copy of'];
+          const HIDDEN_PRINTIFY = ['jogger', 'sweatpant', 'track pant', 'bike short', 'legging', 'copy of', 'custom hoodie', 'custom tee'];
           const printifyProducts = printifyData.products.filter((p) => {
             const lower = (p.title || '').toLowerCase();
             return !HIDDEN_PRINTIFY.some(ex => lower.includes(ex));
@@ -573,7 +573,10 @@ export default function MerchPage() {
       return lower.includes('white') ? '/images/mockups/idmg-label-tee-white.jpg' : '/images/mockups/idmg-tee-black.jpg';
     }
 
-    // IDMG The Label non-tee products (shorts, joggers, bomber, windbreaker, track, zip hoodie)
+    // Fleece shorts — NEVER show model, use flat product image only
+    if (lower.includes('fleece short')) return 'https://images-api.printify.com/mockup/698acb1d3dc736df8a0c0d52/125496/112022/idmg-black-fleece-shorts.jpg?camera_label=front';
+
+    // IDMG The Label non-tee products (joggers, bomber, windbreaker, track, zip hoodie)
     // → Use Printful's actual product mockup preview
     if (lower.includes('idmg') && lower.includes('label') && previewUrl) return previewUrl;
 
@@ -784,8 +787,11 @@ export default function MerchPage() {
     setTimeout(() => { setAddedToCart(false); setToast(null); }, 3000);
   };
 
-  // Separate adult products from kids
-  const adultProducts = products.filter(p => !p.name?.toLowerCase().includes('kid'));
+  // Separate adult products from kids/youth/baby/toddler
+  const kidsKeywords = ['kid', 'toddler', 'youth', 'baby', 'onesie', 'infant'];
+  const isKidsProduct = (name) => kidsKeywords.some(k => (name || '').toLowerCase().includes(k));
+  const adultProducts = products.filter(p => !isKidsProduct(p.name));
+  const printifyKidsProducts = products.filter(p => isKidsProduct(p.name));
   const allAdultItems = adultProducts;
 
   // Organize into sections
@@ -838,7 +844,7 @@ export default function MerchPage() {
   const filteredItems = activeCategory === 'all'
     ? sortItems(searchFiltered)
     : activeCategory === 'kids'
-    ? KIDS_ITEMS
+    ? [...KIDS_ITEMS, ...printifyKidsProducts]
     : sortItems(searchFiltered.filter(item => {
         if (activeCategory === 'apparel') return ['hoodies', 'tees', 'tops'].includes(getSection(item.name));
         if (activeCategory === 'activewear') return ['activewear'].includes(getSection(item.name));
@@ -1115,7 +1121,7 @@ export default function MerchPage() {
           <div className={`text-center mb-12 transition-all duration-700 ${shopVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             <h2 className="text-4xl font-black text-white mb-4">Shop the Collection</h2>
             <p className="text-white/50">
-              {loading ? 'Loading store...' : `${adultProducts.length + KIDS_ITEMS.length} items — Printed & shipped by Printful + Printify`}
+              {loading ? 'Loading store...' : `${adultProducts.length + KIDS_ITEMS.length + printifyKidsProducts.length} items — Printed & shipped by Printful + Printify`}
             </p>
           </div>
 
@@ -1191,10 +1197,13 @@ export default function MerchPage() {
               {[...Array(8)].map((_, i) => <ProductSkeleton key={`skel-${i}`} />)}
             </div>
           ) : activeCategory === 'kids' ? (
-            /* Kids-only view */
+            /* Kids-only view — original + Printify kids */
             <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {KIDS_ITEMS.map((item, idx) => (
                 <KidsCard key={item.id} item={item} idx={idx} />
+              ))}
+              {printifyKidsProducts.map((item, idx) => (
+                <ProductCard key={item.id} item={item} idx={idx + KIDS_ITEMS.length} onQuickView={handleQuickView} />
               ))}
             </div>
           ) : activeCategory === 'all' && !searchQuery && sortBy === 'featured' ? (
@@ -1230,6 +1239,9 @@ export default function MerchPage() {
                 <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                   {KIDS_ITEMS.map((item, idx) => (
                     <KidsCard key={item.id} item={item} idx={idx} />
+                  ))}
+                  {printifyKidsProducts.map((item, idx) => (
+                    <ProductCard key={item.id} item={item} idx={idx + KIDS_ITEMS.length} onQuickView={handleQuickView} />
                   ))}
                 </div>
               </div>

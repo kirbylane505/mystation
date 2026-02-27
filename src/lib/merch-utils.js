@@ -191,6 +191,7 @@ export function getBrandedImage(name, printfulUrl, previewUrl) {
   if ((lower.includes('lotl') || lower.includes('love on the lawn')) && (lower.includes('snapback') || lower.includes('cap'))) return '/images/mockups/lotl-snapback-black.jpg';
   if ((lower.includes('lotl') || lower.includes('love on the lawn')) && lower.includes('bucket')) return '/images/mockups/lotl-bucket-white.jpg';
   if (lower.includes('cap') || lower.includes('hat')) return '/images/mockups/lotl-snapback-black.jpg';
+  if (lower.includes('fleece short')) return 'https://images-api.printify.com/mockup/698acb1d3dc736df8a0c0d52/125496/112022/idmg-black-fleece-shorts.jpg?camera_label=front';
   if (lower.includes('hoodie')) return '/images/merch/idmg-black-hoodie.jpg';
   if (lower.includes('legging')) return '/images/merch/lotl-leggings-final.jpg';
   return previewUrl || printfulUrl || '/images/merch/idmg-black-tee-real.jpg';

@@ -369,7 +369,7 @@ export default function AlbumHeadliner() {
                 className="flex items-center gap-1.5 px-4 py-2 bg-[#1DB954]/10 text-[#1DB954] text-xs font-medium rounded-full hover:bg-[#1DB954]/20 transition">
                 Spotify <ExternalLink size={10} />
               </a>
-              <a href="https://music.apple.com/us/artist/mike-page/1515325834" target="_blank" rel="noopener noreferrer"
+              <a href="https://music.apple.com/us/album/idmg-mixtape/1879905768" target="_blank" rel="noopener noreferrer"
                 className="flex items-center gap-1.5 px-4 py-2 bg-[#FC3C44]/10 text-[#FC3C44] text-xs font-medium rounded-full hover:bg-[#FC3C44]/20 transition">
                 Apple Music <ExternalLink size={10} />
               </a>

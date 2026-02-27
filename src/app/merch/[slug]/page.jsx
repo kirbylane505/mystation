@@ -29,7 +29,7 @@ import 'react-medium-image-zoom/dist/styles.css';
 
 // Hidden products (same filters as merch page)
 const HIDDEN_PRINTFUL = ['bomber jacket', 'athletic short', 'windbreaker', 'track pants', 'track jacket', 'mesh short', 'wide-leg'];
-const HIDDEN_PRINTIFY = ['jogger', 'sweatpant', 'track pant', 'bike short', 'legging', 'copy of'];
+const HIDDEN_PRINTIFY = ['jogger', 'sweatpant', 'track pant', 'bike short', 'legging', 'copy of', 'custom hoodie', 'custom tee'];
 
 function ProductImage({ src, alt }) {
   const [failed, setFailed] = useState(false);
