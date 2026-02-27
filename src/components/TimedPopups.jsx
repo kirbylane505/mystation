@@ -188,9 +188,14 @@ export default function TimedPopups() {
   const { isSubscribed } = useUserStore();
 
   useEffect(() => {
-    // Don't show donate popup to subscribers
+    // Don't show donate popup to subscribers — check both Zustand state AND cookies
     const donateInterval = setInterval(() => {
-      if (!isSubscribed) {
+      const hasSub = typeof document !== 'undefined' && (
+        document.cookie.includes('mystation-sub=') ||
+        document.cookie.includes('mystation-friend=') ||
+        document.cookie.includes('mystation-auth=')
+      );
+      if (!isSubscribed && !hasSub) {
         setShowDonate(true);
       }
     }, 7 * 60 * 1000); // 7 minutes

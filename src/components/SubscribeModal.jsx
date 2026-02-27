@@ -30,7 +30,30 @@ export default function SubscribeModal() {
   const { showSubscribeModal, closeSubscribeModal, pendingTrack, setTrack } = usePlayerStore();
   const { subscribe, isSubscribed } = useUserStore();
 
+  // NEVER show subscribe modal to subscribers — they're already in
   if (!showSubscribeModal) return null;
+  if (isSubscribed) {
+    // Subscriber somehow triggered the modal — auto-close and play the track
+    if (pendingTrack) {
+      setTimeout(() => { setTrack(pendingTrack); closeSubscribeModal(); }, 0);
+    } else {
+      setTimeout(() => closeSubscribeModal(), 0);
+    }
+    return null;
+  }
+  // Also check cookie directly (belt-and-suspenders — cookie is source of truth)
+  if (typeof document !== 'undefined' && (
+    document.cookie.includes('mystation-sub=') ||
+    document.cookie.includes('mystation-friend=') ||
+    document.cookie.includes('mystation-auth=')
+  )) {
+    if (pendingTrack) {
+      setTimeout(() => { setTrack(pendingTrack); closeSubscribeModal(); }, 0);
+    } else {
+      setTimeout(() => closeSubscribeModal(), 0);
+    }
+    return null;
+  }
 
   const handleSubscribe = async (tier) => {
     setLoading(true);

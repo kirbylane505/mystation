@@ -79,11 +79,26 @@ export const usePlayerStore = create(
     }
   },
 
-  // Show subscribe modal
-  openSubscribeModal: (pendingTrack = null) => set({
-    showSubscribeModal: true,
-    pendingTrack
-  }),
+  // Show subscribe modal — NEVER for subscribers
+  openSubscribeModal: (pendingTrack = null) => {
+    // Check cookies first — subscribers never see the modal
+    const cookies = typeof document !== 'undefined' ? document.cookie : '';
+    if (cookies.includes('mystation-sub=') || cookies.includes('mystation-friend=') || cookies.includes('mystation-auth=')) {
+      // Subscriber — play the track directly instead of showing modal
+      if (pendingTrack) {
+        set({ currentTrack: pendingTrack, isPlaying: true, lastPlayedTrack: pendingTrack });
+      }
+      return;
+    }
+    // Also check Zustand user state
+    if (useUserStore.getState().isSubscribed) {
+      if (pendingTrack) {
+        set({ currentTrack: pendingTrack, isPlaying: true, lastPlayedTrack: pendingTrack });
+      }
+      return;
+    }
+    set({ showSubscribeModal: true, pendingTrack });
+  },
 
   closeSubscribeModal: () => set({
     showSubscribeModal: false,
@@ -333,7 +348,11 @@ const FREE_SONGS_TOTAL = 2;
 export function isGated(track) {
   if (!track?.id) return false;
 
-  // Subscribers & friends bypass completely
+  // Check Zustand subscriber state first (fastest, no DOM access)
+  const { isSubscribed } = useUserStore.getState();
+  if (isSubscribed) return false;
+
+  // Subscribers & friends bypass completely (cookie = source of truth)
   const cookies = typeof document !== 'undefined' ? document.cookie : '';
   if (cookies.includes('mystation-sub=')) return false;
   if (cookies.includes('mystation-friend=')) return false;

@@ -49,7 +49,7 @@ function getFreePlays(cookieStr) {
   try { return JSON.parse(val); } catch { return []; }
 }
 
-// Verify subscription cookie (HMAC-signed, 30-day expiry)
+// Verify subscription cookie (HMAC-signed, 365-day expiry — subscribers remembered FOREVER)
 function verifySubscriptionCookie(cookieStr) {
   const val = parseCookie(cookieStr, 'mystation-sub');
   if (!val) return false;
@@ -58,11 +58,11 @@ function verifySubscriptionCookie(cookieStr) {
   const expected = hmacSign('sub', timestamp);
   if (!timingSafeEqual(expected, sig)) return false;
   const ts = parseInt(timestamp, 10);
-  if (isNaN(ts) || Date.now() - ts > 30 * 24 * 60 * 60 * 1000) return false;
+  if (isNaN(ts) || Date.now() - ts > 365 * 24 * 60 * 60 * 1000) return false;
   return true;
 }
 
-// Verify auth cookie (email:timestamp:hmac, 30-day expiry)
+// Verify auth cookie (email:timestamp:hmac, 365-day expiry — authenticated users remembered)
 function verifyAuthCookie(cookieStr) {
   const val = parseCookie(cookieStr, 'mystation-auth');
   if (!val) return null;
@@ -74,7 +74,7 @@ function verifyAuthCookie(cookieStr) {
   const expected = hmacSign('auth', `${email}:${timestamp}`);
   if (!timingSafeEqual(expected, sig)) return null;
   const ts = parseInt(timestamp, 10);
-  if (isNaN(ts) || Date.now() - ts > 30 * 24 * 60 * 60 * 1000) return null;
+  if (isNaN(ts) || Date.now() - ts > 365 * 24 * 60 * 60 * 1000) return null;
   return { email, timestamp: ts };
 }
 
