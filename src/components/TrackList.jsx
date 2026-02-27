@@ -57,7 +57,7 @@ const TrackRow = memo(function TrackRow({ track, index, isCurrentTrack, isPlayin
             {track.title}
           </p>
           <p className="text-[12px] text-white/60 truncate mt-0.5">
-            Mike Page{track.featured ? ` ft. ${track.featured}` : ''}{track.producer ? ` • ${track.producer}` : ''}
+            {track.artist || 'Mike Page'}{track.featured ? ` ft. ${track.featured}` : ''}{track.producer ? ` • ${track.producer}` : ''}
           </p>
         </div>
         <div className="flex items-center gap-0.5 shrink-0">
@@ -124,7 +124,7 @@ const TrackRow = memo(function TrackRow({ track, index, isCurrentTrack, isPlayin
                 {track.title}
               </p>
               <p className="text-sm text-white/70">
-                Mike Page{track.featured && <span className="text-white/60"> • {track.featured}</span>}
+                {track.artist || 'Mike Page'}{track.featured && <span className="text-white/60"> ft. {track.featured}</span>}
                 {track.producer && <span className="text-purple-400"> • Prod by {track.producer}</span>}
               </p>
             </div>

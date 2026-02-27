@@ -158,12 +158,17 @@ export default function MusicPageClient({ initialTrackId, autoplay = false }) {
       });
       break;
     default:
-      // Default: shuffle on each page visit using stable seed
-      filteredTracks = [...filteredTracks].sort((a, b) => {
-        const hashA = ((a.id * 2654435761 + shuffleSeed * 1000000) >>> 0) % 1000;
-        const hashB = ((b.id * 2654435761 + shuffleSeed * 1000000) >>> 0) % 1000;
-        return hashA - hashB;
-      });
+      // If album filter active, sort by track number (album order)
+      if (filterAlbum !== 'all') {
+        filteredTracks = [...filteredTracks].sort((a, b) => (a.trackNumber || 0) - (b.trackNumber || 0));
+      } else {
+        // Default: shuffle on each page visit using stable seed
+        filteredTracks = [...filteredTracks].sort((a, b) => {
+          const hashA = ((a.id * 2654435761 + shuffleSeed * 1000000) >>> 0) % 1000;
+          const hashB = ((b.id * 2654435761 + shuffleSeed * 1000000) >>> 0) % 1000;
+          return hashA - hashB;
+        });
+      }
       break;
   }
 
