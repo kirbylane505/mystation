@@ -522,8 +522,14 @@ async function handleSubscriptionCheckout(session, stripe) {
     // Get subscription details for period end
     let currentPeriodEnd = null;
     if (subscriptionId) {
-      const sub = await stripe.subscriptions.retrieve(subscriptionId);
-      currentPeriodEnd = new Date(sub.current_period_end * 1000).toISOString();
+      try {
+        const sub = await stripe.subscriptions.retrieve(subscriptionId);
+        if (sub.current_period_end) {
+          currentPeriodEnd = new Date(sub.current_period_end * 1000).toISOString();
+        }
+      } catch (subErr) {
+        console.warn('Could not retrieve subscription details:', subErr.message);
+      }
     }
 
     // Count for subscriber number
