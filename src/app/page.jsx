@@ -37,14 +37,15 @@ export default function HomePage() {
           if (p.title?.toLowerCase().startsWith('custom ')) return false;
           return true;
         });
-        // Diversity: pick one per product type (Hoodie, Tee, Cap, etc.)
+        // Diversity: pick one per product type — strip colors to detect same item in diff colors
+        const COLORS = /\b(white|black|navy|blue|red|gold|green|pink|purple|gray|grey|cream|brown|orange|yellow|maroon|teal|burgundy|charcoal|heather)\b/gi;
         const seen = new Set();
         const diverse = [];
         for (const p of withImages) {
-          // Extract base type from title (first word or two)
-          const type = p.title?.split(/\s*[—–-]\s*/)[0]?.trim().toLowerCase() || '';
-          if (!seen.has(type)) {
-            seen.add(type);
+          // Strip color words + extra whitespace to get the base product identity
+          const base = (p.title || '').replace(COLORS, '').replace(/\s+/g, ' ').trim().toLowerCase();
+          if (!seen.has(base)) {
+            seen.add(base);
             diverse.push(p);
           }
           if (diverse.length >= 4) break;
