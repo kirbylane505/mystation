@@ -70,7 +70,7 @@ export default function Image() {
             color: 'rgba(255, 255, 255, 0.3)',
           }}
         >
-          <span>73 Tracks Free</span>
+          <span>100+ Tracks</span>
           <span style={{ color: 'rgba(96, 165, 250, 0.5)' }}>|</span>
           <span>Official Merch</span>
           <span style={{ color: 'rgba(96, 165, 250, 0.5)' }}>|</span>

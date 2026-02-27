@@ -252,10 +252,10 @@ export default function MusicPageClient({ initialTrackId, autoplay = false }) {
             <div className="flex-1 text-center md:text-left">
               <p className="text-blue-400 text-sm font-semibold uppercase tracking-wider mb-2">Mike Page Collection</p>
               <h1 className="text-3xl md:text-5xl font-black text-white mb-3 leading-tight">
-                {musicTracks.length} Tracks.<br className="hidden md:block" /> All Free.
+                {musicTracks.length} Tracks.<br className="hidden md:block" /> Subscribe & Stream.
               </h1>
               <p className="text-white/50 text-sm md:text-base mb-6 max-w-md">
-                Stream the full catalog — every donation supports youth music programs through the Mike Page Foundation.
+                Preview 2 tracks free — subscribe to unlock the full catalog. Every stream supports youth music programs through the Mike Page Foundation.
               </p>
               <div className="flex flex-wrap gap-3 justify-center md:justify-start">
                 <button
