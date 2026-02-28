@@ -59,7 +59,8 @@ export default function FoundingMemberBanner() {
     document.cookie.includes('mystation-friend=') ||
     document.cookie.includes('mystation-auth=')
   );
-  if (isSubscribed || hasSub) return null;
+  // Admin (Mike) always sees the banner — subscribers don't
+  if (!isAdmin && (isSubscribed || hasSub)) return null;
 
   // Don't render anything until fully loaded
   if (dismissed || remaining === null || !ready) return null;
