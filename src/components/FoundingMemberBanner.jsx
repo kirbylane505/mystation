@@ -2,13 +2,13 @@
  * MYSTATION - LOTL Promo Marquee Banner
  * First 250 subscribers who stay until Aug 1 get FREE LOTL 2026 ticket.
  * Glossy scrolling marquee with live count.
- * Dismissible per session — returns on next visit.
+ * Shows for EVERYONE. Dismissible per session — returns on next visit.
  */
 
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useUserStore, usePlayerStore } from '@/store/playerStore';
+import { usePlayerStore } from '@/store/playerStore';
 import { X } from 'lucide-react';
 
 // Urgency countdown — spots decrease by 10/day from this baseline
@@ -21,9 +21,8 @@ export default function FoundingMemberBanner() {
   const [realRemaining, setRealRemaining] = useState(null);
   const [ready, setReady] = useState(false);
   const [dismissed, setDismissed] = useState(false);
-  const isSubscribed = useUserStore(s => s.isSubscribed);
 
-  // Read admin status SYNCHRONOUSLY so it's available on first render
+  // Admin check for real count badge
   const isAdmin = typeof window !== 'undefined' && (() => {
     try { return sessionStorage.getItem('ADMIN_KEY') === 'mpf2026'; } catch { return false; }
   })();
@@ -38,32 +37,19 @@ export default function FoundingMemberBanner() {
       .then(r => r.json())
       .then(data => {
         if (data.remaining > 0) {
-          // Real count for admin
           setRealRemaining(data.remaining);
 
           // Urgency math — decrease by 10/day from baseline
           const daysPassed = Math.max(0, Math.floor((Date.now() - URGENCY_START.getTime()) / 86400000));
           const urgencyCount = Math.max(FLOOR, data.remaining - (daysPassed * DAILY_DECREASE));
           setRemaining(urgencyCount);
-
-          requestAnimationFrame(() => setReady(true));
+          setReady(true);
         }
       })
       .catch(() => {});
   }, []);
 
-  // Don't render for subscribers — they're already in. No need to see this.
-  // Also check cookie directly (Zustand might not be hydrated yet)
-  const hasSub = typeof document !== 'undefined' && (
-    document.cookie.includes('mystation-sub-flag=') ||
-    document.cookie.includes('mystation-sub=') ||
-    document.cookie.includes('mystation-friend=') ||
-    document.cookie.includes('mystation-auth=')
-  );
-  // Admin (Mike) always sees the banner — subscribers don't
-  if (!isAdmin && (isSubscribed || hasSub)) return null;
-
-  // Don't render anything until fully loaded
+  // Only hide if dismissed or data not loaded yet
   if (dismissed || remaining === null || !ready) return null;
 
   const handleClick = () => {
@@ -86,18 +72,17 @@ export default function FoundingMemberBanner() {
   return (
     <div
       onClick={handleClick}
-      className="relative cursor-pointer overflow-hidden mx-4 mb-5 md:mx-8 rounded-xl group"
+      className="relative cursor-pointer overflow-hidden rounded-none group"
       style={{ animation: 'bannerFadeIn 0.4s ease-out' }}
     >
       {/* Glossy glass background */}
       <div className="absolute inset-0 bg-gradient-to-r from-indigo-600/90 via-blue-500/90 to-purple-600/90 backdrop-blur-md" />
 
-      {/* Top glossy shine — the "wet glass" highlight */}
+      {/* Top glossy shine */}
       <div
         className="absolute inset-x-0 top-0 h-1/2 pointer-events-none"
         style={{
           background: 'linear-gradient(180deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.08) 50%, transparent 100%)',
-          borderRadius: '12px 12px 0 0',
         }}
       />
 
@@ -113,9 +98,6 @@ export default function FoundingMemberBanner() {
 
       {/* Bottom edge highlight */}
       <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-
-      {/* Top edge highlight */}
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
 
       {/* Content wrapper */}
       <div className="relative flex items-center h-10 md:h-11">
@@ -156,7 +138,7 @@ export default function FoundingMemberBanner() {
         </div>
       </div>
 
-      {/* Keyframes injected via style tag */}
+      {/* Keyframes */}
       <style jsx>{`
         @keyframes marqueeScroll {
           0% { transform: translateX(0); }
