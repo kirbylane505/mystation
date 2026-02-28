@@ -13,7 +13,7 @@ import { X } from 'lucide-react';
 
 // Urgency countdown — spots decrease by 10/day from this baseline
 const URGENCY_START = new Date('2026-02-25T00:00:00');
-const DAILY_DECREASE = 10;
+const DAILY_DECREASE = 4;
 const FLOOR = 3; // Never show 0 — always "almost gone"
 
 export default function FoundingMemberBanner() {
