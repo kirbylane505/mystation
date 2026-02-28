@@ -14,6 +14,33 @@ export const revalidate = 0;
 export async function generateMetadata({ searchParams }) {
   const params = await searchParams;
   const trackId = params?.track;
+  const albumId = params?.album;
+
+  // Album-specific metadata (shareable album links)
+  if (albumId) {
+    const album = albums.find(a => a.id === albumId);
+    if (album) {
+      const imageUrl = album.appleMusicArtwork || album.coverImage || '/images/albums/cindys-son.jpg';
+      const fullImageUrl = imageUrl.startsWith('http') ? imageUrl : `https://mystationlive.com${imageUrl}`;
+      return {
+        title: `${album.title} - ${album.artist || 'Mike Page'}`,
+        description: album.description || `Stream "${album.title}" free on MyStation.`,
+        openGraph: {
+          title: `🎵 ${album.title} - ${album.artist || 'Mike Page'}`,
+          description: `${album.trackCount} tracks. Stream free on MyStation.\n${album.subtitle || ''}`,
+          images: [{ url: fullImageUrl, width: 1200, height: 1200, alt: album.title }],
+          type: 'music.album',
+          siteName: 'MyStation',
+        },
+        twitter: {
+          card: 'summary_large_image',
+          title: `🎵 ${album.title} - ${album.artist || 'Mike Page'}`,
+          description: `${album.trackCount} tracks. Stream free on MyStation.`,
+          images: [fullImageUrl],
+        },
+      };
+    }
+  }
 
   if (trackId) {
     const track = tracks.find(t => t.id === parseInt(trackId));
@@ -69,7 +96,8 @@ export async function generateMetadata({ searchParams }) {
 export default async function MusicPage({ searchParams }) {
   const params = await searchParams;
   const trackId = params?.track;
+  const albumId = params?.album;
   const autoplay = params?.autoplay === 'true';
-  return <MusicPageClient initialTrackId={trackId} autoplay={autoplay} />;
+  return <MusicPageClient initialTrackId={trackId} initialAlbumId={albumId} autoplay={autoplay} />;
 }
 // Rebuild Wed Feb  4 04:23:49 EST 2026

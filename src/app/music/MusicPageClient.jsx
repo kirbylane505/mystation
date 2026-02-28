@@ -19,7 +19,7 @@ import {
 
 const IDMG_LOGO = '/images/idmg-logo-white.png';
 
-export default function MusicPageClient({ initialTrackId, autoplay = false }) {
+export default function MusicPageClient({ initialTrackId, initialAlbumId, autoplay = false }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterYear, setFilterYear] = useState('all');
   const [filterAlbum, setFilterAlbum] = useState('all');
@@ -37,6 +37,16 @@ export default function MusicPageClient({ initialTrackId, autoplay = false }) {
   const [hasVaultAccess, setHasVaultAccess] = useState(false);
   const { setQueue, play, currentTrack, isPlaying, vaultUnlocked, setVaultUnlocked } = usePlayerStore();
   const { isSubscribed } = useUserStore();
+
+  // Auto-filter to album if coming from album share link
+  useEffect(() => {
+    if (initialAlbumId) {
+      const album = albums.find(a => a.id === initialAlbumId);
+      if (album) {
+        setFilterAlbum(album.title);
+      }
+    }
+  }, [initialAlbumId]);
 
   // Auto-play track if coming from share link
   useEffect(() => {
