@@ -1,7 +1,10 @@
 /**
  * MYSTATION - Welcome Gate
- * First-visit welcome: Sign In / Sign Up / Browse as Guest (4 free songs)
+ * First-visit welcome: Sign In (email only) / Sign Up / Browse as Guest
  * Shows on ALL pages for new visitors. Dismissed once authenticated or guest mode chosen.
+ *
+ * SIGN IN = EMAIL ONLY for subscribers. No password needed.
+ * Just enter your email — if you're subscribed, you're in.
  */
 
 'use client';
@@ -11,9 +14,9 @@ import { Mail, Lock, User, Loader2, Headphones, ArrowLeft, Music2 } from 'lucide
 import { useUserStore } from '@/store/playerStore';
 
 export default function EmailGate() {
-  const { email: storedEmail, setEmail: setStoreEmail, setUser, isLoggedIn } = useUserStore();
+  const { email: storedEmail, setEmail: setStoreEmail, setUser, isLoggedIn, subscribe } = useUserStore();
   const [show, setShow] = useState(false);
-  const [view, setView] = useState('welcome'); // 'welcome' | 'signin' | 'signup'
+  const [view, setView] = useState('welcome'); // 'welcome' | 'signin' | 'signup' | 'password'
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -51,7 +54,56 @@ export default function EmailGate() {
 
   const clearError = () => { setErrorMsg(''); };
 
-  const handleSignIn = async (e) => {
+  // EMAIL-ONLY sign in for subscribers — no password needed
+  const handleSubscriberSignIn = async (e) => {
+    e.preventDefault();
+    if (!email) {
+      setErrorMsg('Enter your email');
+      return;
+    }
+
+    setLoading(true);
+    setErrorMsg('');
+
+    try {
+      const res = await fetch('/api/auth/subscriber-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim().toLowerCase() }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        // Subscriber found — logged in!
+        const cleanEmail = email.trim().toLowerCase();
+        localStorage.setItem('mystation_email', cleanEmail);
+        localStorage.setItem('mystation_user', JSON.stringify(data.user));
+        setStoreEmail(cleanEmail);
+        setUser(data.user);
+        if (data.isSubscribed) subscribe(cleanEmail, data.tier || 'regular');
+        setShow(false);
+        return;
+      }
+
+      // Not found or expired
+      if (data.notFound) {
+        setErrorMsg('No subscription found for this email.');
+        // Don't auto-redirect — let them choose
+      } else if (data.expired) {
+        setErrorMsg('Your subscription has expired. Sign up to resubscribe!');
+      } else {
+        setErrorMsg(data.error || 'Could not sign in');
+      }
+    } catch {
+      setErrorMsg('Connection error. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Password sign in (fallback)
+  const handlePasswordSignIn = async (e) => {
     e.preventDefault();
     if (!email || !password) {
       setErrorMsg('Email and password required');
@@ -76,15 +128,11 @@ export default function EmailGate() {
         return;
       }
 
-      // Store user + email
       const cleanEmail = email.trim().toLowerCase();
       localStorage.setItem('mystation_email', cleanEmail);
       setStoreEmail(cleanEmail);
-      if (data.user) {
-        setUser(data.user);
-      }
+      if (data.user) setUser(data.user);
 
-      // Start trial if they don't have one
       fetch('/api/trial/start', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -132,16 +180,12 @@ export default function EmailGate() {
         return;
       }
 
-      // Store user + email
       const cleanEmail = email.trim().toLowerCase();
       localStorage.setItem('mystation_email', cleanEmail);
       localStorage.setItem('mystation_email_captured', cleanEmail);
       setStoreEmail(cleanEmail);
-      if (data.user) {
-        setUser(data.user);
-      }
+      if (data.user) setUser(data.user);
 
-      // Capture email for marketing + start trial
       fetch('/api/email-capture', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -202,7 +246,8 @@ export default function EmailGate() {
                 onClick={() => switchView('signin')}
                 className="w-full py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold rounded-xl hover:opacity-90 transition flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30 text-lg"
               >
-                Sign In
+                <Mail size={20} />
+                Sign In With Email
               </button>
 
               <button
@@ -228,12 +273,12 @@ export default function EmailGate() {
             >
               <Music2 size={16} />
               Browse as Guest
-              <span className="text-white/30">(4 free songs)</span>
+              <span className="text-white/30">(2 free songs)</span>
             </button>
           </div>
         )}
 
-        {/* SIGN IN VIEW */}
+        {/* SIGN IN VIEW — EMAIL ONLY (no password!) */}
         {view === 'signin' && (
           <div className="bg-gradient-to-b from-white/10 to-white/5 border border-white/10 rounded-3xl p-8 shadow-2xl">
             <button
@@ -243,9 +288,68 @@ export default function EmailGate() {
               <ArrowLeft size={16} /> Back
             </button>
 
-            <h2 className="text-xl font-bold text-white mb-6 text-center">Sign In</h2>
+            <h2 className="text-xl font-bold text-white mb-2 text-center">Sign In</h2>
+            <p className="text-white/50 text-sm text-center mb-6">
+              Subscribers — just enter your email. No password needed.
+            </p>
 
-            <form onSubmit={handleSignIn} className="space-y-4">
+            <form onSubmit={handleSubscriberSignIn} className="space-y-4">
+              <div className="relative">
+                <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => { setEmail(e.target.value); clearError(); }}
+                  placeholder="Enter your email"
+                  className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-blue-500 transition text-lg"
+                  required
+                  autoFocus
+                  disabled={loading}
+                />
+              </div>
+
+              {errorMsg && (
+                <p className="text-red-400 text-sm text-center">{errorMsg}</p>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold rounded-xl hover:opacity-90 transition disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30 text-lg"
+              >
+                {loading ? <Loader2 size={20} className="animate-spin" /> : 'Sign In'}
+              </button>
+            </form>
+
+            <div className="mt-6 space-y-2 text-center">
+              <p className="text-white/40 text-sm">
+                No account?{' '}
+                <button onClick={() => switchView('signup')} className="text-blue-400 hover:text-blue-300 font-medium">
+                  Create one
+                </button>
+              </p>
+              <p className="text-white/30 text-xs">
+                <button onClick={() => switchView('password')} className="text-white/40 hover:text-white/60 transition">
+                  Sign in with password instead
+                </button>
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* PASSWORD SIGN IN (FALLBACK) */}
+        {view === 'password' && (
+          <div className="bg-gradient-to-b from-white/10 to-white/5 border border-white/10 rounded-3xl p-8 shadow-2xl">
+            <button
+              onClick={() => switchView('signin')}
+              className="flex items-center gap-1 text-white/50 hover:text-white text-sm mb-4 transition"
+            >
+              <ArrowLeft size={16} /> Back
+            </button>
+
+            <h2 className="text-xl font-bold text-white mb-6 text-center">Sign In With Password</h2>
+
+            <form onSubmit={handlePasswordSignIn} className="space-y-4">
               <div className="relative">
                 <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" />
                 <input
@@ -287,9 +391,8 @@ export default function EmailGate() {
             </form>
 
             <p className="text-center text-white/40 text-sm mt-4">
-              No account?{' '}
-              <button onClick={() => switchView('signup')} className="text-blue-400 hover:text-blue-300 font-medium">
-                Create one
+              <button onClick={() => switchView('signin')} className="text-blue-400 hover:text-blue-300 font-medium">
+                Back to email sign in
               </button>
             </p>
           </div>
@@ -307,7 +410,7 @@ export default function EmailGate() {
 
             <h2 className="text-xl font-bold text-white mb-2 text-center">Create Account</h2>
             <p className="text-white/50 text-sm text-center mb-6">
-              Get 24-hour free access. No credit card required.
+              Get free access. No credit card required.
             </p>
 
             <form onSubmit={handleSignUp} className="space-y-4">
@@ -365,9 +468,9 @@ export default function EmailGate() {
             </form>
 
             <p className="text-center text-white/40 text-sm mt-4">
-              Already have an account?{' '}
+              Already subscribed?{' '}
               <button onClick={() => switchView('signin')} className="text-blue-400 hover:text-blue-300 font-medium">
-                Sign in
+                Sign in with email
               </button>
             </p>
           </div>
