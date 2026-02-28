@@ -1,6 +1,7 @@
 export const metadata = {
   title: 'Go Live',
   description: 'Go live on MyStation. Stream, perform, and connect with fans in real-time.',
+  alternates: { canonical: 'https://mystationlive.com/live' },
   openGraph: {
     title: 'Go Live on MyStation — Stream & Connect',
     description: 'Go live on MyStation. Stream, perform, and connect with fans in real-time.',

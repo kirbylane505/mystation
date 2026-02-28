@@ -9,6 +9,7 @@ import CubistPlayer from '@/components/CubistPlayer';
 export const metadata = {
   title: 'The Cubist - Tyrell Thornton',
   description: 'The Cubist (Tyrell Thornton) — 100M+ streams & views. Credits: French Montana, Max B, Big30, Pooh Shiesty, Blac Youngsta. BET+ "I Got a Story to Tell" Season 2.',
+  alternates: { canonical: 'https://mystationlive.com/artists/the-cubist' },
   openGraph: {
     title: 'THE CUBIST — 100M+ Streams. BET+. The Sound Behind The Stars.',
     description: 'Tyrell Thornton aka The Cubist — producer for French Montana, Max B, Big30, Pooh Shiesty & Blac Youngsta. Stream his beats, watch his videos, and catch Season 2 on BET+.',
@@ -43,6 +44,27 @@ const MILESTONES = [
 export default function CubistPage() {
   return (
     <div className="min-h-screen">
+      {/* Person/MusicGroup Schema for The Cubist */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Person",
+            "name": "Tyrell Thornton",
+            "alternateName": "The Cubist",
+            "url": "https://mystationlive.com/artists/the-cubist",
+            "jobTitle": "Music Producer",
+            "description": "Producer and artist with 100M+ streams & views. Credits include French Montana, Max B, Big30, Pooh Shiesty, and Blac Youngsta. BET+ 'I Got a Story to Tell' Season 2.",
+            "sameAs": [],
+            "memberOf": {
+              "@type": "Organization",
+              "name": "IDMG - Impossible Dreamz Music Group"
+            },
+            "knowsAbout": ["Music Production", "Hip-Hop", "R&B"]
+          })
+        }}
+      />
       {/* Hero */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-amber-900/60 via-red-900/40 to-black" />

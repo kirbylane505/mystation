@@ -12,9 +12,20 @@ import { Heart, Music, Award, Users, MapPin, Calendar, ExternalLink, Check, Hear
 export const metadata = {
   title: 'About — Mike Page Foundation',
   description: 'Mike Page Foundation — 501(c)(3) nonprofit. Youth music programs, scholarships, community meals, and Love on the Lawn Festival. Building community through music.',
+  alternates: { canonical: 'https://mystationlive.com/about' },
   openGraph: {
-    title: 'About — Mike Page Foundation',
+    title: 'About — Mike Page Foundation | 501(c)(3) Nonprofit',
     description: 'Mike Page Foundation — 501(c)(3) nonprofit. Youth music programs, scholarships, community meals, and the Love on the Lawn Festival.',
+    url: 'https://mystationlive.com/about',
+    siteName: 'MyStation',
+    images: [{ url: '/images/og-image.png', width: 1200, height: 630, alt: 'Mike Page Foundation' }],
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'About — Mike Page Foundation',
+    description: '501(c)(3) nonprofit. Youth music programs, scholarships, community meals, and the Love on the Lawn Festival.',
+    images: ['/images/og-image.png'],
   },
 };
 

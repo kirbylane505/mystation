@@ -1,6 +1,7 @@
 export const metadata = {
   title: 'Fan Zone',
   description: 'Join the MyStation Fan Zone. Connect with the community, earn loyalty points, and get exclusive access to Mike Page content.',
+  alternates: { canonical: 'https://mystationlive.com/fan-zone' },
   openGraph: {
     title: 'MyStation Fan Zone — Join The Movement',
     description: 'Connect with the community, earn loyalty points, and get exclusive access to Mike Page content.',

@@ -9,9 +9,20 @@ import { Calendar, ArrowRight, Flame, Music, Heart, Tv, ShoppingBag, Users } fro
 export const metadata = {
   title: 'News & Updates',
   description: 'Latest news from Mike Page, IDMG, Love on the Lawn Festival, and the Mike Page Foundation. New music, events, and community updates.',
+  alternates: { canonical: 'https://mystationlive.com/news' },
   openGraph: {
-    title: 'News & Updates',
-    description: 'Latest from Mike Page, Love on the Lawn Festival, and the Mike Page Foundation.',
+    title: 'News & Updates — Mike Page, IDMG, LOTL',
+    description: 'Latest news from Mike Page, IDMG, Love on the Lawn Festival, and the Mike Page Foundation.',
+    url: 'https://mystationlive.com/news',
+    siteName: 'MyStation',
+    images: [{ url: '/images/og-image.png', width: 1200, height: 630, alt: 'MyStation News' }],
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'News & Updates — Mike Page & IDMG',
+    description: 'Latest news, new music, events, and community updates.',
+    images: ['/images/og-image.png'],
   },
 };
 

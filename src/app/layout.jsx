@@ -45,27 +45,36 @@ const inter = Inter({
 export const metadata = {
   metadataBase: new URL('https://mystationlive.com'),
   title: {
-    default: 'MyStation - IDMG',
+    default: 'MyStation — Stream Mike Page Music Free | IDMG',
     template: '%s | MyStation',
   },
-  description: 'Stream Mike Page music for free. All proceeds support youth music programs through IDMG.',
-  keywords: 'Mike Page, IDMG, hip-hop, music streaming, donation, foundation',
+  description: 'Stream Mike Page music for free. Official IDMG merch, Love on the Lawn Festival tickets, and exclusive content. All proceeds support youth music programs.',
+  keywords: 'Mike Page, IDMG, hip-hop, R&B, music streaming, Love on the Lawn, LOTL, festival, merch, Mike Page Foundation, nonprofit, Elgin IL',
 
-  // Open Graph - Shows when sharing on social media/iMessage
+  // Canonical
+  alternates: {
+    canonical: 'https://mystationlive.com',
+  },
+
+  // Open Graph
   openGraph: {
-    title: 'MyStation - Stream Mike Page Music Free',
+    title: 'MyStation — Stream Mike Page Music Free',
     description: 'Stream Mike Page music for free. Official merch, Love on the Lawn Festival tickets, and more. All donations support youth music programs.',
     url: 'https://mystationlive.com',
     siteName: 'MyStation',
     locale: 'en_US',
     type: 'website',
+    images: [{ url: '/images/og-image.png', width: 1200, height: 630, alt: 'MyStation — Stream Mike Page Music Free' }],
   },
 
   // Twitter Card
   twitter: {
     card: 'summary_large_image',
-    title: 'MyStation - Stream Mike Page Music Free',
+    site: '@idmgatl',
+    creator: '@idmgatl',
+    title: 'MyStation — Stream Mike Page Music Free',
     description: 'Stream Mike Page music for free. Official merch & Love on the Lawn Festival tickets.',
+    images: ['/images/og-image.png'],
   },
 
   // Apple/iMessage specific
@@ -74,6 +83,19 @@ export const metadata = {
     'apple-mobile-web-app-capable': 'yes',
     'apple-mobile-web-app-status-bar-style': 'black-translucent',
     'mobile-web-app-capable': 'yes',
+  },
+
+  // Robots
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
   },
 
   // PWA Manifest
@@ -87,6 +109,7 @@ export default function RootLayout({ children }) {
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
         <meta name="theme-color" content="#6366f1" />
+        {/* Organization Schema */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -99,11 +122,59 @@ export default function RootLayout({ children }) {
               "logo": "https://mystationlive.com/images/idmg-logo-white.png",
               "sameAs": [
                 "https://instagram.com/idmgatl",
-                "https://tiktok.com/@idmgatl"
+                "https://tiktok.com/@idmgatl",
+                "https://instagram.com/loveonthelawnfestival"
               ],
               "description": "Stream music, shop merch, support youth — MyStation by Mike Page Foundation",
               "foundingDate": "2026",
               "founder": {
+                "@type": "Person",
+                "name": "Mike Page"
+              },
+              "contactPoint": {
+                "@type": "ContactPoint",
+                "email": "mystationlive@gmail.com",
+                "contactType": "customer support"
+              }
+            })
+          }}
+        />
+        {/* WebSite SearchAction — enables Google sitelinks search */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              "name": "MyStation",
+              "url": "https://mystationlive.com",
+              "potentialAction": {
+                "@type": "SearchAction",
+                "target": {
+                  "@type": "EntryPoint",
+                  "urlTemplate": "https://mystationlive.com/search?q={search_term_string}"
+                },
+                "query-input": "required name=search_term_string"
+              }
+            })
+          }}
+        />
+        {/* MusicGroup Schema — Mike Page as artist */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "MusicGroup",
+              "name": "Mike Page",
+              "url": "https://mystationlive.com",
+              "genre": ["Hip-Hop", "R&B"],
+              "description": "Mike Page — hip-hop/R&B artist, founder of IDMG and the Love on the Lawn Festival",
+              "sameAs": [
+                "https://instagram.com/idmgatl",
+                "https://tiktok.com/@idmgatl"
+              ],
+              "member": {
                 "@type": "Person",
                 "name": "Mike Page"
               }
