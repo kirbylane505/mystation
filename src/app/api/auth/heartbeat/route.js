@@ -1,8 +1,10 @@
 /**
  * MYSTATION - Session Heartbeat
  * Enforces concurrent device limits per subscription tier:
- *   - Free / Supporter / Premium: 1 device at a time
- *   - Diamond ($14.99): 2 devices at a time
+ *   - Free: 2 devices
+ *   - Regular ($4.99): 3 devices
+ *   - Premium ($9.99): 5 devices
+ *   - Diamond ($14.99): 5 devices
  * Client pings every 30s. Oldest session is kicked when limit exceeded.
  */
 
@@ -16,8 +18,9 @@ const STALE_TIMEOUT = 5 * 60 * 1000; // 5 min — no heartbeat = dead session
 
 // Max concurrent sessions per tier
 function getMaxSessions(tier) {
-  if (tier === 'diamond') return 2;
-  return 1; // free, supporter, regular, premium — all 1 device
+  if (tier === 'diamond' || tier === 'premium') return 5;
+  if (tier === 'regular') return 3;
+  return 2; // free — 2 devices
 }
 
 // Look up subscriber tier from Supabase
@@ -86,9 +89,7 @@ export async function POST(request) {
       return NextResponse.json({
         valid: false,
         kicked: true,
-        message: maxSessions === 1
-          ? 'This account is signed in on another device. Upgrade to Diamond for 2 devices.'
-          : 'Too many active sessions. One of your sessions was signed out.',
+        message: `Too many active sessions (max ${maxSessions}). Upgrade your plan for more devices.`,
       });
     }
 

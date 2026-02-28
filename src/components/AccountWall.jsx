@@ -2,7 +2,9 @@
  * MYSTATION - Account Wall
  * Sign in, sign up, or enter access code overlay.
  * Shows only when triggered from navbar sign-in button (showAccountWall).
- * Every new subscriber gets first month free (30-day Stripe trial).
+ *
+ * SIGN IN = EMAIL ONLY for subscribers. No password needed.
+ * If not a subscriber, offers sign up or password login fallback.
  */
 
 'use client';
@@ -26,7 +28,7 @@ export default function AccountWall() {
   const { setShowAccountWall, showAccountWall } = usePlayerStore();
   const { isLoggedIn, isSubscribed, setUser, setEmail: setStoreEmail, subscribe, freeSignupSlotsRemaining, setFreeSignupSlots } = useUserStore();
 
-  const [view, setView] = useState('signup'); // 'signup' | 'signin' | 'code'
+  const [view, setView] = useState('signin'); // 'signup' | 'signin' | 'code' | 'password'
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
@@ -59,7 +61,56 @@ export default function AccountWall() {
 
   const clearError = () => { setErrorMsg(''); setSuccessMsg(''); };
 
-  const handleSignIn = async (e) => {
+  // EMAIL-ONLY sign in for subscribers
+  const handleSubscriberSignIn = async (e) => {
+    e.preventDefault();
+    if (!email) {
+      setErrorMsg('Enter your email');
+      return;
+    }
+
+    setLoading(true);
+    setErrorMsg('');
+
+    try {
+      const res = await fetch('/api/auth/subscriber-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim().toLowerCase() }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        // Subscriber found and active — logged in!
+        const cleanEmail = email.trim().toLowerCase();
+        localStorage.setItem('mystation_email', cleanEmail);
+        localStorage.setItem('mystation_user', JSON.stringify(data.user));
+        setStoreEmail(cleanEmail);
+        setUser(data.user);
+        if (data.isSubscribed) subscribe(cleanEmail, data.tier || 'regular');
+        setShowAccountWall(false);
+        return;
+      }
+
+      // Not found or expired — show helpful message
+      if (data.notFound) {
+        setErrorMsg('No subscription found. Sign up to get started!');
+        setTimeout(() => switchView('signup'), 2000);
+      } else if (data.expired) {
+        setErrorMsg('Subscription expired. Resubscribe to continue!');
+      } else {
+        setErrorMsg(data.error || 'Could not sign in');
+      }
+    } catch {
+      setErrorMsg('Connection error. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Password sign in (fallback)
+  const handlePasswordSignIn = async (e) => {
     e.preventDefault();
     if (!email || !password) {
       setErrorMsg('Email and password required');
@@ -220,128 +271,214 @@ export default function AccountWall() {
 
         {!successMsg && (
           <div className="bg-gradient-to-b from-white/10 to-white/5 border border-white/10 rounded-3xl p-8 shadow-2xl">
-            {/* Header */}
-            <div className="text-center mb-6">
-              <h2 className="text-xl font-bold text-white mb-2">
-                Welcome Back
-              </h2>
-              {freeSignupSlotsRemaining > 0 ? (
-                <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-500/20 border border-green-500/30 rounded-full">
-                  <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                  <span className="text-green-400 font-bold text-sm">
-                    {freeSignupSlotsRemaining} of 26 free spots remaining!
-                  </span>
-                </div>
-              ) : (
-                <p className="text-white/50 text-sm">
-                  Free spots taken — $4.99/mo for unlimited access
-                </p>
-              )}
-            </div>
 
-            {/* SIGN UP VIEW */}
-            {view === 'signup' && (
-              <form onSubmit={handleSignUp} className="space-y-4">
-                <div className="relative">
-                  <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" />
-                  <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Name (optional)"
-                    className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-blue-500 transition"
-                    disabled={loading}
-                    autoFocus
-                  />
-                </div>
-
-                <div className="relative">
-                  <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" />
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => { setEmail(e.target.value); clearError(); }}
-                    placeholder="Email"
-                    className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-blue-500 transition"
-                    required
-                    disabled={loading}
-                  />
-                </div>
-
-                <div className="relative">
-                  <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" />
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => { setPassword(e.target.value); clearError(); }}
-                    placeholder="Password (6+ characters)"
-                    className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-blue-500 transition"
-                    required
-                    minLength={6}
-                    disabled={loading}
-                  />
-                </div>
-
-                {errorMsg && <p className="text-red-400 text-sm text-center">{errorMsg}</p>}
-
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold rounded-xl hover:opacity-90 transition disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30"
-                >
-                  {loading ? <Loader2 size={20} className="animate-spin" /> : (
-                    'Sign Up — First Month FREE'
-                  )}
-                </button>
-              </form>
-            )}
-
-            {/* SIGN IN VIEW */}
+            {/* ===== SIGN IN VIEW (EMAIL ONLY — DEFAULT) ===== */}
             {view === 'signin' && (
-              <form onSubmit={handleSignIn} className="space-y-4">
-                <div className="relative">
-                  <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" />
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => { setEmail(e.target.value); clearError(); }}
-                    placeholder="Email"
-                    className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-blue-500 transition"
-                    required
-                    autoFocus
-                    disabled={loading}
-                  />
+              <>
+                <div className="text-center mb-6">
+                  <h2 className="text-xl font-bold text-white mb-2">Welcome Back</h2>
+                  <p className="text-white/50 text-sm">Subscribers — just enter your email</p>
                 </div>
 
-                <div className="relative">
-                  <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" />
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => { setPassword(e.target.value); clearError(); }}
-                    placeholder="Password"
-                    className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-blue-500 transition"
-                    required
+                <form onSubmit={handleSubscriberSignIn} className="space-y-4">
+                  <div className="relative">
+                    <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" />
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => { setEmail(e.target.value); clearError(); }}
+                      placeholder="Enter your email"
+                      className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-blue-500 transition text-lg"
+                      required
+                      autoFocus
+                      disabled={loading}
+                    />
+                  </div>
+
+                  {errorMsg && <p className="text-red-400 text-sm text-center">{errorMsg}</p>}
+
+                  <button
+                    type="submit"
                     disabled={loading}
-                  />
+                    className="w-full py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold rounded-xl hover:opacity-90 transition disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30 text-lg"
+                  >
+                    {loading ? <Loader2 size={20} className="animate-spin" /> : 'Sign In'}
+                  </button>
+                </form>
+
+                <div className="mt-6 space-y-3 text-center">
+                  <p className="text-white/40 text-sm">
+                    New here?{' '}
+                    <button onClick={() => switchView('signup')} className="text-blue-400 hover:text-blue-300 font-medium">
+                      Sign up — First Month FREE
+                    </button>
+                  </p>
+                  <p className="text-white/30 text-xs">
+                    <button onClick={() => switchView('password')} className="text-white/40 hover:text-white/60 transition">
+                      Sign in with password instead
+                    </button>
+                  </p>
+                  <button
+                    onClick={() => switchView('code')}
+                    className="text-blue-400/60 text-xs hover:text-blue-400 transition"
+                  >
+                    Have an access code?
+                  </button>
                 </div>
-
-                {errorMsg && <p className="text-red-400 text-sm text-center">{errorMsg}</p>}
-
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold rounded-xl hover:opacity-90 transition disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30"
-                >
-                  {loading ? <Loader2 size={20} className="animate-spin" /> : 'Sign In'}
-                </button>
-              </form>
+              </>
             )}
 
-            {/* ACCESS CODE VIEW */}
+            {/* ===== PASSWORD SIGN IN (FALLBACK) ===== */}
+            {view === 'password' && (
+              <>
+                <div className="text-center mb-6">
+                  <h2 className="text-xl font-bold text-white mb-2">Sign In With Password</h2>
+                </div>
+
+                <form onSubmit={handlePasswordSignIn} className="space-y-4">
+                  <div className="relative">
+                    <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" />
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => { setEmail(e.target.value); clearError(); }}
+                      placeholder="Email"
+                      className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-blue-500 transition"
+                      required
+                      autoFocus
+                      disabled={loading}
+                    />
+                  </div>
+
+                  <div className="relative">
+                    <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" />
+                    <input
+                      type="password"
+                      value={password}
+                      onChange={(e) => { setPassword(e.target.value); clearError(); }}
+                      placeholder="Password"
+                      className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-blue-500 transition"
+                      required
+                      disabled={loading}
+                    />
+                  </div>
+
+                  {errorMsg && <p className="text-red-400 text-sm text-center">{errorMsg}</p>}
+
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold rounded-xl hover:opacity-90 transition disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30"
+                  >
+                    {loading ? <Loader2 size={20} className="animate-spin" /> : 'Sign In'}
+                  </button>
+                </form>
+
+                <div className="mt-6 text-center">
+                  <button onClick={() => switchView('signin')} className="text-blue-400 hover:text-blue-300 text-sm font-medium">
+                    Back to email sign in
+                  </button>
+                </div>
+              </>
+            )}
+
+            {/* ===== SIGN UP VIEW ===== */}
+            {view === 'signup' && (
+              <>
+                <div className="text-center mb-6">
+                  <h2 className="text-xl font-bold text-white mb-2">Join MyStation</h2>
+                  {freeSignupSlotsRemaining > 0 ? (
+                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-500/20 border border-green-500/30 rounded-full">
+                      <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+                      <span className="text-green-400 font-bold text-sm">
+                        {freeSignupSlotsRemaining} of 26 free spots remaining!
+                      </span>
+                    </div>
+                  ) : (
+                    <p className="text-white/50 text-sm">
+                      $4.99/mo for unlimited access — first month FREE
+                    </p>
+                  )}
+                </div>
+
+                <form onSubmit={handleSignUp} className="space-y-4">
+                  <div className="relative">
+                    <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" />
+                    <input
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Name (optional)"
+                      className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-blue-500 transition"
+                      disabled={loading}
+                      autoFocus
+                    />
+                  </div>
+
+                  <div className="relative">
+                    <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" />
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => { setEmail(e.target.value); clearError(); }}
+                      placeholder="Email"
+                      className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-blue-500 transition"
+                      required
+                      disabled={loading}
+                    />
+                  </div>
+
+                  <div className="relative">
+                    <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" />
+                    <input
+                      type="password"
+                      value={password}
+                      onChange={(e) => { setPassword(e.target.value); clearError(); }}
+                      placeholder="Password (6+ characters)"
+                      className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-blue-500 transition"
+                      required
+                      minLength={6}
+                      disabled={loading}
+                    />
+                  </div>
+
+                  {errorMsg && <p className="text-red-400 text-sm text-center">{errorMsg}</p>}
+
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold rounded-xl hover:opacity-90 transition disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30"
+                  >
+                    {loading ? <Loader2 size={20} className="animate-spin" /> : (
+                      'Sign Up — First Month FREE'
+                    )}
+                  </button>
+                </form>
+
+                <div className="mt-6 space-y-2 text-center">
+                  <p className="text-white/40 text-sm">
+                    Already subscribed?{' '}
+                    <button onClick={() => switchView('signin')} className="text-blue-400 hover:text-blue-300 font-medium">
+                      Sign in with email
+                    </button>
+                  </p>
+                  <button
+                    onClick={() => switchView('code')}
+                    className="text-blue-400/60 text-xs hover:text-blue-400 transition"
+                  >
+                    Have an access code?
+                  </button>
+                </div>
+              </>
+            )}
+
+            {/* ===== ACCESS CODE VIEW ===== */}
             {view === 'code' && (
               <div className="space-y-4">
-                <p className="text-white/60 text-sm text-center">Enter your access code for free unlimited streaming</p>
+                <div className="text-center mb-2">
+                  <h2 className="text-xl font-bold text-white mb-2">Access Code</h2>
+                  <p className="text-white/60 text-sm">Enter your code for free unlimited streaming</p>
+                </div>
                 <div className="flex gap-2">
                   <input
                     type="text"
@@ -362,56 +499,14 @@ export default function AccountWall() {
                   </button>
                 </div>
                 {errorMsg && <p className="text-red-400 text-sm text-center">{errorMsg}</p>}
+
+                <div className="mt-4 text-center">
+                  <button onClick={() => switchView('signin')} className="text-blue-400 hover:text-blue-300 text-sm font-medium">
+                    Back to sign in
+                  </button>
+                </div>
               </div>
             )}
-
-            {/* View switchers */}
-            <div className="mt-6 space-y-2 text-center">
-              {view === 'signup' && (
-                <>
-                  <p className="text-white/40 text-sm">
-                    Already have an account?{' '}
-                    <button onClick={() => switchView('signin')} className="text-blue-400 hover:text-blue-300 font-medium">
-                      Sign in
-                    </button>
-                  </p>
-                  <button
-                    onClick={() => switchView('code')}
-                    className="text-blue-400/60 text-xs hover:text-blue-400 transition"
-                  >
-                    Have an access code?
-                  </button>
-                </>
-              )}
-              {view === 'signin' && (
-                <>
-                  <p className="text-white/40 text-sm">
-                    No account?{' '}
-                    <button onClick={() => switchView('signup')} className="text-blue-400 hover:text-blue-300 font-medium">
-                      Create one
-                    </button>
-                  </p>
-                  <button
-                    onClick={() => switchView('code')}
-                    className="text-blue-400/60 text-xs hover:text-blue-400 transition"
-                  >
-                    Have an access code?
-                  </button>
-                </>
-              )}
-              {view === 'code' && (
-                <p className="text-white/40 text-sm">
-                  <button onClick={() => switchView('signup')} className="text-blue-400 hover:text-blue-300 font-medium">
-                    Sign up
-                  </button>
-                  {' or '}
-                  <button onClick={() => switchView('signin')} className="text-blue-400 hover:text-blue-300 font-medium">
-                    Sign in
-                  </button>
-                  {' instead'}
-                </p>
-              )}
-            </div>
 
             {/* Commerce links — always accessible, no subscription needed */}
             <div className="mt-6 flex items-center justify-center gap-6">
