@@ -21,13 +21,14 @@ export default function FoundingMemberBanner() {
   const [realRemaining, setRealRemaining] = useState(null);
   const [ready, setReady] = useState(false);
   const [dismissed, setDismissed] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
   const isSubscribed = useUserStore(s => s.isSubscribed);
 
-  useEffect(() => {
-    // Check admin
-    try { setIsAdmin(sessionStorage.getItem('ADMIN_KEY') === 'mpf2026'); } catch {}
+  // Read admin status SYNCHRONOUSLY so it's available on first render
+  const isAdmin = typeof window !== 'undefined' && (() => {
+    try { return sessionStorage.getItem('ADMIN_KEY') === 'mpf2026'; } catch { return false; }
+  })();
 
+  useEffect(() => {
     // Check if dismissed this session
     const d = sessionStorage.getItem('founding-banner-dismissed');
     if (d) { setDismissed(true); return; }
