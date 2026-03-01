@@ -83,7 +83,7 @@ export const usePlayerStore = create(
   openSubscribeModal: (pendingTrack = null) => {
     // Check cookies first — subscribers never see the modal
     const cookies = typeof document !== 'undefined' ? document.cookie : '';
-    if (cookies.includes('mystation-sub-flag=') || cookies.includes('mystation-sub=') || cookies.includes('mystation-friend=') || cookies.includes('mystation-auth=')) {
+    if (cookies.includes('mystation-sub-flag=') || cookies.includes('mystation-sub=') || cookies.includes('mystation-friend=')) {
       // Subscriber — play the track directly instead of showing modal
       if (pendingTrack) {
         set({ currentTrack: pendingTrack, isPlaying: true, lastPlayedTrack: pendingTrack });
@@ -353,11 +353,12 @@ export function isGated(track) {
   if (isSubscribed) return false;
 
   // Subscribers & friends bypass completely (cookie = source of truth)
+  // NOTE: mystation-auth is NOT a bypass — auth just means "we know who you are"
+  // Only subscription and friend cookies grant unlimited music
   const cookies = typeof document !== 'undefined' ? document.cookie : '';
   if (cookies.includes('mystation-sub-flag=')) return false; // Client-readable sub flag
   if (cookies.includes('mystation-sub=')) return false; // httpOnly sub (server sees, client may not)
   if (cookies.includes('mystation-friend=')) return false;
-  if (cookies.includes('mystation-auth=')) return false;
 
   // Check total free plays
   const { freePlays } = usePlayerStore.getState();

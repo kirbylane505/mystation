@@ -45,8 +45,7 @@ export default function SubscribeModal() {
   if (typeof document !== 'undefined' && (
     document.cookie.includes('mystation-sub-flag=') ||
     document.cookie.includes('mystation-sub=') ||
-    document.cookie.includes('mystation-friend=') ||
-    document.cookie.includes('mystation-auth=')
+    document.cookie.includes('mystation-friend=')
   )) {
     if (pendingTrack) {
       setTimeout(() => { setTrack(pendingTrack); closeSubscribeModal(); }, 0);

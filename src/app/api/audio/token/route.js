@@ -62,22 +62,6 @@ function verifySubscriptionCookie(cookieStr) {
   return true;
 }
 
-// Verify auth cookie (email:timestamp:hmac, 365-day expiry — authenticated users remembered)
-function verifyAuthCookie(cookieStr) {
-  const val = parseCookie(cookieStr, 'mystation-auth');
-  if (!val) return null;
-  const parts = val.split(':');
-  if (parts.length < 3) return null;
-  const sig = parts[parts.length - 1];
-  const timestamp = parts[parts.length - 2];
-  const email = parts.slice(0, parts.length - 2).join(':');
-  const expected = hmacSign('auth', `${email}:${timestamp}`);
-  if (!timingSafeEqual(expected, sig)) return null;
-  const ts = parseInt(timestamp, 10);
-  if (isNaN(ts) || Date.now() - ts > 365 * 24 * 60 * 60 * 1000) return null;
-  return { email, timestamp: ts };
-}
-
 export async function POST(request) {
   try {
     const { trackId } = await request.json();
@@ -116,11 +100,8 @@ export async function POST(request) {
       return grantToken(track);
     }
 
-    // 4. Auth cookie → full access (authenticated user)
-    const auth = verifyAuthCookie(cookieStr);
-    if (auth) {
-      return grantToken(track);
-    }
+    // 4. Auth cookie — does NOT bypass gate. Auth = "we know who you are", not "you paid".
+    // Only subscription and friend cookies grant unlimited music.
 
     // 5. Universal gate — non-subscribers get 2 free songs total
     const freePlays = getFreePlays(cookieStr);
