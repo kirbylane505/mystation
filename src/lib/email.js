@@ -906,3 +906,96 @@ export async function sendTicketOrderAlert({ orderRef, eventName, customerName, 
     return { success: false, error: err.message };
   }
 }
+
+/**
+ * Send welcome email to new paid subscriber (post-checkout)
+ */
+export async function sendSubscriptionWelcomeEmail({ customerEmail, customerName, tier }) {
+  if (!resend) { console.warn('Resend not configured — skipping welcome email'); return { success: false }; }
+  const safeName = (customerName || customerEmail.split('@')[0]).replace(/[<>&"']/g, '');
+
+  try {
+    const { data, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: customerEmail,
+      subject: `Welcome to MyStation, ${safeName}!`,
+      html: `
+        <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:600px;margin:0 auto;background:#0a0e1a;color:#fff;padding:32px;border-radius:16px;">
+          <div style="text-align:center;margin-bottom:24px;">
+            <h1 style="color:#3b82f6;margin:0;font-size:28px;">Welcome to MyStation</h1>
+            <p style="color:#22c55e;font-size:18px;margin:8px 0;">You're in, ${safeName}.</p>
+          </div>
+          <div style="background:#1a1f36;padding:20px;border-radius:12px;margin-bottom:16px;">
+            <h3 style="color:#3b82f6;margin:0 0 12px;">What You Get</h3>
+            <ul style="color:#e2e8f0;padding-left:20px;margin:0;">
+              <li style="margin-bottom:8px;">Unlimited streaming of the entire catalog</li>
+              <li style="margin-bottom:8px;">Exclusive unreleased tracks</li>
+              <li style="margin-bottom:8px;">Early access to new drops</li>
+              <li style="margin-bottom:8px;">Comment on any track</li>
+            </ul>
+          </div>
+          <div style="text-align:center;margin-top:24px;">
+            <a href="https://mystationlive.com/music" style="display:inline-block;background:#3b82f6;color:#fff;font-weight:bold;text-decoration:none;padding:14px 32px;border-radius:12px;font-size:16px;">Start Listening</a>
+          </div>
+          <p style="color:#475569;font-size:12px;text-align:center;margin-top:24px;">MyStation — Premium Music by IDMG</p>
+        </div>
+      `,
+    });
+    if (error) { console.error('Welcome email error:', error); return { success: false, error }; }
+    console.log('Welcome email sent to:', customerEmail);
+    return { success: true, emailId: data?.id };
+  } catch (err) {
+    console.error('Welcome email error:', err);
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * Send payment failed notification to customer + admin alert
+ */
+export async function sendPaymentFailedEmail({ customerEmail, customerName, invoiceUrl }) {
+  if (!resend) { console.warn('Resend not configured — skipping payment failed email'); return { success: false }; }
+  const safeName = (customerName || 'there').replace(/[<>&"']/g, '');
+
+  try {
+    // Email to customer
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: customerEmail,
+      subject: 'MyStation — Payment Issue with Your Subscription',
+      html: `
+        <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:600px;margin:0 auto;background:#0a0e1a;color:#fff;padding:32px;border-radius:16px;">
+          <div style="text-align:center;margin-bottom:24px;">
+            <h1 style="color:#ef4444;margin:0;font-size:24px;">Payment Issue</h1>
+          </div>
+          <div style="background:#1a1f36;padding:20px;border-radius:12px;margin-bottom:16px;">
+            <p style="color:#e2e8f0;margin:0 0 12px;">Hey ${safeName},</p>
+            <p style="color:#e2e8f0;margin:0 0 12px;">We couldn't process your MyStation subscription payment. Please update your payment method to keep your access active.</p>
+            ${invoiceUrl ? `<div style="text-align:center;margin-top:16px;"><a href="${invoiceUrl}" style="display:inline-block;background:#3b82f6;color:#fff;font-weight:bold;text-decoration:none;padding:12px 24px;border-radius:10px;">Update Payment</a></div>` : ''}
+          </div>
+          <p style="color:#475569;font-size:12px;text-align:center;margin-top:24px;">Questions? Reply to this email.</p>
+        </div>
+      `,
+    });
+
+    // Alert Mike
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: ADMIN_EMAIL,
+      subject: `PAYMENT FAILED — ${customerEmail}`,
+      html: `
+        <div style="font-family:-apple-system,sans-serif;max-width:500px;margin:0 auto;background:#0a0e1a;color:#fff;padding:24px;border-radius:16px;">
+          <h2 style="color:#ef4444;margin:0 0 12px;">Payment Failed</h2>
+          <p style="color:#e2e8f0;margin:0 0 8px;"><strong>${safeName}</strong> (${customerEmail})</p>
+          <p style="color:#94a3b8;margin:0;">Subscription payment could not be processed. Customer has been notified.</p>
+        </div>
+      `,
+    });
+
+    console.log('Payment failed email sent to:', customerEmail);
+    return { success: true };
+  } catch (err) {
+    console.error('Payment failed email error:', err);
+    return { success: false, error: err.message };
+  }
+}

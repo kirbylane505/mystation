@@ -13,7 +13,7 @@ import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import { printful } from '@/lib/printful';
 import { printify } from '@/lib/printify';
-import { sendSaleAlert, sendOrderConfirmation, sendNewSignupAlert, sendCancelAlert, sendBigSpenderThankYou, sendOrderFailedAlert } from '@/lib/email';
+import { sendSaleAlert, sendOrderConfirmation, sendNewSignupAlert, sendCancelAlert, sendBigSpenderThankYou, sendOrderFailedAlert, sendSubscriptionWelcomeEmail, sendPaymentFailedEmail } from '@/lib/email';
 import { tagSubscriber } from '@/lib/kit';
 import { createHmac } from 'crypto';
 
@@ -71,6 +71,10 @@ export async function POST(request) {
 
       case 'customer.subscription.updated':
         await handleSubscriptionUpdated(event.data.object);
+        break;
+
+      case 'invoice.payment_failed':
+        await handleInvoicePaymentFailed(event.data.object);
         break;
 
       default:
@@ -153,6 +157,27 @@ async function handleCheckoutCompleted(session, stripe) {
     let parsedPrintifyItems = null;
     try { if (metadata.printful_items) parsedPrintfulItems = JSON.parse(metadata.printful_items); } catch (e) { console.error('Failed to parse printful_items:', e); }
     try { if (metadata.printify_items) parsedPrintifyItems = JSON.parse(metadata.printify_items); } catch (e) { console.error('Failed to parse printify_items:', e); }
+
+    // ========================================
+    // IDEMPOTENCY — Skip if already processed
+    // ========================================
+    try {
+      const { getSupabaseAdmin } = await import('@/lib/supabaseAdmin');
+      const supabase = getSupabaseAdmin();
+      if (supabase) {
+        const { data: existingOrder } = await supabase
+          .from('merch_orders')
+          .select('id')
+          .eq('stripe_session_id', session.id)
+          .maybeSingle();
+        if (existingOrder) {
+          console.log('Duplicate webhook — order already processed for session:', session.id);
+          return;
+        }
+      }
+    } catch (e) {
+      console.error('Idempotency check failed (non-blocking):', e.message);
+    }
 
     // ========================================
     // ORDER TRACKING — Log to merch_orders
@@ -568,6 +593,13 @@ async function handleSubscriptionCheckout(session, stripe) {
       purchased_sub_until: currentPeriodEnd,
     }, { onConflict: 'email' });
 
+    // Welcome email to subscriber
+    sendSubscriptionWelcomeEmail({
+      customerEmail: email,
+      customerName: session.customer_details?.name || email.split('@')[0],
+      tier,
+    }).catch(err => console.error('Welcome email error:', err));
+
     // Alert Mike + tag in Kit
     sendNewSignupAlert({
       customerName: session.customer_details?.name || email.split('@')[0],
@@ -862,4 +894,23 @@ async function handleSubscriptionUpdated(subscription) {
   } catch (err) {
     console.error('subscription.updated handler error:', err);
   }
+}
+
+/**
+ * Handle invoice.payment_failed — notify customer + admin
+ */
+async function handleInvoicePaymentFailed(invoice) {
+  const customerEmail = invoice.customer_email;
+  if (!customerEmail) {
+    console.log('invoice.payment_failed: No customer email, skipping');
+    return;
+  }
+
+  console.log('Payment failed for:', customerEmail);
+
+  sendPaymentFailedEmail({
+    customerEmail,
+    customerName: invoice.customer_name || customerEmail.split('@')[0],
+    invoiceUrl: invoice.hosted_invoice_url || null,
+  }).catch(err => console.error('Payment failed email error:', err));
 }

@@ -16,8 +16,10 @@ export default function AdminMerchOrdersPage() {
     setLoading(true);
     setError(null);
     try {
-      const statusParam = filter !== 'all' ? `&status=${filter}` : '';
-      const res = await fetch(`/api/admin/merch-orders?key=${adminKey}${statusParam}`);
+      const statusParam = filter !== 'all' ? `?status=${filter}` : '';
+      const res = await fetch(`/api/admin/merch-orders${statusParam}`, {
+        headers: { 'x-admin-key': adminKey },
+      });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to fetch orders');
       setOrders(data.orders || []);

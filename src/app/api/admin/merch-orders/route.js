@@ -12,7 +12,7 @@ function verifyAdminKey(key) {
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
-  const key = request.headers.get('x-admin-key') || searchParams.get('key');
+  const key = request.headers.get('x-admin-key');
   if (!verifyAdminKey(key)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }

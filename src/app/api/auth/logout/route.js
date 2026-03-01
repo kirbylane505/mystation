@@ -1,6 +1,6 @@
 /**
  * MYSTATION - Logout API Route
- * Signs out user from Supabase Auth
+ * Signs out user from Supabase Auth and clears all session cookies
  */
 
 import { NextResponse } from 'next/server';
@@ -17,7 +17,21 @@ export async function POST() {
       );
     }
 
-    return NextResponse.json({ success: true });
+    const response = NextResponse.json({ success: true });
+
+    // Clear all MyStation session cookies
+    const cookiesToClear = ['mystation-auth', 'mystation-sub', 'mystation-trial'];
+    for (const name of cookiesToClear) {
+      response.cookies.set(name, '', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 0,
+        path: '/',
+      });
+    }
+
+    return response;
   } catch (err) {
     console.error('Logout error:', err);
     return NextResponse.json(

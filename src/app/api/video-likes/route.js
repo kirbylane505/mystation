@@ -19,6 +19,23 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
 
+// Rate limit: 10 likes per visitor per hour (in-memory, best-effort)
+const likeLimits = new Map();
+const LIKE_LIMIT = 10;
+const LIKE_WINDOW = 60 * 60 * 1000;
+
+function checkLikeRateLimit(visitorId) {
+  const now = Date.now();
+  const record = likeLimits.get(visitorId);
+  if (!record || now - record.firstAt > LIKE_WINDOW) {
+    likeLimits.set(visitorId, { count: 1, firstAt: now });
+    return true;
+  }
+  if (record.count >= LIKE_LIMIT) return false;
+  record.count++;
+  return true;
+}
+
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const videoId = searchParams.get('videoId');
@@ -70,6 +87,10 @@ export async function POST(request) {
 
     if (!videoId || !visitorId) {
       return NextResponse.json({ error: 'videoId and visitorId required' }, { status: 400 });
+    }
+
+    if (!checkLikeRateLimit(visitorId)) {
+      return NextResponse.json({ error: 'Too many likes. Try again later.' }, { status: 429 });
     }
 
     const supabase = getSupabaseAdmin();

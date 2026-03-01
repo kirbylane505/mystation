@@ -37,6 +37,22 @@ export async function POST(request) {
           .eq('email', cleanEmail)
           .single();
 
+        // Check if user is already an active subscriber
+        if (existing && existing.stripe_sub_active) {
+          return NextResponse.json({ error: 'Already subscribed' }, { status: 409 });
+        }
+
+        // Also check subscribers table
+        const { data: activeSub } = await supabase
+          .from('subscribers')
+          .select('id')
+          .eq('email', cleanEmail)
+          .eq('status', 'active')
+          .maybeSingle();
+        if (activeSub) {
+          return NextResponse.json({ error: 'Already subscribed' }, { status: 409 });
+        }
+
         if (existing) {
           // User exists — keep original trial start
           trialStartedAt = new Date(existing.trial_started_at);
