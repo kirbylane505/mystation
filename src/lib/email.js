@@ -12,7 +12,7 @@ const resend = process.env.RESEND_API_KEY
   ? new Resend(process.env.RESEND_API_KEY)
   : null;
 
-const ADMIN_EMAIL = ['mystationllc1@gmail.com', 'idmgatl@gmail.com'];
+const ADMIN_EMAIL = ['mystationllc1@gmail.com'];
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'MyStation <notifications@mystationlive.com>';
 
 /**

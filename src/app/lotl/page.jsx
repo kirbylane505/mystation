@@ -624,7 +624,7 @@ export default function LOTLPage() {
                     ))}
                   </ul>
                   <a
-                    href="mailto:idmgatl@gmail.com?subject=LOTL%20Streamer%20Application"
+                    href="mailto:Contact@LOTLFEST.com?subject=LOTL%20Streamer%20Application"
                     className="btn-primary bg-gradient-to-r from-green-500 to-emerald-600 inline-flex items-center gap-2"
                   >
                     <Camera size={18} />
@@ -715,7 +715,7 @@ export default function LOTLPage() {
                     ))}
                   </ul>
                   <a
-                    href={level.price === '$0' ? '#' : 'mailto:idmgatl@gmail.com?subject=LOTL%20Streamer%20-%20' + level.title}
+                    href={level.price === '$0' ? '#' : 'mailto:Contact@LOTLFEST.com?subject=LOTL%20Streamer%20-%20' + level.title}
                     className={`block w-full py-3 rounded-xl text-center font-bold text-sm transition ${
                       level.popular
                         ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:shadow-lg hover:shadow-green-500/30'
