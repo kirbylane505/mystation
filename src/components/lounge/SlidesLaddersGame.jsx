@@ -9,8 +9,11 @@ import { useState, useEffect } from 'react';
 import BoardGrid from './board/BoardGrid';
 import DiceRoller from './board/DiceRoller';
 import { PLAYER_COLORS } from '@/lib/games/constants';
+import { HelpButton, useAutoShowGuide } from './HowToPlayModal';
+import HowToPlayModal from './HowToPlayModal';
 
 export default function SlidesLaddersGame({ gameState, myPlayerId, onRoll, players }) {
+  const { showGuide, closeGuide } = useAutoShowGuide('slidesLadders');
   const [rolling, setRolling] = useState(false);
 
   if (!gameState) return null;
@@ -39,7 +42,9 @@ export default function SlidesLaddersGame({ gameState, myPlayerId, onRoll, playe
   };
 
   return (
-    <div className="w-full flex flex-col items-center gap-4">
+    <div className="w-full flex flex-col items-center gap-4 relative">
+      {showGuide && <HowToPlayModal gameId="slidesLadders" isOpen={showGuide} onClose={closeGuide} />}
+      <HelpButton gameId="slidesLadders" className="absolute top-2 right-2 z-10" />
       {/* Turn indicator + Dice + Roll Button (always visible at top) */}
       <div className="flex items-center gap-6">
         <DiceRoller

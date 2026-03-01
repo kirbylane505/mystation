@@ -18,6 +18,26 @@ let audioUnlocked = false;
 let lastSkipTime = 0;
 let consecutiveErrors = 0;
 
+// Cross-tab audio arbitration — prevents IDMG + MyStation playing simultaneously
+let empireAudioChannel = null;
+try {
+  if (typeof window !== 'undefined') {
+    empireAudioChannel = new BroadcastChannel('idmg-empire-audio');
+    empireAudioChannel.onmessage = (e) => {
+      if (e.data?.source === 'idmglive' && e.data?.action === 'playing') {
+        // IDMG started playing — pause MyStation
+        if (globalAudio && !globalAudio.paused) {
+          const { pause } = usePlayerStore.getState();
+          if (pause) pause();
+          globalAudio.pause();
+        }
+      }
+    };
+  }
+} catch {
+  // BroadcastChannel not supported — no cross-tab coordination
+}
+
 // Tiny silent WAV — used to unlock iOS audio on first touch
 const SILENCE_DATA_URL = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';
 
@@ -68,6 +88,8 @@ async function safePlay(audio, retries = 3) {
   for (let i = 0; i < retries; i++) {
     try {
       await audio.play();
+      // Tell other Empire tabs (IDMG) to pause
+      try { empireAudioChannel?.postMessage({ source: 'mystation', action: 'playing' }); } catch {}
       return true;
     } catch (err) {
       if (err.name === 'NotAllowedError') return false;

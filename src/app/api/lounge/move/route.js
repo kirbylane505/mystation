@@ -359,6 +359,7 @@ async function awardGamePoints(supabase, room, gameState) {
             best_streak: Math.max(existing.best_streak, newStreak),
             points_earned: existing.points_earned + pointsEarned,
             last_played_at: new Date().toISOString(),
+            ...(userId.startsWith('sub_') && !existing.subscriber_email ? { subscriber_email: userId } : {}),
           })
           .eq('id', existing.id);
       } else {

@@ -8,11 +8,14 @@
 import { useState } from 'react';
 import Card from './cards/Card';
 import { SUIT_SYMBOLS } from '@/lib/games/constants';
+import { HelpButton, useAutoShowGuide } from './HowToPlayModal';
+import HowToPlayModal from './HowToPlayModal';
 
 const SEAT_LABELS = ['South (You)', 'West', 'North (Partner)', 'East'];
 const SEAT_POSITIONS = ['bottom', 'left', 'top', 'right'];
 
 export default function SpadesGame({ gameState, myPlayerId, onMove }) {
+  const { showGuide, closeGuide } = useAutoShowGuide('spades');
   const [selectedBid, setSelectedBid] = useState(3);
 
   if (!gameState) return null;
@@ -26,7 +29,9 @@ export default function SpadesGame({ gameState, myPlayerId, onMove }) {
   const displayOrder = [0, 1, 2, 3].map(i => (myIdx + i) % 4);
 
   return (
-    <div className="w-full flex flex-col items-center gap-4">
+    <div className="w-full flex flex-col items-center gap-4 relative">
+      {showGuide && <HowToPlayModal gameId="spades" isOpen={showGuide} onClose={closeGuide} />}
+      <HelpButton gameId="spades" className="absolute top-2 right-2 z-10" />
       {/* Scores */}
       <div className="flex items-center gap-8 mb-2">
         <div className={`text-center px-4 py-2 rounded-xl ${myTeam === 'team1' ? 'bg-blue-500/20 border border-blue-500/30' : 'bg-white/5 border border-white/10'}`}>

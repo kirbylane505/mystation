@@ -73,18 +73,27 @@ const MODE_CARDS = [
   },
 ];
 
+const ARCADE_GAMES = {
+  pool: { arcadeKey: 'arcadePool', arcadeName: 'Arcade Pool', arcadeIcon: '🎯', arcadeDesc: 'Solo levels — Rookie to Pro!' },
+  blackjack: { arcadeKey: 'arcadeBlackjack', arcadeName: 'Blackjack Trainer', arcadeIcon: '🎰', arcadeDesc: 'Practice & learn strategy!' },
+};
+
 export default function GameModeModal({ gameKey, isOpen, onClose, displayName, onNameChange }) {
   const router = useRouter();
   const { createRoom } = useGameStore();
   const [showTips, setShowTips] = useState(false);
   const [loading, setLoading] = useState(null);
   const [mounted, setMounted] = useState(false);
+  const [subMode, setSubMode] = useState(null); // null = show sub-selector, 'arcade' = launch arcade, 'multi' = show mode cards
 
   useEffect(() => { setMounted(true); }, []);
 
-  // Reset tips state when modal opens with different game
+  // Reset tips + subMode when modal opens with different game
   useEffect(() => {
-    if (isOpen) setShowTips(false);
+    if (isOpen) {
+      setShowTips(false);
+      setSubMode(null);
+    }
   }, [isOpen, gameKey]);
 
   // ESC to close
@@ -103,6 +112,9 @@ export default function GameModeModal({ gameKey, isOpen, onClose, displayName, o
 
   const game = GAME_TYPES[gameKey];
   if (!game) return null;
+
+  const arcadeInfo = ARCADE_GAMES[gameKey];
+  const hasArcade = !!arcadeInfo;
 
   const needsName = !displayName?.trim();
 
@@ -209,7 +221,48 @@ export default function GameModeModal({ gameKey, isOpen, onClose, displayName, o
           </div>
         )}
 
-        {/* Mode Selection Cards */}
+        {/* Sub-mode selector for games with arcade modes */}
+        {hasArcade && !subMode && (
+          <div className="px-6 space-y-3 mb-5">
+            <div className="grid grid-cols-2 gap-3">
+              {/* Arcade Card */}
+              <button
+                onClick={() => {
+                  onClose();
+                  router.push(`/lounge?arcade=${arcadeInfo.arcadeKey}`);
+                }}
+                className="group relative p-5 rounded-2xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.06] transition-all duration-300 hover:-translate-y-1 text-left overflow-hidden"
+                style={{ animation: 'loungeFadeUp 0.4s ease-out 0.15s both' }}
+              >
+                <div
+                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-2xl"
+                  style={{ background: `linear-gradient(135deg, ${arcadeInfo.arcadeKey === 'arcadePool' ? '#f59e0b' : '#10b981'}08, transparent 70%)` }}
+                />
+                <span className="text-4xl block mb-3">{arcadeInfo.arcadeIcon}</span>
+                <h3 className="text-white font-bold text-sm mb-0.5">{arcadeInfo.arcadeName}</h3>
+                <p className="text-white/20 text-xs">{arcadeInfo.arcadeDesc}</p>
+              </button>
+
+              {/* Multiplayer Card */}
+              <button
+                onClick={() => setSubMode('multi')}
+                className="group relative p-5 rounded-2xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.06] transition-all duration-300 hover:-translate-y-1 text-left overflow-hidden"
+                style={{ animation: 'loungeFadeUp 0.4s ease-out 0.23s both' }}
+              >
+                <div
+                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-2xl"
+                  style={{ background: `linear-gradient(135deg, ${game.color}08, transparent 70%)` }}
+                />
+                <span className="text-4xl block mb-3">{game.icon}</span>
+                <h3 className="text-white font-bold text-sm mb-0.5">Multiplayer</h3>
+                <p className="text-white/20 text-xs">Play with friends or AI</p>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Mode Selection Cards — show if no arcade option OR multiplayer selected */}
+        {(!hasArcade || subMode === 'multi') && (
         <div className="px-6 space-y-3 mb-5">
           {/* Quick Play + With Friends — side by side */}
           <div className="grid grid-cols-2 gap-3">
@@ -271,6 +324,7 @@ export default function GameModeModal({ gameKey, isOpen, onClose, displayName, o
             <ChevronDown size={14} className="text-white/15 -rotate-90 group-hover:translate-x-1 transition-transform duration-300" />
           </button>
         </div>
+        )}
 
         {/* How to Play — Expandable */}
         <div className="px-6 pb-6" style={{ animation: 'loungeFadeUp 0.4s ease-out 0.35s both' }}>

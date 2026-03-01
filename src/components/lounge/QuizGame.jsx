@@ -10,11 +10,14 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { initQuiz, submitAnswer, nextQuestion, getQuizResults, getStreakMultiplier } from '@/lib/games/quiz';
 import { questions, categories } from '@/data/blackHistoryQuestions';
+import { HelpButton, useAutoShowGuide } from './HowToPlayModal';
+import HowToPlayModal from './HowToPlayModal';
 
 const CHOICE_LABELS = ['A', 'B', 'C', 'D'];
 const REVEAL_DELAY = 3500; // ms before auto-advancing from reveal
 
 export default function QuizGame({ gameState: serverState, myPlayerId, onMove }) {
+  const { showGuide, closeGuide } = useAutoShowGuide('quiz');
   // Local state for solo play
   const [localState, setLocalState] = useState(null);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
@@ -348,7 +351,9 @@ export default function QuizGame({ gameState: serverState, myPlayerId, onMove })
 
   // ========== QUESTION / REVEAL PHASE ==========
   return (
-    <div className="w-full max-w-2xl mx-auto px-4">
+    <div className="w-full max-w-2xl mx-auto px-4 relative">
+      {showGuide && <HowToPlayModal gameId="quiz" isOpen={showGuide} onClose={closeGuide} />}
+      <HelpButton gameId="quiz" className="absolute top-2 right-2 z-10" />
       {/* Top Bar: Score + Category + Question Counter */}
       <div className="flex items-center justify-between mb-4">
         <div>

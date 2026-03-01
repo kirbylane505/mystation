@@ -8,6 +8,8 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { PLAYER_COLORS } from '@/lib/games/constants';
+import { HelpButton, useAutoShowGuide } from './HowToPlayModal';
+import HowToPlayModal from './HowToPlayModal';
 
 // ── Web Audio Sound Effects ──
 
@@ -255,6 +257,7 @@ function ChainTile({ tile, isLast, animateIn }) {
 // ── Main Dominoes Game Component ──
 
 export default function DominoesGame({ gameState, myPlayerId, onMove, players }) {
+  const { showGuide, closeGuide } = useAutoShowGuide('dominoes');
   const [selectedTile, setSelectedTile] = useState(null);
   const audioCtxRef = useRef(null);
   const prevChainLenRef = useRef(0);
@@ -380,7 +383,9 @@ export default function DominoesGame({ gameState, myPlayerId, onMove, players })
   const myPipCount = myHand.reduce((sum, t) => sum + t.a + t.b, 0);
 
   return (
-    <div className="w-full flex flex-col items-center gap-5">
+    <div className="w-full flex flex-col items-center gap-5 relative">
+      {showGuide && <HowToPlayModal gameId="dominoes" isOpen={showGuide} onClose={closeGuide} />}
+      <HelpButton gameId="dominoes" className="absolute top-2 right-2 z-10" />
       {/* CSS for domino slam animation */}
       <style>{`
         @keyframes dominoSlam {

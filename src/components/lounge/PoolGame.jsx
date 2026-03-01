@@ -7,54 +7,9 @@
 'use client';
 
 import { useRef, useState, useEffect, useCallback } from 'react';
-
-// ============================================================
-// TABLE & PHYSICS CONSTANTS
-// ============================================================
-const TW = 1200;
-const TH = 600;
-const BORDER = 40;
-const CUSHION = 8;
-const BALL_R = 13;
-const POCKET_R = 22;
-const FRICTION = 0.988;
-const MIN_VEL = 0.06;
-const MAX_POWER = 22;
-const WALL_BOUNCE = 0.7;
-const BALL_BOUNCE = 0.96;
-
-// Corner pockets slightly inside, side pockets centered
-const POCKETS = [
-  { x: BORDER + 6, y: BORDER + 6 },                  // top-left
-  { x: TW / 2, y: BORDER - 4 },                       // top-center
-  { x: TW - BORDER - 6, y: BORDER + 6 },              // top-right
-  { x: BORDER + 6, y: TH - BORDER - 6 },              // bottom-left
-  { x: TW / 2, y: TH - BORDER + 4 },                  // bottom-center
-  { x: TW - BORDER - 6, y: TH - BORDER - 6 },         // bottom-right
-];
-
-// Ball colors (official billiards)
-const BALL_COLORS = {
-  0: '#F8F8F0',   // cue — ivory white
-  1: '#F5C518',   // 1 — yellow
-  2: '#1A3FC7',   // 2 — blue
-  3: '#D4261D',   // 3 — red
-  4: '#5B2C8E',   // 4 — purple
-  5: '#E87511',   // 5 — orange
-  6: '#1B8C4B',   // 6 — green
-  7: '#8B1A1A',   // 7 — maroon
-  8: '#111111',   // 8 — black
-  9: '#F5C518',   // 9 — yellow stripe
-  10: '#1A3FC7',  // 10 — blue stripe
-  11: '#D4261D',  // 11 — red stripe
-  12: '#5B2C8E',  // 12 — purple stripe
-  13: '#E87511',  // 13 — orange stripe
-  14: '#1B8C4B',  // 14 — green stripe
-  15: '#8B1A1A',  // 15 — maroon stripe
-};
-
-const isStripe = (id) => id >= 9 && id <= 15;
-const isSolid = (id) => id >= 1 && id <= 7;
+import { TW, TH, BORDER, CUSHION, BALL_R, POCKET_R, MAX_POWER, BALL_COLORS, isStripe, POCKETS, createInitialBalls, stepPhysics } from '@/lib/games/poolPhysics';
+import { HelpButton, useAutoShowGuide } from './HowToPlayModal';
+import HowToPlayModal from './HowToPlayModal';
 
 // ============================================================
 // SOUND EFFECTS (Web Audio API — no dependencies)
@@ -162,34 +117,9 @@ function playCueStrike(power) {
 
 // Pocket flash effects
 const pocketFlashes = [];
-
-const RACK_ORDER = [
-  [1],
-  [11, 2],
-  [9, 8, 3],
-  [12, 4, 10, 5],
-  [13, 6, 15, 7, 14],
-];
-
-function createInitialBalls() {
-  const balls = [];
-  balls.push({ id: 0, x: TW * 0.25, y: TH / 2, vx: 0, vy: 0, pocketed: false });
-  const rackX = TW * 0.72;
-  const rackY = TH / 2;
-  const spacing = BALL_R * 2.06;
-  const rowDx = spacing * Math.sqrt(3) / 2;
-  RACK_ORDER.forEach((row, ri) => {
-    row.forEach((ballId, ci) => {
-      balls.push({
-        id: ballId,
-        x: rackX + ri * rowDx,
-        y: rackY + (ci - (row.length - 1) / 2) * spacing,
-        vx: 0, vy: 0, pocketed: false,
-      });
-    });
-  });
-  return balls;
-}
+const pocketDrops = []; // { x, y, ballId, scale, alpha, color }
+const trailParticles = []; // { x, y, alpha }
+const sparks = []; // { x, y, vx, vy, alpha }
 
 // ============================================================
 // RENDERING HELPERS
@@ -240,15 +170,30 @@ function drawTable(ctx) {
   ctx.fillStyle = feltGrad;
   ctx.fillRect(BORDER + CUSHION, BORDER + CUSHION, w - (BORDER + CUSHION) * 2, h - (BORDER + CUSHION) * 2);
 
-  // Felt texture (subtle noise pattern)
-  ctx.fillStyle = 'rgba(0,0,0,0.015)';
-  for (let x = BORDER + CUSHION; x < w - BORDER - CUSHION; x += 4) {
-    for (let y = BORDER + CUSHION; y < h - BORDER - CUSHION; y += 4) {
-      if (Math.random() < 0.3) {
-        ctx.fillRect(x, y, 2, 2);
-      }
-    }
+  // Cloth weave texture (diagonal cross-hatch)
+  ctx.strokeStyle = 'rgba(0,0,0,0.02)';
+  ctx.lineWidth = 0.5;
+  const feltLeft = BORDER + CUSHION;
+  const feltTop = BORDER + CUSHION;
+  const feltRight = w - BORDER - CUSHION;
+  const feltBottom = h - BORDER - CUSHION;
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(feltLeft, feltTop, feltRight - feltLeft, feltBottom - feltTop);
+  ctx.clip();
+  for (let i = -feltBottom; i < feltRight; i += 6) {
+    ctx.beginPath();
+    ctx.moveTo(i, feltTop);
+    ctx.lineTo(i + (feltBottom - feltTop), feltBottom);
+    ctx.stroke();
   }
+  for (let i = feltLeft; i < feltRight + feltBottom; i += 6) {
+    ctx.beginPath();
+    ctx.moveTo(i, feltTop);
+    ctx.lineTo(i - (feltBottom - feltTop), feltBottom);
+    ctx.stroke();
+  }
+  ctx.restore();
 
   // Head string (break line)
   ctx.strokeStyle = 'rgba(255,255,255,0.06)';
@@ -403,6 +348,15 @@ function drawBall(ctx, b) {
   ctx.arc(x - r * 0.28, y - r * 0.3, r * 0.22, 0, Math.PI * 2);
   ctx.fillStyle = 'rgba(255,255,255,0.55)';
   ctx.fill();
+
+  // Subtle equator line (spin impression)
+  if (id !== 0) {
+    ctx.beginPath();
+    ctx.arc(x, y, r * 0.85, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(0,0,0,0.06)';
+    ctx.lineWidth = 0.4;
+    ctx.stroke();
+  }
 
   // Edge highlight
   ctx.beginPath();
@@ -611,6 +565,7 @@ function drawPowerBar(ctx, power) {
 // MAIN COMPONENT
 // ============================================================
 export default function PoolGame({ gameState, myPlayerId, onMove, players }) {
+  const { showGuide, closeGuide } = useAutoShowGuide('pool');
   const canvasRef = useRef(null);
   const ballsRef = useRef(createInitialBalls());
   const animRef = useRef(null);
@@ -774,83 +729,61 @@ export default function PoolGame({ gameState, myPlayerId, onMove, players }) {
 
     const step = () => {
       const balls = ballsRef.current;
-      let anyMoving = false;
-      const inner = BORDER + CUSHION;
-      const SUB_STEPS = 3;
 
-      for (let sub = 0; sub < SUB_STEPS; sub++) {
+      const anyMoving = stepPhysics(balls, {
+        onBallCollision: (vel) => playBallClick(vel),
+        onWallCollision: (vel) => playCushionBounce(vel),
+        onPocket: (b, p) => {
+          playPocketDrop();
+          pocketFlashes.push({ x: p.x, y: p.y, alpha: 1.0, radius: POCKET_R });
+          pocketDrops.push({ x: b.x, y: b.y, scale: 1.0, alpha: 1.0, color: BALL_COLORS[b.id] || '#999' });
+          if (!pocketed.includes(b.id)) pocketed.push(b.id);
+        },
+      });
+
+      // Emit trail particles from fast balls
       for (const b of balls) {
         if (b.pocketed) continue;
-        b.x += b.vx / SUB_STEPS;
-        b.y += b.vy / SUB_STEPS;
-
-        // Wall collisions with cushion bounce + sound
-        if (b.x - BALL_R < inner) { if (sub === 0) playCushionBounce(Math.abs(b.vx)); b.x = inner + BALL_R; b.vx = Math.abs(b.vx) * WALL_BOUNCE; }
-        if (b.x + BALL_R > TW - inner) { if (sub === 0) playCushionBounce(Math.abs(b.vx)); b.x = TW - inner - BALL_R; b.vx = -Math.abs(b.vx) * WALL_BOUNCE; }
-        if (b.y - BALL_R < inner) { if (sub === 0) playCushionBounce(Math.abs(b.vy)); b.y = inner + BALL_R; b.vy = Math.abs(b.vy) * WALL_BOUNCE; }
-        if (b.y + BALL_R > TH - inner) { if (sub === 0) playCushionBounce(Math.abs(b.vy)); b.y = TH - inner - BALL_R; b.vy = -Math.abs(b.vy) * WALL_BOUNCE; }
-
-        // Pocket detection
-        for (const p of POCKETS) {
-          const pdx = b.x - p.x;
-          const pdy = b.y - p.y;
-          if (Math.sqrt(pdx * pdx + pdy * pdy) < POCKET_R) {
-            b.pocketed = true;
-            b.vx = 0;
-            b.vy = 0;
-            playPocketDrop();
-            pocketFlashes.push({ x: p.x, y: p.y, alpha: 1.0, radius: POCKET_R });
-            if (!pocketed.includes(b.id)) pocketed.push(b.id);
-            break;
-          }
+        const speed = Math.sqrt(b.vx * b.vx + b.vy * b.vy);
+        if (speed > 3) {
+          trailParticles.push({ x: b.x, y: b.y, alpha: Math.min(speed / 15, 0.4) });
         }
-
+      }
+      // Decay trail particles
+      for (let i = trailParticles.length - 1; i >= 0; i--) {
+        trailParticles[i].alpha -= 0.03;
+        if (trailParticles[i].alpha <= 0) trailParticles.splice(i, 1);
       }
 
-      // Ball-ball collisions (elastic) — inside sub-step for accuracy
-      for (let i = 0; i < balls.length; i++) {
-        if (balls[i].pocketed) continue;
-        for (let j = i + 1; j < balls.length; j++) {
-          if (balls[j].pocketed) continue;
-          const b1 = balls[i], b2 = balls[j];
-          const dx = b2.x - b1.x;
-          const dy = b2.y - b1.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          const minDist = BALL_R * 2;
-
-          if (dist < minDist && dist > 0.01) {
-            const nx = dx / dist;
-            const ny = dy / dist;
-            const dvx = b1.vx - b2.vx;
-            const dvy = b1.vy - b2.vy;
-            const dvn = dvx * nx + dvy * ny;
-            if (dvn > 0) {
-              if (sub === 0) playBallClick(dvn);
-              b1.vx -= dvn * nx * BALL_BOUNCE;
-              b1.vy -= dvn * ny * BALL_BOUNCE;
-              b2.vx += dvn * nx * BALL_BOUNCE;
-              b2.vy += dvn * ny * BALL_BOUNCE;
+      // Impact sparks — check for close high-speed balls
+      if (anyMoving) {
+        for (let i = 0; i < balls.length; i++) {
+          if (balls[i].pocketed) continue;
+          const b1 = balls[i];
+          const s1 = Math.sqrt(b1.vx * b1.vx + b1.vy * b1.vy);
+          if (s1 < 6) continue;
+          for (let j = i + 1; j < balls.length; j++) {
+            if (balls[j].pocketed) continue;
+            const b2 = balls[j];
+            const dx = b2.x - b1.x;
+            const dy = b2.y - b1.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < BALL_R * 2.5) {
+              const s2 = Math.sqrt(b2.vx * b2.vx + b2.vy * b2.vy);
+              if (s1 + s2 > 12) {
+                const mx = (b1.x + b2.x) / 2;
+                const my = (b1.y + b2.y) / 2;
+                for (let k = 0; k < 4; k++) {
+                  sparks.push({
+                    x: mx, y: my,
+                    vx: (Math.random() - 0.5) * 4,
+                    vy: (Math.random() - 0.5) * 4,
+                    alpha: 0.8,
+                  });
+                }
+              }
             }
-            const overlap = minDist - dist;
-            b1.x -= (overlap / 2) * nx;
-            b1.y -= (overlap / 2) * ny;
-            b2.x += (overlap / 2) * nx;
-            b2.y += (overlap / 2) * ny;
           }
-        }
-      }
-      } // end sub-step loop
-
-      // Friction (applied once per frame, not per sub-step)
-      for (const b of balls) {
-        if (b.pocketed) continue;
-        b.vx *= FRICTION;
-        b.vy *= FRICTION;
-        if (Math.abs(b.vx) < MIN_VEL && Math.abs(b.vy) < MIN_VEL) {
-          b.vx = 0;
-          b.vy = 0;
-        } else {
-          anyMoving = true;
         }
       }
 
@@ -922,6 +855,41 @@ export default function PoolGame({ gameState, myPlayerId, onMove, players }) {
         ctx.fill();
       }
 
+      // Pocket drop animations (ball shrinks + fades)
+      for (let i = pocketDrops.length - 1; i >= 0; i--) {
+        const d = pocketDrops[i];
+        d.scale -= 0.04;
+        d.alpha -= 0.05;
+        if (d.alpha <= 0) { pocketDrops.splice(i, 1); continue; }
+        ctx.globalAlpha = d.alpha;
+        ctx.beginPath();
+        ctx.arc(d.x, d.y, BALL_R * d.scale, 0, Math.PI * 2);
+        ctx.fillStyle = d.color;
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      }
+
+      // Shot trails
+      for (const p of trailParticles) {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,255,255,${p.alpha})`;
+        ctx.fill();
+      }
+
+      // Impact sparks
+      for (let i = sparks.length - 1; i >= 0; i--) {
+        const s = sparks[i];
+        s.x += s.vx;
+        s.y += s.vy;
+        s.alpha -= 0.06;
+        if (s.alpha <= 0) { sparks.splice(i, 1); continue; }
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, 1.5, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,220,100,${s.alpha})`;
+        ctx.fill();
+      }
+
       // Balls (draw in order for proper layering)
       const balls = ballsRef.current;
       const sorted = [...balls].sort((a, b) => a.y - b.y);
@@ -962,7 +930,9 @@ export default function PoolGame({ gameState, myPlayerId, onMove, players }) {
   const p2Assign = localAssignments[p2];
 
   return (
-    <div className="w-full flex flex-col items-center gap-3">
+    <div className="w-full flex flex-col items-center gap-3 relative">
+      {showGuide && <HowToPlayModal gameId="pool" isOpen={showGuide} onClose={closeGuide} />}
+      <HelpButton gameId="pool" className="absolute top-2 right-2 z-10" />
       {/* Scoreboard */}
       <div className="flex items-center justify-between w-full max-w-[900px] px-2">
         <div className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm transition-all ${
