@@ -8,7 +8,7 @@
 
 import { useState, useEffect } from 'react';
 import { usePlayerStore, useUserStore } from '@/store/playerStore';
-import { X, Music, Check, CreditCard, Crown, ShoppingBag, Gem, Star, Headphones } from 'lucide-react';
+import { Music, Check, CreditCard, Crown, ShoppingBag, Gem, Star, Headphones } from 'lucide-react';
 import Link from 'next/link';
 
 // Stripe checkout links per tier — MyStation LLC (acct_1T1jP1R0BloCNd9r)
@@ -101,9 +101,7 @@ export default function SubscribeModal() {
     }
   };
 
-  const handleLater = () => {
-    closeSubscribeModal();
-  };
+  // No "later" option — must subscribe or sign in
 
   const tiers = [
     {
@@ -168,13 +166,7 @@ export default function SubscribeModal() {
         className="relative w-full max-w-3xl max-h-[92vh] overflow-y-auto bg-gradient-to-b from-mystation-navy to-mystation-navyDark rounded-3xl border border-white/10 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Close button */}
-        <button
-          onClick={handleLater}
-          className="absolute top-4 right-4 w-8 h-8 bg-white/10 rounded-full flex items-center justify-center text-white/60 hover:text-white hover:bg-white/20 transition z-10"
-        >
-          <X size={18} />
-        </button>
+        {/* No close button — must subscribe or sign in */}
 
         {/* Header */}
         <div className="pt-8 pb-4 px-8 text-center relative">
@@ -341,13 +333,15 @@ export default function SubscribeModal() {
               )}
             </div>
 
+            {/* Sign In option — no "Later", must act */}
             <div className="px-6 pb-6 flex flex-col items-center">
-              <button
-                onClick={handleLater}
-                className="text-white/60 text-sm hover:text-white/80 transition py-2 px-4"
+              <Link
+                href="/account"
+                onClick={() => closeSubscribeModal()}
+                className="text-blue-400 text-sm font-medium hover:text-blue-300 transition py-2 px-4"
               >
-                Later
-              </button>
+                Already a member? Sign In
+              </Link>
             </div>
           </>
         )}
