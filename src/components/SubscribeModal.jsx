@@ -8,7 +8,7 @@
 
 import { useState, useEffect } from 'react';
 import { usePlayerStore, useUserStore } from '@/store/playerStore';
-import { Music, Check, CreditCard, Crown, ShoppingBag, Gem, Star, Headphones } from 'lucide-react';
+import { X, Music, Check, CreditCard, Crown, ShoppingBag, Gem, Star, Headphones } from 'lucide-react';
 import Link from 'next/link';
 
 // Stripe checkout links per tier — MyStation LLC (acct_1T1jP1R0BloCNd9r)
@@ -101,7 +101,7 @@ export default function SubscribeModal() {
     }
   };
 
-  // No "later" option — must subscribe or sign in
+  // Close modal — they can browse but nothing works without subscribing
 
   const tiers = [
     {
@@ -166,7 +166,13 @@ export default function SubscribeModal() {
         className="relative w-full max-w-3xl max-h-[92vh] overflow-y-auto bg-gradient-to-b from-mystation-navy to-mystation-navyDark rounded-3xl border border-white/10 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* No close button — must subscribe or sign in */}
+        {/* Close button — let them browse, but nothing works without subscribing */}
+        <button
+          onClick={closeSubscribeModal}
+          className="absolute top-4 right-4 w-8 h-8 bg-white/10 rounded-full flex items-center justify-center text-white/60 hover:text-white hover:bg-white/20 transition z-10"
+        >
+          <X size={18} />
+        </button>
 
         {/* Header */}
         <div className="pt-8 pb-4 px-8 text-center relative">
@@ -333,15 +339,20 @@ export default function SubscribeModal() {
               )}
             </div>
 
-            {/* Sign In option — no "Later", must act */}
-            <div className="px-6 pb-6 flex flex-col items-center">
+            <div className="px-6 pb-6 flex flex-col items-center gap-2">
               <Link
                 href="/account"
                 onClick={() => closeSubscribeModal()}
-                className="text-blue-400 text-sm font-medium hover:text-blue-300 transition py-2 px-4"
+                className="text-blue-400 text-sm font-medium hover:text-blue-300 transition py-1 px-4"
               >
                 Already a member? Sign In
               </Link>
+              <button
+                onClick={closeSubscribeModal}
+                className="text-white/40 text-xs hover:text-white/60 transition py-1 px-4"
+              >
+                Just browsing
+              </button>
             </div>
           </>
         )}
