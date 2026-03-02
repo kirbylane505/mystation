@@ -8,8 +8,8 @@
 
 import { useState, useEffect, useRef, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Search, Play, Pause, Plus, Music, Disc3, Loader2, X, ListPlus, Check, ExternalLink, Sparkles } from 'lucide-react';
-import { usePlayerStore, useUserStore } from '@/store/playerStore';
+import { Search, Play, Pause, Plus, Music, Disc3, Loader2, X, ListPlus, Check, ExternalLink, Sparkles, Lock } from 'lucide-react';
+import { usePlayerStore, useUserStore, isGated } from '@/store/playerStore';
 import usePlaylistStore from '@/store/playlistStore';
 import { tracks as myStationTracks } from '@/data/tracks';
 import Link from 'next/link';
@@ -306,7 +306,8 @@ function SearchPageInner() {
                   key={`ms-${track.id}`}
                   track={track}
                   isPlaying={isTrackPlaying(track)}
-                  onPlay={() => playMyStation(track)}
+                  isLocked={isGated(track)}
+                  onPlay={() => isGated(track) ? usePlayerStore.getState().openSubscribeModal(track) : playMyStation(track)}
                   onAddToPlaylist={() => setShowPlaylistPicker(track.id)}
                   showPlaylistPicker={showPlaylistPicker === track.id}
                   playlists={playlists}
@@ -502,6 +503,7 @@ function SearchPageInner() {
 function TrackRow({
   track,
   isPlaying,
+  isLocked = false,
   onPlay,
   onAddToPlaylist,
   showPlaylistPicker,
@@ -515,7 +517,7 @@ function TrackRow({
   const hasPreview = spotify ? !!track.previewUrl : true;
 
   return (
-    <div className="relative group">
+    <div className={`relative group ${isLocked ? 'opacity-40' : ''}`}>
       <div className={`flex items-center gap-3 sm:gap-4 p-2.5 sm:p-3 rounded-xl transition-all duration-200 ${
         isPlaying
           ? 'bg-blue-500/15 border border-blue-500/30 shadow-lg shadow-blue-500/5'
@@ -540,9 +542,11 @@ function TrackRow({
             </div>
           )}
           <div className={`absolute inset-0 bg-black/50 flex items-center justify-center transition-all duration-200 ${
-            isPlaying ? 'opacity-100' : 'opacity-0 group-hover/play:opacity-100'
+            isLocked ? 'opacity-100' : isPlaying ? 'opacity-100' : 'opacity-0 group-hover/play:opacity-100'
           }`}>
-            {isPlaying ? (
+            {isLocked ? (
+              <Lock size={16} className="text-white/70" />
+            ) : isPlaying ? (
               <Pause size={20} className="text-white drop-shadow-lg" fill="white" />
             ) : hasPreview ? (
               <Play size={20} className="text-white ml-0.5 drop-shadow-lg" fill="white" />
@@ -561,6 +565,7 @@ function TrackRow({
           <div className="flex items-center gap-1.5">
             <p className={`font-semibold text-sm truncate ${isPlaying ? 'text-blue-400' : 'text-white'}`}>
               {track.title}
+              {isLocked && <span className="ml-1.5 text-[10px] font-medium text-blue-400/80 bg-blue-500/15 px-1.5 py-0.5 rounded-full align-middle">Subscribe to Unlock</span>}
             </p>
             {track.explicit && (
               <span className="shrink-0 text-[9px] font-bold bg-white/15 text-white/50 w-4 h-4 rounded flex items-center justify-center leading-none">E</span>

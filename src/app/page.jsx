@@ -12,8 +12,8 @@ import TrackList from '@/components/TrackList';
 import EmailCapture from '@/components/EmailCapture';
 import LOTLCountdown from '@/components/LOTLCountdown';
 import { tracks, albums, getOfficialTracks, getNonVaultTracks } from '@/data/tracks';
-import { usePlayerStore } from '@/store/playerStore';
-import { Play, ExternalLink, Headphones, ChevronLeft, Shuffle, ShoppingBag, Gamepad2, Film } from 'lucide-react';
+import { usePlayerStore, isGated } from '@/store/playerStore';
+import { Play, ExternalLink, Headphones, ChevronLeft, Shuffle, ShoppingBag, Gamepad2, Film, Lock } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -505,16 +505,19 @@ export default function HomePage() {
               <div className="glass rounded-2xl overflow-hidden">
                 {getAlbumTracks(activeAlbum).map((track, index) => {
                   const isCurrentTrack = currentTrack?.id === track.id;
+                  const locked = isGated(track);
                   return (
                     <button
                       key={track.id}
-                      onClick={() => handlePlayAlbumTrack(activeAlbum, index)}
+                      onClick={() => locked ? usePlayerStore.getState().openSubscribeModal(track) : handlePlayAlbumTrack(activeAlbum, index)}
                       className={`w-full flex items-center gap-4 p-4 hover:bg-white/10 transition text-left border-b border-white/5 last:border-0 ${
                         isCurrentTrack ? 'bg-blue-500/20' : ''
-                      }`}
+                      } ${locked ? 'opacity-40' : ''}`}
                     >
                       <div className="w-8 text-center">
-                        {isCurrentTrack && isPlaying ? (
+                        {locked ? (
+                          <Lock size={14} className="text-white/40 mx-auto" />
+                        ) : isCurrentTrack && isPlaying ? (
                           <div className="flex items-center justify-center gap-0.5">
                             <span className="w-1 h-4 bg-blue-400 rounded-full animate-pulse" />
                             <span className="w-1 h-3 bg-blue-400 rounded-full animate-pulse" style={{ animationDelay: '75ms' }} />
@@ -527,13 +530,14 @@ export default function HomePage() {
                       <div className="flex-1 min-w-0">
                         <p className={`font-medium truncate ${isCurrentTrack ? 'text-blue-400' : 'text-white'}`}>
                           {track.title}
+                          {locked && <span className="ml-1.5 text-[10px] font-medium text-blue-400/80 bg-blue-500/15 px-1.5 py-0.5 rounded-full align-middle">Subscribe to Unlock</span>}
                         </p>
                         <p className="text-white/50 text-sm truncate">
                           Mike Page{track.featured ? ` ft. ${track.featured}` : ''}
                           {track.producer ? ` • Prod. ${track.producer}` : ''}
                         </p>
                       </div>
-                      <span className="text-white/40 text-sm">{track.duration || ''}</span>
+                      <span className="text-white/40 text-sm">{locked ? <Lock size={14} /> : (track.duration || '')}</span>
                     </button>
                   );
                 })}

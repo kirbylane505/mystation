@@ -59,7 +59,7 @@ const TrackRow = memo(function TrackRow({ track, index, isCurrentTrack, isPlayin
         <div className="flex-1 min-w-0">
           <p className={`font-bold text-[14px] leading-tight truncate ${isCurrentTrack ? 'text-blue-400' : 'text-white'}`}>
             {track.title}
-            {isLocked && <span className="ml-1.5 text-[10px] font-medium text-blue-400/80 bg-blue-500/15 px-1.5 py-0.5 rounded-full align-middle">Subscribe</span>}
+            {isLocked && <span className="ml-1.5 text-[10px] font-medium text-blue-400/80 bg-blue-500/15 px-1.5 py-0.5 rounded-full align-middle">Subscribe to Unlock</span>}
           </p>
           <p className="text-[12px] text-white/60 truncate mt-0.5">
             {track.artist || 'Mike Page'}{track.featured ? ` ft. ${track.featured}` : ''}{track.producer ? ` • ${track.producer}` : ''}
@@ -131,7 +131,7 @@ const TrackRow = memo(function TrackRow({ track, index, isCurrentTrack, isPlayin
             <div>
               <p className={`font-bold ${isCurrentTrack ? 'text-blue-400' : 'text-white'}`}>
                 {track.title}
-                {isLocked && <span className="ml-2 text-[10px] font-medium text-blue-400/80 bg-blue-500/15 px-1.5 py-0.5 rounded-full align-middle">Subscribe</span>}
+                {isLocked && <span className="ml-2 text-[10px] font-medium text-blue-400/80 bg-blue-500/15 px-1.5 py-0.5 rounded-full align-middle">Subscribe to Unlock</span>}
               </p>
               <p className="text-sm text-white/70">
                 {track.artist || 'Mike Page'}{track.featured && <span className="text-white/60"> ft. {track.featured}</span>}
@@ -210,7 +210,7 @@ export default function TrackList({ trackIds, showAlbum = true, showNumber = tru
       togglePlay();
       return;
     }
-    // Universal gate — 2 free songs total for non-subscribers
+    // Gate — only "I Want This One" & "R.U.N or R U Out" free for non-subscribers
     if (isGated(track)) {
       usePlayerStore.getState().openSubscribeModal(track);
       return;

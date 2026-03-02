@@ -6,8 +6,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Play, Pause, Trash2, Music, Plus, ListPlus, Search, Clock, Disc3, X, Edit3, Check, GripVertical, Shuffle } from 'lucide-react';
-import { usePlayerStore } from '@/store/playerStore';
+import { Play, Pause, Trash2, Music, Plus, ListPlus, Search, Clock, Disc3, X, Edit3, Check, GripVertical, Shuffle, Lock } from 'lucide-react';
+import { usePlayerStore, isGated } from '@/store/playerStore';
 import usePlaylistStore from '@/store/playlistStore';
 import Link from 'next/link';
 
@@ -355,18 +355,22 @@ export default function PlaylistsPage() {
             {openPlaylist.tracks.map((track, idx) => {
               const playing = isTrackPlaying(track);
               const hasAudio = track.source === 'mystation' || track.previewUrl;
+              const locked = track.source === 'mystation' && isGated(track);
               return (
                 <div
                   key={idx}
-                  className={`flex items-center gap-3 p-3 rounded-xl transition group ${playing ? 'bg-blue-500/15 border border-blue-500/30' : 'bg-white/5 hover:bg-white/10 border border-transparent'}`}
+                  onClick={() => locked ? usePlayerStore.getState().openSubscribeModal(track) : undefined}
+                  className={`flex items-center gap-3 p-3 rounded-xl transition group ${locked ? 'opacity-40 cursor-pointer' : ''} ${playing ? 'bg-blue-500/15 border border-blue-500/30' : 'bg-white/5 hover:bg-white/10 border border-transparent'}`}
                 >
                   {/* Number */}
-                  <span className="w-6 text-center text-white/30 text-sm">{idx + 1}</span>
+                  <span className="w-6 text-center text-white/30 text-sm">
+                    {locked ? <Lock size={12} className="text-white/30 mx-auto" /> : idx + 1}
+                  </span>
 
                   {/* Art + Play */}
                   <button
-                    onClick={() => hasAudio && playTrack(track)}
-                    disabled={!hasAudio}
+                    onClick={() => locked ? usePlayerStore.getState().openSubscribeModal(track) : hasAudio && playTrack(track)}
+                    disabled={!hasAudio && !locked}
                     className="relative w-10 h-10 rounded-lg overflow-hidden shrink-0"
                   >
                     {getTrackArt(track) ? (
@@ -375,14 +379,17 @@ export default function PlaylistsPage() {
                     <div className={`absolute inset-0 bg-gradient-to-br from-blue-600/40 to-purple-900/60 flex items-center justify-center ${getTrackArt(track) ? 'hidden' : ''}`}>
                       <Music size={14} className="text-blue-400/60" />
                     </div>
-                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
-                      {playing ? <Pause size={14} className="text-white" fill="white" /> : <Play size={14} className="text-white ml-0.5" fill="white" />}
+                    <div className={`absolute inset-0 bg-black/40 flex items-center justify-center ${locked ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition`}>
+                      {locked ? <Lock size={14} className="text-white/70" /> : playing ? <Pause size={14} className="text-white" fill="white" /> : <Play size={14} className="text-white ml-0.5" fill="white" />}
                     </div>
                   </button>
 
                   {/* Info */}
                   <div className="flex-1 min-w-0">
-                    <p className={`font-semibold text-sm truncate ${playing ? 'text-blue-400' : 'text-white'}`}>{track.title}</p>
+                    <p className={`font-semibold text-sm truncate ${playing ? 'text-blue-400' : 'text-white'}`}>
+                      {track.title}
+                      {locked && <span className="ml-1.5 text-[10px] font-medium text-blue-400/80 bg-blue-500/15 px-1.5 py-0.5 rounded-full align-middle">Subscribe to Unlock</span>}
+                    </p>
                     <p className="text-white/50 text-xs truncate">{track.artist}</p>
                   </div>
 
@@ -396,7 +403,9 @@ export default function PlaylistsPage() {
                   </span>
 
                   {/* Duration */}
-                  <span className="text-white/30 text-xs w-12 text-right">{track.duration}</span>
+                  <span className="text-white/30 text-xs w-12 text-right">
+                    {locked ? <Lock size={12} className="text-white/30 inline" /> : track.duration}
+                  </span>
 
                   {/* Remove */}
                   <button

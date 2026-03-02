@@ -35,8 +35,8 @@ export const usePlayerStore = create(
   showSubscribeModal: false,
   pendingTrack: null, // Track waiting to play after subscription
 
-  // Universal gate — track IDs played by non-subscribers (session only, not persisted)
-  freePlays: [], // [trackId1, trackId2]
+  // Free track IDs — specific tracks that are always free (no tracking needed)
+  freePlays: [], // legacy — kept for compatibility
 
   // Show account wall (triggered from navbar sign-in button)
   showAccountWall: false,
@@ -107,25 +107,9 @@ export const usePlayerStore = create(
 
   setShowAccountWall: (show) => set({ showAccountWall: show }),
 
-  // Universal gate helpers
-  recordFreePlay: (track) => {
-    if (!track?.id) return;
-    set((state) => {
-      if (state.freePlays.includes(track.id)) return state;
-      return { freePlays: [...state.freePlays, track.id] };
-    });
-  },
-
-  initFreePlays: async () => {
-    if (typeof window === 'undefined') return;
-    try {
-      const res = await fetch('/api/audio/token');
-      if (res.ok) {
-        const { freePlays } = await res.json();
-        set({ freePlays: freePlays || [] });
-      }
-    } catch {}
-  },
+  // Legacy — no-ops (free tracks are now hardcoded by ID, no tracking needed)
+  recordFreePlay: () => {},
+  initFreePlays: () => {},
 
   // Return to last played track
   returnToLastPlayed: () => {
@@ -358,33 +342,28 @@ export const useUserStore = create(
   )
 );
 
-// Check if a track is blocked by the universal 2-song gate
-// Returns true if BLOCKED, false if allowed
-const FREE_SONGS_TOTAL = 2;
+// Specific free tracks — ONLY these 2 songs play for non-subscribers
+// "I Want This One" (500) & "R.U.N or R U Out" (501) — everything else = subscribe
+const FREE_TRACK_IDS = [500, 501];
 
 export function isGated(track) {
   if (!track?.id) return false;
+
+  // These 2 tracks are ALWAYS free for everyone
+  if (FREE_TRACK_IDS.includes(track.id)) return false;
 
   // Check Zustand subscriber state first (fastest, no DOM access)
   const { isSubscribed } = useUserStore.getState();
   if (isSubscribed) return false;
 
   // Subscribers & friends bypass completely (cookie = source of truth)
-  // NOTE: mystation-auth is NOT a bypass — auth just means "we know who you are"
-  // Only subscription and friend cookies grant unlimited music
   const cookies = typeof document !== 'undefined' ? document.cookie : '';
-  if (cookies.includes('mystation-sub-flag=')) return false; // Client-readable sub flag
-  if (cookies.includes('mystation-sub=')) return false; // httpOnly sub (server sees, client may not)
+  if (cookies.includes('mystation-sub-flag=')) return false;
+  if (cookies.includes('mystation-sub=')) return false;
   if (cookies.includes('mystation-friend=')) return false;
 
-  // Check total free plays
-  const { freePlays } = usePlayerStore.getState();
-
-  // Allow replay of already-played tracks
-  if (freePlays.includes(track.id)) return false;
-
-  // Block if at limit
-  return freePlays.length >= FREE_SONGS_TOTAL;
+  // Everything else is GATED for non-subscribers
+  return true;
 }
 
 // Backward compat alias

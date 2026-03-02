@@ -1,7 +1,7 @@
 /**
  * MYSTATION - Audio Token API
- * Access hierarchy: sub > friend > vault > auth > universal gate (2 free songs total)
- * Non-subscribers get 2 free songs site-wide, then must subscribe.
+ * Access hierarchy: sub > friend > vault > specific free tracks (500, 501) > blocked
+ * Only "I Want This One" & "R.U.N or R U Out" are free. Everything else = subscribe.
  */
 
 import { NextResponse } from 'next/server';
@@ -40,14 +40,9 @@ function parseCookie(cookieStr, name) {
   return match ? decodeURIComponent(match[1]) : null;
 }
 
-// Universal gate — non-subscribers get 2 free songs total, site-wide
-const FREE_SONGS_TOTAL = 2;
-
-function getFreePlays(cookieStr) {
-  const val = parseCookie(cookieStr, 'ms-free-plays');
-  if (!val) return [];
-  try { return JSON.parse(val); } catch { return []; }
-}
+// Specific free tracks — ONLY these 2 songs play for non-subscribers
+// "I Want This One" (500) & "R.U.N or R U Out" (501) — everything else = subscribe
+const FREE_TRACK_IDS = [500, 501];
 
 // Verify subscription cookie (HMAC-signed, 365-day expiry — subscribers remembered FOREVER)
 function verifySubscriptionCookie(cookieStr) {
@@ -100,35 +95,16 @@ export async function POST(request) {
       return grantToken(track);
     }
 
-    // 4. Auth cookie — does NOT bypass gate. Auth = "we know who you are", not "you paid".
-    // Only subscription and friend cookies grant unlimited music.
-
-    // 5. Universal gate — non-subscribers get 2 free songs total
-    const freePlays = getFreePlays(cookieStr);
-
-    // Allow replay of already-played tracks
-    if (freePlays.includes(track.id)) {
+    // 4. Specific free tracks — "I Want This One" & "R.U.N or R U Out" always free
+    if (FREE_TRACK_IDS.includes(track.id)) {
       return grantToken(track);
     }
 
-    // Block if at limit
-    if (freePlays.length >= FREE_SONGS_TOTAL) {
-      return NextResponse.json(
-        { error: 'free_limit', limit: FREE_SONGS_TOTAL, played: freePlays.length },
-        { status: 403 }
-      );
-    }
-
-    // Track this play in cookie
-    freePlays.push(track.id);
-    const response = await grantToken(track);
-    response.cookies.set('ms-free-plays', JSON.stringify(freePlays), {
-      path: '/',
-      maxAge: 30 * 24 * 60 * 60,
-      httpOnly: true,
-      sameSite: 'lax',
-    });
-    return response;
+    // 5. Everything else = subscribe required
+    return NextResponse.json(
+      { error: 'free_limit', message: 'Subscribe to unlock 100+ songs from IDMG' },
+      { status: 403 }
+    );
   } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
@@ -147,9 +123,7 @@ async function grantToken(track) {
   return NextResponse.json({ token, expires });
 }
 
-// GET handler — lets client read httpOnly free plays cookie
-export async function GET(request) {
-  const cookieStr = request.headers.get('cookie') || '';
-  const freePlays = getFreePlays(cookieStr);
-  return NextResponse.json({ freePlays, limit: FREE_SONGS_TOTAL });
+// GET handler — returns free track IDs (no cookies needed)
+export async function GET() {
+  return NextResponse.json({ freeTrackIds: FREE_TRACK_IDS });
 }
