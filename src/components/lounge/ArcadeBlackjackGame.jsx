@@ -12,6 +12,8 @@ import { SUITS, RANKS, CARD_VALUES } from '@/lib/games/constants';
 import Card from './cards/Card';
 import CardFan from './cards/CardFan';
 import { ArrowLeft, Zap, Brain, Trophy, Plus, Hand, RotateCcw } from 'lucide-react';
+import { HelpButton, useAutoShowGuide } from './HowToPlayModal';
+import HowToPlayModal from './HowToPlayModal';
 
 /* ─── Card / Deck Logic (internal) ─── */
 
@@ -149,6 +151,8 @@ const BEST_SCORE_KEY = 'ms-arcade-blackjack-best';
 /* ═══════════════════════════════════════════════════════════════════════════ */
 
 export default function ArcadeBlackjackGame({ onBack }) {
+  const { showGuide, closeGuide } = useAutoShowGuide('arcadeBlackjack');
+
   // Screens: 'select' | 'freePlay' | 'trainer' | 'challenge'
   const [mode, setMode] = useState('select');
 
@@ -589,7 +593,9 @@ export default function ArcadeBlackjackGame({ onBack }) {
 
   /* ─── GAME SCREEN (shared by all 3 modes) ─── */
   return (
-    <div className="w-full max-w-2xl mx-auto flex flex-col items-center">
+    <div className="w-full max-w-2xl mx-auto flex flex-col items-center relative">
+      {showGuide && <HowToPlayModal gameId="arcadeBlackjack" isOpen={showGuide} onClose={closeGuide} />}
+      <HelpButton gameId="arcadeBlackjack" className="absolute top-2 right-2 z-10" />
       {/* Header */}
       <div className="w-full flex items-center justify-between mb-3">
         <button

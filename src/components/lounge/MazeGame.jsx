@@ -14,6 +14,8 @@ import {
   movePlayer,
   getMazeResults,
 } from '@/lib/games/maze';
+import { HelpButton, useAutoShowGuide } from './HowToPlayModal';
+import HowToPlayModal from './HowToPlayModal';
 
 // ============================================================
 // CONSTANTS
@@ -131,6 +133,8 @@ function playTimerTick() {
 // COMPONENT
 // ============================================================
 export default function MazeGame({ gameState: externalState, myPlayerId, onMove }) {
+  const { showGuide, closeGuide } = useAutoShowGuide('maze');
+
   // Local state for solo play (when no external gameState)
   const [localState, setLocalState] = useState(null);
   const [selectedSize, setSelectedSize] = useState('medium');
@@ -769,7 +773,9 @@ export default function MazeGame({ gameState: externalState, myPlayerId, onMove 
 
   // Active game
   return (
-    <div className="w-full flex flex-col items-center gap-3">
+    <div className="w-full flex flex-col items-center gap-3 relative">
+      {showGuide && <HowToPlayModal gameId="maze" isOpen={showGuide} onClose={closeGuide} />}
+      <HelpButton gameId="maze" className="absolute top-2 right-2 z-10" />
       {/* Top bar — Timer + Moves */}
       <div className="w-full flex items-center justify-between px-2">
         <div className="flex items-center gap-4">
