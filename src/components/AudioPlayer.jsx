@@ -173,7 +173,7 @@ export default function AudioPlayer() {
   const getAudioUrl = useCallback(async (track) => {
     if (!track) return null;
     if (!track.audioFile) return null;
-    if (track.audioFile.startsWith('http')) return track.audioFile;
+    // ALL tracks go through the gate — no HTTP bypass
     try {
       const resp = await fetch('/api/audio/token', {
         method: 'POST',
@@ -190,7 +190,8 @@ export default function AudioPlayer() {
         }
         return null;
       }
-      const { token } = await resp.json();
+      const { token, audioUrl } = await resp.json();
+      if (audioUrl) return audioUrl; // External URL (R2 CDN) — gate already passed
       if (!token) return null;
       return `/api/audio/stream?path=${encodeURIComponent(track.audioFile)}&_t=${token}`;
     } catch {

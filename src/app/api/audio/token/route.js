@@ -125,7 +125,7 @@ export async function POST(request) {
     response.cookies.set('ms-free-plays', JSON.stringify(freePlays), {
       path: '/',
       maxAge: 30 * 24 * 60 * 60,
-      httpOnly: false,
+      httpOnly: true,
       sameSite: 'lax',
     });
     return response;
@@ -135,9 +135,21 @@ export async function POST(request) {
 }
 
 async function grantToken(track) {
+  // External URLs (R2 CDN) — return directly (gate already passed above)
+  if (track.audioFile.startsWith('http')) {
+    return NextResponse.json({ audioUrl: track.audioFile });
+  }
+  // Local files — sign a token
   const expires = Date.now() + 30 * 60 * 1000; // 30 min
   const payload = `${track.audioFile}:${expires}`;
   const signature = await signToken(payload);
   const token = btoa(`${payload}:${signature}`).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   return NextResponse.json({ token, expires });
+}
+
+// GET handler — lets client read httpOnly free plays cookie
+export async function GET(request) {
+  const cookieStr = request.headers.get('cookie') || '';
+  const freePlays = getFreePlays(cookieStr);
+  return NextResponse.json({ freePlays, limit: FREE_SONGS_TOTAL });
 }

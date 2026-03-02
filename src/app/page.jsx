@@ -575,7 +575,7 @@ export default function HomePage() {
               <ul className="space-y-3 text-white/40 text-sm">
                 <li><Link href="/about" className="hover:text-blue-400 transition">About Us</Link></li>
                 <li><Link href="/about" className="hover:text-blue-400 transition">Programs</Link></li>
-                <li><a href="https://loveonlawn.com" target="_blank" rel="noopener noreferrer" className="hover:text-blue-400 transition flex items-center gap-2">Love on the Lawn <ExternalLink size={12} /></a></li>
+                <li><a href="https://lotlfest.com" target="_blank" rel="noopener noreferrer" className="hover:text-blue-400 transition flex items-center gap-2">Love on the Lawn <ExternalLink size={12} /></a></li>
                 <li><a href="https://cash.app/$RIDE4PAGEMUSIC847" target="_blank" rel="noopener noreferrer" className="hover:text-blue-400 transition flex items-center gap-2">Donate <ExternalLink size={12} /></a></li>
               </ul>
             </div>

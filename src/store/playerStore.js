@@ -116,13 +116,13 @@ export const usePlayerStore = create(
     });
   },
 
-  initFreePlays: () => {
-    if (typeof document === 'undefined') return;
+  initFreePlays: async () => {
+    if (typeof window === 'undefined') return;
     try {
-      const match = document.cookie.match(/ms-free-plays=([^;]+)/);
-      if (match) {
-        const plays = JSON.parse(decodeURIComponent(match[1]));
-        set({ freePlays: plays });
+      const res = await fetch('/api/audio/token');
+      if (res.ok) {
+        const { freePlays } = await res.json();
+        set({ freePlays: freePlays || [] });
       }
     } catch {}
   },
@@ -139,14 +139,21 @@ export const usePlayerStore = create(
     }
   },
 
-  // Queue management
-  setQueue: (tracks, startIndex = 0) => set({
-    queue: tracks,
-    queueIndex: startIndex,
-    currentTrack: tracks[startIndex],
-    isPlaying: true,
-    lastPlayedTrack: tracks[startIndex]
-  }),
+  // Queue management — gate check before playing
+  setQueue: (tracks, startIndex = 0) => {
+    const target = tracks[startIndex];
+    if (target && isGated(target)) {
+      get().openSubscribeModal(target);
+      return;
+    }
+    set({
+      queue: tracks,
+      queueIndex: startIndex,
+      currentTrack: target,
+      isPlaying: true,
+      lastPlayedTrack: target
+    });
+  },
 
   nextTrack: () => {
     const { queue, queueIndex, repeat, shuffle } = get();
@@ -166,6 +173,11 @@ export const usePlayerStore = create(
     }
 
     const nextTrack = queue[nextIndex];
+    if (isGated(nextTrack)) {
+      set({ isPlaying: false });
+      get().openSubscribeModal(nextTrack);
+      return;
+    }
     set({
       queueIndex: nextIndex,
       currentTrack: nextTrack,
@@ -187,6 +199,11 @@ export const usePlayerStore = create(
 
     const prevIndex = queueIndex > 0 ? queueIndex - 1 : queue.length - 1;
     const prevTrack = queue[prevIndex];
+    if (isGated(prevTrack)) {
+      set({ isPlaying: false });
+      get().openSubscribeModal(prevTrack);
+      return;
+    }
     set({
       queueIndex: prevIndex,
       currentTrack: prevTrack,

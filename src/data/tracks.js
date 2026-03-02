@@ -892,6 +892,43 @@ export const tracks = [
     genre: 'Hip-Hop',
     producer: 'The Cubist'
   },
+  {
+    id: 189,
+    title: "I Don't Wanna",
+    artist: "Mike Page",
+    album: "Coming Soon",
+    year: 2026,
+    duration: "3:19",
+    trackNumber: 59,
+    albumId: 'singles-2026',
+    albumArt: '/images/idmg-logo-white.png',
+    audioFile: '/audio/singles/i-dont-wanna-mike-page.m4a',
+    isNew: true,
+    isFeatured: true,
+    featuredWeek: '2026-03-02',
+    hitScore: 93,
+    genre: 'Hip-Hop',
+    producer: 'The Cubist'
+  },
+  {
+    id: 190,
+    title: "Do What WE Do",
+    artist: "Mike Page",
+    featured: "Vincent Berry II",
+    album: "Coming Soon",
+    year: 2026,
+    duration: "4:06",
+    trackNumber: 60,
+    albumId: 'singles-2026',
+    albumArt: '/images/idmg-logo-white.png',
+    audioFile: '/audio/singles/do-what-we-do-mike-page-ft-vincent-berry.m4a',
+    isNew: true,
+    isFeatured: true,
+    featuredWeek: '2026-03-02',
+    hitScore: 94,
+    genre: 'Hip-Hop',
+    producer: 'The Cubist'
+  },
   // ========================================
   // IDMG MIXTAPE 2026 — Executive Produced by The Cubist & Mike Page
   // Drops February 27, 2026
@@ -2023,7 +2060,7 @@ export const albums = [
     subtitle: "2026 Releases",
     artist: "Mike Page",
     year: 2026,
-    trackCount: 58,
+    trackCount: 60,
     coverGradient: "from-blue-500 via-blue-700 to-indigo-900",
     coverEmoji: "🎤",
     coverImage: "/images/idmg-logo-white.png",
