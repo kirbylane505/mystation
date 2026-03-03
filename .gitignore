@@ -27,6 +27,8 @@ public/audio/**/*.wav
 scripts/
 *.png
 !public/**/*.png
+!ios/**/*.png
+!android/**/*.png
 
 # Capacitor — native platform build artifacts
 ios/App/Pods/
