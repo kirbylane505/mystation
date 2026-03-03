@@ -16,7 +16,7 @@ import { usePlayerStore, useUserStore } from '@/store/playerStore';
 // Pages that should NEVER be blocked by the account wall (commerce, ticketing, admin)
 const OPEN_PATHS = ['/events', '/tickets', '/admin', '/merch'];
 import Link from 'next/link';
-import { Mail, Lock, User, Loader2, Headphones, ShoppingBag, Ticket } from 'lucide-react';
+import { Mail, Lock, User, Loader2, Headphones, ShoppingBag, Ticket, X, ArrowLeft } from 'lucide-react';
 
 // Stripe checkout links per tier — MyStation LLC (acct_1T1jP1R0BloCNd9r)
 const STRIPE_LINKS = {
@@ -58,6 +58,21 @@ export default function AccountWall() {
   // Show wall only when explicitly triggered (navbar sign-in button)
   const shouldShow = showAccountWall;
   if (!shouldShow) return null;
+
+  // Already subscribed? Skip the wall — go straight to account page
+  const alreadySubscribed = isSubscribed || (typeof document !== 'undefined' && (
+    document.cookie.includes('mystation-sub-flag=') ||
+    document.cookie.includes('mystation-sub=') ||
+    document.cookie.includes('mystation-friend=')
+  ));
+  if (alreadySubscribed) {
+    // Auto-close and redirect to account management
+    setTimeout(() => {
+      setShowAccountWall(false);
+      window.location.href = '/account';
+    }, 0);
+    return null;
+  }
 
   const clearError = () => { setErrorMsg(''); setSuccessMsg(''); };
 
@@ -252,6 +267,15 @@ export default function AccountWall() {
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/98 backdrop-blur-xl overflow-y-auto">
+      {/* Close / Back button */}
+      <button
+        onClick={() => setShowAccountWall(false)}
+        className="absolute top-4 right-4 w-10 h-10 bg-white/10 rounded-full flex items-center justify-center text-white/60 hover:text-white hover:bg-white/20 transition z-10"
+        aria-label="Close"
+      >
+        <X size={20} />
+      </button>
+
       <div className="w-full max-w-md my-auto">
         {/* Logo */}
         <div className="text-center mb-6">
@@ -387,18 +411,9 @@ export default function AccountWall() {
               <>
                 <div className="text-center mb-6">
                   <h2 className="text-xl font-bold text-white mb-2">Join MyStation</h2>
-                  {freeSignupSlotsRemaining > 0 ? (
-                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-500/20 border border-green-500/30 rounded-full">
-                      <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                      <span className="text-green-400 font-bold text-sm">
-                        {freeSignupSlotsRemaining} of 26 free spots remaining!
-                      </span>
-                    </div>
-                  ) : (
-                    <p className="text-white/50 text-sm">
-                      $4.99/mo for unlimited access — first month FREE
-                    </p>
-                  )}
+                  <p className="text-white/50 text-sm">
+                    $4.99/mo for unlimited access — first month FREE
+                  </p>
                 </div>
 
                 <form onSubmit={handleSignUp} className="space-y-4">
