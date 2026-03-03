@@ -6,6 +6,7 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { hapticFeedback } from '@/lib/native';
 
 export const usePlayerStore = create(
   persist(
@@ -49,9 +50,10 @@ export const usePlayerStore = create(
     lastPlayedTrack: track
   }),
 
-  togglePlay: () => set((state) => ({
-    isPlaying: !state.isPlaying
-  })),
+  togglePlay: () => {
+    hapticFeedback('Light');
+    set((state) => ({ isPlaying: !state.isPlaying }));
+  },
 
   play: () => set({ isPlaying: true }),
   pause: () => set({ isPlaying: false }),

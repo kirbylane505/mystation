@@ -4,10 +4,15 @@
 
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 import PostHogProvider from './PostHogProvider';
+import { initNative } from '@/lib/native';
 
 export default function ClientProviders({ children }) {
+  useEffect(() => {
+    initNative();
+  }, []);
+
   return (
     <PostHogProvider>
       <Suspense fallback={null}>

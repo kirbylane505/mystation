@@ -1,135 +1,59 @@
-/**
- * MYSTATION - Privacy Policy
- */
-
 export const metadata = {
   title: 'Privacy Policy',
-  description: 'Privacy Policy for MyStation music streaming platform',
+  description: 'MyStation privacy policy — how we handle your data.',
 };
 
-export default function PrivacyPolicy() {
+export default function PrivacyPage() {
   return (
-    <main className="min-h-screen bg-[#0a0a0f] pt-24 pb-32">
-      <div className="max-w-3xl mx-auto px-6">
-        <h1 className="text-4xl font-bold text-white mb-2">Privacy Policy</h1>
-        <p className="text-white/40 mb-8">Last updated: January 31, 2026</p>
+    <main className="min-h-screen bg-[#0a0a1a] text-white px-6 py-12 max-w-3xl mx-auto">
+      <h1 className="text-3xl font-bold mb-8">Privacy Policy</h1>
+      <p className="text-gray-400 mb-8">Last updated: March 3, 2026</p>
 
-        <div className="prose prose-invert prose-lg">
-          <div className="space-y-8 text-white/70">
+      <div className="space-y-8 text-gray-300 leading-relaxed">
+        <section>
+          <h2 className="text-xl font-semibold text-white mb-3">What We Collect</h2>
+          <p>When you subscribe to MyStation, we collect your email address to manage your account. Payment processing is handled by Stripe — we never see or store your credit card details.</p>
+        </section>
 
-            <section>
-              <h2 className="text-2xl font-bold text-white mb-4">1. Introduction</h2>
-              <p>
-                MyStation ("we," "our," or "us") is operated by Impossible Dreamz Music Group (IDMG).
-                This Privacy Policy explains how we collect, use, and protect your information when
-                you use our music streaming platform at mystationlive.com.
-              </p>
-            </section>
+        <section>
+          <h2 className="text-xl font-semibold text-white mb-3">How We Use Your Data</h2>
+          <p>Your email is used to verify your subscription status and send important updates about new music, events, and merch drops. We do not sell or share your personal information with third parties.</p>
+        </section>
 
-            <section>
-              <h2 className="text-2xl font-bold text-white mb-4">2. Information We Collect</h2>
+        <section>
+          <h2 className="text-xl font-semibold text-white mb-3">Cookies</h2>
+          <p>We use cookies to maintain your login session and subscription status. These are essential cookies required for the service to function.</p>
+        </section>
 
-              <h3 className="text-xl font-semibold text-white mt-6 mb-3">Automatically Collected</h3>
-              <ul className="list-disc pl-6 space-y-2">
-                <li>Device type (mobile, desktop, tablet)</li>
-                <li>Browser type and version</li>
-                <li>General location (city/region, not precise)</li>
-                <li>Pages visited and time spent</li>
-                <li>Songs played and listening history</li>
-                <li>Anonymous listener ID (stored locally on your device)</li>
-              </ul>
+        <section>
+          <h2 className="text-xl font-semibold text-white mb-3">Analytics</h2>
+          <p>We use Sentry for error tracking and PostHog for anonymous usage analytics to improve the app experience. No personally identifiable information is shared with analytics providers.</p>
+        </section>
 
-              <h3 className="text-xl font-semibold text-white mt-6 mb-3">Voluntarily Provided</h3>
-              <ul className="list-disc pl-6 space-y-2">
-                <li>Comments and messages you post</li>
-                <li>Email address (if you subscribe to updates)</li>
-                <li>Username (if you create an account)</li>
-              </ul>
-            </section>
+        <section>
+          <h2 className="text-xl font-semibold text-white mb-3">Push Notifications</h2>
+          <p>If you use the MyStation mobile app and grant notification permissions, we may send push notifications about new music releases, events, and special offers. You can disable these in your device settings at any time.</p>
+        </section>
 
-            <section>
-              <h2 className="text-2xl font-bold text-white mb-4">3. How We Use Your Information</h2>
-              <ul className="list-disc pl-6 space-y-2">
-                <li>To provide and improve our music streaming service</li>
-                <li>To track play counts and listening statistics</li>
-                <li>To personalize your experience</li>
-                <li>To display leaderboards and top listeners</li>
-                <li>To communicate updates about new music</li>
-                <li>To process donations (via CashApp - see their privacy policy)</li>
-              </ul>
-            </section>
+        <section>
+          <h2 className="text-xl font-semibold text-white mb-3">Data Retention</h2>
+          <p>We retain your account data for as long as your subscription is active. You can request deletion of your data by contacting us.</p>
+        </section>
 
-            <section>
-              <h2 className="text-2xl font-bold text-white mb-4">4. Data Sharing</h2>
-              <p>We do NOT sell your personal information. We may share data with:</p>
-              <ul className="list-disc pl-6 space-y-2 mt-3">
-                <li><strong>Analytics providers</strong> - To understand how our service is used</li>
-                <li><strong>Payment processors</strong> - CashApp handles donations directly</li>
-                <li><strong>Legal requirements</strong> - If required by law</li>
-              </ul>
-            </section>
+        <section>
+          <h2 className="text-xl font-semibold text-white mb-3">Contact</h2>
+          <p>Questions about this policy? Email us at{' '}
+            <a href="mailto:mystationlive@gmail.com" className="text-indigo-400 hover:underline">mystationlive@gmail.com</a>.
+          </p>
+        </section>
 
-            <section>
-              <h2 className="text-2xl font-bold text-white mb-4">5. Cookies & Local Storage</h2>
-              <p>
-                We use local storage to save your listener ID and preferences. This helps us
-                track your listening history and provide a personalized experience. You can
-                clear this data by clearing your browser's local storage.
-              </p>
-            </section>
-
-            <section>
-              <h2 className="text-2xl font-bold text-white mb-4">6. Your Rights</h2>
-              <p>You have the right to:</p>
-              <ul className="list-disc pl-6 space-y-2 mt-3">
-                <li>Request access to your data</li>
-                <li>Request deletion of your data</li>
-                <li>Opt out of analytics tracking</li>
-                <li>Unsubscribe from communications</li>
-              </ul>
-            </section>
-
-            <section>
-              <h2 className="text-2xl font-bold text-white mb-4">7. Data Security</h2>
-              <p>
-                We implement reasonable security measures to protect your information.
-                However, no internet transmission is 100% secure. We encourage you to
-                use strong passwords and protect your devices.
-              </p>
-            </section>
-
-            <section>
-              <h2 className="text-2xl font-bold text-white mb-4">8. Children's Privacy</h2>
-              <p>
-                MyStation is not intended for children under 13. We do not knowingly
-                collect information from children under 13. If you believe we have
-                collected such information, please contact us.
-              </p>
-            </section>
-
-            <section>
-              <h2 className="text-2xl font-bold text-white mb-4">9. Changes to This Policy</h2>
-              <p>
-                We may update this Privacy Policy from time to time. We will notify you
-                of significant changes by posting a notice on our website.
-              </p>
-            </section>
-
-            <section>
-              <h2 className="text-2xl font-bold text-white mb-4">10. Contact Us</h2>
-              <p>
-                For privacy-related questions, contact us at:
-              </p>
-              <p className="mt-3">
-                <strong className="text-white">Impossible Dreamz Music Group</strong><br />
-                Email: mystationllc@gmail.com<br />
-                Atlanta, GA
-              </p>
-            </section>
-
-          </div>
-        </div>
+        <section>
+          <h2 className="text-xl font-semibold text-white mb-3">Children</h2>
+          <p>MyStation is rated 12+. We do not knowingly collect data from children under 13. If you believe we have collected data from a child, please contact us immediately.</p>
+        </section>
       </div>
+
+      <p className="mt-12 text-gray-500 text-sm">MyStation is operated by MyStation LLC (Wyoming).</p>
     </main>
   );
 }

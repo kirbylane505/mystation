@@ -27,3 +27,15 @@ public/audio/**/*.wav
 scripts/
 *.png
 !public/**/*.png
+
+# Capacitor — native platform build artifacts
+ios/App/Pods/
+ios/DerivedData/
+android/.gradle/
+android/app/build/
+android/build/
+android/*.keystore
+*.ipa
+*.apk
+*.aab
+resources/
