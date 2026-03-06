@@ -5,6 +5,7 @@ import { RefreshCw, MessageCircle } from 'lucide-react';
 import ChannelTabs from './ChannelTabs';
 import CommunityPost from './CommunityPost';
 import CreatePost from './CreatePost';
+import RewardsCard from './RewardsCard';
 
 export default function CommunityFeed() {
   const [channel, setChannel] = useState('general');
@@ -106,6 +107,8 @@ export default function CommunityFeed() {
   };
 
   return (
+    <div className="space-y-4">
+      <RewardsCard />
     <div className="bg-white/5 rounded-2xl border border-white/10 overflow-hidden">
       <div className="p-5 border-b border-white/10 bg-gradient-to-r from-purple-600/20 to-blue-600/20">
         <div className="flex items-center justify-between">
@@ -153,6 +156,7 @@ export default function CommunityFeed() {
           ))
         )}
       </div>
+    </div>
     </div>
   );
 }
