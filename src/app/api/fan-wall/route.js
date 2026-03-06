@@ -34,18 +34,27 @@ function checkRateLimit(ip) {
   return true;
 }
 
-export async function GET() {
+export async function GET(request) {
   try {
     const supabase = getSupabaseAdmin();
     if (!supabase) {
       return NextResponse.json({ posts: [], error: 'Database not configured' });
     }
 
-    const { data, error } = await supabase
+    const { searchParams } = new URL(request.url);
+    const channel = searchParams.get('channel');
+
+    let query = supabase
       .from('fan_wall')
       .select('*')
       .order('created_at', { ascending: false })
       .limit(200);
+
+    if (channel) {
+      query = query.or(`channel.eq.${channel},tier.like.reply:%,tier.like.react:%`);
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       return NextResponse.json({ posts: [], error: error.message });
@@ -98,7 +107,7 @@ export async function POST(request) {
     }
 
     const body = await request.json();
-    const { username, content, avatar, parentId, ownerSecret, verifyOwner } = body;
+    const { username, content, avatar, parentId, ownerSecret, verifyOwner, channel, post_type, media_url, poll_options } = body;
 
     // Owner verification endpoint — just checks if the secret is valid
     if (verifyOwner) {
@@ -131,6 +140,20 @@ export async function POST(request) {
       tier = parentId ? `reply:${parentId}` : 'vip';
     }
 
+    // Subscriber gate for community channels (not legacy fan wall)
+    const cookies = request.headers.get('cookie') || '';
+    const isSubscriber = cookies.includes('mystation-sub=true');
+    const isAdmin = OWNER_SECRET && ownerSecret && ownerSecret.length === OWNER_SECRET.length &&
+      crypto.timingSafeEqual(Buffer.from(ownerSecret), Buffer.from(OWNER_SECRET));
+
+    if (!isAdmin && !isSubscriber && channel && channel !== 'general' && !parentId) {
+      return NextResponse.json({ error: 'Subscribe to post in the community' }, { status: 403 });
+    }
+
+    if (channel === 'announcements' && !isAdmin) {
+      return NextResponse.json({ error: 'Only Mike can post announcements' }, { status: 403 });
+    }
+
     const { data, error } = await supabase
       .from('fan_wall')
       .insert({
@@ -139,6 +162,10 @@ export async function POST(request) {
         avatar: cleanAvatar,
         tier,
         likes: 0,
+        channel: channel || 'general',
+        post_type: post_type || 'text',
+        media_url: media_url || null,
+        poll_options: poll_options || null,
       })
       .select()
       .single();

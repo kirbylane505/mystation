@@ -2,14 +2,14 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Music, Search, ShoppingBag, User } from 'lucide-react';
+import { Home, Music, Search, ShoppingBag, MessageCircle } from 'lucide-react';
 
 const tabs = [
   { href: '/', icon: Home, label: 'Home' },
   { href: '/music', icon: Music, label: 'Music' },
+  { href: '/community', icon: MessageCircle, label: 'Community' },
   { href: '/search', icon: Search, label: 'Search' },
   { href: '/merch', icon: ShoppingBag, label: 'Shop' },
-  { href: '/account', icon: User, label: 'Account' },
 ];
 
 export default function BottomTabBar() {

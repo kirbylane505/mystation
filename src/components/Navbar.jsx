@@ -14,7 +14,7 @@ import { useCartStore } from '@/store/cartStore';
 import { useUserStore, usePlayerStore } from '@/store/playerStore';
 import {
   Home, Music, Heart, Users, ShoppingBag,
-  Search, User, LogOut, X, Play, Menu, Mail, Crown, Newspaper, Gamepad2, Ticket, Film, MoreHorizontal
+  Search, User, LogOut, X, Play, Menu, Mail, Crown, Newspaper, Gamepad2, Ticket, Film, MoreHorizontal, HelpCircle, MessageCircle
 } from 'lucide-react';
 import { useEngagementStore } from '@/store/engagementStore';
 import { useStationStore } from '@/store/stationStore';
@@ -40,18 +40,20 @@ export default function Navbar() {
   const navItems = [
     { href: '/', icon: Home, label: 'Home', mobileOrder: 1 },
     { href: '/music', icon: Music, label: 'Music', mobileOrder: 2 },
-    { href: '/merch', icon: ShoppingBag, label: 'Merch', mobileOrder: 3 },
-    { href: '/lounge', icon: Gamepad2, label: 'Lounge', highlight: true, mobileOrder: 4 },
-    { href: '/events', icon: Ticket, label: 'Events', mobileOrder: 5 },
-    { href: '/videos', icon: Film, label: 'Videos', mobileOrder: 6 },
+    { href: '/community', icon: MessageCircle, label: 'Community', mobileOrder: 3 },
+    { href: '/merch', icon: ShoppingBag, label: 'Merch', mobileOrder: 4 },
+    { href: '/lounge', icon: Gamepad2, label: 'Lounge', highlight: true, mobileOrder: 5 },
+    { href: '/events', icon: Ticket, label: 'Events', mobileOrder: 6 },
   ];
 
   // More menu items (shown in dropdown)
   const moreItems = [
+    { href: '/videos', icon: Film, label: 'Videos' },
     { href: '/about', icon: Heart, label: 'Foundation' },
     { href: '/contact', icon: Mail, label: 'Contact' },
     { href: '/news', icon: Newspaper, label: 'News' },
     { href: '/street-team', icon: Users, label: 'Street Team' },
+    { href: '/faq', icon: HelpCircle, label: 'Help' },
   ];
 
   // Filter tracks based on search
@@ -385,7 +387,7 @@ export default function Navbar() {
             </span>
           </Link>
 
-          {/* Cart + Search for mobile top bar */}
+          {/* Cart + Search + Sign In for mobile top bar */}
           <div className="flex items-center gap-2">
             <Link
               href="/search"
@@ -404,6 +406,25 @@ export default function Navbar() {
                 </span>
               )}
             </button>
+            {/* Sign In / User Button — ALWAYS visible on mobile */}
+            {isLoggedIn ? (
+              <button
+                onClick={handleSignOut}
+                className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center"
+                title="Sign Out"
+              >
+                <span className="text-blue-400 font-bold text-sm">
+                  {user?.name?.charAt(0).toUpperCase() || 'U'}
+                </span>
+              </button>
+            ) : (
+              <button
+                onClick={() => usePlayerStore.getState().setShowAccountWall(true)}
+                className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center"
+              >
+                <User size={18} className="text-white" />
+              </button>
+            )}
           </div>
         </div>
       </nav>
