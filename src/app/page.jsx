@@ -16,6 +16,8 @@ import { usePlayerStore, isGated } from '@/store/playerStore';
 import { Play, ExternalLink, Headphones, ChevronLeft, Shuffle, ShoppingBag, Gamepad2, Film, Lock } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import MoodPlaylists from '@/components/MoodPlaylists';
+import TrendingTracks from '@/components/TrendingTracks';
 
 export default function HomePage() {
   const setQueue = usePlayerStore(s => s.setQueue);
@@ -140,6 +142,16 @@ export default function HomePage() {
         <div className="glass rounded-2xl p-2">
           <TrackList trackIds={newReleases.length > 0 ? newReleases : [21, 22, 23, 30, 31, 32, 34, 35]} showNumber={false} showComments={true} />
         </div>
+      </section>
+
+      {/* Mood Playlists */}
+      <section className="max-w-screen-xl mx-auto px-6 py-12">
+        <MoodPlaylists />
+      </section>
+
+      {/* Trending This Week */}
+      <section className="max-w-screen-xl mx-auto px-6 py-12">
+        <TrendingTracks />
       </section>
 
       {/* Albums Grid */}
@@ -414,8 +426,8 @@ export default function HomePage() {
             <div className="relative">
               <div className="aspect-square rounded-2xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-white/10 flex items-center justify-center overflow-hidden">
                 <Image
-                  src="/images/idmg-logo-white.png"
-                  alt="Mike Page - IDMG"
+                  src="/images/mystation-logo.png"
+                  alt="MyStation - Music Streaming"
                   width={400}
                   height={400}
                   className="w-3/4 h-3/4 object-contain opacity-80"

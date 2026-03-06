@@ -361,7 +361,11 @@ export default function Player() {
           {/* Track Info + Heart */}
           <div className="px-8 mb-6 flex items-start justify-between">
             <div className="flex-1 min-w-0">
-              <h2 className="text-[22px] font-bold text-white leading-tight truncate">{currentTrack.title}</h2>
+              <h2 className="text-[22px] font-bold text-white leading-tight truncate flex items-center">{currentTrack.title}{currentTrack?.audioFile?.endsWith('.m4a') && (
+                  <span className="inline-flex items-center px-1 py-0.5 rounded text-[8px] font-bold tracking-wider bg-blue-500/20 text-blue-400 border border-blue-500/30 ml-1.5 flex-shrink-0">
+                    HQ
+                  </span>
+                )}</h2>
               <p className="text-[15px] text-white/50 mt-0.5">
                 Mike Page{currentTrack.featured ? ` ft. ${currentTrack.featured}` : ''}
               </p>
@@ -587,7 +591,11 @@ export default function Player() {
 
           {/* Track info — scrolling marquee for long titles */}
           <div className="flex-1 min-w-0 overflow-hidden">
-            <p className="font-semibold text-white text-[13px] truncate leading-tight">{currentTrack.title}</p>
+            <p className="font-semibold text-white text-[13px] truncate leading-tight flex items-center">{currentTrack.title}{currentTrack?.audioFile?.endsWith('.m4a') && (
+                  <span className="inline-flex items-center px-1 py-0.5 rounded text-[8px] font-bold tracking-wider bg-blue-500/20 text-blue-400 border border-blue-500/30 ml-1.5 flex-shrink-0">
+                    HQ
+                  </span>
+                )}</p>
             <p className="text-[11px] text-white/40 truncate">Mike Page{currentTrack.featured ? ` ft. ${currentTrack.featured}` : ''}</p>
           </div>
 
@@ -653,7 +661,11 @@ export default function Player() {
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <h4 className="font-semibold text-white text-sm truncate leading-tight">{currentTrack.title}</h4>
+              <h4 className="font-semibold text-white text-sm truncate leading-tight flex items-center">{currentTrack.title}{currentTrack?.audioFile?.endsWith('.m4a') && (
+                  <span className="inline-flex items-center px-1 py-0.5 rounded text-[8px] font-bold tracking-wider bg-blue-500/20 text-blue-400 border border-blue-500/30 ml-1.5 flex-shrink-0">
+                    HQ
+                  </span>
+                )}</h4>
               <p className="text-xs text-white/40 truncate mt-0.5">
                 Mike Page{currentTrack.featured ? ` ft. ${currentTrack.featured}` : ''}
               </p>

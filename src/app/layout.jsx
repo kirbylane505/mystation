@@ -24,6 +24,7 @@ import FoundingMemberBanner from '@/components/FoundingMemberBanner';
 import PageTransition from '@/components/PageTransition';
 import CashAppThankYou from '@/components/CashAppThankYou';
 import SubscriberThankYou from '@/components/SubscriberThankYou';
+import BottomTabBar from '@/components/BottomTabBar';
 
 // Lazy-loaded utilities — code-split into separate chunks (loaded async after hydration)
 import LazyUtilities from '@/components/LazyUtilities';
@@ -41,6 +42,13 @@ const inter = Inter({
   display: 'swap',
   variable: '--font-inter',
 });
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: 'cover',
+};
 
 export const metadata = {
   metadataBase: new URL('https://mystationlive.com'),
@@ -119,7 +127,7 @@ export default function RootLayout({ children }) {
               "name": "MyStation",
               "alternateName": "IDMG - Impossible Dreamz Music Group",
               "url": "https://mystationlive.com",
-              "logo": "https://mystationlive.com/images/idmg-logo-white.png",
+              "logo": "https://mystationlive.com/images/mystation-logo.png",
               "sameAs": [
                 "https://instagram.com/idmgatl",
                 "https://tiktok.com/@idmgatl",
@@ -192,6 +200,7 @@ export default function RootLayout({ children }) {
             <PageTransition>{children}</PageTransition>
           </main>
           <Player />
+          <BottomTabBar />
           <AudioPlayer />
           <SubscribeModal />
           <Cart />

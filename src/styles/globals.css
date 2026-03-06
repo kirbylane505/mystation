@@ -975,4 +975,22 @@ img {
   100% { transform: scale(1); }
 }
 
+/* ==========================================
+   Phase 1 — Mobile-First Fixes
+   ========================================== */
+
+/* Prevent horizontal overflow */
+html, body {
+  overflow-x: hidden;
+}
+
+/* Scrollbar hide utility */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 /* Force rebuild Thu Feb 13 00:00:00 EST 2026 */

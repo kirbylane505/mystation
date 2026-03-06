@@ -136,7 +136,7 @@ export async function GET(request) {
   // Extract filename from path (e.g., /audio/singles/song.mp3 → song.mp3)
   const filename = audioPath.split('/').pop();
   const ext = filename.split('.').pop().toLowerCase();
-  const contentType = ext === 'wav' ? 'audio/wav' : 'audio/mpeg';
+  const contentType = ext === 'wav' ? 'audio/wav' : ext === 'm4a' || ext === 'mp4' || ext === 'aac' ? 'audio/mp4' : 'audio/mpeg';
 
   try {
     const r2Url = `${R2_PUBLIC_URL}/${encodeURIComponent(decodeURIComponent(filename))}`;
