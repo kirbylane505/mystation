@@ -17,15 +17,14 @@ const NAV_ROUTES = [
   { patterns: ['account', 'my account', 'profile', 'my profile', 'settings'], path: '/account', label: 'Account' },
   { patterns: ['news', 'updates', 'blog', 'whats new', "what's new"], path: '/news', label: 'News' },
   { patterns: ['videos', 'video', 'watch', 'visuals'], path: '/videos', label: 'Videos' },
-  { patterns: ['live', 'live stream', 'stream', 'go live'], path: '/live', label: 'Live' },
+  { patterns: ['live', 'live stream', 'stream', 'go live'], path: '/events', label: 'Events' },
   { patterns: ['station', 'my station', 'create station', 'radio', 'create'], path: '/station', label: 'Station' },
   { patterns: ['contact', 'contact us', 'reach out', 'get in touch', 'email'], path: '/contact', label: 'Contact' },
   { patterns: ['subscribe', 'subscription', 'sign up', 'upgrade', 'premium'], path: '/subscribe', label: 'Subscribe' },
   { patterns: ['cubist', 'the cubist', 'tyrell', 'artist'], path: '/artists/the-cubist', label: 'The Cubist' },
-  { patterns: ['fan zone', 'fan', 'fans', 'community'], path: '/fan-zone', label: 'Fan Zone' },
+  { patterns: ['fan zone', 'fan', 'fans', 'community', 'fan wall'], path: '/community', label: 'Community' },
   { patterns: ['events', 'calendar', 'shows', 'upcoming'], path: '/lotl', label: 'Events' },
   { patterns: ['checkout', 'cart', 'pay', 'payment'], path: '/checkout', label: 'Checkout' },
-  { patterns: ['make a hit', 'beat maker', 'make music', 'create music'], path: '/make-a-hit', label: 'Make a Hit' },
 ];
 
 // Normalize text for matching — handles speech-to-text quirks

@@ -893,9 +893,9 @@ export default function LOTLPage() {
                   <ShoppingBag size={18} />
                   Shop LOTL Merch
                 </Link>
-                <Link href="/fan-zone" className="px-8 py-4 bg-white/10 border border-white/20 text-white font-bold rounded-2xl hover:bg-white/20 transition flex items-center gap-2">
+                <Link href="/community" className="px-8 py-4 bg-white/10 border border-white/20 text-white font-bold rounded-2xl hover:bg-white/20 transition flex items-center gap-2">
                   <Heart size={18} />
-                  Join Fan Zone
+                  Join Community
                 </Link>
               </div>
             </div>

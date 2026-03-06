@@ -576,18 +576,6 @@ function SearchPageInner() {
           </div>
         )}
 
-        {/* Playlist Quick-Link */}
-        {playlists.length > 0 && searched && (
-          <div className="mt-8 text-center">
-            <Link
-              href="/playlists"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border border-purple-500/30 text-purple-300 font-semibold rounded-xl hover:bg-purple-500/30 transition"
-            >
-              <ListPlus size={18} />
-              View My Playlists ({playlists.length})
-            </Link>
-          </div>
-        )}
       </div>
 
       {/* Create Playlist Modal */}

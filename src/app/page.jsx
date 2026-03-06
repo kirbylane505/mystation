@@ -582,8 +582,7 @@ export default function HomePage() {
               <ul className="space-y-3 text-white/40 text-sm">
                 <li><Link href="/music" className="hover:text-blue-400 transition">Browse Music</Link></li>
                 <li><Link href="/search" className="hover:text-blue-400 transition">Search All Music</Link></li>
-                <li><Link href="/playlists" className="hover:text-blue-400 transition">My Playlists</Link></li>
-                <li><Link href="/live" className="hover:text-blue-400 transition">Live Streams</Link></li>
+                <li><Link href="/community" className="hover:text-blue-400 transition">Community</Link></li>
               </ul>
             </div>
             <div>

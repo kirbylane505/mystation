@@ -482,18 +482,6 @@ export default function Navbar() {
             );
           })}
 
-          {/* Fan Zone */}
-          <Link
-            href="/fan-zone"
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition ${
-              pathname === '/fan-zone' ? 'bg-blue-500/20 text-blue-400' : 'hover:bg-white/10 text-white'
-            }`}
-            onClick={() => setMobileMenuOpen(false)}
-          >
-            <Crown size={20} className={pathname === '/fan-zone' ? 'text-blue-400' : 'text-white/60'} />
-            <span>Fan Zone</span>
-          </Link>
-
           {/* My Cart - Mobile */}
           <button
             onClick={() => { setMobileMenuOpen(false); useCartStore.getState().openCart(); }}
