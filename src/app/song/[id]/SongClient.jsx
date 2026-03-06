@@ -9,6 +9,7 @@ import { progressBridge } from '@/lib/progressBridge';
 import { shareMP3 } from '@/lib/shareAudio';
 import CommentSection from '@/components/CommentSection';
 import VoiceCommand from '@/components/VoiceCommand';
+import RelatedTracks from '@/components/RelatedTracks';
 
 // Get the global audio element set by AudioPlayer
 function getAudio() {
@@ -358,6 +359,11 @@ export default function SongClient({ track, allTracks, albumArt }) {
               Tour the Site
             </Link>
           </div>
+        </div>
+
+        {/* Related Tracks */}
+        <div className="w-full max-w-md mt-8">
+          <RelatedTracks trackId={parseInt(track.id, 10)} />
         </div>
       </div>
     </div>

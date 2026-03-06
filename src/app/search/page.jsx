@@ -6,9 +6,9 @@
 
 'use client';
 
-import { useState, useEffect, useRef, useCallback, Suspense } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Search, Play, Pause, Plus, Music, Disc3, Loader2, X, ListPlus, Check, ExternalLink, Sparkles, Lock } from 'lucide-react';
+import { Search, Play, Pause, Plus, Music, Disc3, Loader2, X, ListPlus, Check, ExternalLink, Sparkles, Lock, Clock, TrendingUp, Library, ChevronRight } from 'lucide-react';
 import { usePlayerStore, useUserStore, isGated } from '@/store/playerStore';
 import usePlaylistStore from '@/store/playlistStore';
 import { tracks as myStationTracks } from '@/data/tracks';
@@ -35,12 +35,29 @@ function SearchPageInner() {
   const [newPlaylistName, setNewPlaylistName] = useState('');
   const [showCreatePlaylist, setShowCreatePlaylist] = useState(false);
   const [addedFeedback, setAddedFeedback] = useState(null);
+  const [recentSearches, setRecentSearches] = useState([]);
   const searchRef = useRef(null);
   const debounceRef = useRef(null);
 
   const { currentTrack, isPlaying, setTrack, setQueue, togglePlay } = usePlayerStore();
   const { playlists, createPlaylist, addTrack } = usePlaylistStore();
   const { isSubscribed, supporterTier } = useUserStore();
+
+  // Load recent searches from localStorage on mount
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('mystation-recent-searches') || '[]');
+      setRecentSearches(saved);
+    } catch {}
+  }, []);
+
+  // Popular tracks — top 6 by hitScore
+  const popularTracks = useMemo(() => {
+    return [...myStationTracks]
+      .filter(t => !t.isVault && !t.comingSoon && t.hitScore)
+      .sort((a, b) => (b.hitScore || 0) - (a.hitScore || 0))
+      .slice(0, 6);
+  }, []);
 
   // Everyone can search Spotify — but interacting with results requires subscription
   const hasSpotifyAccess = true;
@@ -98,6 +115,15 @@ function SearchPageInner() {
         const local = searchMyStation(q);
         const global = await searchGlobal(q);
         setResults({ mystation: local, spotify: global.tracks || [] });
+        // Save to recent searches if results found
+        if (local.length > 0 || (global.tracks && global.tracks.length > 0)) {
+          try {
+            const saved = JSON.parse(localStorage.getItem('mystation-recent-searches') || '[]');
+            const updated = [q, ...saved.filter(s => s !== q)].slice(0, 5);
+            localStorage.setItem('mystation-recent-searches', JSON.stringify(updated));
+            setRecentSearches(updated);
+          } catch {}
+        }
         setLoading(false);
       }, 300);
     },
@@ -246,27 +272,134 @@ function SearchPageInner() {
 
         {/* Results */}
         {!searched && !loading && (
-          <div className="text-center py-12 pb-24">
-            <div className="w-20 h-20 mx-auto mb-4 bg-white/5 rounded-full flex items-center justify-center">
-              <Search size={36} className="text-white/20" />
-            </div>
-            <p className="text-white/30 text-lg mb-1">Search for Kendrick Lamar, Drake, Mike Page</p>
-            <p className="text-white/20 text-sm mb-8">100 million+ songs from every artist in the world</p>
+          <div className="py-8 pb-24">
+            {/* Recent Searches */}
+            {recentSearches.length > 0 && (
+              <div className="mb-8">
+                <div className="flex items-center gap-2 mb-3">
+                  <Clock size={14} className="text-white/30" />
+                  <p className="text-white/40 text-xs uppercase tracking-wider font-medium">Recent Searches</p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {recentSearches.map((term) => (
+                    <button
+                      key={term}
+                      onClick={() => setQuery(term)}
+                      className="flex items-center gap-1.5 px-4 py-2 bg-white/[0.06] hover:bg-white/[0.12] border border-white/[0.08] rounded-full text-white/60 hover:text-white text-sm transition-all"
+                    >
+                      <Clock size={12} className="text-white/25" />
+                      {term}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
-            {/* Trending Searches */}
-            <div className="max-w-lg mx-auto">
-              <p className="text-white/20 text-xs uppercase tracking-wider mb-3">Trending</p>
-              <div className="flex flex-wrap justify-center gap-2 pb-8">
-                {['Mike Page', 'Drake', 'Kendrick Lamar', 'Future', 'The Weeknd', 'Tyler, The Creator', 'SZA', 'Metro Boomin'].map((artist) => (
-                  <button
-                    key={artist}
-                    onClick={() => setQuery(artist)}
-                    className="trending-chip"
-                  >
-                    <Sparkles size={12} />
-                    {artist}
-                  </button>
-                ))}
+            {/* Popular Tracks */}
+            {popularTracks.length > 0 && (
+              <div className="mb-8">
+                <div className="flex items-center gap-2 mb-4">
+                  <TrendingUp size={14} className="text-blue-400/60" />
+                  <p className="text-white/40 text-xs uppercase tracking-wider font-medium">Popular Tracks</p>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {popularTracks.map((track) => {
+                    const trackIsPlaying = currentTrack?.id === track.id && isPlaying;
+                    const locked = isGated(track);
+                    return (
+                      <button
+                        key={track.id}
+                        onClick={() => {
+                          if (locked) {
+                            usePlayerStore.getState().openSubscribeModal(track);
+                            return;
+                          }
+                          const playable = myStationTracks.filter(t => !t.isVault && !t.comingSoon);
+                          const idx = playable.findIndex(t => t.id === track.id);
+                          setQueue(playable, idx >= 0 ? idx : 0);
+                        }}
+                        className={`flex items-center gap-3 p-2.5 rounded-xl transition-all text-left ${
+                          trackIsPlaying
+                            ? 'bg-blue-500/15 border border-blue-500/30'
+                            : 'bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.06]'
+                        } ${locked ? 'opacity-50' : ''}`}
+                      >
+                        <div className="relative w-11 h-11 rounded-lg overflow-hidden shrink-0 bg-gradient-to-br from-indigo-600/60 to-purple-800/80">
+                          {track.albumArt ? (
+                            <img src={track.albumArt} alt="" className="w-full h-full object-cover" loading="lazy" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <Music size={16} className="text-white/40" />
+                            </div>
+                          )}
+                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition">
+                            {locked ? <Lock size={14} className="text-white/70" /> : trackIsPlaying ? <Pause size={14} className="text-white" fill="white" /> : <Play size={14} className="text-white ml-0.5" fill="white" />}
+                          </div>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className={`text-sm font-semibold truncate ${trackIsPlaying ? 'text-blue-400' : 'text-white'}`}>{track.title}</p>
+                          <p className="text-white/35 text-xs truncate">Mike Page{track.featured ? ` ft. ${track.featured}` : ''}</p>
+                        </div>
+                        {trackIsPlaying && (
+                          <div className="flex gap-0.5 shrink-0">
+                            <span className="w-1 h-3 bg-blue-400 rounded-full animate-pulse" />
+                            <span className="w-1 h-4 bg-blue-400 rounded-full animate-pulse" style={{ animationDelay: '150ms' }} />
+                            <span className="w-1 h-2 bg-blue-400 rounded-full animate-pulse" style={{ animationDelay: '300ms' }} />
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Quick Links */}
+            <div className="mb-8">
+              <div className="flex items-center gap-2 mb-3">
+                <Library size={14} className="text-purple-400/60" />
+                <p className="text-white/40 text-xs uppercase tracking-wider font-medium">Quick Links</p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Link href="/music" className="flex items-center gap-1.5 px-4 py-2.5 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 rounded-xl text-blue-300 text-sm font-medium transition-all">
+                  <Music size={14} />
+                  Browse Albums
+                  <ChevronRight size={14} className="text-blue-400/40" />
+                </Link>
+                <button onClick={() => setQuery('Mike Page')} className="flex items-center gap-1.5 px-4 py-2.5 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 rounded-xl text-purple-300 text-sm font-medium transition-all">
+                  <TrendingUp size={14} />
+                  Trending
+                  <ChevronRight size={14} className="text-purple-400/40" />
+                </button>
+                <Link href="/" className="flex items-center gap-1.5 px-4 py-2.5 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 rounded-xl text-indigo-300 text-sm font-medium transition-all">
+                  <Sparkles size={14} />
+                  Mood Playlists
+                  <ChevronRight size={14} className="text-indigo-400/40" />
+                </Link>
+              </div>
+            </div>
+
+            {/* Original Trending Searches */}
+            <div className="text-center">
+              <div className="w-20 h-20 mx-auto mb-4 bg-white/5 rounded-full flex items-center justify-center">
+                <Search size={36} className="text-white/20" />
+              </div>
+              <p className="text-white/30 text-lg mb-1">Search for Kendrick Lamar, Drake, Mike Page</p>
+              <p className="text-white/20 text-sm mb-8">100 million+ songs from every artist in the world</p>
+              <div className="max-w-lg mx-auto">
+                <p className="text-white/20 text-xs uppercase tracking-wider mb-3">Trending</p>
+                <div className="flex flex-wrap justify-center gap-2 pb-8">
+                  {['Mike Page', 'Drake', 'Kendrick Lamar', 'Future', 'The Weeknd', 'Tyler, The Creator', 'SZA', 'Metro Boomin'].map((artist) => (
+                    <button
+                      key={artist}
+                      onClick={() => setQuery(artist)}
+                      className="trending-chip"
+                    >
+                      <Sparkles size={12} />
+                      {artist}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           </div>

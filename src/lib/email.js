@@ -12,7 +12,7 @@ const resend = process.env.RESEND_API_KEY
   ? new Resend(process.env.RESEND_API_KEY)
   : null;
 
-const ADMIN_EMAIL = ['mystationllc1@gmail.com'];
+const ADMIN_EMAIL = ['mystationlive@gmail.com'];
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'MyStation <notifications@mystationlive.com>';
 
 /**
@@ -894,7 +894,7 @@ export async function sendTicketOrderAlert({ orderRef, eventName, customerName, 
             </table>
           </div>
           <div style="text-align:center;margin-top:20px;">
-            <a href="https://mystationlive.com/admin/orders?key=${process.env.AUDIO_SECRET}" style="display:inline-block;background:#3b82f6;color:#fff;font-weight:bold;text-decoration:none;padding:12px 24px;border-radius:8px;">Review & Approve</a>
+            <a href="https://mystationlive.com/admin/orders?key=${process.env.ADMIN_KEY}" style="display:inline-block;background:#3b82f6;color:#fff;font-weight:bold;text-decoration:none;padding:12px 24px;border-radius:8px;">Review & Approve</a>
           </div>
         </div>
       </body></html>`,
@@ -912,33 +912,114 @@ export async function sendTicketOrderAlert({ orderRef, eventName, customerName, 
  */
 export async function sendSubscriptionWelcomeEmail({ customerEmail, customerName, tier }) {
   if (!resend) { console.warn('Resend not configured — skipping welcome email'); return { success: false }; }
-  const safeName = (customerName || customerEmail.split('@')[0]).replace(/[<>&"']/g, '');
+  const safeName = (customerName || 'Village Member').replace(/[<>&"']/g, '');
+  const tierDisplay = tier === 'diamond' ? 'Diamond' : tier === 'premium' ? 'Premium' : 'Supporter';
+  const tierColor = tier === 'diamond' ? '#f59e0b' : tier === 'premium' ? '#a855f7' : '#3b82f6';
+  const tierPrice = tier === 'diamond' ? '14.99' : tier === 'premium' ? '9.99' : '4.99';
 
   try {
     const { data, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: customerEmail,
-      subject: `Welcome to MyStation, ${safeName}!`,
+      subject: `Welcome to the MyStation Village, ${safeName}!`,
       html: `
-        <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:600px;margin:0 auto;background:#0a0e1a;color:#fff;padding:32px;border-radius:16px;">
-          <div style="text-align:center;margin-bottom:24px;">
-            <h1 style="color:#3b82f6;margin:0;font-size:28px;">Welcome to MyStation</h1>
-            <p style="color:#22c55e;font-size:18px;margin:8px 0;">You're in, ${safeName}.</p>
-          </div>
-          <div style="background:#1a1f36;padding:20px;border-radius:12px;margin-bottom:16px;">
-            <h3 style="color:#3b82f6;margin:0 0 12px;">What You Get</h3>
-            <ul style="color:#e2e8f0;padding-left:20px;margin:0;">
-              <li style="margin-bottom:8px;">Unlimited streaming of the entire catalog</li>
-              <li style="margin-bottom:8px;">Exclusive unreleased tracks</li>
-              <li style="margin-bottom:8px;">Early access to new drops</li>
-              <li style="margin-bottom:8px;">Comment on any track</li>
-            </ul>
-          </div>
-          <div style="text-align:center;margin-top:24px;">
-            <a href="https://mystationlive.com/music" style="display:inline-block;background:#3b82f6;color:#fff;font-weight:bold;text-decoration:none;padding:14px 32px;border-radius:12px;font-size:16px;">Start Listening</a>
-          </div>
-          <p style="color:#475569;font-size:12px;text-align:center;margin-top:24px;">MyStation — Premium Music by IDMG</p>
-        </div>
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background:#050810;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+<div style="max-width:600px;margin:0 auto;background:#0a0e1a;border-radius:0;">
+
+  <!-- HEADER — MyStation Logo + Branding -->
+  <div style="background:linear-gradient(135deg,#0a0e1a 0%,#1a1f36 50%,#0a0e1a 100%);padding:40px 32px 24px;text-align:center;border-bottom:2px solid #3b82f6;">
+    <img src="https://mystationlive.com/images/mystation-logo.png" alt="MyStation" width="120" height="120" style="display:block;margin:0 auto 16px;border-radius:20px;" />
+    <h1 style="color:#ffffff;margin:0;font-size:32px;font-weight:800;letter-spacing:-0.5px;">THANK YOU FOR JOINING</h1>
+    <h2 style="color:#3b82f6;margin:8px 0 0;font-size:26px;font-weight:700;">THE MYSTATION VILLAGE</h2>
+  </div>
+
+  <!-- WELCOME MESSAGE -->
+  <div style="padding:32px;text-align:center;">
+    <p style="color:#22c55e;font-size:22px;font-weight:700;margin:0 0 4px;">You're officially in, ${safeName}.</p>
+    <p style="color:${tierColor};font-size:16px;margin:0;font-weight:600;">${tierDisplay} Member — $${tierPrice}/mo</p>
+  </div>
+
+  <!-- WHAT YOU GET -->
+  <div style="margin:0 24px 24px;background:linear-gradient(135deg,#111827,#1a1f36);border:1px solid #1e3a5f;border-radius:16px;padding:24px;">
+    <h3 style="color:#3b82f6;margin:0 0 16px;font-size:20px;text-align:center;">What You Get</h3>
+    <table cellpadding="0" cellspacing="0" border="0" width="100%">
+      <tr><td style="padding:8px 0;color:#e2e8f0;font-size:15px;">&#127911; Unlimited streaming — entire music catalog</td></tr>
+      <tr><td style="padding:8px 0;color:#e2e8f0;font-size:15px;">&#128293; Exclusive unreleased tracks & early drops</td></tr>
+      <tr><td style="padding:8px 0;color:#e2e8f0;font-size:15px;">&#128172; Comment on any track — join the conversation</td></tr>
+      <tr><td style="padding:8px 0;color:#e2e8f0;font-size:15px;">&#127917; Exclusive videos & behind-the-scenes content</td></tr>
+      <tr><td style="padding:8px 0;color:#e2e8f0;font-size:15px;">&#128176; Member-only merch drops & discounts</td></tr>
+      <tr><td style="padding:8px 0;color:#e2e8f0;font-size:15px;">&#127775; VIP access to IDMG events & announcements</td></tr>
+    </table>
+  </div>
+
+  <!-- CTA — START LISTENING -->
+  <div style="text-align:center;padding:0 24px 32px;">
+    <a href="https://mystationlive.com/music" style="display:inline-block;background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;font-weight:800;text-decoration:none;padding:16px 48px;border-radius:14px;font-size:18px;letter-spacing:0.5px;">START LISTENING NOW</a>
+  </div>
+
+  <!-- DIVIDER -->
+  <div style="height:1px;background:linear-gradient(90deg,transparent,#3b82f6,transparent);margin:0 32px;"></div>
+
+  <!-- FREE LOTL TICKET OFFER -->
+  <div style="margin:24px;background:linear-gradient(135deg,#1a0f00,#1a1f36);border:1px solid #f59e0b;border-radius:16px;padding:24px;text-align:center;">
+    <img src="https://mystationlive.com/images/lotl-day-logo.png" alt="Love on the Lawn Day" width="100" height="100" style="display:block;margin:0 auto 12px;border-radius:12px;" />
+    <h3 style="color:#f59e0b;margin:0 0 8px;font-size:20px;">FREE EARLY BIRD TICKET</h3>
+    <p style="color:#e2e8f0;font-size:14px;margin:0 0 8px;line-height:1.5;">
+      As a MyStation subscriber, you get a <strong style="color:#f59e0b;">FREE Early Bird ticket</strong> to
+      <strong>Love on the Lawn Day 2026</strong> — Festival Park, Elgin, Illinois!
+    </p>
+    <p style="color:#94a3b8;font-size:13px;margin:0 0 12px;">
+      September 5, 2026 &middot; 2PM – 10PM &middot; 10,000+ Capacity
+    </p>
+    <p style="color:#f59e0b;font-size:12px;margin:0 0 16px;font-weight:600;">
+      Subscribe before April 12 &amp; stay subscribed through Sept 5 = FREE ticket
+    </p>
+    <a href="https://mystationlive.com/lotl" style="display:inline-block;background:linear-gradient(135deg,#f59e0b,#d97706);color:#000;font-weight:800;text-decoration:none;padding:12px 32px;border-radius:12px;font-size:14px;">LEARN MORE ABOUT LOTL</a>
+  </div>
+
+  <!-- MERCH SECTION -->
+  <div style="margin:24px;background:linear-gradient(135deg,#111827,#1a1f36);border:1px solid #1e3a5f;border-radius:16px;padding:24px;text-align:center;">
+    <h3 style="color:#3b82f6;margin:0 0 8px;font-size:20px;">IDMG Official Merch</h3>
+    <p style="color:#e2e8f0;font-size:14px;margin:0 0 16px;line-height:1.5;">
+      Rep the Empire. Hoodies, tees, hats, slides, joggers &amp; more — all premium quality, shipped to your door.
+    </p>
+    <a href="https://mystationlive.com/merch" style="display:inline-block;background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;font-weight:800;text-decoration:none;padding:12px 32px;border-radius:12px;font-size:14px;">SHOP MERCH</a>
+  </div>
+
+  <!-- QUICK LINKS -->
+  <div style="padding:24px 32px;text-align:center;">
+    <p style="color:#64748b;font-size:12px;margin:0 0 12px;text-transform:uppercase;letter-spacing:1px;">Explore MyStation</p>
+    <div>
+      <a href="https://mystationlive.com/music" style="color:#3b82f6;text-decoration:none;font-size:14px;font-weight:600;padding:0 10px;">Music</a>
+      <span style="color:#334155;">|</span>
+      <a href="https://mystationlive.com/merch" style="color:#3b82f6;text-decoration:none;font-size:14px;font-weight:600;padding:0 10px;">Merch</a>
+      <span style="color:#334155;">|</span>
+      <a href="https://mystationlive.com/search" style="color:#3b82f6;text-decoration:none;font-size:14px;font-weight:600;padding:0 10px;">Search</a>
+      <span style="color:#334155;">|</span>
+      <a href="https://mystationlive.com/events" style="color:#3b82f6;text-decoration:none;font-size:14px;font-weight:600;padding:0 10px;">Events</a>
+      <span style="color:#334155;">|</span>
+      <a href="https://mystationlive.com/lotl" style="color:#3b82f6;text-decoration:none;font-size:14px;font-weight:600;padding:0 10px;">LOTL</a>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div style="background:#050810;padding:24px 32px;text-align:center;border-top:1px solid #1e293b;">
+    <img src="https://mystationlive.com/images/mystation-logo.png" alt="MyStation" width="48" height="48" style="display:block;margin:0 auto 12px;border-radius:10px;opacity:0.7;" />
+    <p style="color:#475569;font-size:12px;margin:0 0 4px;">MyStation — Premium Music by IDMG</p>
+    <p style="color:#334155;font-size:11px;margin:0;">Impossible Dreamz Music Group &middot; Atlanta, GA</p>
+    <p style="color:#334155;font-size:11px;margin:8px 0 0;">
+      <a href="https://mystationlive.com" style="color:#475569;text-decoration:none;">mystationlive.com</a> &middot;
+      <a href="https://idmglive.com" style="color:#475569;text-decoration:none;">idmglive.com</a> &middot;
+      <a href="https://lotlfest.com" style="color:#475569;text-decoration:none;">lotlfest.com</a>
+    </p>
+  </div>
+
+</div>
+</body>
+</html>
       `,
     });
     if (error) { console.error('Welcome email error:', error); return { success: false, error }; }
