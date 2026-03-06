@@ -25,6 +25,7 @@ import PageTransition from '@/components/PageTransition';
 import CashAppThankYou from '@/components/CashAppThankYou';
 import SubscriberThankYou from '@/components/SubscriberThankYou';
 import BottomTabBar from '@/components/BottomTabBar';
+import SecurityShield from '@/components/SecurityShield';
 
 // Lazy-loaded utilities — code-split into separate chunks (loaded async after hydration)
 import LazyUtilities from '@/components/LazyUtilities';
@@ -209,6 +210,7 @@ export default function RootLayout({ children }) {
           <CashAppThankYou />
           <SubscriberThankYou />
           <LazyUtilities />
+          <SecurityShield />
         </ClientProviders>
         <Script id="register-sw" strategy="afterInteractive">
           {`

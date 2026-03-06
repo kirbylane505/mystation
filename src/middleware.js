@@ -76,6 +76,12 @@ async function verifyAudioToken(token, pathname) {
 export async function middleware(request) {
   const { pathname, searchParams } = request.nextUrl;
 
+  // ─── BLOCK SOURCE MAPS & SENSITIVE FILES ───
+  if (pathname.endsWith('.map') || pathname.endsWith('.ts') || pathname.endsWith('.tsx') ||
+      pathname === '/.env' || pathname === '/.env.local' || pathname.startsWith('/.git')) {
+    return new NextResponse('Not Found', { status: 404 });
+  }
+
   // Admin pages — allow through (each page handles its own auth client-side)
   if (pathname.startsWith('/admin/analytics') || pathname.startsWith('/admin/orders') || pathname.startsWith('/admin/merch-orders') || pathname.startsWith('/admin/check-in') || pathname.startsWith('/admin/listeners') || pathname.startsWith('/admin/fans')) {
     // Allow page load — auth happens client-side via admin key
@@ -156,8 +162,21 @@ export async function middleware(request) {
 
   headers.set('Content-Security-Policy', csp);
 
-  // Strict Transport Security - force HTTPS
-  headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  // Strict Transport Security - force HTTPS with preload
+  headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
+
+  // Remove server identity headers
+  headers.delete('X-Powered-By');
+  headers.delete('Server');
+
+  // Prevent caching of HTML pages (always serve fresh)
+  if (!pathname.startsWith('/api/') && !pathname.match(/\.(js|css|png|jpg|svg|ico|woff2?)$/)) {
+    headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+  }
+
+  // Cross-Origin policies — prevent embedding and data leaks
+  headers.set('Cross-Origin-Opener-Policy', 'same-origin');
+  headers.set('Cross-Origin-Resource-Policy', 'same-origin');
 
   return response;
 }
