@@ -4,7 +4,7 @@
  * Cache is ONLY used as offline fallback. Never serves stale content.
  */
 
-const CACHE_NAME = 'mystation-v6';
+const CACHE_NAME = 'mystation-v7';
 const OFFLINE_URL = '/offline.html';
 
 // Assets to cache for offline fallback only

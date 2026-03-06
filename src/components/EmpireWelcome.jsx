@@ -24,7 +24,7 @@ const LOTL_TRACK = {
   duration: "3:48",
   trackNumber: 8,
   albumId: 'singles-2026',
-  audioFile: '/audio/grammy-nights/04-love-on-the-lawn.mp3',
+  audioFile: '/audio/grammy-nights/04-love-on-the-lawn.m4a',
   isNew: true,
 };
 
