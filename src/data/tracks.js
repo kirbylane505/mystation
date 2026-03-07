@@ -8,6 +8,35 @@ export const tracks = [
   // NEW SINGLES - 2026
   // ========================================
   {
+    id: 98,
+    title: "Please Don't",
+    artist: "Djuan Covington",
+    album: "Coming Soon",
+    year: 2026,
+    duration: "3:42",
+    trackNumber: 1,
+    albumId: 'singles-2026',
+    audioFile: '/audio/singles/Djuan Covington - Please Dont_MASTERED.m4a',
+    isNew: true,
+    isFeatured: true,
+    featuredWeek: '2026-03-07',
+    hitScore: 97,
+    producer: 'The Cubist'
+  },
+  {
+    id: 99,
+    title: "Lizzo",
+    artist: "Mike Page",
+    album: "Coming Soon",
+    year: 2026,
+    duration: "2:26",
+    trackNumber: 1,
+    albumId: 'singles-2026',
+    audioFile: '/audio/singles/Mike Page - Lizzo_MASTERED.m4a',
+    isNew: true,
+    producer: 'The Art Teacher'
+  },
+  {
     id: 100,
     title: "Favorite Person",
     album: "Coming Soon",
@@ -1753,6 +1782,8 @@ export const tracks = [
   {
     id: 19,
     title: "Pick It Up, Bag It",
+    artist: "Mike Page",
+    featured: "MM Da Papi",
     album: "Cindy's Son",
     year: 2022,
     duration: "3:13",
@@ -1850,7 +1881,7 @@ export const tracks = [
   { id: 405, title: "Trap Get Ugly", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/Mike Page -TRAP (X6)L.m4a', producer: "The Cubist" },
   { id: 406, title: "Walk In Dat Parti", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/idmg x st236 - Mike Page (ruff01) Walk In.m4a', producer: "The Cubist" },
   { id: 407, title: "It's My Bday Bitch", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/Mike Page x Krissie the Don x Chevy - Bday Bitch (x1.0).m4a', featured: "Krissie the Don", producer: "The Cubist" },
-  { id: 408, title: "Pick It Up, Bag It", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/Mike Page x Majik - Pick it up bagg it (geemix1.0).m4a', featured: "Majik", producer: "The Cubist" },
+  { id: 408, title: "Pick It Up, Bag It", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/Mike Page x Majik - Pick it up bagg it (geemix1.0).m4a', featured: "MM Da Papi & Majik", producer: "The Cubist" },
   { id: 409, title: "From The Town", artist: "Drewson", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/From The Town (feat. Mike Page) [u1qUeN3tabY].m4a', featured: "Mike Page", producer: "The Cubist" },
   { id: 410, title: "200 On The Dashboard", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/IDMG 338 Deazel Page.m4a', featured: "King Deazel", producer: "The Cubist" },
   { id: 411, title: "No Ho", album: "Vault", year: 2026, albumId: 'vault', audioFile: '/audio/IDMG 337 VINYL Page.m4a', featured: "Vincent Berry", producer: "The Cubist" },
