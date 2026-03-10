@@ -7,7 +7,7 @@
 'use client';
 
 import { useEffect, useRef, useCallback } from 'react';
-import { usePlayerStore, useUserStore, isGated } from '@/store/playerStore';
+import { usePlayerStore, useUserStore, isGated, isPreviewOnly } from '@/store/playerStore';
 import { useEngagementStore } from '@/store/engagementStore';
 import { progressBridge } from '@/lib/progressBridge';
 
@@ -17,6 +17,11 @@ let isAudioInitialized = false;
 let audioUnlocked = false;
 let lastSkipTime = 0;
 let consecutiveErrors = 0;
+
+// 30-second preview system — non-subscribers hear 30s then get prompted
+const PREVIEW_DURATION = 30; // seconds
+const FADE_DURATION = 3; // seconds to fade out
+let previewFadeInterval = null;
 
 // Cross-tab audio arbitration — prevents IDMG + MyStation playing simultaneously
 let empireAudioChannel = null;
@@ -213,6 +218,47 @@ export default function AudioPlayer() {
     const onTimeUpdate = () => {
       progressBridge.set(audio.currentTime, audio.duration || 0);
       if (consecutiveErrors > 0) consecutiveErrors = 0;
+
+      // 30-second preview cutoff for non-subscribers
+      const currentTrackNow = usePlayerStore.getState().currentTrack;
+      if (currentTrackNow && isPreviewOnly(currentTrackNow)) {
+        const timeLeft = PREVIEW_DURATION - audio.currentTime;
+
+        // Start fade at 3 seconds before cutoff
+        if (timeLeft <= FADE_DURATION && timeLeft > 0 && !previewFadeInterval) {
+          const startVolume = audio.volume;
+          previewFadeInterval = setInterval(() => {
+            const remaining = PREVIEW_DURATION - audio.currentTime;
+            if (remaining <= 0) {
+              clearInterval(previewFadeInterval);
+              previewFadeInterval = null;
+              return;
+            }
+            audio.volume = Math.max(0, startVolume * (remaining / FADE_DURATION));
+          }, 100);
+        }
+
+        // Hit 30 seconds — stop and show subscribe modal
+        if (audio.currentTime >= PREVIEW_DURATION) {
+          if (previewFadeInterval) {
+            clearInterval(previewFadeInterval);
+            previewFadeInterval = null;
+          }
+          audio.pause();
+          audio.currentTime = 0;
+          // Restore volume for next track
+          const { volume: storeVol, isMuted: muted } = usePlayerStore.getState();
+          audio.volume = muted ? 0 : storeVol;
+          storeActionsRef.current.pause();
+          storeActionsRef.current.openSubscribeModal(currentTrackNow);
+        }
+      } else {
+        // Subscriber or free track — clear any leftover fade
+        if (previewFadeInterval) {
+          clearInterval(previewFadeInterval);
+          previewFadeInterval = null;
+        }
+      }
     };
 
     const onLoadedMetadata = () => {
@@ -383,14 +429,14 @@ export default function AudioPlayer() {
       return;
     }
 
-    // Universal gate — block if non-subscriber hit 2-song limit
-    if (isGated(currentTrack)) {
-      audio.pause();
-      pause();
-      storeActionsRef.current.openSubscribeModal(currentTrack);
-      lastTrackIdRef.current = null;
-      return;
+    // Reset preview fade when loading a new track
+    if (previewFadeInterval) {
+      clearInterval(previewFadeInterval);
+      previewFadeInterval = null;
     }
+    // Restore volume in case previous preview faded it
+    const { volume: storeVol, isMuted: muted } = usePlayerStore.getState();
+    audio.volume = muted ? 0 : storeVol;
 
     if (playing) {
       incrementPlayCount(currentTrack.id);

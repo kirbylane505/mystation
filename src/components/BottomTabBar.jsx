@@ -20,7 +20,7 @@ export default function BottomTabBar() {
   if (isGameRoom) return null;
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-[#0a0a1a]/95 backdrop-blur-xl border-t border-white/[0.06] pb-[env(safe-area-inset-bottom)]">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-[#0a0a1a]/95 backdrop-blur-xl border-t border-white/[0.06] pb-[env(safe-area-inset-bottom)]">
       <div className="flex items-center justify-around h-14">
         {tabs.map(({ href, icon: Icon, label }) => {
           const active = href === '/' ? pathname === '/' : pathname?.startsWith(href);

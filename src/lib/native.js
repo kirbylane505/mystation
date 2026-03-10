@@ -4,7 +4,7 @@
  * Only activates inside the Capacitor native shell.
  */
 
-const isNative = typeof window !== 'undefined' && window.Capacitor?.isNativePlatform();
+export const isNative = typeof window !== 'undefined' && window.Capacitor?.isNativePlatform();
 
 /** Initialize status bar theming */
 export async function initStatusBar() {

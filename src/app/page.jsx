@@ -334,7 +334,7 @@ export default function HomePage() {
             Shop All →
           </Link>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {freshMerch.map((product) => {
             // ALWAYS use front-facing image — logo must be visible on every product
             const img = product.images?.find(i => i.is_default) || product.images?.[0];
@@ -562,7 +562,7 @@ export default function HomePage() {
       {/* Footer */}
       <footer className="border-t border-white/5 py-16 bg-mystation-black/50">
         <div className="max-w-screen-xl mx-auto px-6">
-          <div className="grid md:grid-cols-4 gap-12">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12">
             <div>
               <Link href="/" className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl flex items-center justify-center">

@@ -8,7 +8,7 @@
 
 import { useState, memo, useCallback, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { usePlayerStore, isGated } from '@/store/playerStore';
+import { usePlayerStore, isGated, isPreviewOnly } from '@/store/playerStore';
 import { Play, Pause, Clock, Music, ExternalLink, MessageCircle, Lock } from 'lucide-react';
 import { tracks, albums } from '@/data/tracks';
 import { ShareButton } from './ShareTrack';
@@ -39,7 +39,7 @@ const TrackRow = memo(function TrackRow({ track, index, isCurrentTrack, isPlayin
       onClick={() => onTrackClick(track, index)}
     >
       {/* Mobile Layout */}
-      <div className="flex md:hidden items-center gap-2.5 px-3 py-2">
+      <div className="flex lg:hidden items-center gap-2.5 px-3 py-2">
         <div className="relative w-12 h-12 rounded-lg overflow-hidden shrink-0 border border-white/5">
           <Image src={getTrackArt(track)} alt="" fill className={artClass(getTrackArt(track))} />
           {isLocked ? (
@@ -59,7 +59,7 @@ const TrackRow = memo(function TrackRow({ track, index, isCurrentTrack, isPlayin
         <div className="flex-1 min-w-0">
           <p className={`font-bold text-[14px] leading-tight truncate ${isCurrentTrack ? 'text-blue-400' : 'text-white'}`}>
             {track.title}
-            {isLocked && <span className="ml-1.5 text-[10px] font-medium text-blue-400/80 bg-blue-500/15 px-1.5 py-0.5 rounded-full align-middle">Subscribe to Unlock</span>}
+            {isLocked && <span className="ml-1.5 text-[10px] font-medium text-blue-400/80 bg-blue-500/15 px-1.5 py-0.5 rounded-full align-middle">30s Preview</span>}
           </p>
           <p className="text-[12px] text-white/60 truncate mt-0.5">
             {track.artist || 'Mike Page'}{track.featured ? ` ft. ${track.featured}` : ''}{track.producer ? ` • ${track.producer}` : ''}
@@ -87,7 +87,7 @@ const TrackRow = memo(function TrackRow({ track, index, isCurrentTrack, isPlayin
       </div>
 
       {/* Desktop Layout */}
-      <div className="hidden md:grid grid-cols-12 gap-4 items-center">
+      <div className="hidden lg:grid grid-cols-12 gap-4 items-center">
         {showNumber && (
           <div className="col-span-1 text-white/30 font-mono text-sm">
             <span className="group-hover:hidden">
@@ -131,7 +131,7 @@ const TrackRow = memo(function TrackRow({ track, index, isCurrentTrack, isPlayin
             <div>
               <p className={`font-bold ${isCurrentTrack ? 'text-blue-400' : 'text-white'}`}>
                 {track.title}
-                {isLocked && <span className="ml-2 text-[10px] font-medium text-blue-400/80 bg-blue-500/15 px-1.5 py-0.5 rounded-full align-middle">Subscribe to Unlock</span>}
+                {isLocked && <span className="ml-2 text-[10px] font-medium text-blue-400/80 bg-blue-500/15 px-1.5 py-0.5 rounded-full align-middle">30s Preview</span>}
               </p>
               <p className="text-sm text-white/70">
                 {track.artist || 'Mike Page'}{track.featured && <span className="text-white/60"> ft. {track.featured}</span>}
@@ -210,11 +210,7 @@ export default function TrackList({ trackIds, showAlbum = true, showNumber = tru
       togglePlay();
       return;
     }
-    // Gate — only "I Want This One" & "R.U.N or R U Out" free for non-subscribers
-    if (isGated(track)) {
-      usePlayerStore.getState().openSubscribeModal(track);
-      return;
-    }
+    // All tracks now play (30-second preview for non-subscribers)
     setQueue(displayTracks, index);
   }, [currentTrack?.id, togglePlay, setQueue, displayTracks]);
 
@@ -226,7 +222,7 @@ export default function TrackList({ trackIds, showAlbum = true, showNumber = tru
     <>
     <div className="w-full">
       {/* Header - Hidden on mobile */}
-      <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-3 text-white/30 text-xs uppercase tracking-wider border-b border-white/5 mb-2">
+      <div className="hidden lg:grid grid-cols-12 gap-4 px-6 py-3 text-white/30 text-xs uppercase tracking-wider border-b border-white/5 mb-2">
         {showNumber && <div className="col-span-1">#</div>}
         <div className={showNumber ? 'col-span-5' : 'col-span-6'}>Title</div>
         {showAlbum && <div className="col-span-3">Album</div>}
@@ -242,7 +238,7 @@ export default function TrackList({ trackIds, showAlbum = true, showNumber = tru
           index={index}
           isCurrentTrack={currentTrack?.id === track.id}
           isPlayingThis={currentTrack?.id === track.id && isPlaying}
-          isLocked={isGated(track)}
+          isLocked={isPreviewOnly(track)}
           showNumber={showNumber}
           showAlbum={showAlbum}
           showComments={showComments}

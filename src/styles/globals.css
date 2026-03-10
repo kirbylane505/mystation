@@ -173,10 +173,30 @@ body {
   border: 1px solid transparent;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 1023px) {
   .track-item {
     padding: 0;
     border-radius: 8px;
+  }
+}
+
+/* ==========================================
+   IPAD / TABLET RESPONSIVE (768px - 1023px)
+   ========================================== */
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  /* Ensure content doesn't overflow on iPad */
+  .max-w-screen-xl {
+    max-width: 100%;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+
+  /* Subscribe modal — stack cards vertically on tablet */
+  .subscribe-tier-grid {
+    grid-template-columns: 1fr !important;
+    max-width: 400px;
+    margin: 0 auto;
   }
 }
 

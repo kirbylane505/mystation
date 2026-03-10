@@ -344,14 +344,28 @@ export const useUserStore = create(
   )
 );
 
-// Specific free tracks — ONLY these 2 songs play for non-subscribers
-// "I Want This One" (500) & "R.U.N or R U Out" (501) — everything else = subscribe
+// Specific free tracks — ALWAYS full-length for everyone
+// "I Want This One" (500) & "R.U.N or R U Out" (501)
 const FREE_TRACK_IDS = [500, 501];
 
-export function isGated(track) {
+/**
+ * isGated — NO LONGER blocks playback.
+ * All tracks now play a 30-second preview for non-subscribers.
+ * The AudioPlayer handles the 30s cutoff + fade.
+ * This function now returns false always so playback is never blocked at tap.
+ */
+export function isGated(/* track */) {
+  return false;
+}
+
+/**
+ * isPreviewOnly — returns true if this track should be limited to 30-second preview.
+ * Full tracks: free track IDs + subscribers + friends.
+ */
+export function isPreviewOnly(track) {
   if (!track?.id) return false;
 
-  // These 2 tracks are ALWAYS free for everyone
+  // Free tracks are ALWAYS full-length
   if (FREE_TRACK_IDS.includes(track.id)) return false;
 
   // Check Zustand subscriber state first (fastest, no DOM access)
@@ -364,7 +378,7 @@ export function isGated(track) {
   if (cookies.includes('mystation-sub=')) return false;
   if (cookies.includes('mystation-friend=')) return false;
 
-  // Everything else is GATED for non-subscribers
+  // Non-subscriber + non-free track = 30-second preview only
   return true;
 }
 

@@ -288,10 +288,10 @@ export default function Player() {
       if (playable.length > 0) setQueue(playable, 0);
     };
     return (
-      <div className="fixed bottom-14 md:bottom-0 left-0 right-0 h-16 md:h-20 bg-[#0a0f1a]/98 backdrop-blur-2xl border-t border-white/[0.06] z-[9999]">
-        <div className="h-full flex items-center justify-between px-4 md:px-6">
+      <div className="fixed bottom-14 lg:bottom-0 left-0 right-0 h-16 lg:h-20 bg-[#0a0f1a]/98 backdrop-blur-2xl border-t border-white/[0.06] z-[9999]">
+        <div className="h-full flex items-center justify-between px-4 lg:px-6">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg overflow-hidden border border-white/[0.08] shrink-0 relative">
+            <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-lg overflow-hidden border border-white/[0.08] shrink-0 relative">
               <Image src={IDMG_LOGO} alt="IDMG" fill className="object-contain p-2 bg-[#0a1628]" />
             </div>
             <div>
@@ -561,7 +561,7 @@ export default function Player() {
       {minimized && (
         <button
           onClick={() => setMinimized(false)}
-          className="fixed bottom-16 right-4 md:bottom-2 md:right-4 z-[10000] flex items-center gap-2 px-3 py-2 bg-[#0a0f1a]/95 backdrop-blur-xl border border-white/10 rounded-full shadow-xl shadow-black/40 active:scale-95 transition-all"
+          className="fixed bottom-16 right-4 lg:bottom-2 lg:right-4 z-[10000] flex items-center gap-2 px-3 py-2 bg-[#0a0f1a]/95 backdrop-blur-xl border border-white/10 rounded-full shadow-xl shadow-black/40 active:scale-95 transition-all"
         >
           <div className="w-7 h-7 rounded-full overflow-hidden border border-white/10 shrink-0 relative">
             <Image src={albumArt} alt="" fill className={artClass(albumArt)} />
@@ -572,7 +572,7 @@ export default function Player() {
 
       {/* MOBILE MINI PLAYER */}
       <div
-        className={`md:hidden fixed bottom-14 left-0 right-0 z-[9999] bg-[#0a0f1a]/98 backdrop-blur-2xl border-t border-white/[0.06] transition-transform duration-300 ${minimized ? 'translate-y-full' : 'translate-y-0'}`}
+        className={`lg:hidden fixed bottom-14 left-0 right-0 z-[9999] bg-[#0a0f1a]/98 backdrop-blur-2xl border-t border-white/[0.06] transition-transform duration-300 ${minimized ? 'translate-y-full' : 'translate-y-0'}`}
         onClick={() => !minimized && setExpanded(true)}
       >
         {/* Progress line on top */}
@@ -642,7 +642,7 @@ export default function Player() {
       </div>
 
       {/* DESKTOP PLAYER */}
-      <div className={`hidden md:block fixed bottom-0 left-0 right-0 h-[88px] bg-[#0a0f1a]/98 backdrop-blur-2xl border-t border-white/[0.06] z-[9999] transition-transform duration-300 ${minimized ? 'translate-y-full' : 'translate-y-0'}`}>
+      <div className={`hidden lg:block fixed bottom-0 left-0 right-0 h-[88px] bg-[#0a0f1a]/98 backdrop-blur-2xl border-t border-white/[0.06] z-[9999] transition-transform duration-300 ${minimized ? 'translate-y-full' : 'translate-y-0'}`}>
         <div className="max-w-screen-2xl mx-auto h-full px-5 flex items-center gap-5">
 
           {/* Left — Track Info */}

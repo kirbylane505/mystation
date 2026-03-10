@@ -10,8 +10,10 @@ import { useState, useEffect } from 'react';
 import { usePlayerStore, useUserStore } from '@/store/playerStore';
 import { X, Music, Check, CreditCard, Crown, ShoppingBag, Gem, Star, Headphones } from 'lucide-react';
 import Link from 'next/link';
+import { isNative } from '@/lib/native';
 
 // Stripe checkout links per tier — MyStation LLC (acct_1T1jP1R0BloCNd9r)
+// Hidden on iOS native app (Apple IAP rules)
 const STRIPE_LINKS = {
   regular: 'https://buy.stripe.com/5kQbJ3fyX0l0gLafHd1oI00',
   premium: 'https://buy.stripe.com/bJe00lcmL2t8cuUcv11oI01',
@@ -193,10 +195,10 @@ export default function SubscribeModal() {
               </>
             ) : (
               <>
-                <h2 className="text-xl font-bold text-white mb-1">Subscribe FREE — First Month On Us</h2>
+                <h2 className="text-xl font-bold text-white mb-1">Subscribe to Unlock Full Tracks</h2>
                 <div className="space-y-1 mt-2">
                   <p className="text-white/70 text-sm flex items-center justify-center gap-1.5">
-                    <Check size={14} className="text-green-400 shrink-0" /> Unlock ALL 100+ tracks instantly
+                    <Check size={14} className="text-green-400 shrink-0" /> Preview any song — subscribe for full streaming
                   </p>
                   <p className="text-[#D4AF37] text-sm font-semibold flex items-center justify-center gap-1.5">
                     <span className="text-base">🎫</span> Stay through August = FREE LOTL ticket ($20 value)
@@ -211,7 +213,7 @@ export default function SubscribeModal() {
           <>
             {/* 3-Tier Pricing Cards */}
             <div className="px-6 pb-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
                 {tiers.map((tier) => {
                   const isSelected = selectedTier === tier.id;
                   return (
@@ -258,21 +260,37 @@ export default function SubscribeModal() {
 
             {/* Subscribe Button */}
             <div className="px-6 pb-4">
-              <button
-                onClick={() => handleSubscribe(selectedTier)}
-                disabled={loading}
-                className={`w-full py-4 bg-gradient-to-r ${tiers.find(t => t.id === selectedTier)?.btnGradient} text-white font-bold rounded-xl hover:opacity-90 transition disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg ${tiers.find(t => t.id === selectedTier)?.shadow}`}
-              >
-                {loading ? (
-                  <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                ) : (
-                  <>
-                    <CreditCard size={18} />
-                    Start Free Trial — ${tiers.find(t => t.id === selectedTier)?.price}/mo after
-                  </>
-                )}
-              </button>
-              <p className="text-white/30 text-xs text-center mt-2">First month FREE. Cancel anytime. All proceeds support youth & community programs.</p>
+              {isNative ? (
+                <>
+                  <a
+                    href="https://mystationlive.com/subscribe"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`w-full py-4 bg-gradient-to-r ${tiers.find(t => t.id === selectedTier)?.btnGradient} text-white font-bold rounded-xl hover:opacity-90 transition flex items-center justify-center gap-2 shadow-lg ${tiers.find(t => t.id === selectedTier)?.shadow}`}
+                  >
+                    Subscribe at mystationlive.com
+                  </a>
+                  <p className="text-white/30 text-xs text-center mt-2">Subscribe on our website to unlock full streaming. All proceeds support youth & community programs.</p>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={() => handleSubscribe(selectedTier)}
+                    disabled={loading}
+                    className={`w-full py-4 bg-gradient-to-r ${tiers.find(t => t.id === selectedTier)?.btnGradient} text-white font-bold rounded-xl hover:opacity-90 transition disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg ${tiers.find(t => t.id === selectedTier)?.shadow}`}
+                  >
+                    {loading ? (
+                      <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    ) : (
+                      <>
+                        <CreditCard size={18} />
+                        Start Free Trial — ${tiers.find(t => t.id === selectedTier)?.price}/mo after
+                      </>
+                    )}
+                  </button>
+                  <p className="text-white/30 text-xs text-center mt-2">First month FREE. Cancel anytime. All proceeds support youth & community programs.</p>
+                </>
+              )}
             </div>
 
             {/* Pending track preview */}
@@ -302,42 +320,44 @@ export default function SubscribeModal() {
               </Link>
             </div>
 
-            {/* Access Code */}
-            <div className="px-6 pb-3">
-              {!showCodeInput ? (
-                <button
-                  onClick={() => setShowCodeInput(true)}
-                  className="w-full text-center text-blue-400/70 text-xs hover:text-blue-400 transition"
-                >
-                  Have an access code?
-                </button>
-              ) : (
-                <div className="bg-white/5 rounded-xl border border-white/10 p-3">
-                  <p className="text-white/60 text-xs mb-2 text-center">Enter your access code for free unlimited streaming</p>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={accessCode}
-                      onChange={(e) => { setAccessCode(e.target.value); setCodeError(''); }}
-                      onKeyDown={(e) => e.key === 'Enter' && handleAccessCode()}
-                      placeholder="Enter code"
-                      className="flex-1 px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/30 text-sm focus:outline-none focus:border-blue-500 uppercase tracking-wider"
-                      autoFocus
-                    />
-                    <button
-                      onClick={handleAccessCode}
-                      disabled={codeLoading || !accessCode.trim()}
-                      className="px-5 py-2.5 bg-green-500 text-white font-bold rounded-xl hover:bg-green-400 transition disabled:opacity-50 text-sm"
-                    >
-                      {codeLoading ? '...' : 'Go'}
-                    </button>
+            {/* Access Code — hidden on iOS native (Apple IAP rules) */}
+            {!isNative && (
+              <div className="px-6 pb-3">
+                {!showCodeInput ? (
+                  <button
+                    onClick={() => setShowCodeInput(true)}
+                    className="w-full text-center text-blue-400/70 text-xs hover:text-blue-400 transition"
+                  >
+                    Have an access code?
+                  </button>
+                ) : (
+                  <div className="bg-white/5 rounded-xl border border-white/10 p-3">
+                    <p className="text-white/60 text-xs mb-2 text-center">Enter your access code for free unlimited streaming</p>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={accessCode}
+                        onChange={(e) => { setAccessCode(e.target.value); setCodeError(''); }}
+                        onKeyDown={(e) => e.key === 'Enter' && handleAccessCode()}
+                        placeholder="Enter code"
+                        className="flex-1 px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/30 text-sm focus:outline-none focus:border-blue-500 uppercase tracking-wider"
+                        autoFocus
+                      />
+                      <button
+                        onClick={handleAccessCode}
+                        disabled={codeLoading || !accessCode.trim()}
+                        className="px-5 py-2.5 bg-green-500 text-white font-bold rounded-xl hover:bg-green-400 transition disabled:opacity-50 text-sm"
+                      >
+                        {codeLoading ? '...' : 'Go'}
+                      </button>
+                    </div>
+                    {codeError && (
+                      <p className="text-red-400 text-xs mt-2 text-center">{codeError}</p>
+                    )}
                   </div>
-                  {codeError && (
-                    <p className="text-red-400 text-xs mt-2 text-center">{codeError}</p>
-                  )}
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            )}
 
             <div className="px-6 pb-6 flex flex-col items-center gap-2">
               <Link

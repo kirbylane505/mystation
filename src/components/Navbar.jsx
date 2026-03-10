@@ -141,7 +141,7 @@ export default function Navbar() {
   return (
     <>
       {/* Floating Glass Navbar - Desktop */}
-      <nav className="fixed top-6 left-1/2 -translate-x-1/2 z-[300] hidden md:block">
+      <nav className="fixed top-6 left-1/2 -translate-x-1/2 z-[300] hidden lg:block">
         <div className="flex items-center gap-1 px-2 py-2 bg-white/10 backdrop-blur-xl rounded-full border border-white/20 shadow-2xl shadow-black/20">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 px-4 py-2 rounded-full hover:bg-white/10 transition">
@@ -376,7 +376,7 @@ export default function Navbar() {
       </nav>
 
       {/* Mobile Top Bar */}
-      <nav className="fixed top-0 left-0 right-0 z-[300] md:hidden bg-mystation-navy/90 backdrop-blur-xl border-b border-white/10">
+      <nav className="fixed top-0 left-0 right-0 z-[300] lg:hidden bg-mystation-navy/90 backdrop-blur-xl border-b border-white/10">
         <div className="flex items-center justify-between px-4 h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
@@ -432,12 +432,12 @@ export default function Navbar() {
 
       {/* Mobile Menu Backdrop + Dropdown — extracted for proper z-index */}
       {mobileMenuOpen && (
-        <div className="md:hidden fixed inset-0 z-[455]" onClick={() => setMobileMenuOpen(false)}>
+        <div className="lg:hidden fixed inset-0 z-[455]" onClick={() => setMobileMenuOpen(false)}>
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
         </div>
       )}
       {mobileMenuOpen && (
-        <div className="md:hidden fixed bottom-14 left-0 right-0 bg-mystation-navy/98 backdrop-blur-xl border-t border-white/10 p-4 space-y-2 max-h-[60vh] overflow-y-auto z-[460]">
+        <div className="lg:hidden fixed bottom-14 left-0 right-0 bg-mystation-navy/98 backdrop-blur-xl border-t border-white/10 p-4 space-y-2 max-h-[60vh] overflow-y-auto z-[460]">
           {/* Core Nav Items */}
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -563,7 +563,7 @@ export default function Navbar() {
       )}
 
       {/* Mobile Bottom Tab Bar — persistent, Spotify-style */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-[450] bg-[#0a0f1a]/98 backdrop-blur-2xl border-t border-white/[0.06]">
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-[450] bg-[#0a0f1a]/98 backdrop-blur-2xl border-t border-white/[0.06]">
         <div className="flex items-center justify-around h-14 px-1">
           {[
             { href: '/', icon: Home, label: 'Home' },
