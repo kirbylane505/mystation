@@ -1,8 +1,9 @@
 /**
  * MYSTATION - Comments API (Supabase-backed)
- * GET: Fetch comments for a track (with nested admin replies)
- * POST: Add a comment (subscriber-only) or admin reply
- * DELETE: Remove a comment (admin-only)
+ * GET: Fetch comments for a track (with nested replies)
+ * POST: Add a comment (subscriber-only) or owner reply
+ * PATCH: Like/unlike/pin/unpin a comment
+ * DELETE: Remove a comment (owner-only)
  *
  * Required Supabase table:
  * ---------------------------------------------------------
@@ -15,16 +16,39 @@
  *   parent_id uuid REFERENCES comments(id) DEFAULT NULL,
  *   is_admin boolean DEFAULT false,
  *   role text DEFAULT 'fan',
+ *   likes integer DEFAULT 0,
+ *   is_pinned boolean DEFAULT false,
  *   created_at timestamptz DEFAULT now()
  * );
  * CREATE INDEX idx_comments_track_id ON comments (track_id);
  * CREATE INDEX idx_comments_parent_id ON comments (parent_id);
+ *
+ * Migration (if table exists without likes/is_pinned):
+ * ALTER TABLE comments ADD COLUMN IF NOT EXISTS likes integer DEFAULT 0;
+ * ALTER TABLE comments ADD COLUMN IF NOT EXISTS is_pinned boolean DEFAULT false;
  * ---------------------------------------------------------
  */
 
 import { NextResponse } from 'next/server';
 import { timingSafeEqual } from 'crypto';
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
+
+// Owner emails — auto-detect Mike Page as creator
+const OWNER_EMAILS = ['idmgatl@gmail.com', 'mystationlive@gmail.com', 'pagemusic505@gmail.com'];
+
+function isOwnerEmail(email) {
+  return email && OWNER_EMAILS.includes(email.toLowerCase().trim());
+}
+
+function getEmailFromRequest(request) {
+  // Check mystation-email cookie
+  const emailCookie = request.cookies.get('mystation-email');
+  if (emailCookie?.value) return emailCookie.value;
+  // Check x-user-email header (set by client)
+  const headerEmail = request.headers.get('x-user-email');
+  if (headerEmail) return headerEmail;
+  return null;
+}
 
 // Rate limit: max 5 comments per IP per 10 minutes (in-memory, best-effort)
 const rateLimits = new Map();
@@ -63,6 +87,8 @@ function mapRow(row) {
     parentId: row.parent_id || null,
     isAdmin: row.is_admin || false,
     role: row.role || 'fan',
+    likes: row.likes || 0,
+    isPinned: row.is_pinned || false,
     createdAt: row.created_at,
   };
 }
@@ -81,10 +107,13 @@ export async function GET(request) {
   }
 
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from('comments')
-      .select('id, track_id, username, content, avatar, parent_id, is_admin, role, created_at')
-      .eq('track_id', String(trackId))
+      .select('*')
+      .eq('track_id', String(trackId));
+
+    // Try ordering by is_pinned first; if column doesn't exist, fallback
+    const { data, error } = await query
       .order('created_at', { ascending: true });
 
     if (error) {
@@ -130,7 +159,9 @@ export async function POST(request) {
 
     const { trackId, trackTitle, name, message, parentId, adminKey } = await request.json();
 
-    const isAdmin = isValidAdminKey(adminKey);
+    // Owner detection: admin key OR owner email
+    const email = getEmailFromRequest(request);
+    const isAdmin = isValidAdminKey(adminKey) || isOwnerEmail(email);
 
     // Non-admin posts require subscriber cookie
     if (!isAdmin) {
@@ -179,7 +210,7 @@ export async function POST(request) {
     const { data, error } = await supabase
       .from('comments')
       .insert(insertData)
-      .select('id, track_id, username, content, avatar, parent_id, is_admin, role, created_at')
+      .select('*')
       .single();
 
     if (error) {
@@ -201,11 +232,59 @@ export async function POST(request) {
   }
 }
 
+export async function PATCH(request) {
+  try {
+    const body = await request.json();
+    const { commentId, action, adminKey } = body;
+
+    if (!commentId || !['like', 'unlike', 'pin', 'unpin'].includes(action)) {
+      return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
+    }
+
+    // Pin/unpin = owner only
+    if (action === 'pin' || action === 'unpin') {
+      const email = getEmailFromRequest(request);
+      if (!isOwnerEmail(email) && !isValidAdminKey(adminKey)) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+    }
+
+    const supabase = getSupabaseAdmin();
+    if (!supabase) {
+      return NextResponse.json({ success: true });
+    }
+
+    if (action === 'like' || action === 'unlike') {
+      // Read current likes, handle missing column gracefully
+      const { data: current, error: readErr } = await supabase.from('comments').select('likes').eq('id', commentId).single();
+      if (readErr && readErr.code === '42703') {
+        // Column doesn't exist yet — client handles optimistically
+        return NextResponse.json({ success: true, pending_migration: true });
+      }
+      const currentLikes = current?.likes || 0;
+      const newLikes = action === 'like' ? currentLikes + 1 : Math.max(0, currentLikes - 1);
+      await supabase.from('comments').update({ likes: newLikes }).eq('id', commentId);
+    } else if (action === 'pin' || action === 'unpin') {
+      const { error: pinErr } = await supabase.from('comments').update({ is_pinned: action === 'pin' }).eq('id', commentId);
+      if (pinErr && pinErr.code === '42703') {
+        return NextResponse.json({ success: true, pending_migration: true });
+      }
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    console.error('Comments PATCH error:', err);
+    return NextResponse.json({ error: 'Failed to update' }, { status: 500 });
+  }
+}
+
 export async function DELETE(request) {
   try {
     const { commentId, adminKey } = await request.json();
 
-    if (!isValidAdminKey(adminKey)) {
+    // Owner can delete via admin key OR owner email
+    const email = getEmailFromRequest(request);
+    if (!isValidAdminKey(adminKey) && !isOwnerEmail(email)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -256,7 +335,7 @@ async function notifyAdmin(comment, trackTitle) {
 
   await resend.emails.send({
     from: process.env.RESEND_FROM_EMAIL || 'MyStation <notifications@mystationlive.com>',
-    to: 'mystationllc@gmail.com',
+    to: 'mystationlive@gmail.com',
     subject: `New Comment on "${safeTitle}" \u2014 ${safeName}`,
     html: `
       <div style="font-family:-apple-system,sans-serif;max-width:500px;margin:0 auto;background:#0a0e1a;color:#fff;padding:24px;border-radius:16px;">

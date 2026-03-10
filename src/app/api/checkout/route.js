@@ -110,13 +110,13 @@ export async function POST(request) {
       quantity: item.quantity,
     }));
 
-    // Build Printful items metadata for webhook
+    // Build Printful items metadata for webhook (truncate names to stay under Stripe 500-char metadata limit)
     const printfulItems = items
       .filter(item => item.printfulSyncVariantId)
       .map(item => ({
         sync_variant_id: item.printfulSyncVariantId,
         quantity: item.quantity,
-        name: item.name,
+        name: (item.name || '').slice(0, 40),
       }));
 
     // Build Printify items metadata for webhook
@@ -126,7 +126,7 @@ export async function POST(request) {
         product_id: item.printifyProductId,
         variant_id: item.printifyVariantId,
         quantity: item.quantity,
-        name: item.name,
+        name: (item.name || '').slice(0, 40),
       }));
 
     // Create Stripe Checkout session

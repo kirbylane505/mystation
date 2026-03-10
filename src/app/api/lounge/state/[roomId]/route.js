@@ -6,7 +6,6 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
 import { sanitizeBlackjackState } from '@/lib/games/blackjack';
-import { sanitizeSlidesLaddersState } from '@/lib/games/slidesLadders';
 import { sanitizePoolState } from '@/lib/games/pool';
 import { sanitizeSpadesState } from '@/lib/games/spades';
 import { sanitizeDominoesState } from '@/lib/games/dominoes';
@@ -54,9 +53,6 @@ export async function GET(request, { params }) {
     switch (room.game_type) {
       case 'blackjack':
         gameState = sanitizeBlackjackState(stateRow.state, playerId);
-        break;
-      case 'slidesLadders':
-        gameState = sanitizeSlidesLaddersState(stateRow.state);
         break;
       case 'pool':
         gameState = sanitizePoolState(stateRow.state);

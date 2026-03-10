@@ -20,8 +20,14 @@ out/
 # OS
 .DS_Store
 
-# Large audio - WAV masters stay local only
+# Large audio — all audio served from R2 CDN, not git
 public/audio/**/*.wav
+public/audio/**/*.m4a
+public/audio/**/*.mp3
+
+# Temp scripts
+tiktok-dm-*.js
+.env.vercel-check
 
 # One-off scripts and test artifacts
 scripts/

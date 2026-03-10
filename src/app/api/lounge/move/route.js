@@ -8,7 +8,6 @@ import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
 import { GAME_POINTS } from '@/lib/games/constants';
 import { applyBlackjackMove, sanitizeBlackjackState } from '@/lib/games/blackjack';
-import { applySlidesLaddersMove, sanitizeSlidesLaddersState } from '@/lib/games/slidesLadders';
 import { applyPoolMove, sanitizePoolState } from '@/lib/games/pool';
 import { applySpadesMove, sanitizeSpadesState } from '@/lib/games/spades';
 import { applyDominoesMove, sanitizeDominoesState } from '@/lib/games/dominoes';
@@ -57,9 +56,6 @@ export async function POST(request) {
       case 'blackjack':
         result = applyBlackjackMove(gameState, playerId, action);
         break;
-      case 'slidesLadders':
-        result = applySlidesLaddersMove(gameState, playerId);
-        break;
       case 'pool': {
         // In solo mode, use the current turn player (may be AI)
         const poolPlayer = gameState.turnOrder?.[gameState.currentPlayerIndex] === 'ai_opponent'
@@ -70,12 +66,43 @@ export async function POST(request) {
       case 'spades':
         result = applySpadesMove(gameState, playerId, action);
         break;
-      case 'dominoes':
-        result = applyDominoesMove(gameState, playerId, action, moveData);
+      case 'dominoes': {
+        if (action === 'ai_move') {
+          // Client requested server-side AI move
+          const aiPid = gameState.playerOrder[gameState.currentTurnIndex];
+          if (!aiPid?.startsWith('ai_')) {
+            return NextResponse.json({ error: 'Not AI turn' }, { status: 400 });
+          }
+          result = playDominoesAI(gameState, aiPid);
+        } else {
+          result = applyDominoesMove(gameState, playerId, action, moveData);
+        }
         break;
+      }
       case 'quiz':
         result = applyQuizMove(gameState, playerId, action, moveData);
         break;
+      case 'galaga': {
+        // Galaga runs client-side — moves report score/gameover to server
+        const newGalagaState = { ...gameState };
+        if (action === 'score') {
+          newGalagaState.scores = { ...newGalagaState.scores, [playerId]: moveData.score || 0 };
+        } else if (action === 'gameover') {
+          newGalagaState.scores = { ...newGalagaState.scores, [playerId]: moveData.score || 0 };
+          newGalagaState.phase = 'finished';
+          newGalagaState.winner = Object.entries(newGalagaState.scores)
+            .sort((a, b) => b[1] - a[1])[0]?.[0] || playerId;
+          newGalagaState.results = Object.fromEntries(
+            Object.entries(newGalagaState.scores).map(([id, score]) => [id, {
+              outcome: id === newGalagaState.winner ? 'win' : 'loss',
+              score,
+              reason: id === newGalagaState.winner ? 'High score!' : 'Game over',
+            }])
+          );
+        }
+        result = { valid: true, state: newGalagaState };
+        break;
+      }
       default:
         return NextResponse.json({ error: 'Game type not supported' }, { status: 400 });
     }
@@ -86,20 +113,14 @@ export async function POST(request) {
 
     let newState = result.state;
 
-    // Auto-play AI turns (Slides & Ladders + Dominoes)
-    if (room.game_type === 'slidesLadders' || room.game_type === 'dominoes') {
+    // Auto-play AI turns (Dominoes)
+    if (room.game_type === 'dominoes') {
       let safety = 0;
       while (newState.phase !== 'finished' && safety < 100) {
         const nextPlayer = newState.playerOrder[newState.currentTurnIndex];
         if (!nextPlayer?.startsWith('ai_')) break;
 
-        let aiResult;
-        if (room.game_type === 'slidesLadders') {
-          aiResult = applySlidesLaddersMove(newState, nextPlayer);
-        } else {
-          aiResult = playDominoesAI(newState, nextPlayer);
-        }
-
+        const aiResult = playDominoesAI(newState, nextPlayer);
         if (!aiResult.valid) break;
         newState = aiResult.state;
         safety++;
@@ -150,9 +171,6 @@ export async function POST(request) {
     switch (room.game_type) {
       case 'blackjack':
         broadcastState = sanitizeBlackjackState(newState, '__broadcast__');
-        break;
-      case 'slidesLadders':
-        broadcastState = sanitizeSlidesLaddersState(newState);
         break;
       case 'pool':
         broadcastState = sanitizePoolState(newState);
@@ -311,7 +329,7 @@ async function awardGamePoints(supabase, room, gameState) {
           isWinner = true;
           pointsEarned = GAME_POINTS.gameWin;
         }
-      } else if (room.game_type === 'slidesLadders' || room.game_type === 'pool') {
+      } else if (room.game_type === 'pool') {
         if (gameState.winner === userId) {
           isWinner = true;
           pointsEarned = GAME_POINTS.gameWin;
@@ -376,6 +394,24 @@ async function awardGamePoints(supabase, room, gameState) {
             points_earned: pointsEarned,
           });
       }
+
+      // Check and award badges
+      try {
+        const { checkAndAwardBadges } = await import('@/lib/profiles/awardBadge');
+        await checkAndAwardBadges(supabase, userId, {
+          type: 'game_result',
+          gameType: room.game_type,
+          isWinner,
+          stats: existing || { wins: 0 },
+          newStreak: isWinner ? (existing ? existing.current_streak + 1 : 1) : 0,
+          perfectQuiz: room.game_type === 'quiz' && isWinner && (() => {
+            const pData = gameState.players?.[userId];
+            return pData?.answers?.length === gameState.questions?.length && pData?.answers?.every(a => a.correct);
+          })(),
+        });
+      } catch (badgeErr) {
+        console.error('Badge check error:', badgeErr);
+      }
     }
   } catch (err) {
     console.error('Award points error:', err);
@@ -392,13 +428,6 @@ function getGameEventMessage(gameType, action, result, state, playerId) {
     case 'blackjack':
       if (action === 'hit' && state.results?.[playerId]?.outcome === 'blackjack') return 'Blackjack! 21!';
       if (action === 'hit' && state.results?.[playerId]?.outcome === 'bust') return 'Bust! Over 21.';
-      return null;
-
-    case 'slidesLadders':
-      if (details.rolledSix) return 'Rolled a 6! Extra turn!';
-      if (details.hitLadder) return 'Hit a ladder! Climbing up!';
-      if (details.hitSlide) return 'Hit a slide! Going down!';
-      if (state.winner === playerId) return 'Reached 100! Winner!';
       return null;
 
     case 'dominoes':

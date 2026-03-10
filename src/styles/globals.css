@@ -46,7 +46,6 @@ input, textarea, [contenteditable="true"], .selectable {
 img {
   -webkit-user-drag: none;
   user-drag: none;
-  pointer-events: none;
 }
 
 html {

@@ -20,6 +20,34 @@ import { createHmac } from 'crypto';
 // Stripe webhook secret for signature verification
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
+// US state name → 2-letter abbreviation (Stripe sends full names, Printful/Printify need codes)
+const STATE_ABBREVS = {
+  'alabama':'AL','alaska':'AK','arizona':'AZ','arkansas':'AR','california':'CA',
+  'colorado':'CO','connecticut':'CT','delaware':'DE','florida':'FL','georgia':'GA',
+  'hawaii':'HI','idaho':'ID','illinois':'IL','indiana':'IN','iowa':'IA',
+  'kansas':'KS','kentucky':'KY','louisiana':'LA','maine':'ME','maryland':'MD',
+  'massachusetts':'MA','michigan':'MI','minnesota':'MN','mississippi':'MS','missouri':'MO',
+  'montana':'MT','nebraska':'NE','nevada':'NV','new hampshire':'NH','new jersey':'NJ',
+  'new mexico':'NM','new york':'NY','north carolina':'NC','north dakota':'ND','ohio':'OH',
+  'oklahoma':'OK','oregon':'OR','pennsylvania':'PA','rhode island':'RI','south carolina':'SC',
+  'south dakota':'SD','tennessee':'TN','texas':'TX','utah':'UT','vermont':'VT',
+  'virginia':'VA','washington':'WA','west virginia':'WV','wisconsin':'WI','wyoming':'WY',
+  'district of columbia':'DC','puerto rico':'PR','guam':'GU','virgin islands':'VI',
+  'american samoa':'AS','northern mariana islands':'MP'
+};
+function toStateCode(state) {
+  if (!state) return '';
+  if (state.length === 2) return state.toUpperCase();
+  return STATE_ABBREVS[state.toLowerCase()] || state;
+}
+
+// Clean bogus address line2 values (Stripe placeholder text customers leave in)
+function cleanLine2(line2) {
+  if (!line2) return '';
+  const bogus = ['line 2', 'n/a', 'na', 'none', '-', '.', 'apt', 'apartment, suite, etc.', 'apartment, suite, etc'];
+  return bogus.includes(line2.trim().toLowerCase()) ? '' : line2;
+}
+
 export async function POST(request) {
   try {
     const body = await request.text();
@@ -155,8 +183,23 @@ async function handleCheckoutCompleted(session, stripe) {
     // Parse print provider items from metadata
     let parsedPrintfulItems = null;
     let parsedPrintifyItems = null;
-    try { if (metadata.printful_items) parsedPrintfulItems = JSON.parse(metadata.printful_items); } catch (e) { console.error('Failed to parse printful_items:', e); }
-    try { if (metadata.printify_items) parsedPrintifyItems = JSON.parse(metadata.printify_items); } catch (e) { console.error('Failed to parse printify_items:', e); }
+    let metadataParseError = null;
+    try { if (metadata.printful_items) parsedPrintfulItems = JSON.parse(metadata.printful_items); } catch (e) { console.error('Failed to parse printful_items:', e); metadataParseError = `Printful: ${e.message}`; }
+    try { if (metadata.printify_items) parsedPrintifyItems = JSON.parse(metadata.printify_items); } catch (e) { console.error('Failed to parse printify_items:', e); metadataParseError = (metadataParseError ? metadataParseError + ' | ' : '') + `Printify: ${e.message}`; }
+
+    // CRITICAL: If metadata existed but failed to parse (truncated JSON), alert Mike immediately
+    if (metadataParseError && (metadata.printful_items || metadata.printify_items)) {
+      sendOrderFailedAlert({
+        provider: 'Metadata Parse',
+        error: `Stripe metadata corrupted (likely exceeded 500-char limit). Raw: printful=${(metadata.printful_items || '').slice(-50)}, printify=${(metadata.printify_items || '').slice(-50)}. Parse error: ${metadataParseError}`,
+        customerName: shipping?.name || fullSession.customer_details?.name || 'Customer',
+        customerEmail,
+        items: merchItems.map(i => ({ name: i.description || 'Item', quantity: i.quantity, amount: i.amount_total || 0 })),
+        total: totalAmount,
+        shippingAddress: shipping?.address || null,
+        stripeSessionId: session.id,
+      }).catch(err => console.error('Metadata parse alert error:', err));
+    }
 
     // ========================================
     // IDEMPOTENCY — Skip if already processed
@@ -236,9 +279,9 @@ async function handleCheckoutCompleted(session, stripe) {
         recipient: {
           name: shipping.name || fullSession.customer_details?.name || 'Customer',
           address1: shipping.address.line1,
-          address2: shipping.address.line2 || '',
+          address2: cleanLine2(shipping.address.line2),
           city: shipping.address.city,
-          state_code: shipping.address.state,
+          state_code: toStateCode(shipping.address.state),
           country_code: shipping.address.country,
           zip: shipping.address.postal_code,
           email: customerEmail,
@@ -317,9 +360,9 @@ async function handleCheckoutCompleted(session, stripe) {
           email: customerEmail || '',
           phone: fullSession.customer_details?.phone || '',
           country: shipping.address.country || 'US',
-          region: shipping.address.state || '',
+          region: toStateCode(shipping.address.state) || '',
           address1: shipping.address.line1 || '',
-          address2: shipping.address.line2 || '',
+          address2: cleanLine2(shipping.address.line2),
           city: shipping.address.city || '',
           zip: shipping.address.postal_code || '',
         },
@@ -513,6 +556,17 @@ async function handleCheckoutCompleted(session, stripe) {
     } else {
       console.error('Could not match any items with Printful or Printify products');
       console.log('Line items:', JSON.stringify(merchItems, null, 2));
+      // CRITICAL: Customer paid but no print order was created — alert Mike
+      sendOrderFailedAlert({
+        provider: 'NONE MATCHED',
+        error: 'Customer paid but NO items matched Printful or Printify. Manual fulfillment required. Check metadata and line items.',
+        customerName,
+        customerEmail,
+        items: itemsForEmail,
+        total: totalAmount,
+        shippingAddress: shipping?.address || null,
+        stripeSessionId: session.id,
+      }).catch(err => console.error('No-match alert error:', err));
     }
   } catch (error) {
     console.error('Failed to create fulfillment order:', error);
@@ -606,6 +660,7 @@ async function handleSubscriptionCheckout(session, stripe) {
       customerEmail: email,
       subscriberNumber,
       isFreeSlot: subscriberNumber <= 250,
+      tier,
     }).catch(() => {});
 
     tagSubscriber(email, `subscriber-${tier}`).catch(() => {});
@@ -634,11 +689,17 @@ async function handleInvoicePaid(invoice) {
     const supabase = getSupabaseAdmin();
     if (!supabase) return;
 
-    // Detect tier from invoice amount (in cents)
-    const amountPaid = invoice.amount_paid || 0;
-    let tier = 'regular';
-    if (amountPaid >= 1499) tier = 'diamond';
-    else if (amountPaid >= 999) tier = 'premium';
+    // Detect tier from price ID (reliable) with amount fallback
+    const { tierFromPriceId } = await import('@/lib/tiers');
+    const subItem = invoice.lines?.data?.[0];
+    const priceId = subItem?.price?.id;
+    let tier = priceId ? tierFromPriceId(priceId) : 'supporter';
+    // Fallback: detect from amount if price ID not available
+    if (!priceId) {
+      const amountPaid = invoice.amount_paid || 0;
+      if (amountPaid >= 1499) tier = 'diamond';
+      else if (amountPaid >= 999) tier = 'premium';
+    }
 
     // Extend subscription
     const thirtyDaysFromNow = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
@@ -693,6 +754,7 @@ async function handleInvoicePaid(invoice) {
       customerEmail: email,
       subscriberNumber: count || 1,
       isFreeSlot: false,
+      tier,
     }).catch(() => {});
 
   } catch (err) {
@@ -776,10 +838,15 @@ async function registerNewSubscriber(customerEmail, amountCents) {
       return;
     }
 
-    // Detect tier from amount
-    let tier = 'supporter';
-    if (amountCents >= 1499) tier = 'diamond';
-    else if (amountCents >= 999) tier = 'premium';
+    // Detect tier from price ID (reliable) with amount fallback
+    const { tierFromPriceId } = await import('@/lib/tiers');
+    const lineItem = session.line_items?.data?.[0] || {};
+    const priceId = lineItem.price?.id || session.metadata?.priceId;
+    let tier = priceId ? tierFromPriceId(priceId) : 'supporter';
+    if (!priceId) {
+      if (amountCents >= 1499) tier = 'diamond';
+      else if (amountCents >= 999) tier = 'premium';
+    }
 
     // Get next subscriber number
     const { count } = await supabase
@@ -806,6 +873,7 @@ async function registerNewSubscriber(customerEmail, amountCents) {
       customerEmail: email,
       subscriberNumber,
       isFreeSlot: subscriberNumber <= 250,
+      tier,
     }).catch((err) => console.error('Signup alert email failed:', err));
 
   } catch (err) {

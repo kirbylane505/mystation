@@ -103,7 +103,7 @@ export default function AccountWall() {
         localStorage.setItem('mystation_user', JSON.stringify(data.user));
         setStoreEmail(cleanEmail);
         setUser(data.user);
-        if (data.isSubscribed) subscribe(cleanEmail, data.tier || 'regular');
+        if (data.isSubscribed) subscribe(cleanEmail, data.tier || 'supporter');
         setShowAccountWall(false);
         return;
       }

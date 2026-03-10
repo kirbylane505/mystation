@@ -232,7 +232,8 @@ export default function Player() {
   // Share handlers
   const shareTrack = (platform) => {
     const trackUrl = `https://mystationlive.com/song/${currentTrack.id}`;
-    const text = `Listen to "${currentTrack.title}" by Mike Page on MyStation! ${currentTrack.featured ? `ft. ${currentTrack.featured}` : ''} #MikePage #MyStation #IDMG`;
+    const artistDisplay = currentTrack.artist || 'Mike Page';
+    const text = `Listen to "${currentTrack.title}" by ${artistDisplay} on MyStation! ${currentTrack.featured ? `ft. ${currentTrack.featured}` : ''} #MyStation #IDMG`;
     const shareUrls = {
       twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(trackUrl)}`,
       facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(trackUrl)}&quote=${encodeURIComponent(text)}`,
@@ -367,7 +368,7 @@ export default function Player() {
                   </span>
                 )}</h2>
               <p className="text-[15px] text-white/50 mt-0.5">
-                Mike Page{currentTrack.featured ? ` ft. ${currentTrack.featured}` : ''}
+                {currentTrack.artist || 'Mike Page'}{currentTrack.featured ? ` ft. ${currentTrack.featured}` : ''}
               </p>
               {currentTrack.producer && (
                 <p className="text-[13px] text-purple-400/80 mt-1">Prod. {currentTrack.producer}</p>
@@ -596,7 +597,7 @@ export default function Player() {
                     HQ
                   </span>
                 )}</p>
-            <p className="text-[11px] text-white/40 truncate">Mike Page{currentTrack.featured ? ` ft. ${currentTrack.featured}` : ''}</p>
+            <p className="text-[11px] text-white/40 truncate">{currentTrack.artist || 'Mike Page'}{currentTrack.featured ? ` ft. ${currentTrack.featured}` : ''}</p>
           </div>
 
           {/* Heart */}
@@ -667,7 +668,7 @@ export default function Player() {
                   </span>
                 )}</h4>
               <p className="text-xs text-white/40 truncate mt-0.5">
-                Mike Page{currentTrack.featured ? ` ft. ${currentTrack.featured}` : ''}
+                {currentTrack.artist || 'Mike Page'}{currentTrack.featured ? ` ft. ${currentTrack.featured}` : ''}
               </p>
               {currentTrack.producer && (
                 <p className="text-[11px] text-purple-400/70 mt-0.5 truncate">Prod. {currentTrack.producer}</p>

@@ -48,6 +48,7 @@ export default function Navbar() {
 
   // More menu items (shown in dropdown)
   const moreItems = [
+    { href: '/account/profile', icon: User, label: 'Profile' },
     { href: '/videos', icon: Film, label: 'Videos' },
     { href: '/about', icon: Heart, label: 'Foundation' },
     { href: '/contact', icon: Mail, label: 'Contact' },

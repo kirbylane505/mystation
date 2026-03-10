@@ -1,81 +1,312 @@
 /**
  * MYSTATION - Premium Comment Section
- * Subscriber-only commenting with admin replies
- * Glass morphism dark theme, Supabase-backed
+ * Instagram/YouTube style with owner auto-detect,
+ * profile avatars, hearts, pinned comments, threaded replies
+ *
+ * DB MIGRATION NEEDED (run in Supabase SQL editor):
+ * ALTER TABLE comments ADD COLUMN IF NOT EXISTS likes integer DEFAULT 0;
+ * ALTER TABLE comments ADD COLUMN IF NOT EXISTS is_pinned boolean DEFAULT false;
  */
 
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { MessageCircle, Send, Trash2, Reply, ShieldCheck, Lock, X, CheckCircle2 } from 'lucide-react';
+import {
+  MessageCircle, Send, Trash2, Reply, ShieldCheck,
+  X, Heart, Pin, CheckCircle2
+} from 'lucide-react';
 import { useUserStore } from '@/store/playerStore';
 
-function relativeTime(dateStr) {
-  const now = Date.now();
-  const then = new Date(dateStr).getTime();
-  const diff = Math.max(0, now - then);
+// ─── Constants ───────────────────────────────────────
+const OWNER_EMAILS = [
+  'idmgatl@gmail.com',
+  'mystationlive@gmail.com',
+  'pagemusic505@gmail.com'
+];
+const LIKED_KEY = 'mystation-liked-comments';
 
-  const seconds = Math.floor(diff / 1000);
-  if (seconds < 60) return 'just now';
-  const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m ago`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.floor(hours / 24);
-  if (days < 30) return `${days}d ago`;
-  const months = Math.floor(days / 30);
-  if (months < 12) return `${months}mo ago`;
-  return `${Math.floor(months / 12)}y ago`;
+// ─── Utilities ───────────────────────────────────────
+
+function relativeTime(dateStr) {
+  const diff = Math.max(0, Date.now() - new Date(dateStr).getTime());
+  const s = Math.floor(diff / 1000);
+  if (s < 60) return 'just now';
+  const m = Math.floor(s / 60);
+  if (m < 60) return `${m}m`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h`;
+  const d = Math.floor(h / 24);
+  if (d < 30) return `${d}d`;
+  const mo = Math.floor(d / 30);
+  return mo < 12 ? `${mo}mo` : `${Math.floor(mo / 12)}y`;
 }
 
-function AdminBadge() {
+function getInitials(name) {
+  if (!name) return '?';
+  const parts = name.trim().split(/\s+/);
+  return parts.length > 1
+    ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+    : name.slice(0, 2).toUpperCase();
+}
+
+const AVATAR_GRADIENTS = [
+  'from-red-500 to-rose-600',
+  'from-blue-500 to-indigo-600',
+  'from-green-500 to-emerald-600',
+  'from-purple-500 to-violet-600',
+  'from-pink-500 to-fuchsia-600',
+  'from-cyan-500 to-teal-600',
+  'from-orange-500 to-amber-600',
+  'from-indigo-500 to-blue-600',
+];
+
+function getAvatarGradient(name) {
+  let hash = 0;
+  for (let i = 0; i < (name || '').length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return AVATAR_GRADIENTS[Math.abs(hash) % AVATAR_GRADIENTS.length];
+}
+
+function getLikedIds() {
+  try { return JSON.parse(localStorage.getItem(LIKED_KEY) || '[]'); }
+  catch { return []; }
+}
+
+function toggleLikeLocal(id) {
+  const liked = getLikedIds();
+  const isLiked = liked.includes(id);
+  localStorage.setItem(LIKED_KEY, JSON.stringify(
+    isLiked ? liked.filter(x => x !== id) : [...liked, id]
+  ));
+  return !isLiked;
+}
+
+// ─── Avatar ──────────────────────────────────────────
+
+function Avatar({ name, isAdmin, size = 36 }) {
+  const initials = getInitials(name);
+  const s = { width: size, height: size, fontSize: size * 0.36 };
+
+  if (isAdmin) {
+    return (
+      <div
+        className="shrink-0 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center font-black text-black ring-2 ring-amber-400/30"
+        style={s}
+      >
+        {initials}
+      </div>
+    );
+  }
+
   return (
-    <span className="inline-flex items-center gap-1 ml-1.5">
-      <CheckCircle2 size={12} className="text-blue-400" fill="currentColor" strokeWidth={0} />
-      <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 leading-none">
+    <div
+      className={`shrink-0 rounded-full bg-gradient-to-br ${getAvatarGradient(name)} flex items-center justify-center font-bold text-white`}
+      style={s}
+    >
+      {initials}
+    </div>
+  );
+}
+
+// ─── Badges ──────────────────────────────────────────
+
+function OwnerBadge() {
+  return (
+    <span className="inline-flex items-center gap-1 ml-1">
+      <CheckCircle2 size={13} className="text-blue-400" fill="currentColor" strokeWidth={0} />
+      <span className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 leading-none">
         IDMG
       </span>
     </span>
   );
 }
 
-export default function CommentSection({ trackId, trackTitle, modalMode = false }) {
-  const [open, setOpen] = useState(modalMode);
+// ─── Heart Button ────────────────────────────────────
+
+function HeartBtn({ count, liked, onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`flex items-center gap-1 text-xs transition-all duration-200 ${
+        liked ? 'text-red-500' : 'text-white/25 hover:text-red-400'
+      }`}
+    >
+      <Heart
+        size={14}
+        fill={liked ? 'currentColor' : 'none'}
+        className={`transition-transform duration-200 ${liked ? 'scale-110' : ''}`}
+      />
+      {count > 0 && <span className="text-[11px]">{count}</span>}
+    </button>
+  );
+}
+
+// ─── Comment Row ─────────────────────────────────────
+
+function CommentRow({
+  comment, isAdmin, likedIds, onLike, onReply, onDelete, onPin,
+  replyingTo, replyMsg, setReplyMsg, onReplySubmit, onReplyCancel, submitting
+}) {
+  const liked = likedIds.includes(comment.id);
+
+  return (
+    <div className="group py-3">
+      <div className="flex gap-3">
+        <Avatar name={comment.name} isAdmin={comment.isAdmin} size={36} />
+        <div className="flex-1 min-w-0">
+          {/* Name + badge + time */}
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span className={`text-sm font-bold ${comment.isAdmin ? 'text-blue-400' : 'text-white/90'}`}>
+              {comment.name}
+            </span>
+            {comment.isAdmin && <OwnerBadge />}
+            <span className="text-[11px] text-white/25">{relativeTime(comment.createdAt)}</span>
+          </div>
+
+          {/* Message */}
+          <p className="text-sm text-white/70 leading-relaxed mt-1 break-words">
+            {comment.message}
+          </p>
+
+          {/* Actions */}
+          <div className="flex items-center gap-4 mt-2">
+            <HeartBtn
+              count={comment.likes || 0}
+              liked={liked}
+              onClick={() => onLike(comment.id)}
+            />
+
+            {isAdmin && !comment.isAdmin && (
+              <button
+                onClick={() => onReply(comment.id)}
+                className="text-[11px] text-white/25 hover:text-blue-400 flex items-center gap-1 transition"
+              >
+                <Reply size={12} /> Reply
+              </button>
+            )}
+
+            {isAdmin && (
+              <>
+                <button
+                  onClick={() => onPin(comment.id, !comment.isPinned)}
+                  className={`text-[11px] flex items-center gap-1 transition ${
+                    comment.isPinned ? 'text-amber-400' : 'text-white/25 hover:text-amber-400'
+                  }`}
+                >
+                  <Pin size={12} /> {comment.isPinned ? 'Unpin' : 'Pin'}
+                </button>
+                <button
+                  onClick={() => onDelete(comment.id)}
+                  className="text-[11px] text-white/25 hover:text-red-400 flex items-center gap-1 transition"
+                >
+                  <Trash2 size={12} />
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Replies */}
+      {comment.replies?.length > 0 && (
+        <div className="ml-12 mt-3 space-y-3 border-l-2 border-white/5 pl-4">
+          {comment.replies.map((reply) => (
+            <div key={reply.id} className="flex gap-3 group/reply">
+              <Avatar name={reply.name} isAdmin={reply.isAdmin} size={28} />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className={`text-xs font-bold ${reply.isAdmin ? 'text-blue-400' : 'text-white/80'}`}>
+                    {reply.name}
+                  </span>
+                  {reply.isAdmin && <OwnerBadge />}
+                  <span className="text-[10px] text-white/25">{relativeTime(reply.createdAt)}</span>
+                </div>
+                <p className="text-xs text-white/60 leading-relaxed mt-0.5 break-words">
+                  {reply.message}
+                </p>
+                {isAdmin && (
+                  <button
+                    onClick={() => onDelete(reply.id, comment.id)}
+                    className="text-[10px] text-white/20 hover:text-red-400 flex items-center gap-1 mt-1 opacity-0 group-hover/reply:opacity-100 transition"
+                  >
+                    <Trash2 size={10} />
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Reply input */}
+      {replyingTo === comment.id && isAdmin && (
+        <div className="ml-12 mt-3 flex gap-2 items-center border-l-2 border-blue-500/30 pl-4">
+          <input
+            type="text"
+            value={replyMsg}
+            onChange={(e) => setReplyMsg(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') onReplySubmit(comment); }}
+            placeholder="Reply as Mike Page..."
+            maxLength={500}
+            autoFocus
+            className="flex-1 min-w-0 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-white/80 placeholder:text-white/25 outline-none focus:border-blue-500/40 transition"
+          />
+          <button
+            onClick={() => onReplySubmit(comment)}
+            disabled={!replyMsg.trim() || submitting}
+            className="shrink-0 w-8 h-8 flex items-center justify-center rounded-xl bg-blue-500 hover:bg-blue-600 disabled:bg-white/5 disabled:text-white/20 text-white transition"
+          >
+            <Send size={14} />
+          </button>
+          <button
+            onClick={onReplyCancel}
+            className="shrink-0 w-8 h-8 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 text-white/40 transition"
+          >
+            <X size={14} />
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Comment Panel (shared content for modal + inline) ───
+
+function CommentPanel({ trackId, trackTitle, onCountChange }) {
   const [comments, setComments] = useState([]);
-  const [count, setCount] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [name, setName] = useState('');
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const storeSubscribed = useUserStore(s => s.isSubscribed);
-  const [isSubscribed, setIsSubscribed] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [showAdminInput, setShowAdminInput] = useState(false);
-  const [adminKeyInput, setAdminKeyInput] = useState('');
-  const [adminError, setAdminError] = useState('');
+  const [showCreatorInput, setShowCreatorInput] = useState(false);
+  const [creatorKey, setCreatorKey] = useState('');
   const [replyingTo, setReplyingTo] = useState(null);
-  const [replyMessage, setReplyMessage] = useState('');
-  const panelRef = useRef(null);
+  const [replyMsg, setReplyMsg] = useState('');
+  const [likedIds, setLikedIds] = useState([]);
   const listRef = useRef(null);
-  const hasFetched = useRef(false);
 
-  // Restore saved name + check sub status + admin session
+  const storeSubscribed = useUserStore((s) => s.isSubscribed);
+  const storeEmail = useUserStore((s) => s.email);
+  const [isSubscribed, setIsSubscribed] = useState(false);
+
+  // Auto-detect owner
   useEffect(() => {
+    const email = (storeEmail || localStorage.getItem('mystation-email') || '').toLowerCase();
+    if (OWNER_EMAILS.includes(email)) {
+      sessionStorage.setItem('mystation-admin', 'true');
+      setIsAdmin(true);
+    } else if (sessionStorage.getItem('mystation-admin')) {
+      setIsAdmin(true);
+    }
+    setIsSubscribed(storeSubscribed);
+    setLikedIds(getLikedIds());
     const savedName = localStorage.getItem('mystation-comment-name');
     if (savedName) setName(savedName);
+  }, [storeEmail, storeSubscribed]);
 
-    // Subscription check handled by Zustand store (synced from server on page load)
-
-    // Check admin session
-    const adminSession = sessionStorage.getItem('mystation-admin');
-    if (adminSession) setIsAdmin(true);
-  }, []);
-
-  // Sync subscription from Zustand store (server-verified on page load)
-  useEffect(() => {
-    setIsSubscribed(storeSubscribed);
-  }, [storeSubscribed]);
-
+  // Fetch comments
   const fetchComments = useCallback(async () => {
     if (!trackId) return;
     setLoading(true);
@@ -83,89 +314,30 @@ export default function CommentSection({ trackId, trackTitle, modalMode = false 
       const res = await fetch(`/api/comments?trackId=${encodeURIComponent(trackId)}`);
       if (res.ok) {
         const data = await res.json();
-        const list = Array.isArray(data) ? data : data.comments || [];
+        const list = data.comments || [];
         setComments(list);
-        // Count top-level only
-        setCount(list.length);
+        onCountChange?.(list.filter((c) => !c.parentId).length);
       }
     } catch {
-      // silent fail
+      // silent
     } finally {
       setLoading(false);
     }
-  }, [trackId]);
+  }, [trackId, onCountChange]);
 
-  // Fetch comment count on mount
-  useEffect(() => {
-    if (!trackId) return;
-    fetch(`/api/comments?trackId=${encodeURIComponent(trackId)}`)
-      .then(r => r.ok ? r.json() : null)
-      .then(data => {
-        if (data) {
-          const list = Array.isArray(data) ? data : data.comments || [];
-          setCount(list.length);
-        }
-      })
-      .catch(() => {});
-  }, [trackId]);
+  useEffect(() => { fetchComments(); }, [fetchComments]);
+  useEffect(() => { setReplyingTo(null); }, [trackId]);
 
-  // Full fetch when dropdown opens (or immediately in modal mode)
-  useEffect(() => {
-    if ((open || modalMode) && !hasFetched.current) {
-      hasFetched.current = true;
-      fetchComments();
-    }
-  }, [open, modalMode, fetchComments]);
-
-  // Reset when trackId changes
-  useEffect(() => {
-    hasFetched.current = false;
-    setComments([]);
-    setCount(0);
-    if (!modalMode) setOpen(false);
-    setReplyingTo(null);
-  }, [trackId, modalMode]);
-
-  // Close on outside click (skip in modal mode — parent handles closing)
-  useEffect(() => {
-    if (!open || modalMode) return;
-    function handleClick(e) {
-      if (panelRef.current && !panelRef.current.contains(e.target)) {
-        setOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
-  }, [open, modalMode]);
-
-  const scrollToBottom = () => {
-    if (listRef.current) {
-      listRef.current.scrollTop = listRef.current.scrollHeight;
-    }
-  };
-
+  const canComment = isSubscribed || isAdmin;
   const getAdminKey = () => sessionStorage.getItem('mystation-admin-key') || '';
 
-  const handleAdminLogin = (e) => {
-    e.preventDefault();
-    const key = adminKeyInput.trim();
-    if (!key) return;
-    // Store key — server validates on each request
-    sessionStorage.setItem('mystation-admin', 'true');
-    sessionStorage.setItem('mystation-admin-key', key);
-    setIsAdmin(true);
-    setShowAdminInput(false);
-    setAdminKeyInput('');
-    setAdminError('');
-  };
-
+  // Post comment
   const handleSubmit = async (e) => {
     e?.preventDefault();
-    const trimmedName = name.trim();
     const trimmedMsg = message.trim();
+    const trimmedName = name.trim();
     if (!trimmedMsg || submitting) return;
     if (!isAdmin && !trimmedName) return;
-
     if (!isAdmin) localStorage.setItem('mystation-comment-name', trimmedName);
 
     const optimistic = {
@@ -175,76 +347,58 @@ export default function CommentSection({ trackId, trackTitle, modalMode = false 
       trackId,
       isAdmin,
       role: isAdmin ? 'admin' : 'fan',
+      likes: 0,
+      isPinned: false,
       createdAt: new Date().toISOString(),
       replies: [],
     };
-
-    setComments(prev => [...prev, optimistic]);
-    setCount(prev => prev + 1);
+    setComments((prev) => [...prev, optimistic]);
     setMessage('');
-    setTimeout(scrollToBottom, 50);
+    setTimeout(() => listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: 'smooth' }), 50);
 
     setSubmitting(true);
     try {
-      const body = {
-        trackId,
-        trackTitle,
-        name: isAdmin ? 'Mike Page' : trimmedName,
-        message: trimmedMsg,
-      };
+      const body = { trackId, trackTitle, name: isAdmin ? 'Mike Page' : trimmedName, message: trimmedMsg };
       if (isAdmin) body.adminKey = getAdminKey();
-
       const res = await fetch('/api/comments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
-
       if (res.ok) {
         const { comment: saved } = await res.json();
         if (saved) {
-          setComments(prev =>
-            prev.map(c => (c.id === optimistic.id ? { ...saved, replies: saved.replies || [] } : c))
+          setComments((prev) =>
+            prev.map((c) => (c.id === optimistic.id ? { ...saved, replies: saved.replies || [] } : c))
           );
         }
-      } else if (res.status === 401) {
-        // Admin key was wrong — clear session
-        sessionStorage.removeItem('mystation-admin');
-        sessionStorage.removeItem('mystation-admin-key');
-        setIsAdmin(false);
-        setComments(prev => prev.filter(c => c.id !== optimistic.id));
-        setCount(prev => prev - 1);
       }
     } catch {
-      // Keep optimistic
+      // keep optimistic
     } finally {
       setSubmitting(false);
     }
   };
 
-  const handleReply = async (parentComment) => {
-    const trimmedMsg = replyMessage.trim();
-    if (!trimmedMsg || submitting) return;
+  // Reply
+  const handleReply = async (parent) => {
+    const msg = replyMsg.trim();
+    if (!msg || submitting) return;
 
-    const optimisticReply = {
-      id: `temp-reply-${Date.now()}`,
+    const optimistic = {
+      id: `reply-${Date.now()}`,
       name: 'Mike Page',
-      message: trimmedMsg,
-      parentId: parentComment.id,
+      message: msg,
       isAdmin: true,
       role: 'admin',
       createdAt: new Date().toISOString(),
     };
-
-    // Add reply to parent
-    setComments(prev =>
-      prev.map(c =>
-        c.id === parentComment.id
-          ? { ...c, replies: [...(c.replies || []), optimisticReply] }
-          : c
+    setComments((prev) =>
+      prev.map((c) =>
+        c.id === parent.id ? { ...c, replies: [...(c.replies || []), optimistic] } : c
       )
     );
-    setReplyMessage('');
+    setReplyMsg('');
     setReplyingTo(null);
 
     setSubmitting(true);
@@ -253,52 +407,76 @@ export default function CommentSection({ trackId, trackTitle, modalMode = false 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          trackId,
-          trackTitle,
-          name: 'Mike Page',
-          message: trimmedMsg,
-          parentId: parentComment.id,
-          adminKey: getAdminKey(),
+          trackId, trackTitle, name: 'Mike Page', message: msg,
+          parentId: parent.id, adminKey: getAdminKey(),
         }),
       });
-
       if (res.ok) {
         const { comment: saved } = await res.json();
         if (saved) {
-          setComments(prev =>
-            prev.map(c =>
-              c.id === parentComment.id
-                ? { ...c, replies: (c.replies || []).map(r => r.id === optimisticReply.id ? saved : r) }
+          setComments((prev) =>
+            prev.map((c) =>
+              c.id === parent.id
+                ? { ...c, replies: (c.replies || []).map((r) => (r.id === optimistic.id ? saved : r)) }
                 : c
             )
           );
         }
       }
     } catch {
-      // Keep optimistic
+      // keep optimistic
     } finally {
       setSubmitting(false);
     }
   };
 
-  const handleDelete = async (commentId, parentId = null) => {
-    if (!confirm('Delete this comment?')) return;
+  // Like
+  const handleLike = async (commentId) => {
+    const nowLiked = toggleLikeLocal(commentId);
+    setLikedIds(getLikedIds());
+    setComments((prev) =>
+      prev.map((c) =>
+        c.id === commentId ? { ...c, likes: Math.max(0, (c.likes || 0) + (nowLiked ? 1 : -1)) } : c
+      )
+    );
+    try {
+      await fetch('/api/comments', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: nowLiked ? 'like' : 'unlike', commentId }),
+      });
+    } catch {
+      // optimistic stays
+    }
+  };
 
+  // Pin
+  const handlePin = async (commentId, pin) => {
+    setComments((prev) =>
+      prev.map((c) => ({ ...c, isPinned: c.id === commentId ? pin : false }))
+    );
+    try {
+      await fetch('/api/comments', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: pin ? 'pin' : 'unpin', commentId, adminKey: getAdminKey() }),
+      });
+    } catch {
+      // optimistic stays
+    }
+  };
+
+  // Delete
+  const handleDelete = async (commentId, parentId = null) => {
     if (parentId) {
-      // Remove reply from parent
-      setComments(prev =>
-        prev.map(c =>
-          c.id === parentId
-            ? { ...c, replies: (c.replies || []).filter(r => r.id !== commentId) }
-            : c
+      setComments((prev) =>
+        prev.map((c) =>
+          c.id === parentId ? { ...c, replies: (c.replies || []).filter((r) => r.id !== commentId) } : c
         )
       );
     } else {
-      // Remove top-level comment
-      setComments(prev => prev.filter(c => c.id !== commentId));
-      setCount(prev => prev - 1);
+      setComments((prev) => prev.filter((c) => c.id !== commentId));
     }
-
     try {
       await fetch('/api/comments', {
         method: 'DELETE',
@@ -306,491 +484,242 @@ export default function CommentSection({ trackId, trackTitle, modalMode = false 
         body: JSON.stringify({ commentId, adminKey: getAdminKey() }),
       });
     } catch {
-      // Already removed from UI
+      // already removed
     }
   };
 
-  const canComment = isSubscribed || isAdmin;
+  // Creator mode login
+  const handleCreatorLogin = (e) => {
+    e.preventDefault();
+    if (!creatorKey.trim()) return;
+    sessionStorage.setItem('mystation-admin', 'true');
+    sessionStorage.setItem('mystation-admin-key', creatorKey.trim());
+    setIsAdmin(true);
+    setShowCreatorInput(false);
+    setCreatorKey('');
+  };
 
-  // --- Modal mode: render content directly (no button, no dropdown wrapper) ---
-  if (modalMode) {
-    return (
-      <div className="flex flex-col h-full" ref={panelRef}>
-        {/* Comment List */}
-        <div
-          ref={listRef}
-          className="flex-1 overflow-y-auto overscroll-contain px-4 py-3 space-y-3 scrollbar-thin scrollbar-thumb-white/10"
-        >
-          {loading ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="w-5 h-5 border-2 border-white/20 border-t-blue-400 rounded-full animate-spin" />
-            </div>
-          ) : comments.length === 0 ? (
-            <div className="text-center py-8">
-              <MessageCircle size={28} className="mx-auto mb-2 text-white/15" />
-              <p className="text-xs text-white/30">
-                {canComment ? 'Be the first to comment on this track' : 'No comments yet'}
-              </p>
-            </div>
-          ) : (
-            comments.map((comment) => (
-              <div key={comment.id} className="group">
-                <div className="flex items-start gap-2">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      <span className={`text-xs font-bold shrink-0 ${comment.isAdmin ? 'text-blue-400' : 'text-white/80'}`}>
-                        {comment.name || comment.username}
-                      </span>
-                      {comment.isAdmin && <AdminBadge />}
-                      <span className="text-[10px] text-white/25">
-                        {relativeTime(comment.createdAt)}
-                      </span>
-                    </div>
-                    <p className="text-xs text-white/60 leading-relaxed mt-0.5 break-words">
-                      {comment.message || comment.content}
-                    </p>
-                    {isAdmin && !comment.isAdmin && (
-                      <div className="flex items-center gap-3 mt-1">
-                        <button
-                          onClick={() => { setReplyingTo(comment.id); setReplyMessage(''); }}
-                          className="text-[10px] text-blue-400/70 hover:text-blue-400 flex items-center gap-1"
-                        >
-                          <Reply size={10} /> Reply
-                        </button>
-                        <button
-                          onClick={() => handleDelete(comment.id)}
-                          className="text-[10px] text-red-400/50 hover:text-red-400 flex items-center gap-1"
-                        >
-                          <Trash2 size={10} /> Delete
-                        </button>
-                      </div>
-                    )}
-                    {isAdmin && comment.isAdmin && (
-                      <div className="flex items-center gap-3 mt-1">
-                        <button
-                          onClick={() => handleDelete(comment.id)}
-                          className="text-[10px] text-red-400/50 hover:text-red-400 flex items-center gap-1"
-                        >
-                          <Trash2 size={10} /> Delete
-                        </button>
-                      </div>
-                    )}
-                  </div>
+  // Separate pinned and regular
+  const pinned = comments.filter((c) => c.isPinned);
+  const regular = comments.filter((c) => !c.isPinned);
+
+  return (
+    <div className="flex flex-col h-full">
+      {/* Comment List */}
+      <div
+        ref={listRef}
+        className="flex-1 overflow-y-auto overscroll-contain px-5 py-2 scrollbar-thin scrollbar-thumb-white/10"
+      >
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="w-6 h-6 border-2 border-white/10 border-t-blue-400 rounded-full animate-spin" />
+          </div>
+        ) : comments.length === 0 ? (
+          <div className="text-center py-12">
+            <MessageCircle size={40} className="mx-auto mb-3 text-white/10" />
+            <p className="text-sm text-white/30 font-medium">No comments yet</p>
+            <p className="text-xs text-white/20 mt-1">
+              {canComment ? 'Be the first to share your thoughts' : 'Subscribe to join the conversation'}
+            </p>
+          </div>
+        ) : (
+          <>
+            {/* Pinned */}
+            {pinned.map((c) => (
+              <div key={c.id} className="bg-amber-500/5 border border-amber-500/10 rounded-xl px-4 pt-1 pb-0 mb-3">
+                <div className="flex items-center gap-1.5 text-amber-400 text-[10px] font-bold uppercase tracking-widest pt-3 pb-1">
+                  <Pin size={10} /> Pinned
                 </div>
-                {comment.replies && comment.replies.length > 0 && (
-                  <div className="ml-4 mt-2 space-y-2 border-l border-white/10 pl-3">
-                    {comment.replies.map((reply) => (
-                      <div key={reply.id}>
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className={`text-xs font-bold shrink-0 ${reply.isAdmin ? 'text-blue-400' : 'text-white/80'}`}>
-                            {reply.name || reply.username}
-                          </span>
-                          {reply.isAdmin && <AdminBadge />}
-                          <span className="text-[10px] text-white/25">
-                            {relativeTime(reply.createdAt)}
-                          </span>
-                        </div>
-                        <p className="text-xs text-white/60 leading-relaxed mt-0.5 break-words">
-                          {reply.message || reply.content}
-                        </p>
-                        {isAdmin && (
-                          <button
-                            onClick={() => handleDelete(reply.id, comment.id)}
-                            className="text-[10px] text-red-400/50 hover:text-red-400 flex items-center gap-1 mt-1"
-                          >
-                            <Trash2 size={10} /> Delete
-                          </button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-                {replyingTo === comment.id && isAdmin && (
-                  <div className="ml-4 mt-2 flex gap-2 items-center border-l border-blue-500/30 pl-3">
-                    <input
-                      type="text"
-                      value={replyMessage}
-                      onChange={(e) => setReplyMessage(e.target.value)}
-                      onKeyDown={(e) => { if (e.key === 'Enter') handleReply(comment); }}
-                      placeholder="Reply as Mike Page..."
-                      maxLength={500}
-                      autoFocus
-                      className="flex-1 min-w-0 bg-white/5 border border-blue-500/30 rounded-lg px-3 py-1.5 text-xs text-white/80 placeholder:text-white/25 outline-none focus:border-blue-500/50 transition"
-                    />
-                    <button
-                      onClick={() => handleReply(comment)}
-                      disabled={!replyMessage.trim() || submitting}
-                      className="shrink-0 w-7 h-7 flex items-center justify-center rounded-lg bg-blue-500/80 hover:bg-blue-500 disabled:bg-white/5 disabled:text-white/20 text-white transition disabled:cursor-not-allowed"
-                    >
-                      <Send size={12} />
-                    </button>
-                    <button
-                      onClick={() => setReplyingTo(null)}
-                      className="shrink-0 w-7 h-7 flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/10 text-white/40 hover:text-white/60 transition"
-                    >
-                      <X size={12} />
-                    </button>
-                  </div>
-                )}
-              </div>
-            ))
-          )}
-        </div>
-
-        {/* Input Area */}
-        {canComment ? (
-          <form
-            onSubmit={handleSubmit}
-            className="px-4 py-3 border-t border-white/10 bg-white/[0.02] shrink-0"
-          >
-            <div className="flex gap-2 items-center">
-              {!isAdmin && (
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Name"
-                  maxLength={30}
-                  className="w-20 shrink-0 bg-white/5 border border-white/10 rounded-lg px-2.5 py-2 text-xs text-white/80 placeholder:text-white/25 outline-none focus:border-blue-500/50 transition"
+                <CommentRow
+                  comment={c} isAdmin={isAdmin} likedIds={likedIds}
+                  onLike={handleLike} onReply={setReplyingTo} onDelete={handleDelete} onPin={handlePin}
+                  replyingTo={replyingTo} replyMsg={replyMsg} setReplyMsg={setReplyMsg}
+                  onReplySubmit={handleReply} onReplyCancel={() => setReplyingTo(null)} submitting={submitting}
                 />
-              )}
+              </div>
+            ))}
+
+            {/* Regular */}
+            <div className="divide-y divide-white/5">
+              {regular.map((c) => (
+                <CommentRow
+                  key={c.id} comment={c} isAdmin={isAdmin} likedIds={likedIds}
+                  onLike={handleLike} onReply={setReplyingTo} onDelete={handleDelete} onPin={handlePin}
+                  replyingTo={replyingTo} replyMsg={replyMsg} setReplyMsg={setReplyMsg}
+                  onReplySubmit={handleReply} onReplyCancel={() => setReplyingTo(null)} submitting={submitting}
+                />
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* Input Area */}
+      {canComment ? (
+        <div className="px-5 py-4 border-t border-white/10 bg-white/[0.02] shrink-0">
+          <form onSubmit={handleSubmit} className="flex gap-3 items-end">
+            {!isAdmin && (
               <input
                 type="text"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                placeholder={isAdmin ? 'Comment as Mike Page...' : 'Add a comment...'}
-                maxLength={500}
-                className="flex-1 min-w-0 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-white/80 placeholder:text-white/25 outline-none focus:border-blue-500/50 transition"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Name"
+                maxLength={30}
+                className="w-24 shrink-0 bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white/80 placeholder:text-white/25 outline-none focus:border-blue-500/40 transition"
+              />
+            )}
+            <input
+              type="text"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) handleSubmit(e); }}
+              placeholder={isAdmin ? 'Comment as Mike Page...' : 'Drop a comment...'}
+              maxLength={500}
+              className="flex-1 min-w-0 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white/80 placeholder:text-white/25 outline-none focus:border-blue-500/40 transition"
+            />
+            <button
+              type="submit"
+              disabled={(!isAdmin && !name.trim()) || !message.trim() || submitting}
+              className="shrink-0 w-10 h-10 flex items-center justify-center rounded-xl bg-blue-500 hover:bg-blue-600 disabled:bg-white/5 disabled:text-white/20 text-white transition"
+              aria-label="Send"
+            >
+              <Send size={16} />
+            </button>
+          </form>
+
+          {/* Creator Mode */}
+          <div className="mt-3 flex items-center gap-3">
+            {isAdmin ? (
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-green-500/10 border border-green-500/20 text-green-400 text-xs font-medium">
+                <ShieldCheck size={14} />
+                Posting as Mike Page
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setShowCreatorInput((p) => !p)}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-medium hover:bg-amber-500/20 transition"
+              >
+                <ShieldCheck size={14} />
+                Creator Mode
+              </button>
+            )}
+          </div>
+
+          {/* Creator key input */}
+          {showCreatorInput && !isAdmin && (
+            <form onSubmit={handleCreatorLogin} className="mt-3 flex gap-2">
+              <input
+                type="password"
+                value={creatorKey}
+                onChange={(e) => setCreatorKey(e.target.value)}
+                placeholder="Enter creator key"
+                autoFocus
+                className="flex-1 bg-white/5 border border-amber-500/20 rounded-xl px-3 py-2 text-sm text-white/80 placeholder:text-white/25 outline-none focus:border-amber-500/40 transition"
               />
               <button
                 type="submit"
-                disabled={(!isAdmin && !name.trim()) || !message.trim() || submitting}
-                className="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-blue-500/80 hover:bg-blue-500 disabled:bg-white/5 disabled:text-white/20 text-white transition-all duration-200 disabled:cursor-not-allowed"
-                aria-label="Send comment"
+                disabled={!creatorKey.trim()}
+                className="px-4 py-2 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-black font-bold text-sm rounded-xl transition"
               >
-                <Send size={14} />
+                Go
               </button>
-            </div>
-            <div className="mt-2 flex items-center justify-between">
-              {isAdmin ? (
-                <div className="flex items-center gap-1.5 text-[10px] text-green-400/70">
-                  <ShieldCheck size={12} />
-                  <span>Admin Mode</span>
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setShowAdminInput(prev => !prev)}
-                  className="flex items-center gap-1.5 text-[10px] text-white/20 hover:text-white/40 transition"
-                >
-                  <Lock size={10} />
-                  <span>Admin</span>
-                </button>
-              )}
-            </div>
-            {showAdminInput && !isAdmin && (
-              <form onSubmit={handleAdminLogin} className="mt-2 flex gap-2">
-                <input
-                  type="password"
-                  value={adminKeyInput}
-                  onChange={(e) => { setAdminKeyInput(e.target.value); setAdminError(''); }}
-                  placeholder="Admin key"
-                  autoFocus
-                  className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white/80 placeholder:text-white/25 outline-none focus:border-purple-500/50 transition"
-                />
-                <button
-                  type="submit"
-                  disabled={!adminKeyInput.trim()}
-                  className="px-3 py-1.5 bg-purple-600/80 hover:bg-purple-600 disabled:opacity-50 text-white text-xs rounded-lg transition"
-                >
-                  Go
-                </button>
-              </form>
-            )}
-            {adminError && (
-              <p className="text-red-400 text-[10px] mt-1">{adminError}</p>
-            )}
-          </form>
-        ) : (
-          <div className="px-4 py-4 border-t border-white/10 bg-white/[0.02] text-center shrink-0">
-            <div className="flex items-center justify-center gap-2 text-white/40 mb-2">
-              <Lock size={14} />
-              <span className="text-xs font-medium">Subscribe to join the conversation</span>
-            </div>
-            <a
-              href="/subscribe"
-              className="inline-block px-5 py-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold rounded-full transition"
-            >
-              Subscribe
-            </a>
-          </div>
-        )}
-      </div>
-    );
+            </form>
+          )}
+        </div>
+      ) : (
+        <div className="px-5 py-6 border-t border-white/10 bg-white/[0.02] text-center shrink-0">
+          <p className="text-sm text-white/40 mb-3">Subscribe to join the conversation</p>
+          <a
+            href="/subscribe"
+            className="inline-block px-6 py-2.5 bg-blue-500 hover:bg-blue-600 text-white text-sm font-bold rounded-full transition"
+          >
+            Subscribe
+          </a>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Main Export ─────────────────────────────────────
+
+export default function CommentSection({ trackId, trackTitle, modalMode = false }) {
+  const [showModal, setShowModal] = useState(false);
+  const [count, setCount] = useState(0);
+
+  // Fetch count on mount (standard mode only)
+  useEffect(() => {
+    if (!trackId || modalMode) return;
+    fetch(`/api/comments?trackId=${encodeURIComponent(trackId)}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data?.comments) setCount(data.comments.filter((c) => !c.parentId).length);
+      })
+      .catch(() => {});
+  }, [trackId, modalMode]);
+
+  // Modal mode: render inline
+  if (modalMode) {
+    return <CommentPanel trackId={trackId} trackTitle={trackTitle} />;
   }
 
-  // --- Standard mode: button + dropdown ---
+  // Standard mode: button + modal
   return (
-    <div className="relative" ref={panelRef}>
-      {/* Comment Button with Badge */}
+    <>
+      {/* Comment trigger button */}
       <button
-        onClick={() => setOpen(prev => !prev)}
-        className="relative flex items-center gap-1.5 px-3 py-2 rounded-full bg-white/5 hover:bg-white/10 backdrop-blur transition-all duration-200 text-white/60 hover:text-white/90"
-        aria-label="Toggle comments"
+        onClick={() => setShowModal(true)}
+        className="relative flex items-center gap-1.5 text-white/40 hover:text-white/70 transition"
+        aria-label="Comments"
       >
         <MessageCircle size={18} />
         {count > 0 && (
-          <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-blue-500 text-[10px] font-bold text-white px-1 leading-none">
+          <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-blue-500 text-[10px] font-bold text-white px-1 leading-none">
             {count > 99 ? '99+' : count}
           </span>
         )}
       </button>
 
-      {/* Dropdown Panel */}
-      <div
-        className={`absolute top-full left-0 mt-2 w-[380px] max-w-[calc(100vw-2rem)] z-50 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-2xl overflow-hidden transition-all duration-300 origin-top ${
-          open
-            ? 'opacity-100 scale-y-100 translate-y-0'
-            : 'opacity-0 scale-y-0 translate-y-[-8px] pointer-events-none'
-        }`}
-      >
-        {/* Header */}
-        <div className="px-4 py-3 border-b border-white/10">
-          <h3 className="text-sm font-semibold text-white/80 flex items-center gap-2">
-            <MessageCircle size={14} className="text-blue-400" />
-            Comments
-            {count > 0 && (
-              <span className="text-[11px] text-white/40 font-normal">({count})</span>
-            )}
-          </h3>
-          {trackTitle && (
-            <p className="text-[11px] text-white/30 mt-0.5 truncate">{trackTitle}</p>
-          )}
-        </div>
-
-        {/* Comment List */}
+      {/* Modal overlay */}
+      {showModal && (
         <div
-          ref={listRef}
-          className="max-h-[350px] overflow-y-auto overscroll-contain px-4 py-3 space-y-3 scrollbar-thin scrollbar-thumb-white/10"
+          className="fixed inset-0 z-[95] flex items-end sm:items-center justify-center"
+          onClick={(e) => { if (e.target === e.currentTarget) setShowModal(false); }}
         >
-          {loading ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="w-5 h-5 border-2 border-white/20 border-t-blue-400 rounded-full animate-spin" />
-            </div>
-          ) : comments.length === 0 ? (
-            <div className="text-center py-8">
-              <MessageCircle size={28} className="mx-auto mb-2 text-white/15" />
-              <p className="text-xs text-white/30">
-                {canComment ? 'Be the first to comment on this track' : 'No comments yet'}
-              </p>
-            </div>
-          ) : (
-            comments.map((comment) => (
-              <div key={comment.id} className="group">
-                {/* Top-level comment */}
-                <div className="flex items-start gap-2">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      <span className={`text-xs font-bold shrink-0 ${comment.isAdmin ? 'text-blue-400' : 'text-white/80'}`}>
-                        {comment.name || comment.username}
-                      </span>
-                      {comment.isAdmin && <AdminBadge />}
-                      <span className="text-[10px] text-white/25">
-                        {relativeTime(comment.createdAt)}
-                      </span>
-                    </div>
-                    <p className="text-xs text-white/60 leading-relaxed mt-0.5 break-words">
-                      {comment.message || comment.content}
-                    </p>
-
-                    {/* Admin actions */}
-                    {isAdmin && !comment.isAdmin && (
-                      <div className="flex items-center gap-3 mt-1 opacity-0 group-hover:opacity-100 transition">
-                        <button
-                          onClick={() => { setReplyingTo(comment.id); setReplyMessage(''); }}
-                          className="text-[10px] text-blue-400/70 hover:text-blue-400 flex items-center gap-1"
-                        >
-                          <Reply size={10} /> Reply
-                        </button>
-                        <button
-                          onClick={() => handleDelete(comment.id)}
-                          className="text-[10px] text-red-400/50 hover:text-red-400 flex items-center gap-1"
-                        >
-                          <Trash2 size={10} /> Delete
-                        </button>
-                      </div>
-                    )}
-                    {/* Admin can delete their own replies too */}
-                    {isAdmin && comment.isAdmin && (
-                      <div className="flex items-center gap-3 mt-1 opacity-0 group-hover:opacity-100 transition">
-                        <button
-                          onClick={() => handleDelete(comment.id)}
-                          className="text-[10px] text-red-400/50 hover:text-red-400 flex items-center gap-1"
-                        >
-                          <Trash2 size={10} /> Delete
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Replies */}
-                {comment.replies && comment.replies.length > 0 && (
-                  <div className="ml-4 mt-2 space-y-2 border-l border-white/10 pl-3">
-                    {comment.replies.map((reply) => (
-                      <div key={reply.id} className="group/reply">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className={`text-xs font-bold shrink-0 ${reply.isAdmin ? 'text-blue-400' : 'text-white/80'}`}>
-                            {reply.name || reply.username}
-                          </span>
-                          {reply.isAdmin && <AdminBadge />}
-                          <span className="text-[10px] text-white/25">
-                            {relativeTime(reply.createdAt)}
-                          </span>
-                        </div>
-                        <p className="text-xs text-white/60 leading-relaxed mt-0.5 break-words">
-                          {reply.message || reply.content}
-                        </p>
-                        {isAdmin && (
-                          <button
-                            onClick={() => handleDelete(reply.id, comment.id)}
-                            className="text-[10px] text-red-400/50 hover:text-red-400 flex items-center gap-1 mt-1 opacity-0 group-hover/reply:opacity-100 transition"
-                          >
-                            <Trash2 size={10} /> Delete
-                          </button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Inline reply input */}
-                {replyingTo === comment.id && isAdmin && (
-                  <div className="ml-4 mt-2 flex gap-2 items-center border-l border-blue-500/30 pl-3">
-                    <input
-                      type="text"
-                      value={replyMessage}
-                      onChange={(e) => setReplyMessage(e.target.value)}
-                      onKeyDown={(e) => { if (e.key === 'Enter') handleReply(comment); }}
-                      placeholder="Reply as Mike Page..."
-                      maxLength={500}
-                      autoFocus
-                      className="flex-1 min-w-0 bg-white/5 border border-blue-500/30 rounded-lg px-3 py-1.5 text-xs text-white/80 placeholder:text-white/25 outline-none focus:border-blue-500/50 transition"
-                    />
-                    <button
-                      onClick={() => handleReply(comment)}
-                      disabled={!replyMessage.trim() || submitting}
-                      className="shrink-0 w-7 h-7 flex items-center justify-center rounded-lg bg-blue-500/80 hover:bg-blue-500 disabled:bg-white/5 disabled:text-white/20 text-white transition disabled:cursor-not-allowed"
-                    >
-                      <Send size={12} />
-                    </button>
-                    <button
-                      onClick={() => setReplyingTo(null)}
-                      className="shrink-0 w-7 h-7 flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/10 text-white/40 hover:text-white/60 transition"
-                    >
-                      <X size={12} />
-                    </button>
-                  </div>
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowModal(false)} />
+          <div className="relative w-full sm:max-w-lg max-h-[85vh] sm:max-h-[70vh] bg-[#0d1117] border border-white/10 rounded-t-2xl sm:rounded-2xl overflow-hidden flex flex-col z-10 shadow-2xl">
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-white/10 shrink-0">
+              <div>
+                <h3 className="text-base font-bold text-white flex items-center gap-2">
+                  <MessageCircle size={18} className="text-blue-400" />
+                  Comments
+                  {count > 0 && (
+                    <span className="text-sm text-white/30 font-normal">({count})</span>
+                  )}
+                </h3>
+                {trackTitle && (
+                  <p className="text-xs text-white/30 mt-0.5 truncate max-w-[280px]">{trackTitle}</p>
                 )}
               </div>
-            ))
-          )}
-        </div>
-
-        {/* Input Area */}
-        {canComment ? (
-          <form
-            onSubmit={handleSubmit}
-            className="px-4 py-3 border-t border-white/10 bg-white/[0.02]"
-          >
-            <div className="flex gap-2 items-center">
-              {!isAdmin && (
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Name"
-                  maxLength={30}
-                  className="w-20 shrink-0 bg-white/5 border border-white/10 rounded-lg px-2.5 py-2 text-xs text-white/80 placeholder:text-white/25 outline-none focus:border-blue-500/50 transition"
-                />
-              )}
-              <input
-                type="text"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                placeholder={isAdmin ? 'Comment as Mike Page...' : 'Add a comment...'}
-                maxLength={500}
-                className="flex-1 min-w-0 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-white/80 placeholder:text-white/25 outline-none focus:border-blue-500/50 transition"
-              />
               <button
-                type="submit"
-                disabled={(!isAdmin && !name.trim()) || !message.trim() || submitting}
-                className="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-blue-500/80 hover:bg-blue-500 disabled:bg-white/5 disabled:text-white/20 text-white transition-all duration-200 disabled:cursor-not-allowed"
-                aria-label="Send comment"
+                onClick={() => setShowModal(false)}
+                className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 transition"
               >
-                <Send size={14} />
+                <X size={18} />
               </button>
             </div>
 
-            {/* Admin mode toggle */}
-            <div className="mt-2 flex items-center justify-between">
-              {isAdmin ? (
-                <div className="flex items-center gap-1.5 text-[10px] text-green-400/70">
-                  <ShieldCheck size={12} />
-                  <span>Admin Mode</span>
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setShowAdminInput(prev => !prev)}
-                  className="flex items-center gap-1.5 text-[10px] text-white/20 hover:text-white/40 transition"
-                >
-                  <Lock size={10} />
-                  <span>Admin</span>
-                </button>
-              )}
-            </div>
-
-            {/* Admin key input */}
-            {showAdminInput && !isAdmin && (
-              <form onSubmit={handleAdminLogin} className="mt-2 flex gap-2">
-                <input
-                  type="password"
-                  value={adminKeyInput}
-                  onChange={(e) => { setAdminKeyInput(e.target.value); setAdminError(''); }}
-                  placeholder="Admin key"
-                  autoFocus
-                  className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white/80 placeholder:text-white/25 outline-none focus:border-purple-500/50 transition"
-                />
-                <button
-                  type="submit"
-                  disabled={!adminKeyInput.trim()}
-                  className="px-3 py-1.5 bg-purple-600/80 hover:bg-purple-600 disabled:opacity-50 text-white text-xs rounded-lg transition"
-                >
-                  Go
-                </button>
-              </form>
-            )}
-            {adminError && (
-              <p className="text-red-400 text-[10px] mt-1">{adminError}</p>
-            )}
-          </form>
-        ) : (
-          /* Non-subscriber CTA */
-          <div className="px-4 py-4 border-t border-white/10 bg-white/[0.02] text-center">
-            <div className="flex items-center justify-center gap-2 text-white/40 mb-2">
-              <Lock size={14} />
-              <span className="text-xs font-medium">Subscribe to join the conversation</span>
-            </div>
-            <a
-              href="/subscribe"
-              className="inline-block px-5 py-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold rounded-full transition"
-            >
-              Subscribe
-            </a>
+            {/* Panel */}
+            <CommentPanel
+              trackId={trackId}
+              trackTitle={trackTitle}
+              onCountChange={setCount}
+            />
           </div>
-        )}
-      </div>
-    </div>
+        </div>
+      )}
+    </>
   );
 }

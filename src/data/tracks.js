@@ -8,6 +8,22 @@ export const tracks = [
   // NEW SINGLES - 2026
   // ========================================
   {
+    id: 97,
+    title: "Fantasy",
+    artist: "Mike Page ft. Q Parker (112)",
+    album: "Singles",
+    year: 2010,
+    duration: "4:18",
+    trackNumber: 1,
+    albumId: 'singles-2026',
+    audioFile: '/audio/singles/fantasy-ft-q-parker.m4a',
+    isNew: true,
+    isFeatured: true,
+    featuredWeek: '2026-03-08',
+    hitScore: 96,
+    producer: 'DJ Boi Wunda'
+  },
+  {
     id: 98,
     title: "Please Don't",
     artist: "Djuan Covington",

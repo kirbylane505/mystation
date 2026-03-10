@@ -17,12 +17,13 @@ export async function generateMetadata({ params }) {
   }
 
   const album = albums.find(a => a.id === track.albumId);
-  const title = `${track.title}${track.featured ? ` ft. ${track.featured}` : ''} - Mike Page`;
-  const description = `🎵 "${track.title}" - Mike Page. You subscribing means the world to me. Independent PAGE, I'm nothing without you.`;
+  const artistName = track.artist || 'Mike Page';
+  const title = `${track.title}${track.featured ? ` ft. ${track.featured}` : ''} - ${artistName}`;
+  const description = `🎵 "${track.title}" - ${artistName}. Stream now on MyStation.`;
   const url = `https://mystationlive.com/song/${track.id}`;
   const ogParams = new URLSearchParams({
     title: track.title,
-    artist: `Mike Page${track.featured ? ` ft. ${track.featured}` : ''}`,
+    artist: `${track.artist || 'Mike Page'}${track.featured ? ` ft. ${track.featured}` : ''}`,
     album: track.album || '',
     year: track.year || '2026',
   });
@@ -81,7 +82,7 @@ export default function SongPage({ params }) {
     "duration": track.duration || undefined,
     "byArtist": {
       "@type": "MusicGroup",
-      "name": "Mike Page",
+      "name": track.artist || "Mike Page",
     },
     "inAlbum": track.album ? {
       "@type": "MusicAlbum",

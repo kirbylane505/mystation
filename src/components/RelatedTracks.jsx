@@ -73,7 +73,7 @@ export default function RelatedTracks({ trackId, limit = 6 }) {
               </div>
               <div className="p-2.5">
                 <p className="text-sm font-medium text-white truncate">{track.title}</p>
-                <p className="text-xs text-white/40 truncate">{track.featured ? `ft. ${track.featured}` : 'Mike Page'}</p>
+                <p className="text-xs text-white/40 truncate">{track.artist && track.artist !== 'Mike Page' ? track.artist : track.featured ? `ft. ${track.featured}` : 'Mike Page'}</p>
               </div>
             </button>
           );

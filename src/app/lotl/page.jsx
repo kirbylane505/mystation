@@ -306,7 +306,7 @@ export default function LOTLPage() {
           {/* CTA Buttons */}
           <div className="flex flex-wrap gap-4 justify-center mb-8">
             <a
-              href="https://cash.app/$RIDE4PAGEMUSIC847?note=LOTL%20Ticket"
+              href="https://myticketslive.com/events/lotl-2026"
               target="_blank"
               rel="noopener noreferrer"
               className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-black text-lg rounded-2xl hover:shadow-xl hover:shadow-green-500/30 transition-all hover:scale-105 flex items-center gap-2"
@@ -520,7 +520,7 @@ export default function LOTLPage() {
             <div className="text-center mt-12">
               <p className="text-white/60 mb-4">Ready to be part of the next one?</p>
               <a
-                href="https://cash.app/$RIDE4PAGEMUSIC847?note=LOTL%20Ticket"
+                href="https://myticketslive.com/events/lotl-2026"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn-primary bg-gradient-to-r from-green-500 to-emerald-600 inline-flex items-center gap-2"
@@ -881,7 +881,7 @@ export default function LOTLPage() {
               </p>
               <div className="flex flex-wrap gap-4 justify-center">
                 <a
-                  href="https://cash.app/$RIDE4PAGEMUSIC847?note=LOTL%20Ticket"
+                  href="https://myticketslive.com/events/lotl-2026"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-black rounded-2xl hover:shadow-xl hover:shadow-green-500/30 transition-all hover:scale-105 flex items-center gap-2"
@@ -902,6 +902,14 @@ export default function LOTLPage() {
           </div>
         </div>
       </section>
+
+      {/* Powered By */}
+      <p className="text-center text-[10px] text-white/20 tracking-wide py-6">
+        LOTL Day 2026 — Powered by{' '}
+        <a href="https://mystationlive.com" className="hover:text-white/40 transition-colors">MyStation</a>
+        {' '}&amp;{' '}
+        <a href="https://myticketslive.com" target="_blank" rel="noopener noreferrer" className="hover:text-white/40 transition-colors">MyTicketsLive</a>
+      </p>
     </div>
   );
 }

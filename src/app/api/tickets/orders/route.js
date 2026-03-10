@@ -10,10 +10,18 @@ import { timingSafeEqual } from 'crypto';
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
 
 const AUDIO_SECRET = process.env.AUDIO_SECRET;
+const ADMIN_KEY = process.env.ADMIN_KEY;
 
 function verifyKey(key) {
-  if (!AUDIO_SECRET || !key || key.length !== AUDIO_SECRET.length) return false;
-  try { return timingSafeEqual(Buffer.from(key), Buffer.from(AUDIO_SECRET)); } catch { return false; }
+  if (!key) return false;
+  // Accept either ADMIN_KEY or AUDIO_SECRET for backward compatibility
+  if (ADMIN_KEY && key.length === ADMIN_KEY.length) {
+    try { if (timingSafeEqual(Buffer.from(key), Buffer.from(ADMIN_KEY))) return true; } catch {}
+  }
+  if (AUDIO_SECRET && key.length === AUDIO_SECRET.length) {
+    try { if (timingSafeEqual(Buffer.from(key), Buffer.from(AUDIO_SECRET))) return true; } catch {}
+  }
+  return false;
 }
 
 export async function GET(request) {

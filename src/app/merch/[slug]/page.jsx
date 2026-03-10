@@ -24,6 +24,7 @@ import {
   PRINTIFY_NAME_FIX,
   SIZE_ORDER,
 } from '@/lib/merch-utils';
+import ProductReviews from '@/components/ProductReviews';
 import Zoom from 'react-medium-image-zoom';
 import 'react-medium-image-zoom/dist/styles.css';
 
@@ -570,6 +571,9 @@ export default function MerchProductPage({ params }) {
             </div>
           </div>
         )}
+
+        {/* Customer Reviews */}
+        <ProductReviews productSlug={slug} productName={product.name} />
 
         {/* Back to All Merch */}
         <div className="mt-12 text-center">

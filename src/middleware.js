@@ -154,7 +154,7 @@ export async function middleware(request) {
     "font-src 'self' https://fonts.gstatic.com",
     "connect-src 'self' https://api.stripe.com https://*.supabase.co https://vercel.live https://p.scdn.co https://us.i.posthog.com https://us-assets.i.posthog.com https://www.google-analytics.com https://analytics.google.com https://connect.facebook.net wss:",
     "frame-src https://js.stripe.com https://hooks.stripe.com https://www.youtube.com",
-    "media-src 'self' blob: https:",
+    "media-src 'self' data: blob: https:",
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self' https://buy.stripe.com",
@@ -175,8 +175,9 @@ export async function middleware(request) {
   }
 
   // Cross-Origin policies — prevent embedding and data leaks
-  headers.set('Cross-Origin-Opener-Policy', 'same-origin');
-  headers.set('Cross-Origin-Resource-Policy', 'same-origin');
+  // NOTE: same-origin-allow-popups needed for Stripe checkout and iOS Safari navigation
+  headers.set('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+  headers.set('Cross-Origin-Resource-Policy', 'cross-origin');
 
   return response;
 }

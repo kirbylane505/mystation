@@ -115,6 +115,7 @@ export async function POST(request) {
       customerEmail: cleanEmail,
       subscriberNumber,
       isFreeSlot,
+      tier: 'supporter',
     }).catch(err => console.error('Signup alert failed:', err));
 
     // Sync to Kit for marketing (fire-and-forget)

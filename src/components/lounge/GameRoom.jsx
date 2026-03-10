@@ -14,21 +14,21 @@ import InviteModal from './InviteModal';
 import TurnTimer from './TurnTimer';
 import GameResult from './GameResult';
 import BlackjackGame from './BlackjackGame';
-import SlidesLaddersGame from './SlidesLaddersGame';
 import PoolGame from './PoolGame';
 import SpadesGame from './SpadesGame';
 import DominoesGame from './DominoesGame';
 import QuizGame from './QuizGame';
+import GalagaGame from './GalagaGame';
 import { GAME_TYPES, PLAYER_COLORS } from '@/lib/games/constants';
 import { Users, Share2, Play, LogOut, Loader2, Bot, Eye, ChevronDown, Zap } from 'lucide-react';
 
 const GAME_TIPS = {
   blackjack: ['Hit below 11 — you can\'t bust', 'Stand on 17+ for safety', 'Aces count as 1 or 11'],
-  slidesLadders: ['Climb ladders to jump ahead', 'Watch out for slides!', 'First to square 100 wins'],
   pool: ['Aim carefully — angles matter', 'Pocket your set (solids or stripes)', 'Sink the 8-ball last'],
   spades: ['Count tricks before you bid', 'Lead off-suit to control', 'Save spades for big plays'],
   dominoes: ['Match tile numbers to play', 'Block your opponent', 'Clear your hand first to win'],
   quiz: ['10 questions per round', 'Speed bonus for fast answers', '230 questions across 10 categories'],
+  galaga: ['Arrow keys or WASD to move', 'Space to shoot', 'Collect power-ups for shields & spread shot'],
 };
 
 export default function GameRoom() {
@@ -317,13 +317,6 @@ export default function GameRoom() {
                 myPlayerId={myPlayerId}
                 onMove={handleMove}
               />
-            ) : room.game_type === 'slidesLadders' ? (
-              <SlidesLaddersGame
-                gameState={gameState}
-                myPlayerId={myPlayerId}
-                onRoll={() => handleMove('roll')}
-                players={players}
-              />
             ) : room.game_type === 'pool' ? (
               <PoolGame
                 gameState={gameState}
@@ -346,6 +339,12 @@ export default function GameRoom() {
               />
             ) : room.game_type === 'quiz' ? (
               <QuizGame
+                gameState={gameState}
+                myPlayerId={myPlayerId}
+                onMove={handleMove}
+              />
+            ) : room.game_type === 'galaga' ? (
+              <GalagaGame
                 gameState={gameState}
                 myPlayerId={myPlayerId}
                 onMove={handleMove}

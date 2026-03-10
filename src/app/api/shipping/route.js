@@ -1,5 +1,22 @@
 import { printful } from '@/lib/printful';
 
+// US state name → abbreviation
+const STATE_ABBREVS = {
+  'alabama':'AL','alaska':'AK','arizona':'AZ','arkansas':'AR','california':'CA',
+  'colorado':'CO','connecticut':'CT','delaware':'DE','florida':'FL','georgia':'GA',
+  'hawaii':'HI','idaho':'ID','illinois':'IL','indiana':'IN','iowa':'IA',
+  'kansas':'KS','kentucky':'KY','louisiana':'LA','maine':'ME','maryland':'MD',
+  'massachusetts':'MA','michigan':'MI','minnesota':'MN','mississippi':'MS','missouri':'MO',
+  'montana':'MT','nebraska':'NE','nevada':'NV','new hampshire':'NH','new jersey':'NJ',
+  'new mexico':'NM','new york':'NY','north carolina':'NC','north dakota':'ND','ohio':'OH',
+  'oklahoma':'OK','oregon':'OR','pennsylvania':'PA','rhode island':'RI','south carolina':'SC',
+  'south dakota':'SD','tennessee':'TN','texas':'TX','utah':'UT','vermont':'VT',
+  'virginia':'VA','washington':'WA','west virginia':'WV','wisconsin':'WI','wyoming':'WY',
+  'district of columbia':'DC','puerto rico':'PR','guam':'GU','virgin islands':'VI',
+  'american samoa':'AS','northern mariana islands':'MP'
+};
+function toStateCode(s) { if (!s) return ''; if (s.length === 2) return s.toUpperCase(); return STATE_ABBREVS[s.toLowerCase()] || s; }
+
 /**
  * POST /api/shipping
  * Calculate shipping rates for items to an address
@@ -27,7 +44,7 @@ export async function POST(request) {
     const recipient = {
       address1: address.address1 || '',
       city: address.city || '',
-      state_code: address.state || '',
+      state_code: toStateCode(address.state),
       country_code: address.country || 'US',
       zip: address.zip
     };

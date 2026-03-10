@@ -7,7 +7,6 @@ import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
 import { GAME_TYPES } from '@/lib/games/constants';
 import { initBlackjack, sanitizeBlackjackState } from '@/lib/games/blackjack';
-import { initSlidesLadders, sanitizeSlidesLaddersState } from '@/lib/games/slidesLadders';
 import { initPool, sanitizePoolState } from '@/lib/games/pool';
 import { initSpades, sanitizeSpadesState } from '@/lib/games/spades';
 import { initDominoes, sanitizeDominoesState } from '@/lib/games/dominoes';
@@ -70,12 +69,6 @@ export async function POST(request) {
       case 'blackjack':
         gameState = initBlackjack(playerIds);
         break;
-      case 'slidesLadders': {
-        const slIds = [...playerIds];
-        if (slIds.length < 2) slIds.push('ai_opponent');
-        gameState = initSlidesLadders(slIds);
-        break;
-      }
       case 'pool': {
         const poolIds = [...playerIds];
         if (poolIds.length < 2) poolIds.push('ai_opponent');
@@ -102,6 +95,16 @@ export async function POST(request) {
       case 'quiz': {
         const quizOptions = room.settings || {};
         gameState = initQuiz(playerIds, quizOptions);
+        break;
+      }
+      case 'galaga': {
+        // Galaga runs entirely client-side on Canvas — minimal server state
+        gameState = {
+          phase: 'playing',
+          players: playerIds,
+          startedAt: Date.now(),
+          scores: Object.fromEntries(playerIds.map(id => [id, 0])),
+        };
         break;
       }
       default:
@@ -131,9 +134,6 @@ export async function POST(request) {
       case 'blackjack':
         broadcastState = sanitizeBlackjackState(gameState, '__broadcast__');
         break;
-      case 'slidesLadders':
-        broadcastState = sanitizeSlidesLaddersState(gameState);
-        break;
       case 'pool':
         broadcastState = sanitizePoolState(gameState);
         break;
@@ -145,6 +145,9 @@ export async function POST(request) {
         break;
       case 'quiz':
         broadcastState = sanitizeQuizState(gameState, '__broadcast__');
+        break;
+      case 'galaga':
+        broadcastState = gameState;
         break;
     }
 

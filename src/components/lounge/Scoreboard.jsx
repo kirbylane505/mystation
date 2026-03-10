@@ -28,9 +28,6 @@ export default function Scoreboard({ players, gameState, gameType }) {
               status = result.outcome;
               score = result.payout || 0;
             }
-          } else if (gameType === 'slidesLadders') {
-            score = gameState.positions?.[player.user_id] || 0;
-            if (gameState.winner === player.user_id) status = 'Winner!';
           }
 
           return (

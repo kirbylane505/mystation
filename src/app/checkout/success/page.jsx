@@ -125,7 +125,7 @@ function SuccessContent() {
       fetch('/api/subscription/session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'activate' }),
+        body: JSON.stringify({ action: 'activate', sessionId }),
       }).then(() => {
         if (customerEmail) {
           subscribe(customerEmail.toLowerCase().trim());

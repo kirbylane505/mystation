@@ -218,6 +218,10 @@ export default function AccountPage() {
         <div className="glass rounded-2xl p-6 border border-white/10">
           <h3 className="text-lg font-bold text-white mb-4">Quick Links</h3>
           <div className="space-y-3">
+            <Link href="/account/profile" className="flex items-center justify-between py-3 px-4 rounded-xl bg-white/5 hover:bg-white/10 transition group">
+              <span className="text-white/70 group-hover:text-white transition">Edit Profile</span>
+              <ExternalLink size={16} className="text-white/30" />
+            </Link>
             <Link href="/music" className="flex items-center justify-between py-3 px-4 rounded-xl bg-white/5 hover:bg-white/10 transition group">
               <span className="text-white/70 group-hover:text-white transition">Browse Music</span>
               <ExternalLink size={16} className="text-white/30" />

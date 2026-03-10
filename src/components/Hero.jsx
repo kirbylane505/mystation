@@ -38,8 +38,8 @@ export default function Hero() {
         {/* Logo */}
         <div className="mb-6 flex justify-center hero-title">
           <Image
-            src="/images/idmg-logo-white.png"
-            alt="IDMG - Impossible Dreamz Music Group"
+            src="/images/mystation-logo.png"
+            alt="MyStation - Music Streaming"
             width={280}
             height={280}
             priority

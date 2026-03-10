@@ -110,10 +110,10 @@ function setupMediaSession(track, handlers) {
 
   navigator.mediaSession.metadata = new MediaMetadata({
     title: track.title,
-    artist: track.featured ? `Mike Page ft. ${track.featured}` : 'Mike Page',
+    artist: track.featured ? `${track.artist || 'Mike Page'} ft. ${track.featured}` : (track.artist || 'Mike Page'),
     album: track.album || 'MyStation',
     artwork: [
-      { src: '/images/idmg-logo-white.png', sizes: '512x512', type: 'image/png' },
+      { src: '/images/mystation-logo-512.png', sizes: '512x512', type: 'image/png' },
     ]
   });
 

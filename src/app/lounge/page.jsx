@@ -12,8 +12,6 @@ import GameSelector from '@/components/lounge/GameSelector';
 import GameModeModal from '@/components/lounge/GameModeModal';
 import RoomBrowser from '@/components/lounge/RoomBrowser';
 import OnlineUsers from '@/components/lounge/OnlineUsers';
-import ArcadePoolGame from '@/components/lounge/ArcadePoolGame';
-import ArcadeBlackjackGame from '@/components/lounge/ArcadeBlackjackGame';
 import {
   getPlayerName, isSubscriberPlayer, getAnonymousPlayerId,
   initSubscriberIdentity, getPlayerId, clearAnonymousBackup
@@ -30,7 +28,6 @@ export default function LoungePage() {
   const [selectedGame, setSelectedGame] = useState(null);
   const [stats, setStats] = useState(null);
   const [isSubscriber, setIsSubscriber] = useState(false);
-  const [arcadeGame, setArcadeGame] = useState(null); // 'arcadePool' or 'arcadeBlackjack'
 
   // Initialize subscriber identity + auto-populate name + fetch stats
   useEffect(() => {
@@ -84,37 +81,6 @@ export default function LoungePage() {
     }
     init();
   }, []);
-
-  // Check URL params for arcade mode (reactive — triggers on URL change)
-  useEffect(() => {
-    const arcade = searchParams.get('arcade');
-    if (arcade === 'arcadePool' || arcade === 'arcadeBlackjack') {
-      setArcadeGame(arcade);
-    } else {
-      setArcadeGame(null);
-    }
-  }, [searchParams]);
-
-  // Render arcade games if selected
-  if (arcadeGame === 'arcadePool') {
-    return (
-      <div className="min-h-screen bg-[#030306] text-white">
-        <div className="max-w-6xl mx-auto px-4 py-6">
-          <ArcadePoolGame onBack={() => { setArcadeGame(null); window.history.replaceState({}, '', '/lounge'); }} />
-        </div>
-      </div>
-    );
-  }
-
-  if (arcadeGame === 'arcadeBlackjack') {
-    return (
-      <div className="min-h-screen bg-[#030306] text-white">
-        <div className="max-w-2xl mx-auto px-4 py-6">
-          <ArcadeBlackjackGame onBack={() => { setArcadeGame(null); window.history.replaceState({}, '', '/lounge'); }} />
-        </div>
-      </div>
-    );
-  }
 
   const handleCreateRoom = async () => {
     if (!selectedGame || !displayName.trim()) return;

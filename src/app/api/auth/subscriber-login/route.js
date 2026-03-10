@@ -9,7 +9,7 @@ import { createHmac } from 'crypto';
 import { createRateLimiter, isValidEmail } from '@/lib/rateLimit';
 
 const AUDIO_SECRET = process.env.AUDIO_SECRET;
-const loginLimiter = createRateLimiter('sub-login', 15, 900000); // 15 per IP per 15 min
+const loginLimiter = createRateLimiter('sub-login', 5, 900000); // 5 per IP per 15 min (tightened from 15)
 
 function createAuthCookie(email) {
   const timestamp = Date.now();
@@ -65,7 +65,7 @@ export async function POST(request) {
       );
     }
 
-    const tier = sub.tier || 'regular';
+    const tier = sub.tier || 'supporter';
     const user = {
       email: cleanEmail,
       name: cleanEmail.split('@')[0],

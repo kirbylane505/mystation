@@ -4,15 +4,6 @@
  */
 
 export const HOW_TO_PLAY = {
-  arcadePool: {
-    title: 'Arcade Pool',
-    slides: [
-      { heading: 'How to Shoot', body: 'Tap the white ball, drag back to aim, then let go to shoot! The farther you drag, the harder you hit.' },
-      { heading: 'Your Goal', body: 'Pocket all the colored balls on the table. Each level tells you how many shots you get.' },
-      { heading: 'Earn Stars', body: 'Use fewer shots to earn more stars! 1 star = you did it. 3 stars = you crushed it!' },
-      { heading: 'Level Up', body: 'Beat all 8 levels in a tier to unlock the next one. Start as a Rookie, end as a Pro!' },
-    ],
-  },
   pool: {
     title: '8-Ball Pool',
     slides: [
@@ -30,24 +21,6 @@ export const HOW_TO_PLAY = {
       { heading: 'Card Values', body: 'Number cards = face value. Jack, Queen, King = 10. Ace = 1 or 11 (whichever helps you more).' },
       { heading: 'Hit or Stand', body: 'Hit = get another card. Stand = keep what you have. If you go over 21, you bust and lose!' },
       { heading: 'Beat the Dealer', body: 'The dealer must hit until they reach 17. If you\'re closer to 21 without busting, you win!' },
-    ],
-  },
-  arcadeBlackjack: {
-    title: 'Blackjack Trainer',
-    slides: [
-      { heading: 'Pick a Mode', body: 'Free Play to practice, Strategy Trainer to learn the best moves, or Challenge Mode to test your skills!' },
-      { heading: 'Hit or Stand', body: 'Hit to get another card, Stand to keep what you have. Try to get as close to 21 as possible without going over!' },
-      { heading: 'Card Values', body: 'Number cards = face value. J, Q, K = 10. Ace = 1 or 11 — whatever helps you most!' },
-      { heading: 'Beat the Dealer', body: 'The dealer must hit until 17. Get closer to 21 than the dealer without busting to win!' },
-    ],
-  },
-  slidesLadders: {
-    title: 'Slides & Ladders',
-    slides: [
-      { heading: 'How to Play', body: 'Roll the dice and move forward that many spaces. First player to reach square 100 wins!' },
-      { heading: 'Ladders Go Up!', body: 'Land on the bottom of a ladder? Climb up to the top! Ladders are shortcuts to the finish.' },
-      { heading: 'Slides Go Down!', body: 'Land on the top of a slide? You slide all the way down. Watch out — they can send you way back!' },
-      { heading: 'Tips', body: 'It\'s mostly luck, but cheer for high rolls and hope you hit those ladders! Roll a 6 to go again.' },
     ],
   },
   spades: {
@@ -78,12 +51,14 @@ export const HOW_TO_PLAY = {
       { heading: 'Categories', body: '230 questions across 10 topics: Civil Rights, Music, Sports, Science, Art, and more. Learn while you play!' },
     ],
   },
-  maze: {
-    title: 'Maze HQ',
+  galaga: {
+    title: 'Galaga Station',
     slides: [
-      { heading: 'Navigate the Maze', body: 'Use arrow keys or swipe to move through the maze. Find the exit before time runs out!' },
-      { heading: 'Collect Stars', body: 'Grab stars along the way for bonus points. But don\'t get lost — time is ticking!' },
-      { heading: 'Levels', body: 'Each level gets harder with bigger mazes and trickier paths. How far can you get?' },
+      { heading: 'Controls', body: 'Use arrow keys or WASD to move your ship left and right. Press Space to shoot. On mobile, drag to move — auto-fire is on!' },
+      { heading: 'Enemy Waves', body: 'Aliens attack in waves that get harder. Grunts are easy, Swoopers dive at you, Tanks take multiple hits, and Bombers shoot back!' },
+      { heading: 'Power-Ups', body: 'Destroy enemies to spawn power-ups. Shield protects you, Rapid Fire doubles your speed, Spread Shot fires 3 bullets, and Nuke clears the screen!' },
+      { heading: 'Combos', body: 'Kill enemies quickly to build combos. Each kill within 1 second increases your multiplier up to 5x. Chase those high scores!' },
+      { heading: 'Boss Waves', body: 'Every 5th wave brings a Boss with massive health. Defeat it for huge points. Survive as long as you can!' },
     ],
   },
 };

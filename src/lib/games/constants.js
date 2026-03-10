@@ -37,33 +37,6 @@ for (const suit of SUITS) {
   }
 }
 
-// Slides & Ladders board (10x10 = 100 squares)
-// Ladders go UP (bottom → top), Slides go DOWN (top → bottom)
-export const LADDERS = {
-  2: 38, 7: 14, 8: 31, 15: 26, 21: 42,
-  28: 84, 36: 44, 51: 67, 71: 91, 78: 98, 87: 94,
-};
-
-export const SLIDES = {
-  16: 6, 46: 25, 49: 11, 62: 19, 64: 60,
-  74: 53, 89: 68, 92: 88, 95: 75, 99: 80,
-};
-
-// Board position → [row, col] mapping (snake pattern)
-export function positionToCoords(pos) {
-  if (pos < 1 || pos > 100) return null;
-  const idx = pos - 1;
-  const row = 9 - Math.floor(idx / 10);
-  const col = row % 2 === 1 ? idx % 10 : 9 - (idx % 10);
-  // Fix: row 0 is top, row 9 is bottom
-  const actualRow = Math.floor(idx / 10);
-  const isEvenRow = actualRow % 2 === 0;
-  return {
-    row: 9 - actualRow,
-    col: isEvenRow ? idx % 10 : 9 - (idx % 10),
-  };
-}
-
 // Game type definitions
 export const GAME_TYPES = {
   blackjack: {
@@ -75,16 +48,6 @@ export const GAME_TYPES = {
     icon: '🃏',
     color: '#10b981',
     turnBased: false, // all play simultaneously vs dealer
-  },
-  slidesLadders: {
-    id: 'slidesLadders',
-    name: 'Slides & Ladders',
-    description: 'Roll dice, climb ladders, dodge slides. First to 100 wins!',
-    minPlayers: 1,
-    maxPlayers: 4,
-    icon: '🎲',
-    color: '#8b5cf6',
-    turnBased: true,
   },
   spades: {
     id: 'spades',
@@ -116,28 +79,6 @@ export const GAME_TYPES = {
     color: '#d97706',
     turnBased: true,
   },
-  arcadePool: {
-    id: 'arcadePool',
-    name: 'Arcade Pool',
-    description: 'Solo pool challenges — Rookie to Pro! Clear tables, beat the clock, nail trick shots.',
-    minPlayers: 1,
-    maxPlayers: 1,
-    icon: '🎯',
-    color: '#f59e0b',
-    turnBased: false,
-    arcade: true,
-  },
-  arcadeBlackjack: {
-    id: 'arcadeBlackjack',
-    name: 'Blackjack Trainer',
-    description: 'Practice blackjack solo — Free Play, Strategy Trainer, or Challenge Mode!',
-    minPlayers: 1,
-    maxPlayers: 1,
-    icon: '🎰',
-    color: '#10b981',
-    turnBased: false,
-    arcade: true,
-  },
   quiz: {
     id: 'quiz',
     name: 'Black History Quiz',
@@ -146,6 +87,16 @@ export const GAME_TYPES = {
     maxPlayers: 8,
     icon: '🧠',
     color: '#eab308',
+    turnBased: false,
+  },
+  galaga: {
+    id: 'galaga',
+    name: 'Galaga Station',
+    description: 'Blast alien waves in this premium arcade shooter!',
+    minPlayers: 1,
+    maxPlayers: 2,
+    icon: '🚀',
+    color: '#06b6d4',
     turnBased: false,
   },
 };

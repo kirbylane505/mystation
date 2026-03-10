@@ -96,7 +96,7 @@ export default function SongClient({ track, allTracks, albumArt }) {
 
   const handleShare = async () => {
     const url = `https://mystationlive.com/song/${track.id}`;
-    const text = `🎵 "${track.title}" - Mike Page\n\nYou subscribing means the world to me. Independent PAGE, I'm nothing without you.`;
+    const text = `🎵 "${track.title}" - ${track.artist || 'Mike Page'}\n\nStream now on MyStation.`;
     if (navigator.share) {
       await navigator.share({ title: track.title, text, url });
     } else {
@@ -190,7 +190,7 @@ export default function SongClient({ track, allTracks, albumArt }) {
         {/* Track Info */}
         <h1 className="text-4xl md:text-5xl font-black text-white mb-2">{track.title}</h1>
         <p className="text-xl text-white/60 mb-1">
-          Mike Page{track.featured && <span className="text-blue-400"> ft. {track.featured}</span>}
+          {track.artist || 'Mike Page'}{track.featured && <span className="text-blue-400"> ft. {track.featured}</span>}
         </p>
         {track.producer && (
           <p className="text-purple-400 text-sm mb-1">Prod. {track.producer}</p>

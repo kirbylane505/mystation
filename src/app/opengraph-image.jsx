@@ -20,14 +20,13 @@ export default function Image() {
           fontFamily: 'system-ui, -apple-system, sans-serif',
         }}
       >
-        {/* IDMG Circle Logo */}
+        {/* MyStation Logo */}
         <img
-          src="https://mystationlive.com/images/idmg-logo-white.png"
+          src="https://mystationlive.com/images/mystation-logo.png"
           width="220"
           height="220"
           style={{
-            borderRadius: '50%',
-            border: '3px solid rgba(96, 165, 250, 0.3)',
+            borderRadius: '20px',
             boxShadow: '0 0 60px rgba(96, 165, 250, 0.15)',
           }}
         />

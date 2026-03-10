@@ -78,14 +78,15 @@ export default function SubscribeSuccessPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const tierFromUrl = params.get('tier');
-    const selectedTier = tierFromUrl || localStorage.getItem('mystation-selected-tier') || 'regular';
+    const selectedTier = tierFromUrl || localStorage.getItem('mystation-selected-tier') || 'supporter';
     setTier(selectedTier);
 
-    // Set server-side subscription session cookie
+    // Set server-side subscription session cookie (pass Stripe session_id for verification)
+    const sessionId = params.get('session_id');
     fetch('/api/subscription/session', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'activate', tier: selectedTier }),
+      body: JSON.stringify({ action: 'activate', tier: selectedTier, sessionId }),
     }).catch((err) => console.error('Session cookie failed:', err));
 
     // Get email from localStorage

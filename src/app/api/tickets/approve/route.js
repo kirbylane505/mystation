@@ -9,6 +9,7 @@ import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
 import { createHmac, randomUUID, timingSafeEqual } from 'crypto';
 
 const AUDIO_SECRET = process.env.AUDIO_SECRET;
+const ADMIN_KEY_ENV = process.env.ADMIN_KEY;
 
 function generateQRCode(ticketId) {
   const hmac = createHmac('sha256', AUDIO_SECRET)
@@ -18,18 +19,22 @@ function generateQRCode(ticketId) {
   return `MTIX-${ticketId}-${hmac}`;
 }
 
+function verifyAdminKey(key) {
+  if (!key) return false;
+  if (ADMIN_KEY_ENV && key.length === ADMIN_KEY_ENV.length) {
+    try { if (timingSafeEqual(Buffer.from(key), Buffer.from(ADMIN_KEY_ENV))) return true; } catch {}
+  }
+  if (AUDIO_SECRET && key.length === AUDIO_SECRET.length) {
+    try { if (timingSafeEqual(Buffer.from(key), Buffer.from(AUDIO_SECRET))) return true; } catch {}
+  }
+  return false;
+}
+
 export async function POST(request) {
   try {
-    // Admin auth — timing-safe comparison
+    // Admin auth — timing-safe comparison (accepts ADMIN_KEY or AUDIO_SECRET)
     const key = request.headers.get('x-admin-key');
-    if (!AUDIO_SECRET || !key || key.length !== AUDIO_SECRET.length) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-    try {
-      if (!timingSafeEqual(Buffer.from(key), Buffer.from(AUDIO_SECRET))) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-      }
-    } catch {
+    if (!verifyAdminKey(key)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

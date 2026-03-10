@@ -65,7 +65,7 @@ export default function NowPlayingBanner() {
             <p className="text-[10px] text-blue-400 font-semibold uppercase tracking-widest">Now Playing</p>
             <h3 className="text-white font-bold text-sm md:text-base truncate">{currentTrack.title}</h3>
             <p className="text-white/50 text-xs truncate">
-              Mike Page{currentTrack.featured ? ` ft. ${currentTrack.featured}` : ''}
+              {currentTrack.artist || 'Mike Page'}{currentTrack.featured ? ` ft. ${currentTrack.featured}` : ''}
               {currentTrack.producer && <span className="text-purple-400"> · {currentTrack.producer}</span>}
             </p>
           </div>

@@ -77,6 +77,7 @@ export async function POST(request) {
       customerEmail: email.toLowerCase(),
       subscriberNumber,
       isFreeSlot: lotlEligible,
+      tier: tier || 'supporter',
     }).catch((err) => console.error('Signup alert email failed:', err));
 
     const lotlMessage = lotlEligible

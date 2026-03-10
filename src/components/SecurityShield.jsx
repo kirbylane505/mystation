@@ -47,17 +47,20 @@ export default function SecurityShield() {
       // Keep console.error for critical errors
     }
 
-    // 4. Devtools detection — debugger trap
+    // 4. Devtools detection — desktop only (mobile browsers have variable chrome height that causes false positives)
     let devtoolsInterval;
-    const detectDevtools = () => {
-      const threshold = 160;
-      const widthThreshold = window.outerWidth - window.innerWidth > threshold;
-      const heightThreshold = window.outerHeight - window.innerHeight > threshold;
-      if (widthThreshold || heightThreshold) {
-        document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#000;color:#fff;font-family:system-ui;text-align:center;padding:2rem"><div><h1 style="font-size:2rem;margin-bottom:1rem">Access Denied</h1><p style="color:#666">Developer tools are not permitted on this site.</p></div></div>';
-      }
-    };
-    devtoolsInterval = setInterval(detectDevtools, 1000);
+    const isMobile = /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    if (!isMobile) {
+      const detectDevtools = () => {
+        const threshold = 160;
+        const widthThreshold = window.outerWidth - window.innerWidth > threshold;
+        const heightThreshold = window.outerHeight - window.innerHeight > threshold;
+        if (widthThreshold || heightThreshold) {
+          document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#000;color:#fff;font-family:system-ui;text-align:center;padding:2rem"><div><h1 style="font-size:2rem;margin-bottom:1rem">Access Denied</h1><p style="color:#666">Developer tools are not permitted on this site.</p></div></div>';
+        }
+      };
+      devtoolsInterval = setInterval(detectDevtools, 1000);
+    }
 
     // 5. Block drag/drop of images and content
     const blockDrag = (e) => { e.preventDefault(); return false; };

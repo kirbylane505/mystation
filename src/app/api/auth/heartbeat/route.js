@@ -19,7 +19,7 @@ const STALE_TIMEOUT = 5 * 60 * 1000; // 5 min — no heartbeat = dead session
 // Max concurrent sessions per tier
 function getMaxSessions(tier) {
   if (tier === 'diamond' || tier === 'premium') return 5;
-  if (tier === 'regular') return 3;
+  if (tier === 'regular' || tier === 'supporter') return 3;
   return 2; // free — 2 devices
 }
 
@@ -35,7 +35,7 @@ async function getTier(email) {
       .eq('email', email)
       .single();
     if (!data) return 'free';
-    if (data.status === 'active') return data.tier || 'regular';
+    if (data.status === 'active') return data.tier || 'supporter';
     if (data.free_until && new Date(data.free_until) > new Date()) return data.tier || 'free';
     return 'free';
   } catch {
@@ -85,12 +85,17 @@ export async function POST(request) {
     const mySession = emailSessions.find(s => s.sessionToken === sessionToken);
 
     if (!mySession) {
-      // This session was kicked by a newer login
-      return NextResponse.json({
-        valid: false,
-        kicked: true,
-        message: `Too many active sessions (max ${maxSessions}). Upgrade your plan for more devices.`,
-      });
+      // Session not in memory — likely a deploy/cold-start wiped the in-memory store
+      // Re-register the session instead of kicking the user
+      // Real kicks only happen at login time when device limit is exceeded (line 72-76)
+      if (emailSessions.length >= maxSessions) {
+        // Actually at device limit — oldest session gets replaced
+        emailSessions.sort((a, b) => b.lastSeen - a.lastSeen);
+        emailSessions = emailSessions.slice(0, maxSessions - 1);
+      }
+      emailSessions.push({ sessionToken, lastSeen: now });
+      sessions.set(normalizedEmail, emailSessions);
+      return NextResponse.json({ valid: true, sessionToken, tier, maxSessions });
     }
 
     // Update last seen for this session

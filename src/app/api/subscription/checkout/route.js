@@ -66,9 +66,9 @@ export async function POST(request) {
       cancel_url: 'https://mystationlive.com/subscribe',
       subscription_data: {
         trial_period_days: 30,
-        metadata: { tier, source: 'mystation' },
+        metadata: { tier, priceId, source: 'mystation' },
       },
-      metadata: { tier, source: 'mystation' },
+      metadata: { tier, priceId, source: 'mystation' },
       allow_promotion_codes: true,
     };
 

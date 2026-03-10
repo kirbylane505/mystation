@@ -56,7 +56,7 @@ export async function POST(request) {
         if (sub) {
           if (sub.status === 'active') {
             isSubscribed = true;
-            tier = sub.tier || 'regular';
+            tier = sub.tier || 'supporter';
           } else if (sub.free_until && new Date(sub.free_until) > new Date()) {
             isSubscribed = true;
             tier = sub.tier || 'free';
