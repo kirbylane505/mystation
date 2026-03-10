@@ -3,7 +3,7 @@
  * Uses Resend for transactional emails
  *
  * Required env: RESEND_API_KEY
- * Admin notifications go to: mystationllc1@gmail.com (Resend account owner)
+ * Admin notifications go to: mystationlive@gmail.com
  */
 
 import { Resend } from 'resend';
@@ -448,20 +448,26 @@ export async function sendOrderStatusUpdate({ customerName, customerEmail, order
 /**
  * Send admin alert when someone signs up
  */
-export async function sendNewSignupAlert({ customerName, customerEmail, subscriberNumber, isFreeSlot }) {
+export async function sendNewSignupAlert({ customerName, customerEmail, subscriberNumber, isFreeSlot, tier }) {
   if (!resend) { console.warn('Resend not configured — skipping signup alert'); return { success: false }; }
   try {
     const spotsLeft = Math.max(0, 250 - subscriberNumber);
     const lotlEligible = subscriberNumber <= 250;
+    const tierDisplay = tier === 'diamond' ? 'Diamond ($14.99/mo)' : tier === 'premium' ? 'Premium ($9.99/mo)' : 'Supporter ($4.99/mo)';
+    const tierColor = tier === 'diamond' ? '#a78bfa' : tier === 'premium' ? '#f59e0b' : '#3b82f6';
+    const tierEmoji = tier === 'diamond' ? '&#128142;' : tier === 'premium' ? '&#11088;' : '&#127911;';
     const { data, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: ADMIN_EMAIL,
-      subject: `NEW SIGNUP (#${subscriberNumber}) — ${customerName || customerEmail}`,
+      subject: `NEW SIGNUP (#${subscriberNumber}) — ${tierDisplay.split(' ')[0]} — ${customerName || customerEmail}`,
       html: `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; background: #0a0e1a; color: #fff; padding: 32px; border-radius: 16px;">
           <div style="text-align: center; margin-bottom: 24px;">
             <h1 style="color: #22c55e; margin: 0; font-size: 28px;">NEW SIGNUP</h1>
             <p style="color: #3b82f6; font-size: 18px; font-weight: 700; margin: 8px 0;">Member #${subscriberNumber}</p>
+          </div>
+          <div style="background: linear-gradient(135deg, ${tierColor}15, ${tierColor}08); padding: 16px 20px; border-radius: 12px; border: 1px solid ${tierColor}40; margin-bottom: 16px; text-align: center;">
+            <p style="color: ${tierColor}; font-size: 22px; font-weight: 900; margin: 0;">${tierEmoji} ${tierDisplay}</p>
           </div>
           <div style="background: #1a1f36; padding: 20px; border-radius: 12px; margin-bottom: 16px;">
             <h3 style="color: #3b82f6; margin: 0 0 12px 0;">Details</h3>
