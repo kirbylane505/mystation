@@ -1,25 +1,22 @@
 /**
  * MYTICKETSLIVE - Event Detail Page
- * Full event view with ticket selection, payment, and order submission
+ * Full event view with ticket tiers → directs to MyTicketsLive.com Stripe checkout
  */
 
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import {
   Calendar, MapPin, Ticket, Clock, Users, ChevronLeft,
-  Loader2, Check, Copy, Upload, Share2, AlertCircle,
-  Minus, Plus, Shield, Sparkles, ExternalLink, ArrowRight,
-  ShoppingBag, ChevronRight, Crown, Mail
+  Loader2, Check, AlertCircle,
+  Shield, Sparkles, ExternalLink, ArrowRight,
+  ShoppingBag, ChevronRight, Crown, Mail, Share2
 } from 'lucide-react';
-import PaymentMethodPicker from '@/components/tickets/PaymentMethodPicker';
-import ScreenshotUpload from '@/components/tickets/ScreenshotUpload';
 
 // ─── LOTL RECAP VIDEO BACKGROUND ──────────────────────────────
 function RecapVideoBackground({ slug }) {
-  // Only show for LOTL events
   if (!slug?.includes('lotl')) return null;
   return (
     <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
@@ -34,7 +31,6 @@ function RecapVideoBackground({ slug }) {
       >
         <source src="/videos/lotl-recap-2025.mp4" type="video/mp4" />
       </video>
-      {/* Gradient overlays for readability */}
       <div className="absolute inset-0 bg-gradient-to-b from-mystation-navyDark/80 via-mystation-navyDark/60 to-mystation-navyDark/95" />
       <div className="absolute inset-0 bg-gradient-to-r from-blue-950/40 via-transparent to-purple-950/40" />
     </div>
@@ -50,7 +46,6 @@ function MerchMarquee({ slug }) {
     if (!slug?.includes('lotl')) return;
     async function fetchMerch() {
       try {
-        // Fetch from both Printful and Printify
         const [pfRes, pyRes] = await Promise.allSettled([
           fetch('/api/printful/products').then(r => r.json()),
           fetch('/api/printify/products').then(r => r.json()),
@@ -78,7 +73,6 @@ function MerchMarquee({ slug }) {
           })));
         }
 
-        // Deduplicate and limit
         setProducts(items.slice(0, 12));
       } catch {}
     }
@@ -87,12 +81,10 @@ function MerchMarquee({ slug }) {
 
   if (!slug?.includes('lotl') || products.length === 0 || !showMarquee) return null;
 
-  // Double the array for seamless infinite scroll
   const doubled = [...products, ...products];
 
   return (
-    <div className="fixed bottom-[76px] md:bottom-[116px] left-0 right-0 z-[35] bg-gradient-to-r from-black/95 via-gray-900/95 to-black/95 backdrop-blur-xl border-t border-white/10 shadow-2xl shadow-black/50">
-      {/* Header bar */}
+    <div className="fixed bottom-[76px] lg:bottom-[116px] left-0 right-0 z-[35] bg-gradient-to-r from-black/95 via-gray-900/95 to-black/95 backdrop-blur-xl border-t border-white/10 shadow-2xl shadow-black/50">
       <div className="flex items-center justify-between px-4 py-2 border-b border-white/5">
         <div className="flex items-center gap-2">
           <ShoppingBag size={14} className="text-amber-400" />
@@ -115,7 +107,6 @@ function MerchMarquee({ slug }) {
         </div>
       </div>
 
-      {/* Scrolling products */}
       <div className="overflow-hidden py-3">
         <div
           className="flex gap-4 animate-marquee whitespace-nowrap"
@@ -151,7 +142,6 @@ function MerchMarquee({ slug }) {
         </div>
       </div>
 
-      {/* CSS for marquee animation */}
       <style jsx>{`
         @keyframes marquee {
           0% { transform: translateX(0); }
@@ -177,47 +167,12 @@ function formatDateFull(dateStr) {
   });
 }
 
-// Format date short
-function formatDateShort(dateStr) {
-  if (!dateStr) return '';
-  const d = new Date(dateStr);
-  return d.toLocaleDateString('en-US', {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  });
-}
-
 // Days until event
 function daysUntil(dateStr) {
   const eventDate = new Date(dateStr);
   const now = new Date();
   const diff = Math.ceil((eventDate - now) / (1000 * 60 * 60 * 24));
   return Math.max(0, diff);
-}
-
-// Copy to clipboard utility
-function useCopyToClipboard() {
-  const [copied, setCopied] = useState(false);
-  const copy = async (text) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // Fallback
-      const el = document.createElement('textarea');
-      el.value = text;
-      document.body.appendChild(el);
-      el.select();
-      document.execCommand('copy');
-      document.body.removeChild(el);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
-  };
-  return { copied, copy };
 }
 
 export default function EventDetailPage() {
@@ -227,37 +182,6 @@ export default function EventDetailPage() {
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  // Selection state
-  const [selectedTier, setSelectedTier] = useState(null);
-  const [quantity, setQuantity] = useState(1);
-  const [paymentMethod, setPaymentMethod] = useState(null);
-
-  // Form state
-  const [formName, setFormName] = useState('');
-  const [formEmail, setFormEmail] = useState('');
-  const [formPhone, setFormPhone] = useState('');
-  const [screenshot, setScreenshot] = useState(null);
-
-  // Submit state
-  const [submitting, setSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState(null);
-  const [orderResult, setOrderResult] = useState(null);
-
-  const paymentSectionRef = useRef(null);
-  const { copied, copy } = useCopyToClipboard();
-
-  // Pre-fill from localStorage
-  useEffect(() => {
-    try {
-      const savedUser = localStorage.getItem('mystation_user');
-      if (savedUser) {
-        const user = JSON.parse(savedUser);
-        if (user.name) setFormName(user.name);
-        if (user.email) setFormEmail(user.email);
-      }
-    } catch {}
-  }, []);
 
   // Fetch event data
   useEffect(() => {
@@ -281,71 +205,6 @@ export default function EventDetailPage() {
     fetchEvent();
   }, [slug]);
 
-  // Scroll to payment section when tier is selected
-  useEffect(() => {
-    if (selectedTier && paymentSectionRef.current) {
-      setTimeout(() => {
-        paymentSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 200);
-    }
-  }, [selectedTier]);
-
-  // Handle order submission
-  async function handleSubmit(e) {
-    e.preventDefault();
-    if (!selectedTier || !paymentMethod || !formName || !formEmail) return;
-
-    setSubmitting(true);
-    setSubmitError(null);
-
-    try {
-      // Step 1: Create the order
-      const purchaseRes = await fetch('/api/tickets/purchase', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          event_id: event.id,
-          ticket_type_id: selectedTier.id,
-          quantity,
-          purchaser_name: formName,
-          purchaser_email: formEmail,
-          purchaser_phone: formPhone || null,
-          payment_method: paymentMethod,
-        }),
-      });
-
-      const purchaseData = await purchaseRes.json();
-
-      if (!purchaseRes.ok || !purchaseData.success) {
-        setSubmitError(purchaseData.error || 'Failed to create order');
-        setSubmitting(false);
-        return;
-      }
-
-      // Step 2: Upload screenshot if provided
-      if (screenshot) {
-        try {
-          const formData = new FormData();
-          formData.append('screenshot', screenshot);
-          formData.append('order_ref', purchaseData.order_ref);
-
-          await fetch('/api/tickets/upload-screenshot', {
-            method: 'POST',
-            body: formData,
-          });
-        } catch {
-          // Screenshot upload failure is non-blocking
-        }
-      }
-
-      setOrderResult(purchaseData);
-    } catch {
-      setSubmitError('Something went wrong. Please try again.');
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
   // Share event
   function shareEvent() {
     const url = `https://mystationlive.com/events/${slug}`;
@@ -353,9 +212,12 @@ export default function EventDetailPage() {
     if (navigator.share) {
       navigator.share({ title: event?.name, text, url });
     } else {
-      copy(url);
+      navigator.clipboard.writeText(url).catch(() => {});
     }
   }
+
+  // MyTicketsLive checkout URL for this event
+  const ticketCheckoutUrl = `https://myticketslive.com/events/${slug}`;
 
   // Loading state
   if (loading) {
@@ -388,86 +250,6 @@ export default function EventDetailPage() {
     );
   }
 
-  // SUCCESS state -- order placed
-  if (orderResult) {
-    return (
-      <div className="min-h-screen py-12">
-        <div className="max-w-2xl mx-auto px-6">
-          <div className="glass rounded-3xl p-8 lg:p-12 text-center">
-            {/* Success icon */}
-            <div className="w-24 h-24 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-8 shadow-xl shadow-green-500/30">
-              <Check size={48} className="text-white" />
-            </div>
-
-            <h1 className="text-3xl font-black text-white mb-3">Order Submitted!</h1>
-            <p className="text-white/60 text-lg mb-8">
-              Your order is being verified. You will receive your tickets via email within 24 hours.
-            </p>
-
-            {/* Order details card */}
-            <div className="bg-white/5 rounded-2xl p-6 mb-8 text-left">
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-white/50 text-sm">Order Reference</span>
-                  <span className="text-white font-black text-lg tracking-wider">{orderResult.order_ref}</span>
-                </div>
-                <div className="w-full h-px bg-white/10" />
-                <div className="flex justify-between">
-                  <span className="text-white/50 text-sm">Event</span>
-                  <span className="text-white font-medium">{event.name}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-white/50 text-sm">Ticket Type</span>
-                  <span className="text-white font-medium">{orderResult.ticket_type}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-white/50 text-sm">Quantity</span>
-                  <span className="text-white font-medium">{orderResult.quantity}</span>
-                </div>
-                <div className="w-full h-px bg-white/10" />
-                <div className="flex justify-between">
-                  <span className="text-white/50 text-sm">Total</span>
-                  <span className="text-white font-black text-xl">{orderResult.payment?.amount}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-white/50 text-sm">Payment Method</span>
-                  <span className="text-white font-medium capitalize">{orderResult.payment?.method}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Payment reminder */}
-            <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4 mb-8">
-              <div className="flex items-start gap-3">
-                <AlertCircle size={20} className="text-yellow-400 shrink-0 mt-0.5" />
-                <div className="text-left">
-                  <p className="text-yellow-300 font-bold text-sm mb-1">Payment Reminder</p>
-                  <p className="text-white/60 text-sm">
-                    Send <span className="text-white font-bold">{orderResult.payment?.amount}</span> to{' '}
-                    <span className="text-white font-bold">{orderResult.payment?.handle}</span> via{' '}
-                    <span className="text-white font-bold capitalize">{orderResult.payment?.method}</span>.
-                    Include <span className="text-white font-bold">{orderResult.order_ref}</span> in the note.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap gap-4 justify-center">
-              <Link href="/tickets" className="btn-primary inline-flex items-center gap-2">
-                <Ticket size={16} />
-                View My Tickets
-              </Link>
-              <Link href="/events" className="btn-secondary inline-flex items-center gap-2">
-                <ChevronLeft size={16} />
-                Browse More Events
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   // Calculate stats
   const totalSold = (event.ticket_types || []).reduce((sum, tt) => sum + (tt.quantity_sold || 0), 0);
   const totalAvailable = (event.ticket_types || []).reduce((sum, tt) => sum + (tt.quantity_available || 0), 0);
@@ -477,12 +259,10 @@ export default function EventDetailPage() {
 
   return (
     <div className="min-h-screen relative">
-      {/* LOTL Recap Video Background — transparent, immersive */}
       <RecapVideoBackground slug={slug} />
 
       {/* Hero Section */}
       <section className="relative py-16 lg:py-24 overflow-hidden z-10">
-        {/* Background image or gradient */}
         {event.cover_image_url ? (
           <>
             <div className="absolute inset-0">
@@ -503,7 +283,6 @@ export default function EventDetailPage() {
         )}
 
         <div className="relative max-w-screen-xl mx-auto px-6">
-          {/* Breadcrumb */}
           <Link
             href="/events"
             className="inline-flex items-center gap-2 text-white/50 hover:text-white text-sm mb-8 transition"
@@ -512,7 +291,6 @@ export default function EventDetailPage() {
             All Events
           </Link>
 
-          {/* Organization badge */}
           {event.organization && (
             <div className="mb-4">
               <span className={`px-4 py-1.5 rounded-full text-xs font-bold ${
@@ -526,12 +304,10 @@ export default function EventDetailPage() {
             </div>
           )}
 
-          {/* Event name */}
           <h1 className="text-4xl lg:text-6xl font-black text-white mb-6 max-w-3xl leading-tight">
             {event.name}
           </h1>
 
-          {/* Date & Location */}
           <div className="flex flex-wrap items-center gap-6 text-white/70 mb-8">
             <div className="flex items-center gap-2">
               <Calendar size={20} className="text-blue-400" />
@@ -549,7 +325,6 @@ export default function EventDetailPage() {
             )}
           </div>
 
-          {/* Description */}
           {event.description && (
             <p className="text-white/60 text-lg max-w-2xl mb-8 leading-relaxed">
               {event.description}
@@ -589,56 +364,33 @@ export default function EventDetailPage() {
       <section className="py-12 lg:py-16 relative z-10">
         <div className="max-w-screen-xl mx-auto px-6">
           <div className="mb-10">
-            <h2 className="text-2xl lg:text-3xl font-black text-white mb-2">Select Your Tickets</h2>
-            <p className="text-white/50">Choose a tier and quantity to continue.</p>
+            <h2 className="text-2xl lg:text-3xl font-black text-white mb-2">Tickets</h2>
+            <p className="text-white/50">Secure checkout powered by Stripe on MyTicketsLive.com</p>
           </div>
 
           {event.ticket_types && event.ticket_types.length > 0 ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
               {event.ticket_types.filter(t => t.is_active !== false).map((tier) => {
-                const isSelected = selectedTier?.id === tier.id;
                 const soldOut = (tier.quantity_remaining || 0) <= 0;
-                // Price in dollars (not cents) — display as $XX.00
                 const priceDisplay = tier.price > 0
                   ? `$${Number(tier.price).toFixed(2)}`
                   : 'FREE';
 
                 return (
-                  <button
+                  <div
                     key={tier.id}
-                    onClick={() => {
-                      if (soldOut) return;
-                      setSelectedTier(tier);
-                      setQuantity(1);
-                      setPaymentMethod(null);
-                    }}
-                    disabled={soldOut}
-                    className={`text-left glass rounded-2xl p-6 transition-all duration-300 relative overflow-hidden ${
-                      isSelected
-                        ? 'border-blue-500 ring-2 ring-blue-500/30 shadow-xl shadow-blue-500/10'
-                        : soldOut
-                        ? 'opacity-50 cursor-not-allowed border-white/5'
-                        : 'hover:border-blue-500/30 hover:-translate-y-1 cursor-pointer'
+                    className={`glass rounded-2xl p-6 relative overflow-hidden ${
+                      soldOut ? 'opacity-50' : ''
                     }`}
                   >
-                    {/* Selected indicator */}
-                    {isSelected && (
-                      <div className="absolute top-4 right-4 w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                        <Check size={16} className="text-white" />
-                      </div>
-                    )}
-
-                    {/* Sold out overlay */}
                     {soldOut && (
                       <div className="absolute top-4 right-4 px-3 py-1 bg-red-500/80 rounded-full">
                         <span className="text-white text-xs font-bold">SOLD OUT</span>
                       </div>
                     )}
 
-                    {/* Tier name */}
                     <h3 className="text-xl font-bold text-white mb-2 pr-12">{tier.name}</h3>
 
-                    {/* Price */}
                     <div className="mb-4">
                       <span className="text-3xl font-black text-white">{priceDisplay}</span>
                       {tier.price > 0 && (
@@ -653,12 +405,10 @@ export default function EventDetailPage() {
                       )}
                     </div>
 
-                    {/* Description */}
                     {tier.description && (
                       <p className="text-white/50 text-sm mb-4">{tier.description}</p>
                     )}
 
-                    {/* Perks */}
                     {tier.perks && tier.perks.length > 0 && (
                       <ul className="space-y-2 mb-4">
                         {tier.perks.map((perk, i) => (
@@ -670,36 +420,42 @@ export default function EventDetailPage() {
                       </ul>
                     )}
 
-                    {/* Remaining count */}
                     <div className="mt-auto pt-4 border-t border-white/10">
-                      <div className="flex items-center justify-between">
-                        <span className="text-white/40 text-xs">
-                          {soldOut ? 'Sold out' : `${tier.quantity_remaining || 0} remaining`}
-                        </span>
-                        {!soldOut && (
-                          <span className={`text-xs font-bold ${
-                            isSelected ? 'text-blue-400' : 'text-white/30'
-                          }`}>
-                            {isSelected ? 'SELECTED' : 'TAP TO SELECT'}
-                          </span>
-                        )}
-                      </div>
+                      <span className="text-white/40 text-xs">
+                        {soldOut ? 'Sold out' : `${tier.quantity_remaining || 0} remaining`}
+                      </span>
                     </div>
-                  </button>
+                  </div>
                 );
               })}
             </div>
           ) : (
-            <div className="glass rounded-2xl p-12 text-center mb-12">
+            <div className="glass rounded-2xl p-12 text-center mb-8">
               <Ticket size={48} className="text-white/10 mx-auto mb-4" />
               <p className="text-white/40 text-lg">Tickets not yet available for this event.</p>
               <p className="text-white/30 text-sm mt-2">Check back soon.</p>
             </div>
           )}
 
+          {/* GET TICKETS — Stripe checkout on MyTicketsLive */}
+          <a
+            href={ticketCheckoutUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full flex items-center justify-center gap-3 py-5 rounded-2xl font-bold text-lg bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5 transition-all duration-300"
+          >
+            <Ticket size={22} />
+            Get Tickets on MyTicketsLive
+            <ExternalLink size={16} className="opacity-60" />
+          </a>
+          <p className="text-center text-white/30 text-xs mt-3 flex items-center justify-center gap-2">
+            <Shield size={12} />
+            Secure Stripe checkout. Instant ticket delivery via email.
+          </p>
+
           {/* VIP Early Registration CTA */}
           {event.slug === 'lotl-2026' && (
-            <div className="relative overflow-hidden rounded-2xl mb-8 p-[1px] bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500">
+            <div className="relative overflow-hidden rounded-2xl mt-8 p-[1px] bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500">
               <div className="bg-black/95 rounded-[15px] p-6 lg:p-8">
                 <div className="flex flex-col md:flex-row items-center gap-6">
                   <div className="flex-1 text-center md:text-left">
@@ -721,191 +477,8 @@ export default function EventDetailPage() {
             </div>
           )}
 
-          {/* Quantity Selector -- shown after tier selection */}
-          {selectedTier && (
-            <div className="glass rounded-2xl p-6 mb-8">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-white font-bold mb-1">Quantity</h3>
-                  <p className="text-white/40 text-sm">
-                    {selectedTier.name} -- ${selectedTier.price.toFixed(2)}
-                    {selectedTier.name === 'Buddy Pass' ? ' per 4-pack' :
-                     selectedTier.name === 'Squad Pack' ? ' per 6-pack' :
-                     selectedTier.name === 'Family Pack' ? ' per 8-pack' :
-                     selectedTier.name === 'VIP Tent' ? ' per tent (12 guests)' :
-                     selectedTier.name === 'Parking Pass' ? ' per spot' :
-                     ' each'}
-                  </p>
-                </div>
-                <div className="flex items-center gap-4">
-                  <button
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center text-white hover:bg-white/20 transition"
-                  >
-                    <Minus size={18} />
-                  </button>
-                  <span className="text-white font-black text-2xl min-w-[40px] text-center">{quantity}</span>
-                  <button
-                    onClick={() => setQuantity(Math.min(10, quantity + 1, selectedTier.quantity_remaining || 10))}
-                    className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center text-white hover:bg-white/20 transition"
-                  >
-                    <Plus size={18} />
-                  </button>
-                </div>
-              </div>
-              <div className="mt-4 pt-4 border-t border-white/10 flex items-center justify-between">
-                <span className="text-white/50">Total</span>
-                <span className="text-white font-black text-2xl">
-                  ${((selectedTier.price * quantity)).toFixed(2)}
-                </span>
-              </div>
-            </div>
-          )}
-
-          {/* Payment Section -- shown after tier + quantity selection */}
-          {selectedTier && (
-            <div ref={paymentSectionRef} className="glass rounded-2xl p-6 lg:p-8 mb-8">
-              <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-3">
-                <Shield size={20} className="text-blue-400" />
-                Complete Your Order
-              </h2>
-
-              <form onSubmit={handleSubmit} className="space-y-8">
-                {/* Payment Method */}
-                <div>
-                  <label className="text-white/60 text-sm font-medium mb-4 block">Payment Method</label>
-                  <PaymentMethodPicker
-                    selected={paymentMethod}
-                    onSelect={setPaymentMethod}
-                  />
-                </div>
-
-                {/* Payment Info Panel */}
-                {paymentMethod && (
-                  <div className={`rounded-xl p-5 border ${
-                    paymentMethod === 'cashapp' ? 'bg-green-500/10 border-green-500/20' :
-                    paymentMethod === 'zelle' ? 'bg-purple-500/10 border-purple-500/20' :
-                    'bg-white/5 border-white/10'
-                  }`}>
-                    <p className="text-white/50 text-sm mb-3">
-                      {paymentMethod === 'cashapp' && 'Send payment via CashApp to:'}
-                      {paymentMethod === 'zelle' && 'Send payment via Zelle to:'}
-                      {paymentMethod === 'applepay' && 'Send payment via Apple Pay to:'}
-                    </p>
-                    <div className="flex items-center justify-between bg-black/30 rounded-lg px-4 py-3 mb-3">
-                      <span className="text-white font-bold text-lg font-mono">
-                        {paymentMethod === 'cashapp' ? '$RIDE4PAGEMUSIC847' : 'mystationllc@gmail.com'}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => copy(paymentMethod === 'cashapp' ? '$RIDE4PAGEMUSIC847' : 'mystationllc@gmail.com')}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 rounded-lg text-white/60 hover:text-white hover:bg-white/20 transition text-sm"
-                      >
-                        {copied ? <Check size={14} className="text-green-400" /> : <Copy size={14} />}
-                        {copied ? 'Copied' : 'Copy'}
-                      </button>
-                    </div>
-                    <p className="text-white/40 text-xs">
-                      Amount: <span className="text-white font-bold">${((selectedTier.price * quantity)).toFixed(2)}</span>
-                      {' '} -- Include your email in the payment note for faster verification.
-                    </p>
-                  </div>
-                )}
-
-                {/* Contact Form */}
-                <div>
-                  <label className="text-white/60 text-sm font-medium mb-4 block">Your Information</label>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-white/40 text-xs mb-1.5 block">Full Name *</label>
-                      <input
-                        type="text"
-                        value={formName}
-                        onChange={(e) => setFormName(e.target.value)}
-                        placeholder="Your full name"
-                        required
-                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-blue-500 transition"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-white/40 text-xs mb-1.5 block">Email *</label>
-                      <input
-                        type="email"
-                        value={formEmail}
-                        onChange={(e) => setFormEmail(e.target.value)}
-                        placeholder="your@email.com"
-                        required
-                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-blue-500 transition"
-                      />
-                    </div>
-                    <div className="md:col-span-2">
-                      <label className="text-white/40 text-xs mb-1.5 block">Phone (optional)</label>
-                      <input
-                        type="tel"
-                        value={formPhone}
-                        onChange={(e) => setFormPhone(e.target.value)}
-                        placeholder="(555) 123-4567"
-                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-blue-500 transition"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Screenshot Upload */}
-                <div>
-                  <label className="text-white/60 text-sm font-medium mb-4 block">
-                    Upload Payment Screenshot
-                  </label>
-                  <ScreenshotUpload
-                    onFileChange={setScreenshot}
-                    file={screenshot}
-                  />
-                </div>
-
-                {/* Submit Error */}
-                {submitError && (
-                  <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex items-start gap-3">
-                    <AlertCircle size={20} className="text-red-400 shrink-0 mt-0.5" />
-                    <p className="text-red-300 text-sm">{submitError}</p>
-                  </div>
-                )}
-
-                {/* Submit Button */}
-                <button
-                  type="submit"
-                  disabled={!selectedTier || !paymentMethod || !formName || !formEmail || submitting}
-                  className={`w-full flex items-center justify-center gap-3 py-4 rounded-xl font-bold text-lg transition-all duration-300 ${
-                    submitting
-                      ? 'bg-blue-500/50 text-white/50 cursor-wait'
-                      : !selectedTier || !paymentMethod || !formName || !formEmail
-                      ? 'bg-white/10 text-white/30 cursor-not-allowed'
-                      : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5'
-                  }`}
-                >
-                  {submitting ? (
-                    <>
-                      <Loader2 size={20} className="animate-spin" />
-                      Processing...
-                    </>
-                  ) : (
-                    <>
-                      <Ticket size={20} />
-                      SUBMIT ORDER -- ${((selectedTier?.price || 0) * quantity).toFixed(2)}
-                    </>
-                  )}
-                </button>
-
-                <p className="text-center text-white/30 text-xs">
-                  Your tickets will be verified and emailed within 24 hours.
-                  Orders expire in 24 hours if payment is not received.
-                </p>
-              </form>
-            </div>
-          )}
-
           {/* Address + Share */}
           <div className="grid md:grid-cols-2 gap-6 mt-12">
-            {/* Venue Info */}
             {fullAddress && (
               <div className="glass rounded-2xl p-6">
                 <h3 className="text-white font-bold mb-4 flex items-center gap-2">
@@ -925,7 +498,6 @@ export default function EventDetailPage() {
               </div>
             )}
 
-            {/* Share */}
             <div className="glass rounded-2xl p-6">
               <h3 className="text-white font-bold mb-4 flex items-center gap-2">
                 <Share2 size={18} className="text-blue-400" />
@@ -954,10 +526,7 @@ export default function EventDetailPage() {
         </div>
       </section>
 
-      {/* Spacer for LOTL merch marquee + player bar overlap prevention */}
-      {slug?.includes('lotl') && <div className="h-28 md:h-32" />}
-
-      {/* LOTL Merch Marquee — sticky scrolling product ticker */}
+      {slug?.includes('lotl') && <div className="h-28 lg:h-32" />}
       <MerchMarquee slug={slug} />
     </div>
   );
