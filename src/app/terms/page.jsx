@@ -135,7 +135,7 @@ export default function TermsOfService() {
               </p>
               <p className="mt-3">
                 <strong className="text-white">Impossible Dreamz Music Group</strong><br />
-                Email: mystationllc@gmail.com<br />
+                Email: mystationlive@gmail.com<br />
                 Atlanta, GA
               </p>
             </section>

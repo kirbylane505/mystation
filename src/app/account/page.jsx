@@ -238,7 +238,7 @@ export default function AccountPage() {
         </div>
 
         <p className="text-center text-white/30 text-xs mt-8">
-          Questions? Contact us at <a href="mailto:mystationllc@gmail.com" className="text-blue-400 hover:text-blue-300">mystationllc@gmail.com</a>
+          Questions? Contact us at <a href="mailto:mystationlive@gmail.com" className="text-blue-400 hover:text-blue-300">mystationlive@gmail.com</a>
         </p>
       </div>
     </div>
