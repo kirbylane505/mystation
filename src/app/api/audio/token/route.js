@@ -1,7 +1,8 @@
 /**
  * MYSTATION - Audio Token API
- * Access hierarchy: sub > friend > vault > specific free tracks (500, 501) > blocked
- * Only "I Want This One" & "R.U.N or R U Out" are free. Everything else = subscribe.
+ * Access hierarchy: sub > friend > vault > grant token for all tracks
+ * 30-second preview enforcement happens CLIENT-SIDE in AudioPlayer.jsx
+ * (Apple App Store compliant: all users can preview any track for 30s)
  */
 
 import { NextResponse } from 'next/server';
@@ -95,16 +96,10 @@ export async function POST(request) {
       return grantToken(track);
     }
 
-    // 4. Specific free tracks — "I Want This One" & "R.U.N or R U Out" always free
-    if (FREE_TRACK_IDS.includes(track.id)) {
-      return grantToken(track);
-    }
-
-    // 5. Everything else = subscribe required
-    return NextResponse.json(
-      { error: 'free_limit', message: 'Subscribe to unlock 100+ songs from IDMG' },
-      { status: 403 }
-    );
+    // 4. All other tracks — grant token for 30-second preview
+    // AudioPlayer.jsx enforces the 30s cutoff + fade for non-subscribers
+    // FREE_TRACK_IDS (500, 501) get full playback (handled client-side in isPreviewOnly)
+    return grantToken(track);
   } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
