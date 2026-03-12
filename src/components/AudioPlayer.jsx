@@ -314,10 +314,10 @@ export default function AudioPlayer() {
     const onStalled = () => {
       if (usePlayerStore.getState().isPlaying && audio.paused) {
         setTimeout(() => {
-          if (usePlayerStore.getState().isPlaying && audio.paused && audio.readyState >= 3) {
+          if (usePlayerStore.getState().isPlaying && audio.paused && audio.readyState >= 2) {
             safePlay(audio);
           }
-        }, 1500);
+        }, 500);
       }
     };
 
@@ -336,15 +336,12 @@ export default function AudioPlayer() {
         const state = usePlayerStore.getState();
         if (state.isPlaying && audio.paused && audio.readyState >= 2 && !isLoadingRef.current) {
           safePlay(audio).then(played => {
-            // If resume failed and user isn't looking at the page, don't force pause yet —
-            // onVisibilityChange will try again when they return.
-            // If they ARE looking, sync the store so UI shows paused.
             if (!played && document.visibilityState === 'visible') {
               storeActionsRef.current.pause();
             }
           });
         }
-      }, 300);
+      }, 150);
     };
     audio.addEventListener('pause', onAudioPause);
 
@@ -531,6 +528,8 @@ export default function AudioPlayer() {
         audio.addEventListener('canplay', onReady);
         audio.addEventListener('canplaythrough', onReady);
 
+        // Aggressive fallback — 2s is plenty for R2 CDN audio to buffer enough to start
+        // readyState 2 = HAVE_CURRENT_DATA, 3 = HAVE_FUTURE_DATA — both playable
         loadTimeoutRef.current = setTimeout(async () => {
           loadTimeoutRef.current = null;
           if (isLoadingRef.current && audio.readyState >= 2) {
@@ -540,7 +539,7 @@ export default function AudioPlayer() {
               if (!played) storeActionsRef.current.pause();
             }
           }
-        }, 5000);
+        }, 2000);
       } else {
         // Track already loaded — clear loading flag and play
         isLoadingRef.current = false;

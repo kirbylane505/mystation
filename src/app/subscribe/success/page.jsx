@@ -76,34 +76,70 @@ export default function SubscribeSuccessPage() {
   const { subscribe } = useUserStore();
 
   useEffect(() => {
+    let cancelled = false;
+
     const params = new URLSearchParams(window.location.search);
     const tierFromUrl = params.get('tier');
     const selectedTier = tierFromUrl || localStorage.getItem('mystation-selected-tier') || 'supporter';
     setTier(selectedTier);
 
-    // Set server-side subscription session cookie (pass Stripe session_id for verification)
-    const sessionId = params.get('session_id');
-    fetch('/api/subscription/session', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'activate', tier: selectedTier, sessionId }),
-    }).catch((err) => console.error('Session cookie failed:', err));
-
     // Get email from localStorage
     const storedEmail = localStorage.getItem('mystation-email') || '';
 
-    // Register subscriber with backend (tier-aware)
-    if (storedEmail) {
-      fetch('/api/subscription/subscribe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: storedEmail, tier: selectedTier }),
-      }).catch(() => {});
-    }
-
-    // Mark user as subscribed in client store
+    // Mark user as subscribed in client store IMMEDIATELY (Zustand persists to localStorage)
     subscribe(storedEmail || 'subscriber@mystation.com', selectedTier);
     localStorage.removeItem('mystation-selected-tier');
+
+    // Set server-side subscription cookie — AWAIT it, retry once on failure
+    const sessionId = params.get('session_id');
+    const activateSession = async () => {
+      for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+          const res = await fetch('/api/subscription/session', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'activate', tier: selectedTier, sessionId }),
+          });
+          if (res.ok) return true;
+        } catch {}
+        // Brief pause before retry
+        if (attempt === 0) await new Promise(r => setTimeout(r, 1000));
+      }
+      return false;
+    };
+
+    // Register subscriber with backend (tier-aware)
+    const registerSubscriber = async () => {
+      if (!storedEmail) return;
+      try {
+        await fetch('/api/subscription/subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: storedEmail, tier: selectedTier }),
+        });
+      } catch {}
+    };
+
+    // Run cookie activation + subscriber registration in parallel
+    const setup = async () => {
+      await Promise.all([activateSession(), registerSubscriber()]);
+
+      // Preload pending track audio token so playback is instant on redirect
+      const savedPendingTrack = localStorage.getItem('mystation-pending-track');
+      if (savedPendingTrack) {
+        try {
+          const track = JSON.parse(savedPendingTrack);
+          // Warm the audio token cache — fetching now means instant playback later
+          await fetch('/api/audio/token', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ trackId: track.id }),
+          }).catch(() => {});
+        } catch {}
+      }
+    };
+
+    setup();
 
     // Animate in after brief pause
     setTimeout(() => setShowContent(true), 300);
@@ -111,6 +147,7 @@ export default function SubscribeSuccessPage() {
     // Auto-redirect for Supporter/Premium (not Diamond — they choose)
     if (selectedTier !== 'diamond') {
       const timer = setTimeout(() => {
+        if (cancelled) return;
         const savedPendingTrack = localStorage.getItem('mystation-pending-track');
         if (savedPendingTrack) {
           try {
@@ -122,7 +159,7 @@ export default function SubscribeSuccessPage() {
         }
         router.push('/');
       }, 10000);
-      return () => clearTimeout(timer);
+      return () => { cancelled = true; clearTimeout(timer); };
     }
   }, []);
 
