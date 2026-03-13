@@ -133,6 +133,12 @@ async function handleCheckoutCompleted(session, stripe) {
     return;
   }
 
+  // --- CREATOR SIGNUP CHECKOUT ---
+  if (meta.source === 'creator-signup') {
+    await handleCreatorCheckout(session, stripe);
+    return;
+  }
+
   // --- SUBSCRIPTION CHECKOUT ---
   // If mode is 'subscription', handle subscriber registration (NOT merch)
   if (session.mode === 'subscription') {
@@ -576,6 +582,52 @@ async function handleCheckoutCompleted(session, stripe) {
 }
 
 /**
+ * Handle creator signup checkout — activate creator subscription
+ * Called when session.metadata.source === 'creator-signup'
+ */
+async function handleCreatorCheckout(session, stripe) {
+  const { getSupabaseAdmin } = await import('@/lib/supabaseAdmin');
+  const supabase = getSupabaseAdmin();
+  const userId = session.metadata?.creator_user_id;
+  const slug = session.metadata?.creator_slug;
+  const email = session.customer_email || session.customer_details?.email;
+
+  if (!userId) {
+    console.error('[webhook] Creator checkout missing user_id');
+    return;
+  }
+
+  const { error } = await supabase
+    .from('creators')
+    .update({
+      subscription_status: 'active',
+      subscription_id: session.subscription,
+      stripe_customer_id: session.customer,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('user_id', userId);
+
+  if (error) {
+    console.error('[webhook] Failed to activate creator:', error);
+    return;
+  }
+
+  console.log(`[webhook] Creator activated: ${slug} (${email})`);
+
+  try {
+    sendNewSignupAlert({
+      customerName: slug || 'New Creator',
+      customerEmail: email,
+      subscriberNumber: 0,
+      isFreeSlot: false,
+      tier: 'creator',
+    }).catch(() => {});
+  } catch (e) {
+    console.error('[webhook] Creator admin alert failed:', e);
+  }
+}
+
+/**
  * Handle subscription checkout — store Stripe IDs, register subscriber
  * Called when session.mode === 'subscription' (NOT merch orders)
  */
@@ -809,6 +861,21 @@ async function handleSubscriptionCanceled(subscription) {
       .eq('email', email);
 
     sendCancelAlert({ customerEmail: email, reason: 'Subscription canceled' }).catch(() => {});
+
+    // Check if this is a creator subscription
+    const { data: creatorSub } = await supabase
+      .from('creators')
+      .select('id, slug')
+      .eq('subscription_id', subscription.id)
+      .maybeSingle();
+
+    if (creatorSub) {
+      await supabase
+        .from('creators')
+        .update({ subscription_status: 'canceled', updated_at: new Date().toISOString() })
+        .eq('id', creatorSub.id);
+      console.log(`[webhook] Creator subscription canceled: ${creatorSub.slug}`);
+    }
 
   } catch (err) {
     console.error('subscription.deleted handler error:', err);
