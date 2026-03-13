@@ -251,7 +251,7 @@ export default function SubscribeSuccessPage() {
 
         {/* Foundation note */}
         <p className="text-white/30 text-xs">
-          Every subscription supports the Mike Page Foundation 501(c)(3)
+          Every subscription supports the Mike Page Foundation 501(c)(3) | EIN: 41-3820708
         </p>
       </div>
     </div>

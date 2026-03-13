@@ -224,7 +224,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signup' }) {
         <div className="px-8 py-4 bg-blue-500/5 border-t border-white/5 text-center">
           <p className="text-white/40 text-xs">
             <Heart size={12} className="inline mr-1" />
-            MyStation supports the Mike Page Foundation 501(c)(3)
+            MyStation supports the Mike Page Foundation 501(c)(3) | EIN: 41-3820708
           </p>
         </div>
       </div>

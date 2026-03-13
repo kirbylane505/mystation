@@ -123,7 +123,7 @@ export async function sendOrderConfirmation({ customerName, customerEmail, items
 
           <div style="text-align: center; margin-top: 24px; padding-top: 16px; border-top: 1px solid #2a2f46;">
             <p style="color: #64748b; font-size: 12px;">Order Ref: ${sessionId?.slice(-8) || 'N/A'}</p>
-            <p style="color: #64748b; font-size: 12px;">Every purchase supports the Mike Page Foundation</p>
+            <p style="color: #64748b; font-size: 12px;">Every purchase supports the Mike Page Foundation (EIN: 41-3820708)</p>
           </div>
         </div>
       `,
@@ -650,7 +650,7 @@ export async function sendWelcomeEmail({ customerName, customerEmail, password }
           </div>
 
           <div style="text-align: center; margin-top: 24px; padding-top: 16px; border-top: 1px solid #2a2f46;">
-            <p style="color: #64748b; font-size: 12px;">Every listen supports the Mike Page Foundation 501(c)(3)</p>
+            <p style="color: #64748b; font-size: 12px;">Every listen supports the Mike Page Foundation 501(c)(3) | EIN: 41-3820708</p>
             <p style="color: #64748b; font-size: 12px;">MyStation — by IDMG</p>
           </div>
         </div>
@@ -693,7 +693,7 @@ export async function sendDeliveryConfirmation({ customerName, customerEmail, or
           </div>
           <div style="text-align: center; margin-top: 20px; padding-top: 16px; border-top: 1px solid #2a2f46;">
             <p style="color: #64748b; font-size: 12px;">Order #${orderId || 'N/A'}</p>
-            <p style="color: #64748b; font-size: 12px;">Every purchase supports the Mike Page Foundation</p>
+            <p style="color: #64748b; font-size: 12px;">Every purchase supports the Mike Page Foundation (EIN: 41-3820708)</p>
           </div>
         </div>
       `,
@@ -854,7 +854,7 @@ export async function sendBigSpenderThankYou({ customerName, customerEmail, tota
           </div>
 
           <div style="text-align: center; padding: 16px 32px 24px; border-top: 1px solid #2a2f46;">
-            <p style="color: #64748b; font-size: 12px; margin: 0;">Every purchase supports the Mike Page Foundation 501(c)(3)</p>
+            <p style="color: #64748b; font-size: 12px; margin: 0;">Every purchase supports the Mike Page Foundation 501(c)(3) | EIN: 41-3820708</p>
             <p style="color: #64748b; font-size: 12px; margin: 4px 0;">MyStation — by IDMG</p>
           </div>
         </div>

@@ -11,11 +11,11 @@ import { Heart, Music, Award, Users, MapPin, Calendar, ExternalLink, Check, Hear
 
 export const metadata = {
   title: 'About — Mike Page Foundation',
-  description: 'Mike Page Foundation — 501(c)(3) nonprofit. Youth music programs, scholarships, community meals, and Love on the Lawn Festival. Building community through music.',
+  description: 'Mike Page Foundation, a 501(c)(3) nonprofit (EIN: 41-3820708). Youth music programs, scholarships, community meals, and Love on the Lawn Festival. Building community through music.',
   alternates: { canonical: 'https://mystationlive.com/about' },
   openGraph: {
     title: 'About — Mike Page Foundation | 501(c)(3) Nonprofit',
-    description: 'Mike Page Foundation — 501(c)(3) nonprofit. Youth music programs, scholarships, community meals, and the Love on the Lawn Festival.',
+    description: 'Mike Page Foundation, a 501(c)(3) nonprofit (EIN: 41-3820708). Youth music programs, scholarships, community meals, and the Love on the Lawn Festival.',
     url: 'https://mystationlive.com/about',
     siteName: 'MyStation',
     images: [{ url: '/images/og-image.png', width: 1200, height: 630, alt: 'Mike Page Foundation' }],
@@ -24,7 +24,7 @@ export const metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'About — Mike Page Foundation',
-    description: '501(c)(3) nonprofit. Youth music programs, scholarships, community meals, and the Love on the Lawn Festival.',
+    description: '501(c)(3) nonprofit (EIN: 41-3820708). Youth music programs, scholarships, community meals, and the Love on the Lawn Festival.',
     images: ['/images/og-image.png'],
   },
 };
@@ -40,7 +40,7 @@ export default function AboutPage() {
         <div className="relative max-w-screen-xl mx-auto px-6 text-center">
           <div className="foundation-badge mb-6 inline-flex items-center gap-2">
             <Heart size={14} className="text-mystation-gold" />
-            501(c)(3) Nonprofit Organization
+            501(c)(3) Nonprofit Organization | EIN: 41-3820708
           </div>
 
           <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
@@ -65,12 +65,12 @@ export default function AboutPage() {
           <div>
             <h2 className="text-3xl font-bold text-white mb-6">Our Mission</h2>
             <p className="text-white/70 text-lg mb-6">
-              The Mike Page Foundation was created to give back to the community that shaped us.
+              The Mike Page Foundation, a 501(c)(3) nonprofit (EIN: 41-3820708), was created to give back to the community that shaped us.
               Based in Elgin, Illinois, we believe every young person deserves access to music,
               education, and opportunity.
             </p>
             <p className="text-white/70 text-lg">
-              When you support MyStation, you help the Mike Page Foundation fund youth music programs,
+              When you support MyStation, you help the Mike Page Foundation (EIN: 41-3820708) fund youth music programs,
               provide scholarships, and host community events that bring people together.
               We're not just making music—we're building a movement.
             </p>

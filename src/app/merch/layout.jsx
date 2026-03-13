@@ -1,6 +1,6 @@
 export const metadata = {
   title: 'Official Merch — IDMG x Mike Page Foundation',
-  description: 'Shop official IDMG & Mike Page merch. Hoodies, tees, snapbacks, joggers & more. Every purchase supports youth music programs through the Mike Page Foundation.',
+  description: 'Shop official IDMG & Mike Page merch. Hoodies, tees, snapbacks, joggers & more. Every purchase supports youth music programs through the Mike Page Foundation (EIN: 41-3820708).',
   openGraph: {
     title: 'IDMG Official Merch — Hoodies, Tees, Snapbacks & More',
     description: 'Rep the movement. Official IDMG & Mike Page merch — hoodies, tees, snapbacks, joggers. Every purchase supports youth music programs.',

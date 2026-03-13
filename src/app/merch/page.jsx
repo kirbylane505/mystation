@@ -1274,7 +1274,7 @@ export default function MerchPage() {
               <Image src="/images/mpf-logo.png" alt="Mike Page Foundation" width={80} height={80} className={`mx-auto mb-6 transition-all duration-700 delay-300 ${ctaVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}`} />
               <h2 className={`text-3xl lg:text-4xl font-black text-white mb-4 transition-all duration-700 delay-500 ${ctaVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>Every Purchase Supports the Mission</h2>
               <p className={`text-white/50 text-lg mb-8 max-w-2xl mx-auto transition-all duration-700 delay-700 ${ctaVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
-                The Mike Page Foundation is a 501(c)(3) nonprofit dedicated to youth music education,
+                The Mike Page Foundation is a 501(c)(3) nonprofit (EIN: 41-3820708) dedicated to youth music education,
                 scholarships, and community programs like Love on the Lawn.
               </p>
               <div className={`flex flex-wrap gap-4 justify-center transition-all duration-700 delay-900 ${ctaVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>

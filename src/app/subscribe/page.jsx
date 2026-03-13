@@ -393,7 +393,7 @@ export default function SubscribePage() {
         <div className="text-center">
           <div className="inline-flex items-center gap-2 px-6 py-3 bg-white/5 rounded-full border border-white/10">
             <Shield size={16} className="text-green-400" />
-            <span className="text-white/60 text-sm">All proceeds support the <strong className="text-white">Mike Page Foundation</strong></span>
+            <span className="text-white/60 text-sm">All proceeds support the <strong className="text-white">Mike Page Foundation</strong> 501(c)(3) | EIN: 41-3820708</span>
           </div>
         </div>
 

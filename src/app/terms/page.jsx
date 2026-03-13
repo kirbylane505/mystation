@@ -76,7 +76,7 @@ export default function TermsOfService() {
                 <li>Subject to CashApp's terms of service</li>
               </ul>
               <p className="mt-3">
-                Donations to the Mike Page Foundation (501(c)(3)) may be tax-deductible.
+                Donations to the Mike Page Foundation, a 501(c)(3) nonprofit (EIN: 41-3820708), may be tax-deductible.
                 Consult a tax professional for advice.
               </p>
             </section>

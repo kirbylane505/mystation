@@ -401,7 +401,7 @@ export default function HomePage() {
                 Music That Gives Back
               </h2>
               <p className="text-white/60 text-lg leading-relaxed mb-4">
-                Mike Page built MyStation on a simple idea: every play should matter. As founder of the Mike Page Foundation, a 501(c)(3) nonprofit, he channels music into real impact — funding youth programs, community events, and the annual Love on the Lawn Festival.
+                Mike Page built MyStation on a simple idea: every play should matter. As founder of the Mike Page Foundation, a 501(c)(3) nonprofit (EIN: 41-3820708), he channels music into real impact — funding youth programs, community events, and the annual Love on the Lawn Festival.
               </p>
               <p className="text-white/60 text-lg leading-relaxed mb-6">
                 From Atlanta to the world, IDMG (Impossible Dreamz Music Group) represents independent artists who refuse to wait for permission. Stream the catalog. Wear the merch. Join the movement.
@@ -574,7 +574,7 @@ export default function HomePage() {
               </Link>
               <p className="text-white/40 text-sm leading-relaxed">
                 Independent music platform by IDMG.
-                Every stream supports youth programs, community events, and the Love on the Lawn Festival through the Mike Page Foundation.
+                Every stream supports youth programs, community events, and the Love on the Lawn Festival through the Mike Page Foundation (EIN: 41-3820708).
               </p>
             </div>
             <div>

@@ -270,7 +270,7 @@ export default function MusicPageClient({ initialTrackId, initialAlbumId, autopl
                 {musicTracks.length} Tracks.<br className="hidden md:block" /> Subscribe & Stream.
               </h1>
               <p className="text-white/50 text-sm md:text-base mb-6 max-w-md">
-                Preview 2 tracks free — subscribe to unlock the full catalog. Every stream supports youth music programs through the Mike Page Foundation.
+                Preview 2 tracks free — subscribe to unlock the full catalog. Every stream supports youth music programs through the Mike Page Foundation (EIN: 41-3820708).
               </p>
               <div className="flex flex-wrap gap-3 justify-center md:justify-start">
                 <button
