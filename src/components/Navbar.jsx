@@ -14,7 +14,7 @@ import { useCartStore } from '@/store/cartStore';
 import { useUserStore, usePlayerStore } from '@/store/playerStore';
 import {
   Home, Music, Heart, Users, ShoppingBag,
-  Search, User, LogOut, X, Play, Menu, Mail, Crown, Newspaper, Gamepad2, Ticket, Film, MoreHorizontal, HelpCircle, MessageCircle, Download
+  Search, User, LogOut, X, Play, Menu, Mail, Crown, Newspaper, Gamepad2, Ticket, Film, MoreHorizontal, HelpCircle, MessageCircle, Download, Mic2
 } from 'lucide-react';
 import { useEngagementStore } from '@/store/engagementStore';
 import { useStationStore } from '@/store/stationStore';
@@ -54,6 +54,7 @@ export default function Navbar() {
     { href: '/about', icon: Heart, label: 'Foundation' },
     { href: '/contact', icon: Mail, label: 'Contact' },
     { href: '/news', icon: Newspaper, label: 'News' },
+    { href: '/creators', icon: Mic2, label: 'Creators' },
     { href: '/street-team', icon: Users, label: 'Street Team' },
     { href: '/faq', icon: HelpCircle, label: 'Help' },
   ];
