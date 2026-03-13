@@ -62,7 +62,7 @@ export default function PWAInstallBanner() {
     return (
       <div className="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-sm flex items-end justify-center p-4 pb-8">
         <div className="bg-[#0f1729] border border-white/10 rounded-3xl max-w-sm w-full p-6 relative">
-          <button onClick={handleDismiss} className="absolute top-4 right-4 text-white/40 hover:text-white">
+          <button onClick={handleDismiss} aria-label="Close install guide" className="absolute top-4 right-4 text-white/40 hover:text-white">
             <X size={20} />
           </button>
 
@@ -153,7 +153,7 @@ export default function PWAInstallBanner() {
             Install
           </button>
         )}
-        <button onClick={(e) => { e.stopPropagation(); handleDismiss(); }} className="text-white/30 hover:text-white/60 flex-shrink-0">
+        <button onClick={(e) => { e.stopPropagation(); handleDismiss(); }} aria-label="Dismiss install banner" className="text-white/30 hover:text-white/60 flex-shrink-0">
           <X size={16} />
         </button>
       </div>

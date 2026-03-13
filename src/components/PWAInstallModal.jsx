@@ -54,7 +54,7 @@ export default function PWAInstallModal() {
   return (
     <div className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
       <div className="bg-gradient-to-b from-[#0f1729] to-[#0a0a1a] border border-white/10 rounded-3xl max-w-sm w-full p-6 relative">
-        <button onClick={handleDismiss} className="absolute top-4 right-4 text-white/40 hover:text-white">
+        <button onClick={handleDismiss} aria-label="Close install modal" className="absolute top-4 right-4 text-white/40 hover:text-white">
           <X size={20} />
         </button>
 
