@@ -11,6 +11,26 @@ export default function SecurityShield() {
   useEffect(() => {
     if (process.env.NODE_ENV !== 'production') return;
 
+    // Admin bypass — type "idmg" anywhere to disable shield for this session
+    let adminBuffer = '';
+    const adminListener = (e) => {
+      adminBuffer += e.key.toLowerCase();
+      if (adminBuffer.length > 10) adminBuffer = adminBuffer.slice(-10);
+      if (adminBuffer.includes('idmg')) {
+        sessionStorage.setItem('mystation-admin-shield', 'off');
+        document.removeEventListener('contextmenu', blockContext);
+        document.removeEventListener('keydown', blockKeys);
+        document.removeEventListener('dragstart', blockDrag);
+        clearInterval(devtoolsInterval);
+        window.location.reload();
+      }
+    };
+    if (sessionStorage.getItem('mystation-admin-shield') === 'off') {
+      document.addEventListener('keydown', adminListener);
+      return () => document.removeEventListener('keydown', adminListener);
+    }
+    document.addEventListener('keydown', adminListener);
+
     // 1. Block right-click context menu
     const blockContext = (e) => {
       e.preventDefault();

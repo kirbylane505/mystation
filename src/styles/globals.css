@@ -1020,8 +1020,10 @@ img {
    Phase 1 — Mobile-First Fixes
    ========================================== */
 
-/* Prevent horizontal overflow */
-html, body {
+/* Prevent horizontal overflow — ONLY on body, NOT html.
+   iOS standalone (PWA) uses html as the scroll container.
+   Setting overflow on html kills ALL scrolling in the PWA. (ERR-0059) */
+body {
   overflow-x: hidden;
 }
 

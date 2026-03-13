@@ -6,6 +6,12 @@
 
 export const isNative = typeof window !== 'undefined' && window.Capacitor?.isNativePlatform();
 
+/** Detect if running as installed PWA (standalone mode) */
+export const isPWA = typeof window !== 'undefined' && (
+  window.matchMedia('(display-mode: standalone)').matches ||
+  window.navigator.standalone === true
+);
+
 /** Initialize status bar theming */
 export async function initStatusBar() {
   if (!isNative) return;

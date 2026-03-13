@@ -1,8 +1,7 @@
 /**
- * MYSTATION - LOTL Promo Marquee Banner
- * First 250 subscribers who stay until Aug 1 get FREE LOTL 2026 ticket.
- * Glossy scrolling marquee with live count.
- * Shows for EVERYONE. Dismissible per session — returns on next visit.
+ * MYSTATION - Member Banner + LOTL Promo Marquee
+ * Shows member count ("34 Real Ones") + LOTL ticket promo
+ * Dismissible — returns after 24 hours, not permanently hidden.
  */
 
 'use client';
@@ -11,35 +10,44 @@ import { useState, useEffect } from 'react';
 import { usePlayerStore } from '@/store/playerStore';
 import { X } from 'lucide-react';
 
-// Urgency countdown — spots decrease by 10/day from this baseline
 const URGENCY_START = new Date('2026-02-25T00:00:00');
 const DAILY_DECREASE = 4;
-const FLOOR = 3; // Never show 0 — always "almost gone"
+const FLOOR = 3;
+const DISMISS_HOURS = 24;
 
 export default function FoundingMemberBanner() {
   const [remaining, setRemaining] = useState(null);
   const [realRemaining, setRealRemaining] = useState(null);
+  const [memberCount, setMemberCount] = useState(0);
   const [ready, setReady] = useState(false);
   const [dismissed, setDismissed] = useState(false);
 
-  // Admin check for real count badge
   const isAdmin = typeof window !== 'undefined' && (() => {
     try { return sessionStorage.getItem('ADMIN_KEY') === 'mpf2026'; } catch { return false; }
   })();
 
   useEffect(() => {
-    // Check if dismissed this session
-    const d = sessionStorage.getItem('founding-banner-dismissed');
-    if (d) { setDismissed(true); return; }
+    // Check if dismissed recently (24 hours, not permanent)
+    try {
+      const d = localStorage.getItem('founding-banner-dismissed');
+      if (d) {
+        const elapsed = Date.now() - parseInt(d, 10);
+        if (elapsed < DISMISS_HOURS * 60 * 60 * 1000) {
+          setDismissed(true);
+          return;
+        }
+        // Expired — remove and show again
+        localStorage.removeItem('founding-banner-dismissed');
+      }
+    } catch {}
 
-    // Fetch remaining founding member slots
     fetch('/api/subscription/subscribe')
       .then(r => r.json())
       .then(data => {
         if (data.remaining > 0) {
           setRealRemaining(data.remaining);
+          setMemberCount(data.taken || (250 - data.remaining));
 
-          // Urgency math — decrease by 10/day from baseline
           const daysPassed = Math.max(0, Math.floor((Date.now() - URGENCY_START.getTime()) / 86400000));
           const urgencyCount = Math.max(FLOOR, data.remaining - (daysPassed * DAILY_DECREASE));
           setRemaining(urgencyCount);
@@ -49,7 +57,6 @@ export default function FoundingMemberBanner() {
       .catch(() => {});
   }, []);
 
-  // Only hide if dismissed or data not loaded yet
   if (dismissed || remaining === null || !ready) return null;
 
   const handleClick = () => {
@@ -58,15 +65,14 @@ export default function FoundingMemberBanner() {
 
   const handleDismiss = (e) => {
     e.stopPropagation();
-    sessionStorage.setItem('founding-banner-dismissed', Date.now().toString());
+    localStorage.setItem('founding-banner-dismissed', Date.now().toString());
     setDismissed(true);
   };
 
-  // Build marquee text
   const spotText = remaining === 1 ? '1 Spot Left' : `${remaining} Spots Left`;
-  const segment = `\u00A0\u00A0\u00A0\u2727 FREE LOTL TICKET — Subscribe & Stay Until Aug 1st \u2727\u00A0\u00A0\u00A0\u2022\u00A0\u00A0\u00A0${spotText} of 250 \u2022\u00A0\u00A0\u00A0Love on the Lawn 2026 \u2022\u00A0\u00A0\u00A0Year 5 \u2022`;
+  const memberText = `${memberCount} Real Ones & Growing`;
+  const segment = `\u00A0\u00A0\u00A0\u2727 ${memberText} \u2727\u00A0\u00A0\u00A0\u2022\u00A0\u00A0\u00A0FREE LOTL TICKET \u2014 Subscribe & Stay Until Aug 1st \u2022\u00A0\u00A0\u00A0${spotText} of 250 \u2022\u00A0\u00A0\u00A0Love on the Lawn 2026 \u2022\u00A0\u00A0\u00A0Year 5 \u2022`;
 
-  // Repeat enough times for seamless scroll
   const repeated = Array(8).fill(segment).join('');
 
   return (
@@ -75,10 +81,8 @@ export default function FoundingMemberBanner() {
       className="relative cursor-pointer overflow-hidden rounded-none group"
       style={{ animation: 'bannerFadeIn 0.4s ease-out' }}
     >
-      {/* Glossy glass background */}
       <div className="absolute inset-0 bg-gradient-to-r from-indigo-600/90 via-blue-500/90 to-purple-600/90 backdrop-blur-md" />
 
-      {/* Top glossy shine */}
       <div
         className="absolute inset-x-0 top-0 h-1/2 pointer-events-none"
         style={{
@@ -86,7 +90,6 @@ export default function FoundingMemberBanner() {
         }}
       />
 
-      {/* Subtle moving shine on hover */}
       <div
         className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
         style={{
@@ -96,12 +99,9 @@ export default function FoundingMemberBanner() {
         }}
       />
 
-      {/* Bottom edge highlight */}
       <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
 
-      {/* Content wrapper */}
       <div className="relative flex items-center h-10 md:h-11">
-        {/* Scrolling marquee */}
         <div className="flex-1 overflow-hidden whitespace-nowrap">
           <div
             className="inline-block"
@@ -113,14 +113,12 @@ export default function FoundingMemberBanner() {
           </div>
         </div>
 
-        {/* Admin real count — only Mike sees this */}
         {isAdmin && realRemaining !== null && (
           <div className="shrink-0 px-2 py-0.5 bg-black/40 rounded text-[9px] text-green-400 font-mono mr-1" title="Real subscriber count">
-            Real: {realRemaining}
+            Real: {realRemaining} | Members: {memberCount}
           </div>
         )}
 
-        {/* CTA pill — right side */}
         <div className="shrink-0 flex items-center gap-1.5 mr-2">
           <button
             onClick={(e) => { e.stopPropagation(); handleClick(); }}
@@ -138,7 +136,6 @@ export default function FoundingMemberBanner() {
         </div>
       </div>
 
-      {/* Keyframes */}
       <style jsx>{`
         @keyframes marqueeScroll {
           0% { transform: translateX(0); }

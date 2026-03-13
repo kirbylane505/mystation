@@ -14,7 +14,7 @@ import { useCartStore } from '@/store/cartStore';
 import { useUserStore, usePlayerStore } from '@/store/playerStore';
 import {
   Home, Music, Heart, Users, ShoppingBag,
-  Search, User, LogOut, X, Play, Menu, Mail, Crown, Newspaper, Gamepad2, Ticket, Film, MoreHorizontal, HelpCircle, MessageCircle
+  Search, User, LogOut, X, Play, Menu, Mail, Crown, Newspaper, Gamepad2, Ticket, Film, MoreHorizontal, HelpCircle, MessageCircle, Download
 } from 'lucide-react';
 import { useEngagementStore } from '@/store/engagementStore';
 import { useStationStore } from '@/store/stationStore';
@@ -26,6 +26,7 @@ export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [installPrompt, setInstallPrompt] = useState(null);
+  const [isStandalone, setIsStandalone] = useState(false);
   const searchRef = useRef(null);
   const moreRef = useRef(null);
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
@@ -87,8 +88,9 @@ export default function Navbar() {
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
-  // Capture PWA install prompt
+  // Capture PWA install prompt + detect standalone
   useEffect(() => {
+    setIsStandalone(window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true);
     const handler = (e) => { e.preventDefault(); setInstallPrompt(e); };
     window.addEventListener('beforeinstallprompt', handler);
     return () => window.removeEventListener('beforeinstallprompt', handler);
@@ -240,6 +242,18 @@ export default function Navbar() {
                     </Link>
                   );
                 })}
+                {!isStandalone && (
+                  <>
+                    <div className="h-px bg-white/10 mx-3 my-1" />
+                    <button
+                      onClick={handleInstall}
+                      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-indigo-500/20 text-indigo-300 transition"
+                    >
+                      <Download size={18} className="text-indigo-400" />
+                      <span className="text-sm font-medium">Install App</span>
+                    </button>
+                  </>
+                )}
               </div>
             )}
           </div>
@@ -345,7 +359,7 @@ export default function Navbar() {
           <CartButton />
 
           {/* User */}
-          {isLoggedIn ? (
+          {(isLoggedIn || isSubscribed) ? (
             <div className="flex items-center gap-1">
               <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-full">
                 <div className="w-7 h-7 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
@@ -408,7 +422,7 @@ export default function Navbar() {
               )}
             </button>
             {/* Sign In / User Button — ALWAYS visible on mobile */}
-            {isLoggedIn ? (
+            {(isLoggedIn || isSubscribed) ? (
               <button
                 onClick={handleSignOut}
                 className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center"
@@ -483,6 +497,17 @@ export default function Navbar() {
             );
           })}
 
+          {/* Install App - Mobile (only when not already installed) */}
+          {!isStandalone && (
+            <button
+              onClick={() => { setMobileMenuOpen(false); handleInstall(); }}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-indigo-500/10 border border-indigo-500/20 hover:bg-indigo-500/20 transition mb-2"
+            >
+              <Download size={20} className="text-indigo-400" />
+              <span className="text-indigo-300 font-medium">Install MyStation App</span>
+            </button>
+          )}
+
           {/* My Cart - Mobile */}
           <button
             onClick={() => { setMobileMenuOpen(false); useCartStore.getState().openCart(); }}
@@ -530,7 +555,7 @@ export default function Navbar() {
           )}
 
           <div className="pt-4 border-t border-white/10">
-            {isLoggedIn ? (
+            {(isLoggedIn || isSubscribed) ? (
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">

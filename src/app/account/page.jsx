@@ -7,8 +7,9 @@
 
 import { useState } from 'react';
 import { useUserStore, usePlayerStore } from '@/store/playerStore';
-import { CreditCard, Crown, Music, ExternalLink, Loader2, Star, Gem, Headphones, ArrowUp, Zap } from 'lucide-react';
+import { CreditCard, Crown, Music, ExternalLink, Loader2, Star, Gem, Headphones, ArrowUp, Zap, Download } from 'lucide-react';
 import Link from 'next/link';
+import usePWA from '@/hooks/usePWA';
 
 const TIER_CONFIG = {
   diamond: { name: 'Diamond', price: '$14.99', icon: Gem, gradient: 'from-amber-500 to-yellow-500', textColor: 'text-amber-400', level: 3 },
@@ -23,6 +24,7 @@ export default function AccountPage() {
   const [loading, setLoading] = useState(false);
   const [upgrading, setUpgrading] = useState(null);
 
+  const { isStandalone, canInstall, installApp, isIOS } = usePWA();
   const currentTier = isSubscribed ? (supporterTier || 'supporter') : 'free';
   const config = TIER_CONFIG[currentTier] || TIER_CONFIG.free;
   const TierIcon = config.icon;
@@ -218,6 +220,25 @@ export default function AccountPage() {
         <div className="glass rounded-2xl p-6 border border-white/10">
           <h3 className="text-lg font-bold text-white mb-4">Quick Links</h3>
           <div className="space-y-3">
+            {!isStandalone && (
+              <button
+                onClick={() => {
+                  if (canInstall) {
+                    installApp();
+                  } else if (isIOS) {
+                    alert('Tap the Share button (box with arrow) at the bottom of Safari, then tap "Add to Home Screen"');
+                  } else {
+                    alert('Open this site in Chrome or Safari to install the app to your home screen');
+                  }
+                }}
+                className="w-full flex items-center justify-between py-3 px-4 rounded-xl bg-gradient-to-r from-indigo-500/20 to-purple-500/20 border border-indigo-500/30 hover:border-indigo-400/50 transition group"
+              >
+                <span className="text-indigo-300 group-hover:text-indigo-200 transition font-medium flex items-center gap-2">
+                  <Download size={16} /> Install MyStation App
+                </span>
+                <ExternalLink size={16} className="text-indigo-400/50" />
+              </button>
+            )}
             <Link href="/account/profile" className="flex items-center justify-between py-3 px-4 rounded-xl bg-white/5 hover:bg-white/10 transition group">
               <span className="text-white/70 group-hover:text-white transition">Edit Profile</span>
               <ExternalLink size={16} className="text-white/30" />

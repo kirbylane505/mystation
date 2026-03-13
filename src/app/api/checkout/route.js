@@ -137,28 +137,46 @@ export async function POST(request) {
       shipping_address_collection: {
         allowed_countries: ['US'],
       },
-      shipping_options: [
-        {
-          shipping_rate_data: {
-            type: 'fixed_amount',
-            fixed_amount: {
-              amount: 599,
-              currency: 'usd',
+      shipping_options: (() => {
+        // Calculate cart subtotal in cents for shipping logic
+        const subtotalCents = items.reduce((sum, item) => sum + Math.round(item.price * 100 * discountMultiplier) * item.quantity, 0);
+        if (subtotalCents >= 5000) {
+          // $50+ = free shipping + express option
+          return [
+            {
+              shipping_rate_data: {
+                type: 'fixed_amount',
+                fixed_amount: { amount: 0, currency: 'usd' },
+                display_name: 'FREE Shipping (5-10 days)',
+              },
             },
-            display_name: 'Standard Shipping (5-10 days)',
-          },
-        },
-        {
-          shipping_rate_data: {
-            type: 'fixed_amount',
-            fixed_amount: {
-              amount: 1299,
-              currency: 'usd',
+            {
+              shipping_rate_data: {
+                type: 'fixed_amount',
+                fixed_amount: { amount: 1299, currency: 'usd' },
+                display_name: 'Express Shipping (2-4 days)',
+              },
             },
-            display_name: 'Express Shipping (2-4 days)',
+          ];
+        }
+        // Under $50 = standard + express
+        return [
+          {
+            shipping_rate_data: {
+              type: 'fixed_amount',
+              fixed_amount: { amount: 599, currency: 'usd' },
+              display_name: 'Standard Shipping (5-10 days)',
+            },
           },
-        },
-      ],
+          {
+            shipping_rate_data: {
+              type: 'fixed_amount',
+              fixed_amount: { amount: 1299, currency: 'usd' },
+              display_name: 'Express Shipping (2-4 days)',
+            },
+          },
+        ];
+      })(),
       // Store item data for webhook to create orders with both providers
       metadata: {
         printful_items: JSON.stringify(printfulItems),

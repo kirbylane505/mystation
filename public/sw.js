@@ -1,20 +1,22 @@
 /**
- * MyStation Service Worker v5
- * Network-first for ALL requests — guarantees users always get the latest version.
- * Cache is ONLY used as offline fallback. Never serves stale content.
+ * MyStation Service Worker v6 — PWA Edition
+ * Network-first with audio caching for offline playback.
+ * Push notification support.
  */
 
-const CACHE_NAME = 'mystation-v8';
+const CACHE_NAME = 'mystation-v10';
+const AUDIO_CACHE = 'mystation-audio-v1';
 const OFFLINE_URL = '/offline.html';
+const MAX_AUDIO_CACHE_ITEMS = 10;
 
-// Assets to cache for offline fallback only
+// Assets to cache for offline fallback
 const PRECACHE_ASSETS = [
   '/offline.html',
   '/icons/icon-192x192.png',
   '/icons/icon-512x512.png',
 ];
 
-// Install — cache offline assets, skip waiting immediately
+// Install — cache offline assets, skip waiting
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_ASSETS))
@@ -22,13 +24,13 @@ self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
 
-// Activate — delete ALL old caches, claim clients immediately
+// Activate — delete old caches, claim clients
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) =>
       Promise.all(
         cacheNames
-          .filter((name) => name !== CACHE_NAME)
+          .filter((name) => name !== CACHE_NAME && name !== AUDIO_CACHE)
           .map((name) => caches.delete(name))
       )
     )
@@ -36,48 +38,138 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Fetch — NETWORK FIRST for everything. Cache is offline fallback only.
+// Fetch — network-first with audio caching
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
-  // Skip API calls and external requests entirely — let them go direct
-  if (event.request.url.includes('/api/') ||
-      !event.request.url.startsWith(self.location.origin)) {
+  var url = new URL(event.request.url);
+
+  // Skip API calls (except audio streaming)
+  if (url.pathname.startsWith('/api/') && !url.pathname.startsWith('/api/audio/stream')) {
     return;
   }
 
-  // Navigation requests (page loads) — network first, offline fallback
+  // External requests — pass through (MUST be before audio check so R2 CDN URLs aren't intercepted)
+  if (!url.href.startsWith(self.location.origin)) return;
+
+  // Audio streaming — cache for offline playback (same-origin only)
+  if (url.pathname.startsWith('/api/audio/stream') ||
+      url.pathname.endsWith('.mp3') ||
+      url.pathname.endsWith('.m4a')) {
+    event.respondWith(handleAudioRequest(event.request));
+    return;
+  }
+
+  // Navigation requests — network first, offline fallback
   if (event.request.mode === 'navigate') {
     event.respondWith(
       fetch(event.request)
-        .then((response) => {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+        .then(function(response) {
+          var clone = response.clone();
+          caches.open(CACHE_NAME).then(function(cache) { cache.put(event.request, clone); });
           return response;
         })
-        .catch(() =>
-          caches.match(event.request).then((cached) => cached || caches.match(OFFLINE_URL))
-        )
+        .catch(function() {
+          return caches.match(event.request).then(function(cached) {
+            return cached || caches.match(OFFLINE_URL);
+          });
+        })
     );
     return;
   }
 
-  // Static assets — NETWORK FIRST (not cache-first). Fresh content always wins.
+  // Static assets — network first, cache fallback
   event.respondWith(
     fetch(event.request)
-      .then((response) => {
+      .then(function(response) {
         if (response && response.status === 200) {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          var clone = response.clone();
+          caches.open(CACHE_NAME).then(function(cache) { cache.put(event.request, clone); });
         }
         return response;
       })
-      .catch(() => caches.match(event.request).then((cached) => cached || new Response('', { status: 408 })))
+      .catch(function() {
+        return caches.match(event.request).then(function(cached) {
+          return cached || new Response('', { status: 408 });
+        });
+      })
   );
 });
 
-// Listen for update messages from the app
-self.addEventListener('message', (event) => {
+// Audio request handler — network first, cache for offline
+async function handleAudioRequest(request) {
+  try {
+    var response = await fetch(request);
+    if (response && response.status === 200) {
+      var clone = response.clone();
+      var cache = await caches.open(AUDIO_CACHE);
+      await cache.put(request, clone);
+      await trimAudioCache();
+    }
+    return response;
+  } catch (e) {
+    var cached = await caches.match(request);
+    if (cached) return cached;
+    return new Response('Offline - track not cached', { status: 503 });
+  }
+}
+
+// Keep audio cache within limits (FIFO eviction)
+async function trimAudioCache() {
+  var cache = await caches.open(AUDIO_CACHE);
+  var keys = await cache.keys();
+  if (keys.length > MAX_AUDIO_CACHE_ITEMS) {
+    var toDelete = keys.slice(0, keys.length - MAX_AUDIO_CACHE_ITEMS);
+    await Promise.all(toDelete.map(function(key) { return cache.delete(key); }));
+  }
+}
+
+// Push notification handler
+self.addEventListener('push', function(event) {
+  if (!event.data) return;
+
+  var data;
+  try {
+    data = event.data.json();
+  } catch (e) {
+    data = { title: 'MyStation', body: event.data.text() };
+  }
+
+  var options = {
+    body: data.body || '',
+    icon: '/icons/icon-192x192.png',
+    badge: '/icons/icon-96x96.png',
+    image: data.image || undefined,
+    data: { url: data.url || '/' },
+    vibrate: [100, 50, 100],
+    actions: data.actions || [],
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(data.title || 'MyStation', options)
+  );
+});
+
+// Notification click — open the app/URL
+self.addEventListener('notificationclick', function(event) {
+  event.notification.close();
+  var url = event.notification.data && event.notification.data.url ? event.notification.data.url : '/';
+
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(clients) {
+      for (var i = 0; i < clients.length; i++) {
+        if (clients[i].url.indexOf(self.location.origin) !== -1 && 'focus' in clients[i]) {
+          clients[i].navigate(url);
+          return clients[i].focus();
+        }
+      }
+      return self.clients.openWindow(url);
+    })
+  );
+});
+
+// Listen for messages from the app
+self.addEventListener('message', function(event) {
   if (event.data === 'SKIP_WAITING') {
     self.skipWaiting();
   }

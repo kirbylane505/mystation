@@ -334,6 +334,8 @@ export const useUserStore = create(
     {
       name: 'mystation-user',
       partialize: (state) => ({
+        user: state.user,
+        isLoggedIn: state.isLoggedIn,
         isSubscribed: state.isSubscribed,
         email: state.email,
         favorites: state.favorites,

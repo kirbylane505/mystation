@@ -26,6 +26,10 @@ import CashAppThankYou from '@/components/CashAppThankYou';
 import SubscriberThankYou from '@/components/SubscriberThankYou';
 import BottomTabBar from '@/components/BottomTabBar';
 import SecurityShield from '@/components/SecurityShield';
+import PWAInstallModal from '@/components/PWAInstallModal';
+import PWAInstallBanner from '@/components/PWAInstallBanner';
+import OfflineBanner from '@/components/OfflineBanner';
+import PushPermission from '@/components/PushPermission';
 
 // Lazy-loaded utilities — code-split into separate chunks (loaded async after hydration)
 import LazyUtilities from '@/components/LazyUtilities';
@@ -211,16 +215,18 @@ export default function RootLayout({ children }) {
           <SubscriberThankYou />
           <LazyUtilities />
           <SecurityShield />
+          <PWAInstallModal />
+          <PWAInstallBanner />
+          <OfflineBanner />
+          <PushPermission />
         </ClientProviders>
         <Script id="register-sw" strategy="afterInteractive">
           {`
             if ('serviceWorker' in navigator) {
-              window.addEventListener('load', () => {
+              window.addEventListener('load', function() {
                 navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' })
                   .then(function(reg) {
-                    // Force check for new SW on every page load
                     reg.update();
-                    // When new SW is waiting, tell it to activate immediately
                     if (reg.waiting) reg.waiting.postMessage('SKIP_WAITING');
                     reg.addEventListener('updatefound', function() {
                       var nw = reg.installing;
@@ -233,11 +239,26 @@ export default function RootLayout({ children }) {
                   })
                   .catch(function() {});
               });
-              // Reload when new SW takes over
               var refreshing = false;
               navigator.serviceWorker.addEventListener('controllerchange', function() {
                 if (!refreshing) { refreshing = true; window.location.reload(); }
               });
+              // Push subscription sync (if already granted)
+              if ('PushManager' in window) {
+                navigator.serviceWorker.ready.then(function(reg) {
+                  if (Notification.permission === 'granted') {
+                    reg.pushManager.getSubscription().then(function(sub) {
+                      if (sub) {
+                        fetch('/api/push/subscribe', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ subscription: sub })
+                        }).catch(function() {});
+                      }
+                    });
+                  }
+                });
+              }
             }
           `}
         </Script>
