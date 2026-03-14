@@ -152,9 +152,12 @@ async function handleCheckoutCompleted(session, stripe) {
       expand: ['line_items', 'line_items.data.price.product', 'customer_details'],
     });
 
-    // Extract shipping address (may be null for some checkouts)
-    const shipping = fullSession.shipping_details || fullSession.customer_details;
-    const hasShipping = shipping && shipping.address;
+    // Extract shipping address — fall back to customer_details if shipping_details is empty/missing
+    const rawShipping = fullSession.shipping_details;
+    const shipping = (rawShipping && rawShipping.address && rawShipping.address.line1)
+      ? rawShipping
+      : fullSession.customer_details;
+    const hasShipping = shipping && shipping.address && shipping.address.line1;
     if (!hasShipping) {
       console.warn('No shipping address found in session — emails will still be sent');
     }
@@ -281,7 +284,7 @@ async function handleCheckoutCompleted(session, stripe) {
     let printfulResult = null;
     if (parsedPrintfulItems && parsedPrintfulItems.length > 0 && hasShipping) {
       const printfulOrder = {
-        external_id: session.id,
+        external_id: session.id.slice(-36),
         recipient: {
           name: shipping.name || fullSession.customer_details?.name || 'Customer',
           address1: shipping.address.line1,
@@ -351,7 +354,7 @@ async function handleCheckoutCompleted(session, stripe) {
     let printifyResult = null;
     if (parsedPrintifyItems && parsedPrintifyItems.length > 0 && hasShipping) {
       const printifyOrder = {
-        external_id: session.id,
+        external_id: session.id.slice(-36),
         label: `MyStation Order ${session.id.slice(-8)}`,
         line_items: parsedPrintifyItems.map(item => ({
           product_id: item.product_id,
