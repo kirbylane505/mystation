@@ -70,7 +70,7 @@ export default function FoundingMemberBanner() {
   };
 
   const spotText = remaining === 1 ? '1 Spot Left' : `${remaining} Spots Left`;
-  const memberText = `${memberCount} Real Ones & Growing`;
+  const memberText = 'The Real Ones Are Here & Growing';
   const segment = `\u00A0\u00A0\u00A0\u2727 ${memberText} \u2727\u00A0\u00A0\u00A0\u2022\u00A0\u00A0\u00A0FREE LOTL TICKET \u2014 Subscribe & Stay Until Aug 1st \u2022\u00A0\u00A0\u00A0${spotText} of 250 \u2022\u00A0\u00A0\u00A0Love on the Lawn 2026 \u2022\u00A0\u00A0\u00A0Year 5 \u2022`;
 
   const repeated = Array(8).fill(segment).join('');
