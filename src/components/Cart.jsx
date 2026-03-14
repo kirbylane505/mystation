@@ -211,12 +211,13 @@ export default function Cart() {
                 </Link>
 
                 {/* Continue Shopping */}
-                <button
+                <Link
+                  href="/merch"
                   onClick={closeCart}
-                  className="w-full mt-3 py-3 text-white/60 hover:text-white text-sm transition"
+                  className="w-full mt-3 py-3 text-white/60 hover:text-white text-sm transition flex items-center justify-center gap-2"
                 >
                   Continue Shopping
-                </button>
+                </Link>
               </div>
             )}
           </motion.div>

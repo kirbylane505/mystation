@@ -357,8 +357,29 @@ export default function MerchProductPage({ params }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#0a0a1a] via-[#0d0d2b] to-[#0a0a1a] pt-24 pb-32">
-      {/* Breadcrumb */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-6">
+      {/* Sticky mobile nav bar */}
+      <div className="sticky top-16 lg:top-0 z-40 bg-[#0a0a1a]/95 backdrop-blur-xl border-b border-white/5 lg:hidden">
+        <div className="flex items-center justify-between px-4 py-3">
+          <Link href="/merch" className="flex items-center gap-2 text-blue-400 font-bold text-sm">
+            <ArrowLeft size={18} />
+            All Merch
+          </Link>
+          <button
+            onClick={openCart}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 text-white text-sm font-bold"
+          >
+            <ShoppingBag size={16} />
+            {useCartStore.getState().getItemCount() > 0 && (
+              <span className="bg-blue-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+                {useCartStore.getState().getItemCount()}
+              </span>
+            )}
+          </button>
+        </div>
+      </div>
+
+      {/* Breadcrumb — desktop */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-6 hidden lg:block">
         <nav className="flex items-center gap-2 text-sm text-white/40">
           <Link href="/" className="hover:text-white/60 transition-colors">Home</Link>
           <ChevronRight size={14} />
@@ -502,20 +523,29 @@ export default function MerchProductPage({ params }) {
 
             {/* Go to Checkout — shows after adding to cart */}
             {addedToCart && (
-              <div className="flex gap-3 mb-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
+              <div className="flex flex-col gap-3 mb-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <div className="flex gap-3">
+                  <Link
+                    href="/checkout"
+                    className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 rounded-full font-bold text-base bg-white text-black hover:bg-white/90 transition-all"
+                  >
+                    Checkout Now
+                    <ChevronRight size={18} />
+                  </Link>
+                  <button
+                    onClick={openCart}
+                    className="flex items-center justify-center gap-2 px-5 py-3.5 rounded-full font-bold text-sm bg-white/10 text-white border border-white/10 hover:bg-white/20 transition-all"
+                  >
+                    View Cart
+                  </button>
+                </div>
                 <Link
-                  href="/checkout"
-                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 rounded-full font-bold text-base bg-white text-black hover:bg-white/90 transition-all"
+                  href="/merch"
+                  className="flex items-center justify-center gap-2 py-3 rounded-full font-bold text-sm text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 transition-all"
                 >
-                  Checkout Now
-                  <ChevronRight size={18} />
+                  <ArrowLeft size={16} />
+                  Continue Shopping
                 </Link>
-                <button
-                  onClick={openCart}
-                  className="flex items-center justify-center gap-2 px-5 py-3.5 rounded-full font-bold text-sm bg-white/10 text-white border border-white/10 hover:bg-white/20 transition-all"
-                >
-                  View Cart
-                </button>
               </div>
             )}
             {!addedToCart && <div className="mb-8" />}
