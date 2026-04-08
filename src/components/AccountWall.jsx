@@ -16,7 +16,8 @@ import { usePlayerStore, useUserStore } from '@/store/playerStore';
 // Pages that should NEVER be blocked by the account wall (commerce, ticketing, admin)
 const OPEN_PATHS = ['/events', '/tickets', '/admin', '/merch'];
 import Link from 'next/link';
-import { Mail, Lock, User, Loader2, Headphones, ShoppingBag, Ticket, X, ArrowLeft } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Mail, Lock, User, Loader2, Headphones, ShoppingBag, Ticket, X, ArrowLeft, Home } from 'lucide-react';
 
 // Stripe checkout links per tier — MyStation LLC (acct_1T1jP1R0BloCNd9r)
 const STRIPE_LINKS = {
@@ -28,10 +29,12 @@ export default function AccountWall() {
   const { setShowAccountWall, showAccountWall } = usePlayerStore();
   const { isLoggedIn, isSubscribed, setUser, setEmail: setStoreEmail, subscribe, freeSignupSlotsRemaining, setFreeSignupSlots } = useUserStore();
 
-  const [view, setView] = useState('signin'); // 'signup' | 'signin' | 'code' | 'password'
+  const router = useRouter();
+  const [view, setView] = useState('signin'); // 'signup' | 'signin' | 'code' | 'password' | 'choose-destination'
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+  const [loggedInCreatorSlug, setLoggedInCreatorSlug] = useState(null);
 
   // Form fields
   const [email, setEmail] = useState('');
@@ -76,6 +79,20 @@ export default function AccountWall() {
 
   const clearError = () => { setErrorMsg(''); setSuccessMsg(''); };
 
+  // After login, check if user is a creator and show destination choice
+  const checkCreatorAndRoute = async (userEmail) => {
+    try {
+      const res = await fetch(`/api/creators/me?email=${encodeURIComponent(userEmail)}`);
+      const data = await res.json();
+      if (data.creator?.slug) {
+        setLoggedInCreatorSlug(data.creator.slug);
+        setView('choose-destination');
+        return true; // is creator, showing choice
+      }
+    } catch {}
+    return false; // not a creator, close normally
+  };
+
   // EMAIL-ONLY sign in for subscribers
   const handleSubscriberSignIn = async (e) => {
     e.preventDefault();
@@ -104,7 +121,9 @@ export default function AccountWall() {
         setStoreEmail(cleanEmail);
         setUser(data.user);
         if (data.isSubscribed) subscribe(cleanEmail, data.tier || 'supporter');
-        setShowAccountWall(false);
+        // Check if creator — show destination choice
+        const isCreator = await checkCreatorAndRoute(cleanEmail);
+        if (!isCreator) setShowAccountWall(false);
         return;
       }
 
@@ -155,7 +174,9 @@ export default function AccountWall() {
       localStorage.setItem('mystation_user', JSON.stringify(data.user));
       setStoreEmail(cleanEmail);
       setUser(data.user);
-      setShowAccountWall(false);
+      // Check if creator — show destination choice
+      const isCreator = await checkCreatorAndRoute(cleanEmail);
+      if (!isCreator) setShowAccountWall(false);
     } catch {
       setErrorMsg('Connection error. Please try again.');
     } finally {
@@ -213,10 +234,11 @@ export default function AccountWall() {
         // Free month — every new subscriber gets 30-day trial
         subscribe(cleanEmail, 'regular');
         setFreeSignupSlots(data.freeSignupSlots || 0);
-        setSuccessMsg(`Welcome! You're member #${data.subscriberNumber} — first month FREE!`);
-        setTimeout(() => {
-          setShowAccountWall(false);
+        setSuccessMsg(`Welcome! You're member #${data.subscriberNumber}, first month FREE!`);
+        setTimeout(async () => {
           setSuccessMsg('');
+          const isCreator = await checkCreatorAndRoute(cleanEmail);
+          if (!isCreator) setShowAccountWall(false);
         }, 2500);
       } else if (data.needsPayment) {
         // After 26 — redirect to Stripe
@@ -301,7 +323,7 @@ export default function AccountWall() {
               <>
                 <div className="text-center mb-6">
                   <h2 className="text-xl font-bold text-white mb-2">Welcome Back</h2>
-                  <p className="text-white/50 text-sm">Subscribers — just enter your email</p>
+                  <p className="text-white/50 text-sm">Subscribers, just enter your email</p>
                 </div>
 
                 <form onSubmit={handleSubscriberSignIn} className="space-y-4">
@@ -334,7 +356,7 @@ export default function AccountWall() {
                   <p className="text-white/40 text-sm">
                     New here?{' '}
                     <button onClick={() => switchView('signup')} className="text-blue-400 hover:text-blue-300 font-medium">
-                      Sign up — First Month FREE
+                      Sign up, First Month FREE
                     </button>
                   </p>
                   <p className="text-white/30 text-xs">
@@ -412,7 +434,7 @@ export default function AccountWall() {
                 <div className="text-center mb-6">
                   <h2 className="text-xl font-bold text-white mb-2">Join MyStation</h2>
                   <p className="text-white/50 text-sm">
-                    $4.99/mo for unlimited access — first month FREE
+                    $4.99/mo for unlimited access, first month FREE
                   </p>
                 </div>
 
@@ -465,7 +487,7 @@ export default function AccountWall() {
                     className="w-full py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold rounded-xl hover:opacity-90 transition disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30"
                   >
                     {loading ? <Loader2 size={20} className="animate-spin" /> : (
-                      'Sign Up — First Month FREE'
+                      'Sign Up, First Month FREE'
                     )}
                   </button>
                 </form>
@@ -520,6 +542,48 @@ export default function AccountWall() {
                     Back to sign in
                   </button>
                 </div>
+              </div>
+            )}
+
+            {/* ===== CHOOSE DESTINATION (after creator login) ===== */}
+            {view === 'choose-destination' && (
+              <div className="space-y-4">
+                <div className="text-center mb-4">
+                  <h2 className="text-xl font-bold text-white mb-2">Welcome Back!</h2>
+                  <p className="text-white/50 text-sm">Where would you like to go?</p>
+                </div>
+
+                <button
+                  onClick={() => {
+                    setShowAccountWall(false);
+                    router.push(`/artist/${loggedInCreatorSlug}`);
+                  }}
+                  className="w-full flex items-center gap-4 p-4 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-2xl hover:from-purple-500/30 hover:to-pink-500/30 transition group"
+                >
+                  <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shrink-0">
+                    <User size={24} className="text-white" />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-white font-bold text-lg">My Profile</p>
+                    <p className="text-white/50 text-sm">Go to your creator station</p>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setShowAccountWall(false);
+                    router.push('/');
+                  }}
+                  className="w-full flex items-center gap-4 p-4 bg-gradient-to-r from-blue-500/20 to-blue-600/20 border border-blue-500/30 rounded-2xl hover:from-blue-500/30 hover:to-blue-600/30 transition group"
+                >
+                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shrink-0">
+                    <Home size={24} className="text-white" />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-white font-bold text-lg">Home</p>
+                    <p className="text-white/50 text-sm">Browse music, merch & more</p>
+                  </div>
+                </button>
               </div>
             )}
 

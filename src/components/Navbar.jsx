@@ -14,10 +14,9 @@ import { useCartStore } from '@/store/cartStore';
 import { useUserStore, usePlayerStore } from '@/store/playerStore';
 import {
   Home, Music, Heart, Users, ShoppingBag,
-  Search, User, LogOut, X, Play, Menu, Mail, Crown, Newspaper, Gamepad2, Ticket, Film, MoreHorizontal, HelpCircle, MessageCircle, Download, Mic2
+  Search, User, LogOut, X, Play, Menu, Mail, Crown, Newspaper, Gamepad2, Ticket, Film, MoreHorizontal, HelpCircle, MessageCircle, Download, Mic2, Radio
 } from 'lucide-react';
 import { useEngagementStore } from '@/store/engagementStore';
-import { useStationStore } from '@/store/stationStore';
 import { tracks } from '@/data/tracks';
 
 export default function Navbar() {
@@ -35,7 +34,17 @@ export default function Navbar() {
   const logout = useUserStore(s => s.logout);
   const isSubscribed = useUserStore(s => s.isSubscribed);
   const setQueue = usePlayerStore(s => s.setQueue);
-  const isCreator = useStationStore(s => s.isCreator);
+  const [creatorSlug, setCreatorSlug] = useState(null);
+
+  // Check if user is a creator
+  useEffect(() => {
+    const email = document.cookie.split('; ').find(c => c.startsWith('mystation-email='))?.split('=')[1];
+    if (!email) return;
+    fetch(`/api/creators/me?email=${encodeURIComponent(decodeURIComponent(email))}`)
+      .then(r => r.json())
+      .then(d => { if (d.creator?.slug) setCreatorSlug(d.creator.slug); })
+      .catch(() => {});
+  }, []);
 
   // Core nav items — 6 tabs
   const navItems = [
@@ -45,6 +54,7 @@ export default function Navbar() {
     { href: '/merch', icon: ShoppingBag, label: 'Merch', mobileOrder: 4 },
     { href: '/lounge', icon: Gamepad2, label: 'Lounge', highlight: true, mobileOrder: 5 },
     { href: '/events', icon: Ticket, label: 'Events', mobileOrder: 6 },
+    { href: '/podstation', icon: Radio, label: 'PodStation', mobileOrder: 7 },
   ];
 
   // More menu items (shown in dropdown)
@@ -259,18 +269,18 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Create Station / Dashboard Button */}
-          {isCreator ? (
+          {/* Create Station / My Profile Button */}
+          {creatorSlug ? (
             <Link
-              href="/station/dashboard"
+              href={`/artist/${creatorSlug}`}
               className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full hover:shadow-lg hover:shadow-purple-500/30 transition text-white font-bold text-sm"
             >
-              <Crown size={16} />
-              My Station
+              <User size={16} />
+              My Profile
             </Link>
           ) : (
             <Link
-              href="/station/create"
+              href="/creators/signup"
               className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full hover:shadow-lg hover:shadow-blue-500/30 transition text-white font-bold text-sm"
             >
               <Crown size={16} />
@@ -350,7 +360,7 @@ export default function Navbar() {
                   </div>
                 )}
                 {searchQuery.length > 1 && searchResults.length === 0 && (
-                  <div className="p-4 text-center text-white/50 text-sm">No MyStation songs found — try global search</div>
+                  <div className="p-4 text-center text-white/50 text-sm">No MyStation songs found. Try global search.</div>
                 )}
               </div>
             )}
@@ -362,14 +372,17 @@ export default function Navbar() {
           {/* User */}
           {(isLoggedIn || isSubscribed) ? (
             <div className="flex items-center gap-1">
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-full">
+              <Link
+                href={creatorSlug ? `/artist/${creatorSlug}` : '/account'}
+                className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-full hover:bg-white/10 transition"
+              >
                 <div className="w-7 h-7 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
                   <span className="text-white font-bold text-xs">
                     {user?.name?.charAt(0).toUpperCase() || 'U'}
                   </span>
                 </div>
                 <span className="text-sm text-white/80">{user?.name?.split(' ')[0] || 'User'}</span>
-              </div>
+              </Link>
               <button
                 onClick={handleSignOut}
                 className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-red-500/20 transition"
@@ -424,15 +437,14 @@ export default function Navbar() {
             </button>
             {/* Sign In / User Button — ALWAYS visible on mobile */}
             {(isLoggedIn || isSubscribed) ? (
-              <button
-                onClick={handleSignOut}
+              <Link
+                href={creatorSlug ? `/artist/${creatorSlug}` : '/account'}
                 className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center"
-                title="Sign Out"
               >
                 <span className="text-blue-400 font-bold text-sm">
                   {user?.name?.charAt(0).toUpperCase() || 'U'}
                 </span>
-              </button>
+              </Link>
             ) : (
               <button
                 onClick={() => usePlayerStore.getState().setShowAccountWall(true)}
@@ -523,23 +535,23 @@ export default function Navbar() {
             )}
           </button>
 
-          {/* Create Station / Dashboard Button - Mobile */}
-          {isCreator ? (
+          {/* Create Station / My Profile Button - Mobile */}
+          {creatorSlug ? (
             <Link
-              href="/station/dashboard"
+              href={`/artist/${creatorSlug}`}
               className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl text-white font-bold mb-2"
               onClick={() => setMobileMenuOpen(false)}
             >
-              <Crown size={18} />
-              My Station Dashboard
+              <User size={16} />
+              My Profile
             </Link>
           ) : (
             <Link
-              href="/station/create"
+              href="/creators/signup"
               className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl text-white font-bold mb-2"
               onClick={() => setMobileMenuOpen(false)}
             >
-              <Crown size={18} />
+              <Crown size={16} />
               Create Your Station
             </Link>
           )}
@@ -551,7 +563,7 @@ export default function Navbar() {
               onClick={() => { setMobileMenuOpen(false); usePlayerStore.getState().openSubscribeModal(); }}
             >
               <Crown size={18} />
-              Subscribe — Plans from $4.99/mo
+              Subscribe for $4.99/mo
             </button>
           )}
 
@@ -595,7 +607,9 @@ export default function Navbar() {
             { href: '/', icon: Home, label: 'Home' },
             { href: '/music', icon: Music, label: 'Music' },
             { href: '/search', icon: Search, label: 'Search' },
-            { href: '/merch', icon: ShoppingBag, label: 'Merch' },
+            creatorSlug
+              ? { href: `/artist/${creatorSlug}`, icon: User, label: 'My Profile' }
+              : { href: '/merch', icon: ShoppingBag, label: 'Merch' },
           ].map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
@@ -618,8 +632,8 @@ export default function Navbar() {
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="flex flex-col items-center justify-center w-16 h-full gap-0.5"
           >
-            <MoreHorizontal size={20} className={mobileMenuOpen || !['/', '/music', '/search', '/merch'].includes(pathname) ? 'text-blue-400' : 'text-white/40'} />
-            <span className={`text-[10px] font-medium ${mobileMenuOpen || !['/', '/music', '/search', '/merch'].includes(pathname) ? 'text-blue-400' : 'text-white/40'}`}>
+            <MoreHorizontal size={20} className={mobileMenuOpen || !['/', '/music', '/search', '/merch'].includes(pathname) && !(creatorSlug && pathname === `/artist/${creatorSlug}`) ? 'text-blue-400' : 'text-white/40'} />
+            <span className={`text-[10px] font-medium ${mobileMenuOpen || !['/', '/music', '/search', '/merch'].includes(pathname) && !(creatorSlug && pathname === `/artist/${creatorSlug}`) ? 'text-blue-400' : 'text-white/40'}`}>
               More
             </span>
           </button>
