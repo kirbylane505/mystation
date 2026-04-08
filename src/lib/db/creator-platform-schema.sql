@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS creators (
   email TEXT UNIQUE NOT NULL,
   slug TEXT UNIQUE NOT NULL,
   display_name TEXT NOT NULL,
-  category TEXT NOT NULL CHECK (category IN ('musician', 'podcaster', 'producer', 'dj', 'content_creator')),
+  category TEXT NOT NULL CHECK (category IN ('musician', 'podcaster', 'producer', 'dj', 'content_creator', 'fitness_wellness')),
   bio TEXT,
   avatar_url TEXT,
   banner_url TEXT,
@@ -22,6 +22,8 @@ CREATE TABLE IF NOT EXISTS creators (
   track_count INTEGER DEFAULT 0,
   follower_count INTEGER DEFAULT 0,
   total_plays INTEGER DEFAULT 0,
+  is_live BOOLEAN DEFAULT false,
+  current_stream_id TEXT,
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
@@ -107,11 +109,44 @@ CREATE TABLE IF NOT EXISTS creator_followers (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   creator_id UUID REFERENCES creators(id) ON DELETE CASCADE NOT NULL,
   follower_email TEXT NOT NULL,
+  push_subscription JSONB,
   followed_at TIMESTAMPTZ DEFAULT now(),
   UNIQUE(creator_id, follower_email)
 );
 
 CREATE INDEX idx_creator_followers_creator_id ON creator_followers(creator_id);
+
+-- 7. Creator videos table
+CREATE TABLE IF NOT EXISTS creator_videos (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  creator_id UUID REFERENCES creators(id) ON DELETE CASCADE NOT NULL,
+  title TEXT NOT NULL,
+  description TEXT,
+  video_url TEXT NOT NULL,
+  thumbnail_url TEXT,
+  duration INTEGER,
+  stream_id UUID,
+  views INTEGER DEFAULT 0,
+  status TEXT DEFAULT 'active' CHECK (status IN ('active', 'hidden', 'removed')),
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE INDEX idx_creator_videos_creator ON creator_videos(creator_id);
+CREATE INDEX idx_creator_videos_status ON creator_videos(status);
+
+-- 8. Creator messages table
+CREATE TABLE IF NOT EXISTS creator_messages (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  sender_id UUID REFERENCES creators(id) ON DELETE CASCADE NOT NULL,
+  receiver_id UUID REFERENCES creators(id) ON DELETE CASCADE NOT NULL,
+  message TEXT NOT NULL,
+  read BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE INDEX idx_creator_messages_receiver ON creator_messages(receiver_id, read);
+CREATE INDEX idx_creator_messages_conversation ON creator_messages(sender_id, receiver_id);
 
 -- RLS Policies
 ALTER TABLE creators ENABLE ROW LEVEL SECURITY;
@@ -120,6 +155,8 @@ ALTER TABLE creator_merch ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ads ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ad_impressions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE creator_followers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE creator_videos ENABLE ROW LEVEL SECURITY;
+ALTER TABLE creator_messages ENABLE ROW LEVEL SECURITY;
 
 -- Public read for active creators
 CREATE POLICY "Anyone can view active creators"
@@ -185,3 +222,47 @@ CREATE POLICY "Anyone can follow"
 CREATE POLICY "Anyone can unfollow"
   ON creator_followers FOR DELETE
   USING (true);
+
+-- Videos: public read active, service role write
+CREATE POLICY "Anyone can view active videos"
+  ON creator_videos FOR SELECT
+  USING (status = 'active');
+
+-- Messages: service role manages all
+CREATE POLICY "Service role manages messages"
+  ON creator_messages FOR ALL
+  USING (true);
+
+-- 9. Creator albums (My Life gallery)
+CREATE TABLE IF NOT EXISTS creator_albums (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  creator_id UUID REFERENCES creators(id) ON DELETE CASCADE NOT NULL,
+  name TEXT NOT NULL,
+  cover_url TEXT,
+  visibility TEXT DEFAULT 'public' CHECK (visibility IN ('public', 'followers', 'subscribers')),
+  sort_order INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE INDEX idx_creator_albums_creator ON creator_albums(creator_id);
+CREATE INDEX idx_creator_albums_sort ON creator_albums(creator_id, sort_order);
+
+-- 10. Creator gallery items (photos/videos/live replays in albums)
+CREATE TABLE IF NOT EXISTS creator_gallery_items (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  album_id UUID REFERENCES creator_albums(id) ON DELETE CASCADE NOT NULL,
+  creator_id UUID REFERENCES creators(id) ON DELETE CASCADE NOT NULL,
+  type TEXT NOT NULL CHECK (type IN ('photo', 'video', 'live_replay')),
+  media_url TEXT NOT NULL,
+  thumbnail_url TEXT,
+  caption TEXT,
+  sort_order INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE INDEX idx_gallery_items_album ON creator_gallery_items(album_id);
+CREATE INDEX idx_gallery_items_creator ON creator_gallery_items(creator_id);
+
+ALTER TABLE creator_albums ENABLE ROW LEVEL SECURITY;
+ALTER TABLE creator_gallery_items ENABLE ROW LEVEL SECURITY;
