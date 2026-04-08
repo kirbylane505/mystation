@@ -36,15 +36,15 @@ export default function Navbar() {
   const setQueue = usePlayerStore(s => s.setQueue);
   const [creatorSlug, setCreatorSlug] = useState(null);
 
-  // Check if user is a creator
+  // Check if user is a creator (use store email — cookie is httpOnly)
   useEffect(() => {
-    const email = document.cookie.split('; ').find(c => c.startsWith('mystation-email='))?.split('=')[1];
+    const email = user?.email;
     if (!email) return;
-    fetch(`/api/creators/me?email=${encodeURIComponent(decodeURIComponent(email))}`)
+    fetch(`/api/creators/me?email=${encodeURIComponent(email)}`)
       .then(r => r.json())
       .then(d => { if (d.creator?.slug) setCreatorSlug(d.creator.slug); })
       .catch(() => {});
-  }, []);
+  }, [user?.email]);
 
   // Core nav items — 6 tabs
   const navItems = [

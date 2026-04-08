@@ -1,19 +1,33 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Music, Search, ShoppingBag, MessageCircle } from 'lucide-react';
-
-const tabs = [
-  { href: '/', icon: Home, label: 'Home' },
-  { href: '/music', icon: Music, label: 'Music' },
-  { href: '/community', icon: MessageCircle, label: 'Community' },
-  { href: '/search', icon: Search, label: 'Search' },
-  { href: '/merch', icon: ShoppingBag, label: 'Shop' },
-];
+import { Home, Music, Search, ShoppingBag, MessageCircle, Radio, User } from 'lucide-react';
+import { useUserStore } from '@/store/playerStore';
 
 export default function BottomTabBar() {
   const pathname = usePathname();
+  const user = useUserStore(s => s.user);
+  const [creatorSlug, setCreatorSlug] = useState(null);
+
+  useEffect(() => {
+    const email = user?.email;
+    if (!email) return;
+    fetch(`/api/creators/me?email=${encodeURIComponent(email)}`)
+      .then(r => r.json())
+      .then(d => { if (d.creator?.slug) setCreatorSlug(d.creator.slug); })
+      .catch(() => {});
+  }, [user?.email]);
+
+  const tabs = [
+    { href: '/', icon: Home, label: 'Home' },
+    { href: '/music', icon: Music, label: 'Music' },
+    { href: '/community', icon: MessageCircle, label: 'Community' },
+    { href: '/search', icon: Search, label: 'Search' },
+    { href: creatorSlug ? `/artist/${creatorSlug}` : '/merch', icon: creatorSlug ? User : ShoppingBag, label: creatorSlug ? 'My Profile' : 'Shop' },
+    { href: '/podstation', icon: Radio, label: 'Live' },
+  ];
 
   // Hide during active game rooms (not lounge lobby)
   const isGameRoom = pathname?.startsWith('/lounge/') && pathname !== '/lounge';
