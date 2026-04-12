@@ -255,7 +255,7 @@ export default function LOTLPage() {
           {/* YEAR 5 Badge */}
           <div className="inline-flex items-center gap-3 px-6 py-2.5 bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-400/40 rounded-full mb-8 shadow-lg shadow-green-500/10">
             <Flame size={18} className="text-yellow-400 animate-pulse" />
-            <span className="text-green-300 text-sm font-black uppercase tracking-[0.2em]">Year 5 — The Biggest One Yet</span>
+            <span className="text-green-300 text-sm font-black uppercase tracking-[0.2em]">Year 5: The Biggest One Yet</span>
             <Flame size={18} className="text-yellow-400 animate-pulse" />
           </div>
 
@@ -277,7 +277,7 @@ export default function LOTLPage() {
           </h1>
 
           <p className="text-lg lg:text-xl text-white/60 mb-8 max-w-2xl mx-auto">
-            Elgin's premier outdoor music festival. Live music, community, food, and culture — all supporting youth music programs.
+            Elgin's premier outdoor music festival. Live music, community, food, and culture, all supporting youth music programs.
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-4 lg:gap-8 text-white/60 mb-10">
@@ -870,7 +870,7 @@ export default function LOTLPage() {
             <div className="relative">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-green-500/10 border border-green-500/20 rounded-full mb-6">
                 <Flame size={14} className="text-yellow-400" />
-                <span className="text-green-400 text-xs font-black uppercase tracking-wider">Year 5 — September 5, 2026</span>
+                <span className="text-green-400 text-xs font-black uppercase tracking-wider">Year 5, September 5, 2026</span>
               </div>
               <h2 className="text-3xl lg:text-5xl font-black text-white mb-4">
                 Don't Miss <span className="bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">LOTL 2026</span>
@@ -905,7 +905,7 @@ export default function LOTLPage() {
 
       {/* Powered By */}
       <p className="text-center text-[10px] text-white/20 tracking-wide py-6">
-        LOTL Day 2026 — Powered by{' '}
+        LOTL Day 2026 | Powered by{' '}
         <a href="https://mystationlive.com" className="hover:text-white/40 transition-colors">MyStation</a>
         {' '}&amp;{' '}
         <a href="https://myticketslive.com" target="_blank" rel="noopener noreferrer" className="hover:text-white/40 transition-colors">MyTicketsLive</a>

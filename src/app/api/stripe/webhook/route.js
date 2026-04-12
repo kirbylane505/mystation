@@ -13,7 +13,7 @@ import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import { printful } from '@/lib/printful';
 import { printify } from '@/lib/printify';
-import { sendSaleAlert, sendOrderConfirmation, sendNewSignupAlert, sendCancelAlert, sendBigSpenderThankYou, sendOrderFailedAlert, sendSubscriptionWelcomeEmail, sendPaymentFailedEmail } from '@/lib/email';
+import { sendSaleAlert, sendOrderConfirmation, sendNewSignupAlert, sendCancelAlert, sendBigSpenderThankYou, sendOrderFailedAlert, sendSubscriptionWelcomeEmail, sendPaymentFailedEmail, sendRenewalThankYou } from '@/lib/email';
 import { tagSubscriber } from '@/lib/kit';
 import { createHmac } from 'crypto';
 
@@ -762,7 +762,7 @@ async function handleInvoicePaid(invoice) {
     // Update subscribers table
     const { data: existing } = await supabase
       .from('subscribers')
-      .select('id, tier')
+      .select('id, tier, subscriber_number, created_at')
       .eq('email', email)
       .single();
 
@@ -804,10 +804,25 @@ async function handleInvoicePaid(invoice) {
       .from('subscribers')
       .select('*', { count: 'exact', head: true });
 
+    // Calculate months active
+    const sub = existing || {};
+    const createdAt = sub.created_at ? new Date(sub.created_at) : new Date();
+    const monthsActive = Math.max(1, Math.round((Date.now() - createdAt.getTime()) / (30 * 24 * 60 * 60 * 1000)));
+
+    // Send renewal thank you to subscriber
+    sendRenewalThankYou({
+      customerEmail: email,
+      customerName: invoice.customer_name || email.split('@')[0],
+      tier: existing?.tier || tier,
+      subscriberNumber: existing?.subscriber_number || count || 1,
+      monthsActive,
+    }).catch(() => {});
+
+    // Alert Mike about renewal
     sendNewSignupAlert({
       customerName: invoice.customer_name || email.split('@')[0],
       customerEmail: email,
-      subscriberNumber: count || 1,
+      subscriberNumber: existing?.subscriber_number || count || 1,
       isFreeSlot: false,
       tier,
     }).catch(() => {});

@@ -3,7 +3,7 @@ export const metadata = {
   description: 'Curated playlists from Mike Page and IDMG. Discover new music, classic tracks, and exclusive mixes on MyStation.',
   alternates: { canonical: 'https://mystationlive.com/playlists' },
   openGraph: {
-    title: 'Playlists — Curated by Mike Page & IDMG',
+    title: 'Playlists | Curated by Mike Page & IDMG',
     description: 'Curated playlists from Mike Page and IDMG. Discover new music, classic tracks, and exclusive mixes.',
     url: 'https://mystationlive.com/playlists',
     siteName: 'MyStation',
@@ -12,7 +12,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Playlists — Curated by Mike Page & IDMG',
+    title: 'Playlists | Curated by Mike Page & IDMG',
     description: 'Discover new music, classic tracks, and exclusive mixes.',
     images: ['/images/og-image.png'],
   },

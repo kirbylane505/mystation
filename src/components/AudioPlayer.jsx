@@ -432,8 +432,14 @@ export default function AudioPlayer() {
       previewFadeInterval = null;
     }
     // Restore volume in case previous preview faded it
-    const { volume: storeVol, isMuted: muted } = usePlayerStore.getState();
+    const { volume: storeVol, isMuted: muted, sharedTrackId, clearSharedTrack: clearShared } = usePlayerStore.getState();
     audio.volume = muted ? 0 : storeVol;
+
+    // Clear shared track access when user plays a DIFFERENT track
+    if (sharedTrackId && currentTrack.id !== sharedTrackId) {
+      clearShared();
+      sessionStorage.removeItem('mystation-shared-track');
+    }
 
     if (playing) {
       incrementPlayCount(currentTrack.id);
@@ -455,9 +461,9 @@ export default function AudioPlayer() {
       canPlayListenerRef.current = null;
     }
 
-    // Clear stale fallback timeout
+    // Clear stale fallback timer
     if (loadTimeoutRef.current) {
-      clearTimeout(loadTimeoutRef.current);
+      clearInterval(loadTimeoutRef.current);
       loadTimeoutRef.current = null;
     }
 
@@ -502,9 +508,9 @@ export default function AudioPlayer() {
         audio.src = audioUrl;
         audio.load();
 
-        // Clear any previous fallback timeout
+        // Clear any previous fallback timer
         if (loadTimeoutRef.current) {
-          clearTimeout(loadTimeoutRef.current);
+          clearInterval(loadTimeoutRef.current);
           loadTimeoutRef.current = null;
         }
 
@@ -512,9 +518,9 @@ export default function AudioPlayer() {
           audio.removeEventListener('canplay', onReady);
           audio.removeEventListener('canplaythrough', onReady);
           canPlayListenerRef.current = null;
-          // Clear fallback timeout — canplay won the race
+          // Clear fallback timer. canplay won the race
           if (loadTimeoutRef.current) {
-            clearTimeout(loadTimeoutRef.current);
+            clearInterval(loadTimeoutRef.current);
             loadTimeoutRef.current = null;
           }
           if (!isLoadingRef.current) return; // already handled by timeout
@@ -528,18 +534,25 @@ export default function AudioPlayer() {
         audio.addEventListener('canplay', onReady);
         audio.addEventListener('canplaythrough', onReady);
 
-        // Aggressive fallback — 2s is plenty for R2 CDN audio to buffer enough to start
-        // readyState 2 = HAVE_CURRENT_DATA, 3 = HAVE_FUTURE_DATA — both playable
-        loadTimeoutRef.current = setTimeout(async () => {
-          loadTimeoutRef.current = null;
-          if (isLoadingRef.current && audio.readyState >= 2) {
+        // Fast fallback. Check every 300ms if audio is ready to play, max 1.5s
+        let fallbackChecks = 0;
+        loadTimeoutRef.current = setInterval(async () => {
+          fallbackChecks++;
+          if (!isLoadingRef.current || fallbackChecks >= 5) {
+            clearInterval(loadTimeoutRef.current);
+            loadTimeoutRef.current = null;
+            return;
+          }
+          if (audio.readyState >= 2) {
+            clearInterval(loadTimeoutRef.current);
+            loadTimeoutRef.current = null;
             isLoadingRef.current = false;
             if (usePlayerStore.getState().isPlaying) {
               const played = await safePlay(audio);
               if (!played) storeActionsRef.current.pause();
             }
           }
-        }, 2000);
+        }, 300);
       } else {
         // Track already loaded — clear loading flag and play
         isLoadingRef.current = false;

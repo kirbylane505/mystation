@@ -1021,7 +1021,7 @@ export default function MerchPage() {
                 <span className="px-2 py-0.5 bg-green-500/20 text-green-400 text-xs font-bold rounded-full">SAVE $5</span>
               </div>
               <h3 className="text-lg font-black text-white mb-1">2 Tanks</h3>
-              <p className="text-white/40 text-sm mb-3">Any 2 tank tops — mix IDMG, LOTL, or MPF</p>
+              <p className="text-white/40 text-sm mb-3">Any 2 tank tops, mix IDMG, LOTL, or MPF</p>
               <div className="flex items-baseline gap-2">
                 <span className="text-2xl font-black text-green-400">$44.98</span>
                 <span className="text-white/30 line-through text-sm">$49.98</span>
@@ -1036,7 +1036,7 @@ export default function MerchPage() {
                 <span className="px-2 py-0.5 bg-green-500/20 text-green-400 text-xs font-bold rounded-full">SAVE $5</span>
               </div>
               <h3 className="text-lg font-black text-white mb-1">2 Crop Tops</h3>
-              <p className="text-white/40 text-sm mb-3">Any 2 crop tops — IDMG or LOTL Festival</p>
+              <p className="text-white/40 text-sm mb-3">Any 2 crop tops, IDMG or LOTL Festival</p>
               <div className="flex items-baseline gap-2">
                 <span className="text-2xl font-black text-green-400">$44.98</span>
                 <span className="text-white/30 line-through text-sm">$49.98</span>
@@ -1100,7 +1100,7 @@ export default function MerchPage() {
               <div className="flex items-baseline gap-2">
                 <span className="text-2xl font-black text-blue-400">15% OFF</span>
               </div>
-              <p className="text-white/30 text-xs mt-1">Auto-applied at checkout — no code needed</p>
+              <p className="text-white/30 text-xs mt-1">Auto-applied at checkout, no code needed</p>
             </div>
           </div>
 
@@ -1123,7 +1123,7 @@ export default function MerchPage() {
           <div className={`text-center mb-12 transition-all duration-700 ${shopVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             <h2 className="text-4xl font-black text-white mb-4">Shop the Collection</h2>
             <p className="text-white/50">
-              {loading ? 'Loading store...' : `${adultProducts.length + KIDS_ITEMS.length + printifyKidsProducts.length} items — Printed & shipped by Printful + Printify`}
+              {loading ? 'Loading store...' : `${adultProducts.length + KIDS_ITEMS.length + printifyKidsProducts.length} items. Printed & shipped by Printful + Printify.`}
             </p>
           </div>
 

@@ -22,7 +22,7 @@ export async function PATCH(request) {
     if (!email) return NextResponse.json({ error: 'Email required' }, { status: 400 });
 
     // Whitelist allowed fields
-    const allowed = ['display_name', 'bio', 'avatar_url', 'banner_url', 'genre_tags', 'social_links'];
+    const allowed = ['display_name', 'bio', 'avatar_url', 'banner_url', 'genre_tags', 'social_links', 'category', 'onboarding_dismissed'];
     const safeUpdates = {};
     for (const key of allowed) {
       if (updates[key] !== undefined) safeUpdates[key] = updates[key];

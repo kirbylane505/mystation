@@ -235,7 +235,7 @@ export const questions = [
     answer: 1,
     category: 'Music & Culture',
     difficulty: 1,
-    didYouKnow: 'The Miseducation of Lauryn Hill won 5 Grammys, including Album of the Year — the first hip-hop album to win that award.',
+    didYouKnow: 'The Miseducation of Lauryn Hill won 5 Grammys, including Album of the Year. It was the first hip-hop album to win that award.',
   },
   {
     id: 23,
@@ -375,7 +375,7 @@ export const questions = [
     answer: 1,
     category: 'Music & Culture',
     difficulty: 2,
-    didYouKnow: 'House music was born at The Warehouse nightclub, DJed by Frankie Knuckles — known as the "Godfather of House Music."',
+    didYouKnow: 'House music was born at The Warehouse nightclub, DJed by Frankie Knuckles, known as the "Godfather of House Music."',
   },
   {
     id: 38,
@@ -512,7 +512,7 @@ export const questions = [
     answer: 0,
     category: 'Firsts & Pioneers',
     difficulty: 1,
-    didYouKnow: 'Ketanji Brown Jackson was confirmed in 2022, becoming the 116th Supreme Court Justice — 232 years after the Court was established.',
+    didYouKnow: 'Ketanji Brown Jackson was confirmed in 2022, becoming the 116th Supreme Court Justice, 232 years after the Court was established.',
   },
   {
     id: 53,
@@ -584,7 +584,7 @@ export const questions = [
     answer: 0,
     category: 'Firsts & Pioneers',
     difficulty: 2,
-    didYouKnow: 'Tony Dungy won Super Bowl XLI in 2007 with the Indianapolis Colts. The opposing coach, Lovie Smith, was also Black — a first for the Super Bowl.',
+    didYouKnow: 'Tony Dungy won Super Bowl XLI in 2007 with the Indianapolis Colts. The opposing coach, Lovie Smith, was also Black, a first for the Super Bowl.',
   },
 
   // ===== SPORTS (61-80) =====
@@ -622,7 +622,7 @@ export const questions = [
     answer: 2,
     category: 'Sports',
     difficulty: 2,
-    didYouKnow: 'Serena Williams won 23 Grand Slam singles titles, the most in the Open Era, including a "Serena Slam" — holding all four major titles simultaneously.',
+    didYouKnow: 'Serena Williams won 23 Grand Slam singles titles, the most in the Open Era, including a "Serena Slam": holding all four major titles simultaneously.',
   },
   {
     id: 65,
@@ -654,7 +654,7 @@ export const questions = [
     answer: 1,
     category: 'Sports',
     difficulty: 2,
-    didYouKnow: 'Wilma Rudolph was told she would never walk without braces. She became "The Tornado" — the fastest woman in the world.',
+    didYouKnow: 'Wilma Rudolph was told she would never walk without braces. She became "The Tornado," the fastest woman in the world.',
   },
   {
     id: 68,
@@ -758,7 +758,7 @@ export const questions = [
   {
     id: 79,
     question: 'Which Williams sister won her first Grand Slam at age 17 at the 1999 US Open?',
-    choices: ['Venus Williams', 'Serena Williams', 'Both won together', 'Neither — it was a different year'],
+    choices: ['Venus Williams', 'Serena Williams', 'Both won together', 'Neither, it was a different year'],
     answer: 1,
     category: 'Sports',
     difficulty: 2,
@@ -1015,7 +1015,7 @@ export const questions = [
     answer: 1,
     category: 'Literature & Art',
     difficulty: 2,
-    didYouKnow: 'Jacob Lawrence painted "The Migration Series" at age 23 — 60 panels depicting the Great Migration of Black Americans from the South to the North.',
+    didYouKnow: 'Jacob Lawrence painted "The Migration Series" at age 23: 60 panels depicting the Great Migration of Black Americans from the South to the North.',
   },
   {
     id: 106,
@@ -1051,7 +1051,7 @@ export const questions = [
     answer: 1,
     category: 'Literature & Art',
     difficulty: 2,
-    didYouKnow: 'SAMO stood for "Same Old Shit." Basquiat became one of the most expensive artists in history — his painting sold for $110.5 million in 2017.',
+    didYouKnow: 'SAMO stood for "Same Old Shit." Basquiat became one of the most expensive artists in history. His painting sold for $110.5 million in 2017.',
   },
   {
     id: 110,
@@ -1141,7 +1141,7 @@ export const questions = [
     answer: 1,
     category: 'Literature & Art',
     difficulty: 3,
-    didYouKnow: 'Romare Bearden\'s collages depicted the richness of Black American life — music, religion, daily rituals. He was also a talented jazz songwriter.',
+    didYouKnow: 'Romare Bearden\'s collages depicted the richness of Black American life: music, religion, daily rituals. He was also a talented jazz songwriter.',
   },
   {
     id: 120,
@@ -1322,7 +1322,7 @@ export const questions = [
     answer: 0,
     category: 'Movies & TV',
     difficulty: 2,
-    didYouKnow: 'Sanaa Lathan and Omar Epps starred in "Love & Basketball." Denzel Washington was not in the film — this was a trick question filter. Sanaa Lathan trained for months to look like a real basketball player.',
+    didYouKnow: 'Sanaa Lathan and Omar Epps starred in "Love & Basketball." Denzel Washington was not in the film. This was a trick question. Sanaa Lathan trained for months to look like a real basketball player.',
   },
   {
     id: 138,
@@ -1572,7 +1572,7 @@ export const questions = [
     answer: 1,
     category: 'The Culture',
     difficulty: 1,
-    didYouKnow: 'Black culture has been "putting on" the entire world for centuries — from music and dance to fashion and language. Most global trends start in Black communities.',
+    didYouKnow: 'Black culture has been "putting on" the entire world for centuries, from music and dance to fashion and language. Most global trends start in Black communities.',
   },
   {
     id: 165,
@@ -1622,7 +1622,7 @@ export const questions = [
     answer: 1,
     category: 'The Culture',
     difficulty: 2,
-    didYouKnow: 'Code-switching is a survival skill many Black Americans learn from a young age — shifting between AAVE with family and "standard English" in professional settings.',
+    didYouKnow: 'Code-switching is a survival skill many Black Americans learn from a young age, shifting between AAVE with family and "standard English" in professional settings.',
   },
   {
     id: 170,
@@ -1877,7 +1877,7 @@ export const questions = [
     answer: 1,
     category: 'Deep Cuts',
     difficulty: 2,
-    didYouKnow: 'The term comes from actual red lines drawn on maps by the Home Owners\' Loan Corporation in the 1930s. Its effects persist today — formerly redlined neighborhoods still have lower home values and fewer resources.',
+    didYouKnow: 'The term comes from actual red lines drawn on maps by the Home Owners\' Loan Corporation in the 1930s. Its effects persist today. Formerly redlined neighborhoods still have lower home values and fewer resources.',
   },
   {
     id: 192,
@@ -1974,7 +1974,7 @@ export const questions = [
     answer: 1,
     category: 'Deep Cuts',
     difficulty: 2,
-    didYouKnow: 'Victor Hugo Green, a postal worker from Harlem, published the guide. Traveling while Black during Jim Crow was dangerous — the Green Book could be a lifesaver.',
+    didYouKnow: 'Victor Hugo Green, a postal worker from Harlem, published the guide. Traveling while Black during Jim Crow was dangerous, and the Green Book could be a lifesaver.',
   },
   {
     id: 200,
@@ -2235,7 +2235,7 @@ export const questions = [
     answer: 2,
     category: 'Hip-Hop & R&B',
     difficulty: 2,
-    didYouKnow: 'D\'Angelo\'s "Voodoo" album won the Grammy for Best R&B Album. The music video for "Untitled" is iconic — he spent 3 years doing Ab Ripper X workouts to prepare for it.',
+    didYouKnow: 'D\'Angelo\'s "Voodoo" album won the Grammy for Best R&B Album. The music video for "Untitled" is iconic. He spent 3 years doing Ab Ripper X workouts to prepare for it.',
   },
   {
     id: 226,
@@ -2280,6 +2280,6 @@ export const questions = [
     answer: 2,
     category: 'Hip-Hop & R&B',
     difficulty: 1,
-    didYouKnow: 'Nas was 20 years old when "Illmatic" dropped. The album had production from DJ Premier, Pete Rock, Q-Tip, Large Professor, and L.E.S. — a hip-hop dream team.',
+    didYouKnow: 'Nas was 20 years old when "Illmatic" dropped. The album had production from DJ Premier, Pete Rock, Q-Tip, Large Professor, and L.E.S., a hip-hop dream team.',
   },
 ];

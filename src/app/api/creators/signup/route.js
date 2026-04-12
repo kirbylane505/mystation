@@ -24,13 +24,13 @@ function slugify(name) {
 
 export async function POST(request) {
   try {
-    const { email, password, displayName, category } = await request.json();
+    const { email, password, displayName, category, customCategory } = await request.json();
 
     if (!email || !password || !displayName || !category) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const validCategories = ['musician', 'podcaster', 'producer', 'dj', 'content_creator'];
+    const validCategories = ['musician', 'podcaster', 'producer', 'dj', 'content_creator', 'fitness_wellness', 'barber_stylist', 'visual_artist', 'chef_food', 'educator_coach', 'comedian', 'model_fashion', 'custom'];
     if (!validCategories.includes(category)) {
       return NextResponse.json({ error: 'Invalid category' }, { status: 400 });
     }
@@ -76,6 +76,7 @@ export async function POST(request) {
         slug,
         display_name: displayName,
         category,
+        custom_category: category === 'custom' ? (customCategory || null) : null,
         subscription_status: 'inactive',
       });
 

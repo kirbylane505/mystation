@@ -19,7 +19,7 @@ import {
 
 const IDMG_LOGO = '/images/idmg-logo-white.png';
 
-export default function MusicPageClient({ initialTrackId, initialAlbumId, autoplay = false }) {
+export default function MusicPageClient({ initialTrackId, initialAlbumId, autoplay = false, shared = false }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterYear, setFilterYear] = useState('all');
   const [filterAlbum, setFilterAlbum] = useState('all');
@@ -35,7 +35,7 @@ export default function MusicPageClient({ initialTrackId, initialAlbumId, autopl
   const [accessError, setAccessError] = useState('');
   const [accessLoading, setAccessLoading] = useState(false);
   const [hasVaultAccess, setHasVaultAccess] = useState(false);
-  const { setQueue, play, currentTrack, isPlaying, vaultUnlocked, setVaultUnlocked } = usePlayerStore();
+  const { setQueue, play, currentTrack, isPlaying, vaultUnlocked, setVaultUnlocked, setSharedTrackId, clearSharedTrack } = usePlayerStore();
   const { isSubscribed } = useUserStore();
 
   // Auto-filter to album if coming from album share link
@@ -60,6 +60,21 @@ export default function MusicPageClient({ initialTrackId, initialAlbumId, autopl
       }
     }
   }, [initialTrackId, autoplay, setQueue, play]);
+
+  // Shared link — grant full play for ONE track, expires on navigation or different track
+  useEffect(() => {
+    if (shared && initialTrackId) {
+      const trackId = parseInt(initialTrackId);
+      setSharedTrackId(trackId);
+      // Store in sessionStorage so it survives soft navigations but not new tabs
+      sessionStorage.setItem('mystation-shared-track', String(trackId));
+    }
+    // Cleanup: clear shared track when user leaves this page
+    return () => {
+      clearSharedTrack();
+      sessionStorage.removeItem('mystation-shared-track');
+    };
+  }, [shared, initialTrackId, setSharedTrackId, clearSharedTrack]);
 
   // Load user playlists from localStorage (will be Supabase later)
   useEffect(() => {
@@ -270,7 +285,7 @@ export default function MusicPageClient({ initialTrackId, initialAlbumId, autopl
                 {musicTracks.length} Tracks.<br className="hidden md:block" /> Subscribe & Stream.
               </h1>
               <p className="text-white/50 text-sm md:text-base mb-6 max-w-md">
-                Preview 2 tracks free — subscribe to unlock the full catalog. Every stream supports youth music programs through the Mike Page Foundation (EIN: 41-3820708).
+                Preview 2 tracks free. Subscribe to unlock the full catalog. Every stream supports youth music programs through the Mike Page Foundation (EIN: 41-3820708).
               </p>
               <div className="flex flex-wrap gap-3 justify-center md:justify-start">
                 <button

@@ -121,10 +121,10 @@ export const useCartStore = create(
         const referralPercent = hasReferral ? 15 : 0;
         const percent = Math.max(bundlePercent, referralPercent);
         if (percent === referralPercent && hasReferral && referralPercent > bundlePercent) {
-          return { percent, label: '15% OFF — Referral Discount' };
+          return { percent, label: '15% OFF: Referral Discount' };
         }
-        if (bundlePercent >= 15) return { percent, label: '15% OFF — 5+ items' };
-        if (bundlePercent >= 10) return { percent, label: '10% OFF — 2+ items' };
+        if (bundlePercent >= 15) return { percent, label: '15% OFF: 5+ items' };
+        if (bundlePercent >= 10) return { percent, label: '10% OFF: 2+ items' };
         return { percent: 0, label: null };
       },
 

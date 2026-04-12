@@ -4,15 +4,22 @@ import { useState } from 'react';
 import Link from 'next/link';
 
 const CATEGORIES = [
-  { value: 'musician', label: 'Musician' },
-  { value: 'podcaster', label: 'Podcaster' },
-  { value: 'producer', label: 'Producer' },
-  { value: 'dj', label: 'DJ' },
-  { value: 'content_creator', label: 'Content Creator' },
+  { value: 'musician', label: 'Musician', icon: '🎵' },
+  { value: 'podcaster', label: 'Podcaster', icon: '🎙' },
+  { value: 'producer', label: 'Producer', icon: '🎛' },
+  { value: 'dj', label: 'DJ', icon: '🎧' },
+  { value: 'fitness_wellness', label: 'Fitness & Wellness', icon: '💪' },
+  { value: 'barber_stylist', label: 'Barber / Stylist', icon: '✂️' },
+  { value: 'visual_artist', label: 'Visual Artist', icon: '🎨' },
+  { value: 'chef_food', label: 'Chef / Food', icon: '🍳' },
+  { value: 'educator_coach', label: 'Educator / Coach', icon: '📚' },
+  { value: 'comedian', label: 'Comedian', icon: '😂' },
+  { value: 'model_fashion', label: 'Model / Fashion', icon: '👗' },
+  { value: 'custom', label: 'Other', icon: '⭐' },
 ];
 
 export default function CreatorSignup() {
-  const [form, setForm] = useState({ email: '', password: '', displayName: '', category: '' });
+  const [form, setForm] = useState({ email: '', password: '', displayName: '', category: '', customCategory: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -25,7 +32,7 @@ export default function CreatorSignup() {
       const res = await fetch('/api/creators/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, customCategory: form.category === 'custom' ? form.customCategory : undefined }),
       });
 
       const data = await res.json();
@@ -56,7 +63,7 @@ export default function CreatorSignup() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-white mb-2">Join MyStation</h1>
-          <p className="text-[#71717a]">$14.99/mo — Upload music, sell merch, build your audience</p>
+          <p className="text-[#71717a]">$14.99/mo. Build your station, grow your audience, go live.</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -99,22 +106,33 @@ export default function CreatorSignup() {
 
           <div>
             <label className="block text-sm text-[#a1a1aa] mb-2">What do you do?</label>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-3 gap-2">
               {CATEGORIES.map((cat) => (
                 <button
                   key={cat.value}
                   type="button"
                   onClick={() => setForm({ ...form, category: cat.value })}
-                  className={`px-3 py-3 rounded-lg border text-sm font-medium transition-all ${
+                  className={`px-2 py-3 rounded-lg border text-xs font-medium transition-all text-center ${
                     form.category === cat.value
                       ? 'border-[#D4AF37] bg-[#D4AF37]/10 text-[#D4AF37]'
                       : 'border-[#27272a] bg-[#18181b] text-[#a1a1aa] hover:border-[#3f3f46]'
                   }`}
                 >
+                  <span className="block text-lg mb-1">{cat.icon}</span>
                   {cat.label}
                 </button>
               ))}
             </div>
+            {form.category === 'custom' && (
+              <input
+                type="text"
+                required
+                value={form.customCategory}
+                onChange={(e) => setForm({ ...form, customCategory: e.target.value })}
+                placeholder="What's your craft?"
+                className="w-full mt-3 px-4 py-3 bg-[#18181b] border border-[#27272a] rounded-lg text-white focus:border-[#D4AF37] focus:outline-none"
+              />
+            )}
           </div>
 
           {error && (
@@ -126,7 +144,7 @@ export default function CreatorSignup() {
             disabled={loading || !form.category}
             className="w-full py-3 bg-[#D4AF37] text-black font-bold rounded-lg hover:bg-[#b8962e] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
-            {loading ? 'Setting up...' : 'Start Creating — $14.99/mo'}
+            {loading ? 'Setting up...' : 'Start Creating, $14.99/mo'}
           </button>
 
           <p className="text-center text-[#71717a] text-sm">

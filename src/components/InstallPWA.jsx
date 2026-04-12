@@ -122,7 +122,7 @@ export default function InstallPWA() {
                 {isIOS
                   ? 'Get the full app experience on your iPhone'
                   : isMobile
-                    ? 'Get the full app experience — music never stops'
+                    ? 'Get the full app experience. Music never stops.'
                     : 'Pin MyStation to your desktop for instant access'
                 }
               </p>

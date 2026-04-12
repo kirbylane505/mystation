@@ -8,7 +8,7 @@ export const moodPlaylists = [
   {
     id: 'late-night',
     title: 'Late Night Vibes',
-    description: 'Smooth & slow — wind down',
+    description: 'Smooth & slow. Wind down.',
     icon: '\u{1F319}',
     gradient: 'from-indigo-900 to-purple-800',
     trackIds: [

@@ -260,7 +260,7 @@ export default function AlbumHeadliner() {
                 src={coverSide === 'front'
                   ? '/images/albums/idmg-mixtape-cover.png'
                   : '/images/albums/idmg-mixtape-tracklist.png'}
-                alt={coverSide === 'front' ? 'IDMG Mixtape 2026 — Front Cover' : 'IDMG Mixtape 2026 — Tracklist'}
+                alt={coverSide === 'front' ? 'IDMG Mixtape 2026, Front Cover' : 'IDMG Mixtape 2026, Tracklist'}
                 fill
                 sizes="(max-width: 768px) 80vw, 500px"
                 className="object-cover"

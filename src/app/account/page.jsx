@@ -75,10 +75,10 @@ export default function AccountPage() {
         useUserStore.getState().subscribe(userEmail, newTier);
         window.location.reload();
       } else {
-        alert(data.error || 'Upgrade failed — try again or contact support.');
+        alert(data.error || 'Upgrade failed. Try again or contact support.');
       }
     } catch {
-      alert('Network error — please try again.');
+      alert('Network error. Please try again.');
     } finally {
       setUpgrading(null);
     }
@@ -108,7 +108,7 @@ export default function AccountPage() {
               </h2>
               <p className="text-white/50 text-sm">
                 {isSubscribed
-                  ? `${config.price}/month — Unlimited streaming`
+                  ? `${config.price}/month, unlimited streaming`
                   : '4 free songs per session'
                 }
               </p>
@@ -127,14 +127,14 @@ export default function AccountPage() {
             {currentLevel >= 2 && (
               <div className="flex items-center gap-3">
                 <div className="w-2 h-2 rounded-full bg-green-400" />
-                <span className="text-white/70 text-sm">Spotify Search — 100M+ songs</span>
+                <span className="text-white/70 text-sm">Spotify Search, 100M+ songs</span>
               </div>
             )}
             {currentLevel >= 3 && (
               <>
                 <div className="flex items-center gap-3">
                   <div className="w-2 h-2 rounded-full bg-green-400" />
-                  <span className="text-white/70 text-sm">Your Own Station — upload & sell</span>
+                  <span className="text-white/70 text-sm">Your Own Station: upload & sell</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="w-2 h-2 rounded-full bg-green-400" />
@@ -165,7 +165,7 @@ export default function AccountPage() {
               href="/subscribe"
               className="w-full flex items-center justify-center gap-2 py-3.5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl font-bold hover:shadow-lg hover:shadow-indigo-500/30 transition"
             >
-              <Crown size={18} /> Subscribe — Plans from $4.99/mo
+              <Crown size={18} /> Subscribe for $4.99/mo
             </Link>
           )}
         </div>

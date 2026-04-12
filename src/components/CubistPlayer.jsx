@@ -94,7 +94,7 @@ export default function CubistPlayer() {
           <div id="cubist-yt-player" />
         </div>
         <h3 className="text-xl font-bold text-white">iDMG Coke Wave Beats</h3>
-        <p className="text-white/50">Produced by The Cubist — Consecutive Playback</p>
+        <p className="text-white/50">Produced by The Cubist, Consecutive Playback</p>
       </div>
 
       {/* Tracklist */}

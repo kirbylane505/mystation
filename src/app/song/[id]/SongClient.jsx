@@ -23,7 +23,7 @@ function isIOS() {
     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 }
 
-export default function SongClient({ track, allTracks, albumArt }) {
+export default function SongClient({ track, allTracks, albumArt, shared: isSharedLink = false }) {
   const currentTrack = usePlayerStore(s => s.currentTrack);
   const isPlaying = usePlayerStore(s => s.isPlaying);
   const setTrack = usePlayerStore(s => s.setTrack);
@@ -35,6 +35,8 @@ export default function SongClient({ track, allTracks, albumArt }) {
   const toggleMute = usePlayerStore(s => s.toggleMute);
   const nextTrack = usePlayerStore(s => s.nextTrack);
   const prevTrack = usePlayerStore(s => s.prevTrack);
+  const setSharedTrackId = usePlayerStore(s => s.setSharedTrackId);
+  const clearSharedTrack = usePlayerStore(s => s.clearSharedTrack);
 
   const [shared, setShared] = useState(false);
   const [mp3Loading, setMp3Loading] = useState(false);
@@ -49,6 +51,18 @@ export default function SongClient({ track, allTracks, albumArt }) {
   const isiOS = mounted && isIOS();
 
   useEffect(() => { setMounted(true); }, []);
+
+  // Shared link — grant full play for this ONE track, expires on navigation
+  useEffect(() => {
+    if (isSharedLink && track?.id) {
+      setSharedTrackId(track.id);
+      sessionStorage.setItem('mystation-shared-track', String(track.id));
+    }
+    return () => {
+      clearSharedTrack();
+      sessionStorage.removeItem('mystation-shared-track');
+    };
+  }, [isSharedLink, track?.id, setSharedTrackId, clearSharedTrack]);
 
   // Subscribe to progressBridge for real-time progress (no re-renders via store)
   useEffect(() => {
@@ -95,7 +109,7 @@ export default function SongClient({ track, allTracks, albumArt }) {
   }, []);
 
   const handleShare = async () => {
-    const url = `https://mystationlive.com/song/${track.id}`;
+    const url = `https://mystationlive.com/song/${track.id}?shared=true`;
     const text = `🎵 "${track.title}" - ${track.artist || 'Mike Page'}\n\nStream now on MyStation.`;
     if (navigator.share) {
       await navigator.share({ title: track.title, text, url });

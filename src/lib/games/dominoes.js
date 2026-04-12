@@ -133,14 +133,14 @@ export function applyDominoesMove(state, playerId, action, data = {}) {
   if (action === 'draw') {
     // Draw from boneyard
     if (state.boneyard.length === 0) {
-      return { state, valid: false, error: 'Boneyard is empty — you must pass' };
+      return { state, valid: false, error: 'Boneyard is empty. You must pass.' };
     }
 
     // Check if player can already play (can't draw if you can play)
     if (state.chain.length > 0) {
       const canPlayAny = hand.some(t => canPlay(t, state.leftEnd, state.rightEnd));
       if (canPlayAny) {
-        return { state, valid: false, error: 'You have a playable tile — must play it' };
+        return { state, valid: false, error: 'You have a playable tile. Must play it.' };
       }
     }
 
@@ -191,7 +191,7 @@ export function applyDominoesMove(state, playerId, action, data = {}) {
     if (state.chain.length > 0) {
       const canPlayAny = hand.some(t => canPlay(t, state.leftEnd, state.rightEnd));
       if (canPlayAny) {
-        return { state, valid: false, error: 'You have a playable tile — must play it' };
+        return { state, valid: false, error: 'You have a playable tile. Must play it.' };
       }
     }
 

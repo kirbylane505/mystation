@@ -3,7 +3,7 @@ export const metadata = {
   description: 'Get in touch with Mike Page, IDMG, and the MyStation team. Booking, partnerships, press inquiries, and general questions.',
   alternates: { canonical: 'https://mystationlive.com/contact' },
   openGraph: {
-    title: 'Contact MyStation — IDMG',
+    title: 'Contact MyStation | IDMG',
     description: 'Get in touch with Mike Page, IDMG, and the MyStation team. Booking, partnerships, press, and general inquiries.',
     url: 'https://mystationlive.com/contact',
     siteName: 'MyStation',
@@ -12,7 +12,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Contact MyStation — IDMG',
+    title: 'Contact MyStation | IDMG',
     description: 'Get in touch with Mike Page, IDMG, and the MyStation team.',
     images: ['/images/og-image.png'],
   },

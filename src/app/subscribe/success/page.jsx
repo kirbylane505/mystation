@@ -22,10 +22,10 @@ const TIER_CONFIG = {
     headline: 'Welcome to the Diamond Club',
     subtitle: 'You now have the keys to your own empire.',
     features: [
-      { icon: Globe, text: 'Your own station — your name, your page' },
-      { icon: ShoppingBag, text: 'Upload & sell anything — keep 100%' },
+      { icon: Globe, text: 'Your own station. Your name, your page.' },
+      { icon: ShoppingBag, text: 'Upload & sell anything, keep 100%' },
       { icon: BarChart3, text: 'Full analytics dashboard' },
-      { icon: Users, text: 'Own your audience — no algorithm' },
+      { icon: Users, text: 'Own your audience. No algorithm.' },
       { icon: Lock, text: 'Full Vault + Grammy Nights access' },
       { icon: Gem, text: 'Diamond badge everywhere' },
       { icon: ShoppingBag, text: '10% off all MyStation merch' },
@@ -43,7 +43,7 @@ const TIER_CONFIG = {
     headline: 'Welcome to Premium',
     subtitle: 'You just unlocked the full MyStation experience.',
     features: [
-      { icon: Zap, text: 'Global Spotify Search — 100M+ songs' },
+      { icon: Zap, text: 'Global Spotify Search, 100M+ songs' },
       { icon: Music, text: 'Early access to new drops' },
       { icon: Users, text: 'Full Fan Zone access' },
       { icon: Radio, text: 'DJ Turntables unlocked' },
@@ -61,7 +61,7 @@ const TIER_CONFIG = {
     headline: 'Welcome to the Family',
     subtitle: 'Thank you for supporting independent music.',
     features: [
-      { icon: Music, text: 'Unlimited streaming — no limits' },
+      { icon: Music, text: 'Unlimited streaming, no limits' },
       { icon: Headphones, text: 'Background playback & CarPlay' },
       { icon: Heart, text: 'Supporting youth music programs' },
     ],
@@ -225,7 +225,7 @@ export default function SubscribeSuccessPage() {
         {isDiamond && (
           <div className="space-y-3 mb-6">
             <Link
-              href="/station/create"
+              href="/creators/signup"
               className="w-full py-4 bg-gradient-to-r from-amber-500 to-yellow-500 text-black font-black rounded-xl hover:opacity-90 transition flex items-center justify-center gap-3 text-lg shadow-lg shadow-amber-500/30"
             >
               <Crown size={22} />

@@ -62,7 +62,7 @@ export default function ReferralDetector() {
       <div className="max-w-lg mx-auto flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-500/30 rounded-2xl backdrop-blur-xl">
         <Gift size={20} className="text-green-400 shrink-0" />
         <div className="flex-1 min-w-0">
-          <p className="text-green-400 font-bold text-sm">15% OFF Merch — Referral Reward!</p>
+          <p className="text-green-400 font-bold text-sm">15% OFF Merch: Referral Reward!</p>
           <p className="text-white/50 text-xs">Auto-applied at checkout. Code: REFER15</p>
         </div>
         <Link

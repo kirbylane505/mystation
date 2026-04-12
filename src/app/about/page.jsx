@@ -10,11 +10,11 @@ import Image from 'next/image';
 import { Heart, Music, Award, Users, MapPin, Calendar, ExternalLink, Check, HeartHandshake, Utensils } from 'lucide-react';
 
 export const metadata = {
-  title: 'About — Mike Page Foundation',
+  title: 'About | Mike Page Foundation',
   description: 'Mike Page Foundation, a 501(c)(3) nonprofit (EIN: 41-3820708). Youth music programs, scholarships, community meals, and Love on the Lawn Festival. Building community through music.',
   alternates: { canonical: 'https://mystationlive.com/about' },
   openGraph: {
-    title: 'About — Mike Page Foundation | 501(c)(3) Nonprofit',
+    title: 'About | Mike Page Foundation | 501(c)(3) Nonprofit',
     description: 'Mike Page Foundation, a 501(c)(3) nonprofit (EIN: 41-3820708). Youth music programs, scholarships, community meals, and the Love on the Lawn Festival.',
     url: 'https://mystationlive.com/about',
     siteName: 'MyStation',
@@ -23,7 +23,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'About — Mike Page Foundation',
+    title: 'About | Mike Page Foundation',
     description: '501(c)(3) nonprofit (EIN: 41-3820708). Youth music programs, scholarships, community meals, and the Love on the Lawn Festival.',
     images: ['/images/og-image.png'],
   },
@@ -162,7 +162,7 @@ export default function AboutPage() {
             Feed My <span className="text-green-400">Friends</span>
           </h2>
           <p className="text-white/60 text-lg max-w-2xl mx-auto">
-            We show up for our community. Free food, free clothes, free blankets, free tents — because nobody should go without the basics.
+            We show up for our community. Free food, free clothes, free blankets, free tents. Nobody should go without the basics.
           </p>
         </div>
 
@@ -171,7 +171,7 @@ export default function AboutPage() {
           <div className="group relative rounded-2xl overflow-hidden border border-white/10">
             <img
               src="/images/foundation/feed-signs.jpg"
-              alt="Volunteers holding signs — Free Tents, Free Clothes, Free Blankets"
+              alt="Volunteers holding signs: Free Tents, Free Clothes, Free Blankets"
               className="w-full aspect-[4/3] object-cover group-hover:scale-105 transition-transform duration-500"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />

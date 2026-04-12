@@ -149,7 +149,7 @@ export default function MyProfilePage() {
           Subscribe to MyStation to get your profile, follow other members, and be part of the family.
         </p>
         <Link href="/subscribe" className="px-8 py-3.5 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl text-white font-bold hover:shadow-lg hover:shadow-indigo-500/30 transition">
-          Subscribe — Plans from $4.99/mo
+          Subscribe for $4.99/mo
         </Link>
       </div>
     );
@@ -458,7 +458,7 @@ export default function MyProfilePage() {
           <div className="space-y-2 text-sm text-white/60">
             <div className="flex items-start gap-2">
               <Heart size={14} className="text-pink-400 mt-0.5 shrink-0" />
-              <span>Support each other. This is a family — we build each other up.</span>
+              <span>Support each other. This is a family. We build each other up.</span>
             </div>
             <div className="flex items-start gap-2">
               <Users size={14} className="text-blue-400 mt-0.5 shrink-0" />

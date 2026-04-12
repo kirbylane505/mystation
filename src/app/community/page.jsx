@@ -2,7 +2,7 @@ import CommunityFeed from '@/components/community/CommunityFeed';
 
 export const metadata = {
   title: 'Community | MyStation',
-  description: 'Connect with the MyStation community — music talk, events, announcements, and more.',
+  description: 'Connect with the MyStation community. Music talk, events, announcements, and more.',
 };
 
 export default function CommunityPage() {

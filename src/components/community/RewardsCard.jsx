@@ -45,7 +45,7 @@ export default function RewardsCard() {
         <div>
           <div className="flex justify-between text-[10px] text-white/30 mb-1">
             <span>{rank.icon} {rank.name}</span>
-            <span>{nextRank.icon} {nextRank.name} — {(nextRank.minPoints - points).toLocaleString()} pts to go</span>
+            <span>{nextRank.icon} {nextRank.name}, {(nextRank.minPoints - points).toLocaleString()} pts to go</span>
           </div>
           <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
             <div

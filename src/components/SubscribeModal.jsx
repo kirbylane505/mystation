@@ -198,7 +198,7 @@ export default function SubscribeModal() {
                 <h2 className="text-xl font-bold text-white mb-1">Subscribe to Unlock Full Tracks</h2>
                 <div className="space-y-1 mt-2">
                   <p className="text-white/70 text-sm flex items-center justify-center gap-1.5">
-                    <Check size={14} className="text-green-400 shrink-0" /> Preview any song — subscribe for full streaming
+                    <Check size={14} className="text-green-400 shrink-0" /> Preview any song. Subscribe for full streaming.
                   </p>
                   <p className="text-[#D4AF37] text-sm font-semibold flex items-center justify-center gap-1.5">
                     <span className="text-base">🎫</span> Stay through August = FREE LOTL ticket ($20 value)
@@ -284,7 +284,7 @@ export default function SubscribeModal() {
                     ) : (
                       <>
                         <CreditCard size={18} />
-                        Start Free Trial — ${tiers.find(t => t.id === selectedTier)?.price}/mo after
+                        Start Free Trial, ${tiers.find(t => t.id === selectedTier)?.price}/mo after
                       </>
                     )}
                   </button>

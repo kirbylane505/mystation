@@ -8,19 +8,19 @@ import CubistPlayer from '@/components/CubistPlayer';
 
 export const metadata = {
   title: 'The Cubist - Tyrell Thornton',
-  description: 'The Cubist (Tyrell Thornton) — 100M+ streams & views. Credits: French Montana, Max B, Big30, Pooh Shiesty, Blac Youngsta. BET+ "I Got a Story to Tell" Season 2.',
+  description: 'The Cubist (Tyrell Thornton), 100M+ streams & views. Credits: French Montana, Max B, Big30, Pooh Shiesty, Blac Youngsta. BET+ "I Got a Story to Tell" Season 2.',
   alternates: { canonical: 'https://mystationlive.com/artists/the-cubist' },
   openGraph: {
-    title: 'THE CUBIST — 100M+ Streams. BET+. The Sound Behind The Stars.',
-    description: 'Tyrell Thornton aka The Cubist — producer for French Montana, Max B, Big30, Pooh Shiesty & Blac Youngsta. Stream his beats, watch his videos, and catch Season 2 on BET+.',
+    title: 'THE CUBIST | 100M+ Streams. BET+. The Sound Behind The Stars.',
+    description: 'Tyrell Thornton aka The Cubist, producer for French Montana, Max B, Big30, Pooh Shiesty & Blac Youngsta. Stream his beats, watch his videos, and catch Season 2 on BET+.',
     url: 'https://mystationlive.com/artists/the-cubist',
     siteName: 'MyStation',
-    images: [{ url: 'https://mystationlive.com/api/og?title=THE%20CUBIST&artist=Tyrell%20Thornton&album=100M%2B%20Streams%20%E2%80%A2%20BET%2B&year=IDMG', width: 1200, height: 630, alt: 'The Cubist — MyStation' }],
+    images: [{ url: 'https://mystationlive.com/api/og?title=THE%20CUBIST&artist=Tyrell%20Thornton&album=100M%2B%20Streams%20%E2%80%A2%20BET%2B&year=IDMG', width: 1200, height: 630, alt: 'The Cubist on MyStation' }],
     type: 'profile',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'THE CUBIST — 100M+ Streams. The Sound Behind The Stars.',
+    title: 'THE CUBIST | 100M+ Streams. The Sound Behind The Stars.',
     description: 'Producer for French Montana, Max B, Big30 & more. Stream beats + catch BET+ Season 2.',
     images: ['https://mystationlive.com/api/og?title=THE%20CUBIST&artist=Tyrell%20Thornton&album=100M%2B%20Streams%20%E2%80%A2%20BET%2B&year=IDMG'],
   },
@@ -105,7 +105,7 @@ export default function CubistPage() {
               The Cubist is a multi-faceted creative force in hip-hop and entertainment. With over 100 million streams and views across platforms, he has established himself as one of the most prolific producers in the game.
             </p>
             <p>
-              His production credits read like a who{"'"}s who of hip-hop royalty — French Montana, Max B, Big30, Pooh Shiesty, and Blac Youngsta have all tapped into The Cubist{"'"}s signature sound. His beats blend cinematic atmosphere with hard-hitting drums, creating the perfect backdrop for storytelling.
+              His production credits read like a who{"'"}s who of hip-hop royalty. French Montana, Max B, Big30, Pooh Shiesty, and Blac Youngsta have all tapped into The Cubist{"'"}s signature sound. His beats blend cinematic atmosphere with hard-hitting drums, creating the perfect backdrop for storytelling.
             </p>
             <p>
               In April 2026, The Cubist expands into television with Season 2 of <strong className="text-white">{'"'}I Got a Story to Tell{'"'}</strong> on BET+. The docuseries dives deep into the untold stories behind the music, showcasing The Cubist{"'"}s journey from the trenches to the top of the industry.
@@ -157,7 +157,7 @@ export default function CubistPage() {
               />
             </div>
             <h3 className="text-xl font-bold text-white">Bulletproof Maybach</h3>
-            <p className="text-white/50">French Montana x Max B — Prod. The Cubist</p>
+            <p className="text-white/50">French Montana x Max B, Prod. The Cubist</p>
             <p className="text-white/30 text-xs mt-1">From <em>Coke Wave 3.5: Narcos</em></p>
           </div>
 
@@ -176,7 +176,7 @@ export default function CubistPage() {
               />
             </div>
             <h3 className="text-xl font-bold text-white">Ever Since U Left Me</h3>
-            <p className="text-white/50">French Montana x Max B — Prod. The Cubist</p>
+            <p className="text-white/50">French Montana x Max B, Prod. The Cubist</p>
           </div>
 
           {/* YouTube Video - Pop The Half */}
@@ -194,7 +194,7 @@ export default function CubistPage() {
               />
             </div>
             <h3 className="text-xl font-bold text-white">Pop The Half</h3>
-            <p className="text-white/50">French Montana & Max B — Prod. The Cubist</p>
+            <p className="text-white/50">French Montana & Max B, Prod. The Cubist</p>
             <p className="text-white/30 text-xs mt-1">From <em>Coke Wave 3.5: Narcos</em></p>
           </div>
 
@@ -212,7 +212,7 @@ export default function CubistPage() {
               </div>
             </div>
             <h3 className="text-xl font-bold text-white text-center">Pop The Half</h3>
-            <p className="text-white/50 text-center">French Montana & Max B — Prod. The Cubist</p>
+            <p className="text-white/50 text-center">French Montana & Max B, Prod. The Cubist</p>
             <p className="text-white/30 text-xs mt-1 text-center">Visual Clip</p>
           </div>
 
@@ -231,7 +231,7 @@ export default function CubistPage() {
               />
             </div>
             <h3 className="text-xl font-bold text-white">Free Shiest Life</h3>
-            <p className="text-white/50">Big30 ft. Pooh Shiesty — Prod. The Cubist</p>
+            <p className="text-white/50">Big30 ft. Pooh Shiesty, Prod. The Cubist</p>
           </div>
 
           {/* Joe & Jada - Pop The Half Review */}
@@ -248,7 +248,7 @@ export default function CubistPage() {
               </div>
             </div>
             <h3 className="text-xl font-bold text-white text-center">{'"'}Pop a Half is TOUGH{'"'}</h3>
-            <p className="text-white/50 text-center">Joe & Jada react to French Montana x Max B — Prod. The Cubist</p>
+            <p className="text-white/50 text-center">Joe & Jada react to French Montana x Max B, Prod. The Cubist</p>
           </div>
         </div>
       </section>
@@ -257,7 +257,7 @@ export default function CubistPage() {
       <section className="py-16 bg-white/[0.02]">
         <div className="max-w-4xl mx-auto px-6">
           <h2 className="text-2xl font-black text-white mb-2">My Work</h2>
-          <p className="text-white/40 mb-8">iDMG Coke Wave Beats — Produced by The Cubist</p>
+          <p className="text-white/40 mb-8">iDMG Coke Wave Beats, Produced by The Cubist</p>
           <CubistPlayer />
         </div>
       </section>

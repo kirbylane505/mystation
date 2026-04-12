@@ -290,7 +290,7 @@ export default function EmailGate() {
 
             <h2 className="text-xl font-bold text-white mb-2 text-center">Sign In</h2>
             <p className="text-white/50 text-sm text-center mb-6">
-              Subscribers — just enter your email. No password needed.
+              Subscribers, just enter your email. No password needed.
             </p>
 
             <form onSubmit={handleSubscriberSignIn} className="space-y-4">

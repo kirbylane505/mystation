@@ -20,7 +20,7 @@ const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'MyStation <notifications@my
  */
 export async function sendSaleAlert({ customerName, customerEmail, items, total, shippingAddress, sessionId, printfulOrderId, printifyOrderId }) {
   if (!resend) { console.warn('Resend not configured — skipping sale alert'); return { success: false }; }
-  const itemList = items.map(i => `- ${i.name} x${i.quantity} — $${(i.amount / 100).toFixed(2)}`).join('\n');
+  const itemList = items.map(i => `- ${i.name} x${i.quantity}: $${(i.amount / 100).toFixed(2)}`).join('\n');
   const address = shippingAddress
     ? `${shippingAddress.line1}${shippingAddress.line2 ? ', ' + shippingAddress.line2 : ''}, ${shippingAddress.city}, ${shippingAddress.state} ${shippingAddress.postal_code}`
     : 'Not provided';
@@ -34,7 +34,7 @@ export async function sendSaleAlert({ customerName, customerEmail, items, total,
     const { data, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: ADMIN_EMAIL,
-      subject: `NEW SALE — $${(total / 100).toFixed(2)} from ${customerName}`,
+      subject: `NEW SALE: $${(total / 100).toFixed(2)} from ${customerName}`,
       html: `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; background: #0a0e1a; color: #fff; padding: 32px; border-radius: 16px;">
           <div style="text-align: center; margin-bottom: 24px;">
@@ -50,7 +50,7 @@ export async function sendSaleAlert({ customerName, customerEmail, items, total,
 
           <div style="background: #1a1f36; padding: 20px; border-radius: 12px; margin-bottom: 16px;">
             <h3 style="color: #3b82f6; margin: 0 0 12px 0;">Items</h3>
-            ${items.map(i => `<p style="margin: 6px 0; color: #e2e8f0;">${i.name} x${i.quantity} — <strong>$${(i.amount / 100).toFixed(2)}</strong></p>`).join('')}
+            ${items.map(i => `<p style="margin: 6px 0; color: #e2e8f0;">${i.name} x${i.quantity}: <strong>$${(i.amount / 100).toFixed(2)}</strong></p>`).join('')}
           </div>
 
           <div style="background: #1a1f36; padding: 20px; border-radius: 12px; margin-bottom: 16px;">
@@ -93,7 +93,7 @@ export async function sendOrderConfirmation({ customerName, customerEmail, items
     const { data, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: customerEmail,
-      subject: `Order Confirmed — MyStation`,
+      subject: `Order Confirmed | MyStation`,
       html: `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; background: #0a0e1a; color: #fff; padding: 32px; border-radius: 16px;">
           <div style="text-align: center; margin-bottom: 24px;">
@@ -105,7 +105,7 @@ export async function sendOrderConfirmation({ customerName, customerEmail, items
 
           <div style="background: #1a1f36; padding: 20px; border-radius: 12px; margin-bottom: 16px;">
             <h3 style="color: #3b82f6; margin: 0 0 12px 0;">Your Order</h3>
-            ${items.map(i => `<p style="margin: 6px 0; color: #e2e8f0;">${i.name} x${i.quantity} — <strong>$${(i.amount / 100).toFixed(2)}</strong></p>`).join('')}
+            ${items.map(i => `<p style="margin: 6px 0; color: #e2e8f0;">${i.name} x${i.quantity}: <strong>$${(i.amount / 100).toFixed(2)}</strong></p>`).join('')}
             <hr style="border-color: #2a2f46; margin: 12px 0;" />
             <p style="color: #fff; font-weight: 700; text-align: right;">Total: $${(total / 100).toFixed(2)}</p>
           </div>
@@ -224,7 +224,7 @@ export async function sendDailyAnalyticsReport(report) {
     const { data, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: ADMIN_EMAIL,
-      subject: `MyStation Daily — ${totalPlays} plays, ${uniqueListeners} listeners, $${(totalRevenue / 100).toFixed(2)} revenue`,
+      subject: `MyStation Daily: ${totalPlays} plays, ${uniqueListeners} listeners, $${(totalRevenue / 100).toFixed(2)} revenue`,
       html: `
         <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:650px;margin:0 auto;background:#0a0e1a;color:#fff;padding:32px;border-radius:16px;">
           <div style="text-align:center;margin-bottom:24px;">
@@ -329,10 +329,10 @@ export async function sendOrderFailedAlert({ provider, error: orderError, custom
   try {
     const address = shippingAddress
       ? `${shippingAddress.line1 || ''}${shippingAddress.line2 ? ', ' + shippingAddress.line2 : ''}, ${shippingAddress.city || ''}, ${shippingAddress.state || ''} ${shippingAddress.postal_code || ''}`
-      : 'NOT PROVIDED — check Stripe dashboard';
+      : 'NOT PROVIDED, check Stripe dashboard';
 
     const itemRows = (items || []).map(i =>
-      `<p style="margin: 4px 0; color: #e2e8f0;">${i.name} x${i.quantity} — $${(i.amount / 100).toFixed(2)}</p>`
+      `<p style="margin: 4px 0; color: #e2e8f0;">${i.name} x${i.quantity}: $${(i.amount / 100).toFixed(2)}</p>`
     ).join('') || '<p style="color: #94a3b8;">No item details available</p>';
 
     const printfulData = printfulItems ? `<p style="color: #94a3b8; font-size: 12px; word-break: break-all;">Printful metadata: ${JSON.stringify(printfulItems)}</p>` : '';
@@ -341,7 +341,7 @@ export async function sendOrderFailedAlert({ provider, error: orderError, custom
     await resend.emails.send({
       from: FROM_EMAIL,
       to: ADMIN_EMAIL,
-      subject: `URGENT: ORDER FAILED — ${provider} — ${customerName || customerEmail} — $${((total || 0) / 100).toFixed(2)}`,
+      subject: `URGENT: ORDER FAILED | ${provider} | ${customerName || customerEmail} | $${((total || 0) / 100).toFixed(2)}`,
       html: `
         <div style="font-family: -apple-system, sans-serif; max-width: 600px; margin: 0 auto; background: #0a0e1a; color: #fff; padding: 32px; border-radius: 16px; border: 2px solid #ef4444;">
           <div style="text-align: center; margin-bottom: 24px;">
@@ -352,7 +352,7 @@ export async function sendOrderFailedAlert({ provider, error: orderError, custom
 
           <div style="background: #1a1f36; padding: 20px; border-radius: 12px; margin-bottom: 16px;">
             <h3 style="color: #ef4444; margin: 0 0 12px 0;">Error</h3>
-            <p style="color: #fca5a5; margin: 0; font-family: monospace; font-size: 13px;">${orderError || 'Unknown error — check server logs'}</p>
+            <p style="color: #fca5a5; margin: 0; font-family: monospace; font-size: 13px;">${orderError || 'Unknown error. Check server logs.'}</p>
           </div>
 
           <div style="background: #1a1f36; padding: 20px; border-radius: 12px; margin-bottom: 16px;">
@@ -413,7 +413,7 @@ export async function sendOrderStatusUpdate({ customerName, customerEmail, order
     const { data, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: customerEmail,
-      subject: `Order Update — ${status.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}`,
+      subject: `Order Update: ${status.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}`,
       html: `
         <div style="font-family: -apple-system, sans-serif; max-width: 600px; margin: 0 auto; background: #0a0e1a; color: #fff; padding: 32px; border-radius: 16px;">
           <div style="text-align: center; margin-bottom: 24px;">
@@ -459,7 +459,7 @@ export async function sendNewSignupAlert({ customerName, customerEmail, subscrib
     const { data, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: ADMIN_EMAIL,
-      subject: `NEW SIGNUP (#${subscriberNumber}) — ${tierDisplay.split(' ')[0]} — ${customerName || customerEmail}`,
+      subject: `NEW SIGNUP (#${subscriberNumber}) | ${tierDisplay.split(' ')[0]} | ${customerName || customerEmail}`,
       html: `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; background: #0a0e1a; color: #fff; padding: 32px; border-radius: 16px;">
           <div style="text-align: center; margin-bottom: 24px;">
@@ -473,7 +473,7 @@ export async function sendNewSignupAlert({ customerName, customerEmail, subscrib
             <h3 style="color: #3b82f6; margin: 0 0 12px 0;">Details</h3>
             <p style="margin: 6px 0; color: #e2e8f0;">Name: <strong>${customerName || 'Not provided'}</strong></p>
             <p style="margin: 6px 0; color: #e2e8f0;">Email: <strong>${customerEmail}</strong></p>
-            <p style="margin: 6px 0; color: ${lotlEligible ? '#22c55e' : '#f59e0b'};">LOTL Ticket: <strong>${lotlEligible ? 'ELIGIBLE (if subscribed until Aug 1)' : 'Not eligible — 250 slots filled'}</strong></p>
+            <p style="margin: 6px 0; color: ${lotlEligible ? '#22c55e' : '#f59e0b'};">LOTL Ticket: <strong>${lotlEligible ? 'ELIGIBLE (if subscribed until Aug 1)' : 'Not eligible, 250 slots filled'}</strong></p>
           </div>
           <div style="background: #1a1f36; padding: 20px; border-radius: 12px; text-align: center;">
             <p style="color: #64748b; font-size: 12px; margin: 0 0 4px;">LOTL Ticket Spots Remaining</p>
@@ -508,7 +508,7 @@ export async function sendCancelAlert({ customerEmail, reason }) {
     const { data, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: ADMIN_EMAIL,
-      subject: `UNSUBSCRIBED — ${customerEmail}`,
+      subject: `UNSUBSCRIBED: ${customerEmail}`,
       html: `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; background: #0a0e1a; color: #fff; padding: 32px; border-radius: 16px;">
           <div style="text-align: center; margin-bottom: 24px;">
@@ -547,13 +547,13 @@ export async function sendLOTLTicketEmail({ customerEmail, subscriberNumber, tic
     const { data, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: customerEmail,
-      subject: `YOUR FREE TICKET — Love on the Lawn 2026, Year 5!`,
+      subject: `YOUR FREE TICKET: Love on the Lawn 2026, Year 5!`,
       html: `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; background: #0a0e1a; color: #fff; padding: 0; border-radius: 16px; overflow: hidden;">
           <div style="background: linear-gradient(135deg, #059669 0%, #10b981 50%, #34d399 100%); padding: 40px 32px; text-align: center;">
             <img src="https://mystationlive.com/images/lotl-day-logo.png" alt="Love on the Lawn Day" width="180" height="180" style="margin: 0 auto 12px; display: block; border-radius: 12px;" />
             <h1 style="color: #fff; margin: 12px 0 0; font-size: 32px; font-weight: 900;">LOVE ON THE LAWN</h1>
-            <p style="color: rgba(255,255,255,0.9); font-size: 18px; margin: 4px 0 0; font-weight: 600;">2026 — YEAR 5</p>
+            <p style="color: rgba(255,255,255,0.9); font-size: 18px; margin: 4px 0 0; font-weight: 600;">2026, YEAR 5</p>
             <p style="color: rgba(255,255,255,0.7); font-size: 14px; margin: 8px 0 0;">September 5, 2026 | Elgin, IL</p>
           </div>
 
@@ -565,18 +565,18 @@ export async function sendLOTLTicketEmail({ customerEmail, subscriberNumber, tic
             <div style="background: linear-gradient(135deg, #064e3b, #065f46); border: 2px solid #10b981; border-radius: 16px; padding: 24px; text-align: center; margin-bottom: 24px;">
               <p style="color: #6ee7b7; font-size: 12px; margin: 0 0 8px; text-transform: uppercase; letter-spacing: 3px;">Ticket Code</p>
               <p style="color: #fff; font-size: 32px; font-weight: 900; margin: 0; letter-spacing: 4px; font-family: monospace;">${ticketCode}</p>
-              <p style="color: #6ee7b7; font-size: 12px; margin: 8px 0 0;">General Admission — 1 Person</p>
+              <p style="color: #6ee7b7; font-size: 12px; margin: 8px 0 0;">General Admission, 1 Person</p>
             </div>
 
             <div style="background: #1a1f36; padding: 20px; border-radius: 12px; margin-bottom: 24px;">
               <p style="color: #e2e8f0; font-size: 14px; line-height: 1.6; margin: 0;">
-                Thank you for being a loyal MyStation subscriber. You believed in us from the beginning — Member #${subscriberNumber}. You stayed. You streamed. You supported independent music.
+                Thank you for being a loyal MyStation subscriber. You believed in us from the beginning, Member #${subscriberNumber}. You stayed. You streamed. You supported independent music.
               </p>
               <p style="color: #e2e8f0; font-size: 14px; line-height: 1.6; margin: 16px 0 0;">
                 This ticket is yours. No strings. Pull up to Love on the Lawn 2026, show this code at the gate, and enjoy Year 5 on us.
               </p>
               <p style="color: #3b82f6; font-size: 14px; font-weight: 700; margin: 16px 0 0;">
-                — The MyStation Family
+                - The MyStation Family
               </p>
             </div>
 
@@ -584,7 +584,7 @@ export async function sendLOTLTicketEmail({ customerEmail, subscriberNumber, tic
               <p style="color: #64748b; font-size: 12px; margin: 0 0 8px; text-transform: uppercase; letter-spacing: 1px;">Event Details</p>
               <p style="color: #e2e8f0; font-size: 13px; margin: 4px 0;">📅 September 5, 2026</p>
               <p style="color: #e2e8f0; font-size: 13px; margin: 4px 0;">📍 Festival Park, 132 S. Grove Ave, Elgin, IL</p>
-              <p style="color: #e2e8f0; font-size: 13px; margin: 4px 0;">🎵 Love on the Lawn Day — Year 5</p>
+              <p style="color: #e2e8f0; font-size: 13px; margin: 4px 0;">🎵 Love on the Lawn Day, Year 5</p>
               <p style="color: #e2e8f0; font-size: 13px; margin: 4px 0;">🌐 lotlfest.com</p>
             </div>
           </div>
@@ -651,7 +651,7 @@ export async function sendWelcomeEmail({ customerName, customerEmail, password }
 
           <div style="text-align: center; margin-top: 24px; padding-top: 16px; border-top: 1px solid #2a2f46;">
             <p style="color: #64748b; font-size: 12px;">Every listen supports the Mike Page Foundation 501(c)(3) | EIN: 41-3820708</p>
-            <p style="color: #64748b; font-size: 12px;">MyStation — by IDMG</p>
+            <p style="color: #64748b; font-size: 12px;">MyStation by IDMG</p>
           </div>
         </div>
       `,
@@ -718,7 +718,7 @@ export async function sendTicketOrderPending({ customerName, customerEmail, orde
     const { data, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: customerEmail,
-      subject: `Order ${orderRef} — Payment Verification Pending`,
+      subject: `Order ${orderRef}: Payment Verification Pending`,
       html: `<html><body style="margin:0;padding:0;background:#0a1628;font-family:Arial,sans-serif;">
         <div style="max-width:600px;margin:0 auto;padding:40px 20px;">
           <div style="text-align:center;margin-bottom:30px;">
@@ -770,7 +770,7 @@ export async function sendTicketConfirmation({ customerName, customerEmail, orde
     const { data, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: customerEmail,
-      subject: `🎫 Your Tickets for ${eventName} — ${orderRef}`,
+      subject: `🎫 Your Tickets for ${eventName} | ${orderRef}`,
       html: `<html><body style="margin:0;padding:0;background:#0a1628;font-family:Arial,sans-serif;">
         <div style="max-width:600px;margin:0 auto;padding:40px 20px;">
           <div style="text-align:center;margin-bottom:30px;">
@@ -789,7 +789,7 @@ export async function sendTicketConfirmation({ customerName, customerEmail, orde
             <div style="text-align:center;margin-top:20px;">
               <a href="https://mystationlive.com/tickets" style="display:inline-block;background:linear-gradient(135deg,#3b82f6,#1e40af);color:#fff;font-weight:bold;text-decoration:none;padding:14px 32px;border-radius:12px;font-size:16px;">View My Tickets</a>
             </div>
-            <p style="color:rgba(255,255,255,0.4);font-size:11px;margin:20px 0 0;text-align:center;">Order ${orderRef} • Save this email — it's your ticket!</p>
+            <p style="color:rgba(255,255,255,0.4);font-size:11px;margin:20px 0 0;text-align:center;">Order ${orderRef} • Save this email, it's your ticket!</p>
           </div>
         </div>
       </body></html>`,
@@ -816,7 +816,7 @@ export async function sendBigSpenderThankYou({ customerName, customerEmail, tota
     const { data, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: customerEmail,
-      subject: `Thank You for Your Support — MyStation`,
+      subject: `Thank You for Your Support | MyStation`,
       html: `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; background: #0a0e1a; color: #fff; padding: 0; border-radius: 16px; overflow: hidden;">
           <div style="background: linear-gradient(135deg, #1e3a5f 0%, #3b82f6 50%, #6366f1 100%); padding: 40px 32px; text-align: center;">
@@ -855,7 +855,7 @@ export async function sendBigSpenderThankYou({ customerName, customerEmail, tota
 
           <div style="text-align: center; padding: 16px 32px 24px; border-top: 1px solid #2a2f46;">
             <p style="color: #64748b; font-size: 12px; margin: 0;">Every purchase supports the Mike Page Foundation 501(c)(3) | EIN: 41-3820708</p>
-            <p style="color: #64748b; font-size: 12px; margin: 4px 0;">MyStation — by IDMG</p>
+            <p style="color: #64748b; font-size: 12px; margin: 4px 0;">MyStation by IDMG</p>
           </div>
         </div>
       `,
@@ -884,7 +884,7 @@ export async function sendTicketOrderAlert({ orderRef, eventName, customerName, 
     const { data, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: ADMIN_EMAIL,
-      subject: `🎫 NEW TICKET ORDER — ${orderRef} — $${totalAmount.toFixed(2)} via ${methodLabel}`,
+      subject: `🎫 NEW TICKET ORDER | ${orderRef} | $${totalAmount.toFixed(2)} via ${methodLabel}`,
       html: `<html><body style="margin:0;padding:0;background:#0a1628;font-family:Arial,sans-serif;">
         <div style="max-width:500px;margin:0 auto;padding:30px 20px;">
           <h2 style="color:#60a5fa;margin:0 0 20px;">New Ticket Order 🎫</h2>
@@ -945,16 +945,16 @@ export async function sendSubscriptionWelcomeEmail({ customerEmail, customerName
   <!-- WELCOME MESSAGE -->
   <div style="padding:32px;text-align:center;">
     <p style="color:#22c55e;font-size:22px;font-weight:700;margin:0 0 4px;">You're officially in, ${safeName}.</p>
-    <p style="color:${tierColor};font-size:16px;margin:0;font-weight:600;">${tierDisplay} Member — $${tierPrice}/mo</p>
+    <p style="color:${tierColor};font-size:16px;margin:0;font-weight:600;">${tierDisplay} Member, $${tierPrice}/mo</p>
   </div>
 
   <!-- WHAT YOU GET -->
   <div style="margin:0 24px 24px;background:linear-gradient(135deg,#111827,#1a1f36);border:1px solid #1e3a5f;border-radius:16px;padding:24px;">
     <h3 style="color:#3b82f6;margin:0 0 16px;font-size:20px;text-align:center;">What You Get</h3>
     <table cellpadding="0" cellspacing="0" border="0" width="100%">
-      <tr><td style="padding:8px 0;color:#e2e8f0;font-size:15px;">&#127911; Unlimited streaming — entire music catalog</td></tr>
+      <tr><td style="padding:8px 0;color:#e2e8f0;font-size:15px;">&#127911; Unlimited streaming, entire music catalog</td></tr>
       <tr><td style="padding:8px 0;color:#e2e8f0;font-size:15px;">&#128293; Exclusive unreleased tracks & early drops</td></tr>
-      <tr><td style="padding:8px 0;color:#e2e8f0;font-size:15px;">&#128172; Comment on any track — join the conversation</td></tr>
+      <tr><td style="padding:8px 0;color:#e2e8f0;font-size:15px;">&#128172; Comment on any track, join the conversation</td></tr>
       <tr><td style="padding:8px 0;color:#e2e8f0;font-size:15px;">&#127917; Exclusive videos & behind-the-scenes content</td></tr>
       <tr><td style="padding:8px 0;color:#e2e8f0;font-size:15px;">&#128176; Member-only merch drops & discounts</td></tr>
       <tr><td style="padding:8px 0;color:#e2e8f0;font-size:15px;">&#127775; VIP access to IDMG events & announcements</td></tr>
@@ -975,7 +975,7 @@ export async function sendSubscriptionWelcomeEmail({ customerEmail, customerName
     <h3 style="color:#f59e0b;margin:0 0 8px;font-size:20px;">FREE EARLY BIRD TICKET</h3>
     <p style="color:#e2e8f0;font-size:14px;margin:0 0 8px;line-height:1.5;">
       As a MyStation subscriber, you get a <strong style="color:#f59e0b;">FREE Early Bird ticket</strong> to
-      <strong>Love on the Lawn Day 2026</strong> — Festival Park, Elgin, Illinois!
+      <strong>Love on the Lawn Day 2026</strong> at Festival Park, Elgin, Illinois!
     </p>
     <p style="color:#94a3b8;font-size:13px;margin:0 0 12px;">
       September 5, 2026 &middot; 2PM – 10PM &middot; 10,000+ Capacity
@@ -990,7 +990,7 @@ export async function sendSubscriptionWelcomeEmail({ customerEmail, customerName
   <div style="margin:24px;background:linear-gradient(135deg,#111827,#1a1f36);border:1px solid #1e3a5f;border-radius:16px;padding:24px;text-align:center;">
     <h3 style="color:#3b82f6;margin:0 0 8px;font-size:20px;">IDMG Official Merch</h3>
     <p style="color:#e2e8f0;font-size:14px;margin:0 0 16px;line-height:1.5;">
-      Rep the Empire. Hoodies, tees, hats, slides, joggers &amp; more — all premium quality, shipped to your door.
+      Rep the Empire. Hoodies, tees, hats, slides, joggers &amp; more. All premium quality, shipped to your door.
     </p>
     <a href="https://mystationlive.com/merch" style="display:inline-block;background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;font-weight:800;text-decoration:none;padding:12px 32px;border-radius:12px;font-size:14px;">SHOP MERCH</a>
   </div>
@@ -1014,7 +1014,7 @@ export async function sendSubscriptionWelcomeEmail({ customerEmail, customerName
   <!-- FOOTER -->
   <div style="background:#050810;padding:24px 32px;text-align:center;border-top:1px solid #1e293b;">
     <img src="https://mystationlive.com/images/mystation-logo.png" alt="MyStation" width="48" height="48" style="display:block;margin:0 auto 12px;border-radius:10px;opacity:0.7;" />
-    <p style="color:#475569;font-size:12px;margin:0 0 4px;">MyStation — Premium Music by IDMG</p>
+    <p style="color:#475569;font-size:12px;margin:0 0 4px;">MyStation | Premium Music by IDMG</p>
     <p style="color:#334155;font-size:11px;margin:0;">Impossible Dreamz Music Group &middot; Atlanta, GA</p>
     <p style="color:#334155;font-size:11px;margin:8px 0 0;">
       <a href="https://mystationlive.com" style="color:#475569;text-decoration:none;">mystationlive.com</a> &middot;
@@ -1049,7 +1049,7 @@ export async function sendPaymentFailedEmail({ customerEmail, customerName, invo
     await resend.emails.send({
       from: FROM_EMAIL,
       to: customerEmail,
-      subject: 'MyStation — Payment Issue with Your Subscription',
+      subject: 'MyStation: Payment Issue with Your Subscription',
       html: `
         <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:600px;margin:0 auto;background:#0a0e1a;color:#fff;padding:32px;border-radius:16px;">
           <div style="text-align:center;margin-bottom:24px;">
@@ -1069,7 +1069,7 @@ export async function sendPaymentFailedEmail({ customerEmail, customerName, invo
     await resend.emails.send({
       from: FROM_EMAIL,
       to: ADMIN_EMAIL,
-      subject: `PAYMENT FAILED — ${customerEmail}`,
+      subject: `PAYMENT FAILED: ${customerEmail}`,
       html: `
         <div style="font-family:-apple-system,sans-serif;max-width:500px;margin:0 auto;background:#0a0e1a;color:#fff;padding:24px;border-radius:16px;">
           <h2 style="color:#ef4444;margin:0 0 12px;">Payment Failed</h2>
@@ -1083,6 +1083,74 @@ export async function sendPaymentFailedEmail({ customerEmail, customerName, invo
     return { success: true };
   } catch (err) {
     console.error('Payment failed email error:', err);
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * Send loyalty/renewal thank you email to subscriber on renewal
+ */
+export async function sendRenewalThankYou({ customerEmail, customerName, tier, subscriberNumber, monthsActive }) {
+  if (!resend) { console.warn('Resend not configured — skipping renewal thank you'); return { success: false }; }
+  const safeName = (customerName || 'there').replace(/[<>&"']/g, '');
+  const tierUpper = (tier || 'supporter').toUpperCase();
+  const months = monthsActive || 1;
+
+  try {
+    const { data, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: customerEmail,
+      subject: `${months} Month${months > 1 ? 's' : ''} Strong! Thank You, Member #${subscriberNumber}`,
+      html: `
+        <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:600px;margin:0 auto;background:#0a0e1a;color:#fff;padding:32px;border-radius:16px;">
+          <div style="text-align:center;margin-bottom:24px;">
+            <h1 style="color:#3b82f6;margin:0;font-size:24px;">MYSTATION</h1>
+            <p style="color:#22c55e;font-size:18px;font-weight:700;margin:12px 0;">${months} Month${months > 1 ? 's' : ''} & Counting</p>
+          </div>
+
+          <div style="background:#1a1f36;padding:24px;border-radius:12px;margin-bottom:16px;">
+            <p style="color:#e2e8f0;font-size:15px;line-height:1.7;margin:0;">Hey ${safeName},</p>
+            <p style="color:#e2e8f0;font-size:15px;line-height:1.7;margin:12px 0;">Your <strong style="color:#a855f7;">${tierUpper}</strong> subscription just renewed, and we appreciate you more than you know. You've been rocking with MyStation for <strong style="color:#f59e0b;">${months} month${months > 1 ? 's' : ''}</strong> as Founding Member <strong style="color:#f59e0b;">#${subscriberNumber}</strong>.</p>
+            <p style="color:#e2e8f0;font-size:15px;line-height:1.7;margin:12px 0;">Every month you stay, you're helping build something real, supporting independent music, the Mike Page Foundation, and the Love on the Lawn Festival. That's bigger than a subscription. That's family.</p>
+            <p style="color:#e2e8f0;font-size:15px;line-height:1.7;margin:12px 0;">New music and features are always in the works. Stay tuned.</p>
+            <p style="color:#e2e8f0;font-size:15px;line-height:1.7;margin:16px 0 0;">With love,<br/><strong>Mike Page & The IDMG Family</strong></p>
+          </div>
+
+          <div style="text-align:center;margin-top:20px;">
+            <a href="https://mystationlive.com/music" style="display:inline-block;background:#3b82f6;color:#fff;padding:14px 32px;border-radius:12px;text-decoration:none;font-weight:700;">Listen Now</a>
+          </div>
+
+          <div style="text-align:center;margin-top:20px;padding-top:16px;border-top:1px solid #2a2f46;">
+            <p style="color:#64748b;font-size:12px;">Founding Member #${subscriberNumber} | ${tierUpper} Tier</p>
+            <p style="color:#64748b;font-size:11px;">Every subscription supports the Mike Page Foundation (EIN: 41-3820708)</p>
+          </div>
+        </div>
+      `,
+    });
+
+    if (error) {
+      console.error('Failed to send renewal thank you:', error);
+      return { success: false, error };
+    }
+
+    // Alert Mike
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: ADMIN_EMAIL,
+      subject: `RENEWAL: Member #${subscriberNumber} (${tierUpper}), ${months} month${months > 1 ? 's' : ''}`,
+      html: `
+        <div style="font-family:-apple-system,sans-serif;max-width:500px;margin:0 auto;background:#0a0e1a;color:#fff;padding:24px;border-radius:16px;">
+          <h2 style="color:#22c55e;margin:0 0 12px;">Subscription Renewed</h2>
+          <p style="color:#e2e8f0;margin:0 0 8px;"><strong>${safeName}</strong> (${customerEmail})</p>
+          <p style="color:#94a3b8;margin:0;">Member #${subscriberNumber} | ${tierUpper} | ${months} month${months > 1 ? 's' : ''} active</p>
+        </div>
+      `,
+    }).catch(err => console.error('Renewal admin alert error:', err));
+
+    console.log('Renewal thank you sent to:', customerEmail);
+    return { success: true, emailId: data?.id };
+  } catch (err) {
+    console.error('Renewal thank you email error:', err);
     return { success: false, error: err.message };
   }
 }

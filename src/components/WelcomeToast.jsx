@@ -11,7 +11,7 @@ export default function WelcomeToast() {
 
     const timer = setTimeout(() => {
       toast('Welcome to MyStation', {
-        description: '100+ tracks. Preview 2 free — subscribe to unlock all.',
+        description: '100+ tracks. Preview 2 free. Subscribe to unlock all.',
         icon: <Music size={16} className="text-blue-400" />,
         duration: 5000,
       });

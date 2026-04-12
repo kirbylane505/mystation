@@ -3,7 +3,7 @@ export const metadata = {
   description: 'Play classic games with friends in the IDMG MyStation Kickback Lounge. Spades, Dominos, 21, Poker, and more.',
   alternates: { canonical: 'https://mystationlive.com/lounge' },
   openGraph: {
-    title: 'IDMG MyStation Kickback Lounge — Play Games With Friends',
+    title: 'IDMG MyStation Kickback Lounge | Play Games With Friends',
     description: 'Multiplayer gaming lounge. Invite up to 8 friends for Spades, 21, Slides & Ladders, and more.',
     url: 'https://mystationlive.com/lounge',
     siteName: 'MyStation',

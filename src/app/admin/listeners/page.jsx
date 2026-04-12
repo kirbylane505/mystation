@@ -79,7 +79,7 @@ export default function ListenersPage() {
             <MapPin size={32} className="text-blue-400" />
             Listener Map
           </h1>
-          <p className="text-white/50 mt-1">Where your music is playing — last 30 days</p>
+          <p className="text-white/50 mt-1">Where your music is playing, last 30 days</p>
         </div>
         <button
           onClick={fetchData}

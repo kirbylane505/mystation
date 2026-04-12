@@ -46,7 +46,7 @@ export const LEVELS = [
   { num: 6, name: 'Quick Learner', type: 'time', balls: [0, 1, 2, 3, 4], timeLimit: 90,
     starThresholds: [90, 60, 30], description: 'Clear 4 balls before time runs out!' },
   { num: 7, name: 'Ten Ball', type: 'clear', balls: [0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11], shotLimit: 22,
-    starThresholds: [22, 16, 10], description: 'Now we\'re cooking — 10 balls!' },
+    starThresholds: [22, 16, 10], description: 'Now we\'re cooking! 10 balls!' },
   { num: 8, name: 'Rookie Finals', type: 'clear', balls: [0, 1, 2, 3, 4, 5, 6, 7, 8], shotLimit: 20,
     starThresholds: [20, 14, 9], description: 'Clear 8 balls including the 8-ball. Rookie complete!' },
 

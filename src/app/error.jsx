@@ -16,7 +16,7 @@ export default function GlobalError({ error, reset }) {
         </div>
         <h2 className="text-xl font-bold text-white mb-2">Something went wrong</h2>
         <p className="text-white/50 text-sm mb-6">
-          Don't worry — your music is safe. Try refreshing the page.
+          Don't worry, your music is safe. Try refreshing the page.
         </p>
         <button
           onClick={() => reset()}

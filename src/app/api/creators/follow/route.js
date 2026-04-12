@@ -4,7 +4,7 @@ import { getSupabaseAdmin } from '@/lib/creatorAuth';
 // Follow a creator
 export async function POST(request) {
   try {
-    const { creatorSlug, followerEmail } = await request.json();
+    const { creatorSlug, followerEmail, pushSubscription } = await request.json();
     if (!creatorSlug || !followerEmail) {
       return NextResponse.json({ error: 'creatorSlug and followerEmail required' }, { status: 400 });
     }
@@ -23,7 +23,11 @@ export async function POST(request) {
     await supabase
       .from('creator_followers')
       .upsert(
-        { creator_id: creator.id, follower_email: followerEmail.toLowerCase() },
+        {
+          creator_id: creator.id,
+          follower_email: followerEmail.toLowerCase(),
+          ...(pushSubscription ? { push_subscription: pushSubscription } : {}),
+        },
         { onConflict: 'creator_id,follower_email' }
       );
 

@@ -284,7 +284,7 @@ export default function SleepTimer({ isOpen, onClose }) {
                 className="w-full py-4 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold text-lg rounded-xl hover:opacity-90 transition flex items-center justify-center gap-3"
               >
                 <Moon size={22} />
-                Start Sleep Timer — {customMinutes || selectedMinutes} min
+                Start Sleep Timer, {customMinutes || selectedMinutes} min
               </button>
 
               <p className="text-white/30 text-xs text-center mt-3">

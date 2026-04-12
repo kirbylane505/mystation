@@ -57,7 +57,7 @@ function DonatePopup({ onClose }) {
             className="w-full flex items-center justify-center gap-2 py-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold rounded-xl hover:opacity-90 transition shadow-lg shadow-blue-500/30"
           >
             <Crown size={18} />
-            Subscribe — Plans from $4.99/mo
+            Subscribe for $4.99/mo
           </button>
 
           {/* Donate */}
@@ -125,7 +125,7 @@ function MerchPopup({ onClose }) {
         <div className="relative pt-6 px-8 text-center">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-green-500/20 border border-green-500/30 rounded-full mb-4">
             <Sparkles size={14} className="text-green-400" />
-            <span className="text-green-400 text-xs font-black uppercase tracking-wider">LOTL 2026 — Year 5</span>
+            <span className="text-green-400 text-xs font-black uppercase tracking-wider">LOTL 2026, Year 5</span>
           </div>
         </div>
 
@@ -154,7 +154,7 @@ function MerchPopup({ onClose }) {
             </div>
             <p className="text-white text-sm font-bold">Spend $50+ = 25% OFF LOTL tickets</p>
             <p className="text-white text-sm font-bold">Spend $100+ = 1 FREE TICKET</p>
-            <p className="text-white/40 text-xs mt-1">September 5, 2026 — Festival Park, Elgin IL</p>
+            <p className="text-white/40 text-xs mt-1">September 5, 2026 at Festival Park, Elgin IL</p>
           </div>
         </div>
 

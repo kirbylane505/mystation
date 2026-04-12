@@ -313,7 +313,7 @@ function applyPlay(state, playerId, action) {
   const valid = getValidPlays(state, playerId);
 
   if (!valid.some(c => c.id === cardId)) {
-    return { state, valid: false, error: 'Invalid play — must follow suit' };
+    return { state, valid: false, error: 'Invalid play. Must follow suit.' };
   }
 
   // Apply the play

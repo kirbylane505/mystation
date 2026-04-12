@@ -46,13 +46,26 @@ export async function generateMetadata({ params }) {
           alt: title,
         },
       ],
-      audio: track.audioFile ? [{ url: `https://mystationlive.com${track.audioFile}` }] : undefined,
+      audio: track.audioFile ? [{
+        url: track.audioFile.startsWith('http')
+          ? track.audioFile
+          : `https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/${track.audioFile.replace(/^\/audio\//, '')}`,
+        type: track.audioFile.endsWith('.m4a') ? 'audio/mp4' : 'audio/mpeg',
+      }] : undefined,
     },
     twitter: {
-      card: 'summary_large_image',
+      card: 'player',
       title,
       description,
       images: [ogImage],
+      players: [{
+        playerUrl: `https://mystationlive.com/embed/${track.id}`,
+        streamUrl: track.audioFile.startsWith('http')
+          ? track.audioFile
+          : `https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/${track.audioFile.replace(/^\/audio\//, '')}`,
+        width: 480,
+        height: 80,
+      }],
     },
   };
 }
@@ -60,8 +73,10 @@ export async function generateMetadata({ params }) {
 // Dynamic rendering — too many tracks to statically generate all at build time
 export const dynamic = 'force-dynamic';
 
-export default function SongPage({ params }) {
+export default async function SongPage({ params, searchParams }) {
   const { id } = params;
+  const sp = await searchParams;
+  const shared = sp?.shared === 'true';
   const track = tracks.find(t => String(t.id) === String(id));
   const album = albums.find(a => a.id === track?.albumId);
   const albumArt = album?.coverImage || null;
@@ -107,7 +122,7 @@ export default function SongPage({ params }) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(songJsonLd) }}
       />
-      <SongClient track={track} allTracks={tracks} albumArt={albumArt} />
+      <SongClient track={track} allTracks={tracks} albumArt={albumArt} shared={shared} />
     </>
   );
 }

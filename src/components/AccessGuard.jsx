@@ -91,7 +91,7 @@ export default function AccessGuard() {
           className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold rounded-xl hover:opacity-90 transition shadow-lg shadow-blue-500/30 text-lg mb-6"
         >
           <CreditCard size={20} />
-          Subscribe — Starting at $4.99/mo
+          Subscribe for $4.99/mo
         </a>
 
         {/* Alternative access methods */}

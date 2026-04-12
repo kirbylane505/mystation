@@ -92,7 +92,7 @@ export default function RewardsPage() {
           </h1>
           <p className="text-lg text-white/50 max-w-2xl mx-auto">
             Every dollar you spend on MyStation brings you closer to exclusive rewards,
-            VIP access, and the ultimate prize — a weekend at the IDMG Compound.
+            VIP access, and the ultimate prize: a weekend at the IDMG Compound.
           </p>
         </div>
       </section>
@@ -253,7 +253,7 @@ export default function RewardsPage() {
           <h2 className="text-2xl font-black text-white mb-3">The IDMG Compound Awaits</h2>
           <p className="text-white/50 mb-6 max-w-lg mx-auto">
             A free weekend. Room and food on us. Experience the lifestyle.
-            Build lifetime friendships with the Dreamerz. This isn&apos;t merch — it&apos;s a movement.
+            Build lifetime friendships with the Dreamerz. This isn&apos;t merch. It&apos;s a movement.
           </p>
           <Link
             href="/merch"

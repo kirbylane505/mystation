@@ -214,7 +214,7 @@ export default function SpadesGame({ gameState, myPlayerId, onMove }) {
       {gameState.phase === 'playing' && (
         <div className="mt-2">
           {isMyTurn ? (
-            <p className="text-blue-400 font-bold text-sm animate-pulse">Your turn — play a card</p>
+            <p className="text-blue-400 font-bold text-sm animate-pulse">Your turn, play a card</p>
           ) : (
             <p className="text-white/30 text-sm">
               Waiting for {gameState.aiPlayers?.includes(gameState.currentPlayerId) ? 'AI' : 'opponent'}...

@@ -1031,7 +1031,7 @@ export default function PoolGame({ gameState, myPlayerId, onMove, players }) {
         ) : placingCue && isMyTurn ? (
           <span className="text-cyan-400">Click in the shaded zone to place the cue ball</span>
         ) : isMyTurn ? (
-          <span className="text-emerald-400">Your shot — drag back from cue ball to aim, release to shoot</span>
+          <span className="text-emerald-400">Your shot. Drag back from cue ball to aim, release to shoot.</span>
         ) : (
           <span className="text-white/40">Opponent&apos;s turn...</span>
         )}

@@ -1,6 +1,6 @@
 export const metadata = {
   title: 'Privacy Policy',
-  description: 'MyStation privacy policy — how we handle your data.',
+  description: 'MyStation privacy policy. How we handle your data.',
 };
 
 export default function PrivacyPage() {
@@ -12,7 +12,7 @@ export default function PrivacyPage() {
       <div className="space-y-8 text-gray-300 leading-relaxed">
         <section>
           <h2 className="text-xl font-semibold text-white mb-3">What We Collect</h2>
-          <p>When you subscribe to MyStation, we collect your email address to manage your account. Payment processing is handled by Stripe — we never see or store your credit card details.</p>
+          <p>When you subscribe to MyStation, we collect your email address to manage your account. Payment processing is handled by Stripe. We never see or store your credit card details.</p>
         </section>
 
         <section>

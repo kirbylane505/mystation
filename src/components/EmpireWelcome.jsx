@@ -82,7 +82,7 @@ export default function EmpireWelcome() {
                 <span className="text-[#D4AF37]"> is Playing</span>
               </h2>
               <p className="text-white/40 text-sm">
-                Stream music, shop official merch, grab tickets — all in one place.
+                Stream music, shop official merch, grab tickets. All in one place.
                 <br />
                 <span className="text-white/25">Free for 26 minutes. Then $4.99/mo.</span>
               </p>
@@ -118,7 +118,7 @@ export default function EmpireWelcome() {
               </div>
               <div className="flex-1 text-left">
                 <p className="text-white font-bold text-sm group-hover:text-[#D4AF37] transition">Get Tickets</p>
-                <p className="text-white/35 text-xs">LOTL 2026 — Sept 5 — from $20</p>
+                <p className="text-white/35 text-xs">LOTL 2026, Sept 5, from $20</p>
               </div>
               <span className="text-white/20 text-lg">→</span>
             </a>
@@ -133,7 +133,7 @@ export default function EmpireWelcome() {
                 <Music size={20} className="text-black" />
               </div>
               <div className="flex-1 text-left">
-                <p className="text-[#D4AF37] font-bold text-sm">Subscribe — $4.99/mo</p>
+                <p className="text-[#D4AF37] font-bold text-sm">Subscribe, $4.99/mo</p>
                 <p className="text-white/35 text-xs">Unlimited streaming, merch discounts</p>
               </div>
               <span className="text-[#D4AF37]/40 text-lg">→</span>
@@ -150,7 +150,7 @@ export default function EmpireWelcome() {
                 <span className="w-0.5 h-3.5 bg-[#D4AF37] rounded-full animate-pulse" style={{ animationDelay: '450ms' }} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-white/60 text-xs truncate">Now Playing — <span className="text-[#D4AF37]">Never Let The Money</span></p>
+                <p className="text-white/60 text-xs truncate">Now Playing: <span className="text-[#D4AF37]">Never Let The Money</span></p>
                 <p className="text-white/30 text-[10px]">Vincent Berry II ft. Mike Page</p>
               </div>
             </div>

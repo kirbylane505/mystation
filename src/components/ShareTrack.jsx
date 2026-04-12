@@ -19,7 +19,7 @@ export default function ShareTrack({ track }) {
 
   // Always use production URL for sharing - never localhost
   const siteUrl = 'https://mystationlive.com';
-  const trackUrl = `${siteUrl}/song/${track.id}`;
+  const trackUrl = `${siteUrl}/song/${track.id}?shared=true`;
 
   // Share message - title prominent, encourages engagement back on site
   const shareTitle = `${track.title} - Mike Page`;

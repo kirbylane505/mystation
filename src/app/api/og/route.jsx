@@ -20,59 +20,33 @@ export async function GET(request) {
           fontFamily: 'system-ui, sans-serif',
           position: 'relative',
           overflow: 'hidden',
+          alignItems: 'center',
+          justifyContent: 'center',
         }}
       >
-        {/* Blue accent orbs */}
+        {/* Glow behind play button */}
         <div
           style={{
             position: 'absolute',
-            width: '400px',
-            height: '400px',
+            width: '500px',
+            height: '500px',
             borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(59,130,246,0.3) 0%, transparent 70%)',
-            top: '-100px',
-            left: '-100px',
-            display: 'flex',
-          }}
-        />
-        <div
-          style={{
-            position: 'absolute',
-            width: '300px',
-            height: '300px',
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(99,102,241,0.2) 0%, transparent 70%)',
-            bottom: '-50px',
-            right: '-50px',
-            display: 'flex',
-          }}
-        />
-
-        {/* IDMG Circle Logo — right side */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="https://mystationlive.com/images/idmg-logo-white.png"
-          alt=""
-          width="360"
-          height="360"
-          style={{
-            position: 'absolute',
-            right: '60px',
+            background: 'radial-gradient(circle, rgba(59,130,246,0.35) 0%, transparent 65%)',
             top: '50%',
-            transform: 'translateY(-50%)',
-            opacity: 0.4,
-            borderRadius: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            display: 'flex',
           }}
         />
 
-        {/* Main content */}
+        {/* Left side — song info */}
         <div
           style={{
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',
-            padding: '60px 80px',
-            width: '100%',
+            padding: '50px 60px',
+            width: '55%',
           }}
         >
           {/* MYSTATION brand */}
@@ -80,28 +54,28 @@ export async function GET(request) {
             style={{
               display: 'flex',
               alignItems: 'center',
-              marginBottom: '40px',
+              marginBottom: '30px',
             }}
           >
             <div
               style={{
-                width: '48px',
-                height: '48px',
+                width: '44px',
+                height: '44px',
                 borderRadius: '12px',
                 background: 'linear-gradient(135deg, #3b82f6, #6366f1)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '24px',
-                marginRight: '12px',
+                fontSize: '22px',
+                marginRight: '10px',
               }}
             >
               🎵
             </div>
-            <span style={{ color: '#ffffff', fontSize: '28px', fontWeight: 800, letterSpacing: '2px' }}>
+            <span style={{ color: '#ffffff', fontSize: '24px', fontWeight: 800, letterSpacing: '2px' }}>
               MY
             </span>
-            <span style={{ color: '#3b82f6', fontSize: '28px', fontWeight: 800, letterSpacing: '2px' }}>
+            <span style={{ color: '#3b82f6', fontSize: '24px', fontWeight: 800, letterSpacing: '2px' }}>
               STATION
             </span>
           </div>
@@ -109,11 +83,11 @@ export async function GET(request) {
           {/* Song title */}
           <div
             style={{
-              fontSize: title.length > 20 ? '52px' : '64px',
+              fontSize: title.length > 25 ? '44px' : title.length > 15 ? '52px' : '60px',
               fontWeight: 900,
               color: '#ffffff',
               lineHeight: 1.1,
-              marginBottom: '16px',
+              marginBottom: '12px',
               display: 'flex',
             }}
           >
@@ -123,9 +97,9 @@ export async function GET(request) {
           {/* Artist */}
           <div
             style={{
-              fontSize: '32px',
+              fontSize: '28px',
               color: 'rgba(255,255,255,0.6)',
-              marginBottom: '8px',
+              marginBottom: '6px',
               display: 'flex',
             }}
           >
@@ -135,31 +109,44 @@ export async function GET(request) {
           {/* Album + Year */}
           <div
             style={{
-              fontSize: '22px',
+              fontSize: '20px',
               color: 'rgba(255,255,255,0.3)',
-              marginBottom: '40px',
               display: 'flex',
             }}
           >
             {album} • {year}
           </div>
+        </div>
 
-          {/* CTA */}
+        {/* Right side — MASSIVE play button */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '45%',
+            gap: '20px',
+          }}
+        >
           <div
             style={{
+              width: '200px',
+              height: '200px',
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
               display: 'flex',
               alignItems: 'center',
-              padding: '16px 32px',
-              background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
-              borderRadius: '50px',
-              width: '280px',
+              justifyContent: 'center',
+              boxShadow: '0 8px 60px rgba(59,130,246,0.7), 0 0 120px rgba(59,130,246,0.3)',
+              border: '4px solid rgba(255,255,255,0.2)',
             }}
           >
-            <span style={{ fontSize: '20px', marginRight: '12px', display: 'flex' }}>▶</span>
-            <span style={{ color: '#ffffff', fontSize: '20px', fontWeight: 700, letterSpacing: '2px', display: 'flex' }}>
-              STREAM FREE
-            </span>
+            <span style={{ fontSize: '90px', color: '#fff', marginLeft: '16px', display: 'flex' }}>▶</span>
           </div>
+          <span style={{ color: 'rgba(255,255,255,0.8)', fontSize: '22px', fontWeight: 700, letterSpacing: '4px', display: 'flex' }}>
+            TAP TO PLAY
+          </span>
         </div>
 
         {/* Bottom bar */}

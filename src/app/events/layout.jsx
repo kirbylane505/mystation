@@ -1,10 +1,10 @@
 export const metadata = {
   title: 'Events',
-  description: 'Upcoming events from IDMG and Mike Page. Love on the Lawn Day 2026 — September 5, Elgin IL. 10,000 capacity. Live music, food, community.',
+  description: 'Upcoming events from IDMG and Mike Page. Love on the Lawn Day 2026, September 5, Elgin IL. 10,000 capacity. Live music, food, community.',
   alternates: { canonical: 'https://mystationlive.com/events' },
   openGraph: {
-    title: 'Events — Love on the Lawn Day 2026 & More',
-    description: 'Upcoming events from IDMG. Love on the Lawn Day 2026 — September 5, Elgin IL. 10,000 capacity. Live music, food, community.',
+    title: 'Events | Love on the Lawn Day 2026 & More',
+    description: 'Upcoming events from IDMG. Love on the Lawn Day 2026, September 5, Elgin IL. 10,000 capacity. Live music, food, community.',
     url: 'https://mystationlive.com/events',
     siteName: 'MyStation',
     images: [{ url: '/images/og-image.png', width: 1200, height: 630, alt: 'MyStation Events' }],
@@ -12,7 +12,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Events — Love on the Lawn Day 2026',
+    title: 'Events | Love on the Lawn Day 2026',
     description: 'September 5, 2026. Elgin, IL. 10,000 capacity. Get tickets now.',
     images: ['/images/og-image.png'],
   },
@@ -28,7 +28,7 @@ export default function EventsLayout({ children }) {
             "@context": "https://schema.org",
             "@type": "Event",
             "name": "Love on the Lawn Day 2026",
-            "description": "5th Annual Love on the Lawn Day — the biggest Hip-Hop/R&B festival in the Midwest. Live music, food, community. 10,000 capacity.",
+            "description": "5th Annual Love on the Lawn Day, the biggest Hip-Hop/R&B festival in the Midwest. Live music, food, community. 10,000 capacity.",
             "startDate": "2026-09-05T12:00:00-05:00",
             "endDate": "2026-09-05T22:00:00-05:00",
             "eventStatus": "https://schema.org/EventScheduled",

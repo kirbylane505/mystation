@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSupabaseAdmin } from '@/lib/creatorAuth';
+import { getWebPush } from '@/lib/push';
 
 const r2 = new S3Client({
   region: 'auto',
@@ -83,9 +84,41 @@ export async function POST(request) {
       })
       .eq('id', creator.id);
 
+    // Notify followers of new track
+    notifyFollowers(creator.id, creator.slug, `New track: ${title}`);
+
     return NextResponse.json({ track });
   } catch (err) {
     console.error('[creator-upload] Error:', err);
     return NextResponse.json({ error: err.message || 'Upload failed' }, { status: 500 });
+  }
+}
+
+async function notifyFollowers(creatorId, creatorSlug, body) {
+  try {
+    const webpush = getWebPush();
+    if (!webpush) return;
+
+    const supabase = getSupabaseAdmin();
+    const { data: followers } = await supabase
+      .from('creator_followers')
+      .select('push_subscription')
+      .eq('creator_id', creatorId)
+      .not('push_subscription', 'is', null);
+
+    if (!followers || followers.length === 0) return;
+
+    const payload = JSON.stringify({
+      title: 'New on MyStation',
+      body,
+      url: `/artist/${creatorSlug}`,
+      image: '/images/mystation-logo.png',
+    });
+
+    await Promise.allSettled(
+      followers.map(f => webpush.sendNotification(f.push_subscription, payload).catch(() => null))
+    );
+  } catch (err) {
+    console.error('Follower notification error:', err);
   }
 }

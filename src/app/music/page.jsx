@@ -47,6 +47,7 @@ export async function generateMetadata({ searchParams }) {
     if (track) {
       const album = albums.find(a => a.id === track.albumId);
       const imageUrl = album?.coverImage || '/images/albums/cindys-son.jpg';
+      const shareUrl = `https://mystationlive.com/music?track=${trackId}&autoplay=true&shared=true`;
 
       return {
         title: `${track.title} - Mike Page`,
@@ -54,6 +55,7 @@ export async function generateMetadata({ searchParams }) {
         openGraph: {
           title: `🎵 ${track.title} - Mike Page`,
           description: `Tap to listen & drop a 🔥 if it's fire!\n\nStream free on MyStation`,
+          url: shareUrl,
           images: [
             {
               url: `https://mystationlive.com${imageUrl}`,
@@ -64,6 +66,12 @@ export async function generateMetadata({ searchParams }) {
           ],
           type: 'music.song',
           siteName: 'MyStation',
+          audio: track.audioFile ? [{
+            url: track.audioFile.startsWith('http')
+              ? track.audioFile
+              : `https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/${track.audioFile.replace(/^\/audio\//, '')}`,
+            type: track.audioFile.endsWith('.m4a') ? 'audio/mp4' : 'audio/mpeg',
+          }] : undefined,
         },
         twitter: {
           card: 'summary_large_image',
@@ -98,6 +106,7 @@ export default async function MusicPage({ searchParams }) {
   const trackId = params?.track;
   const albumId = params?.album;
   const autoplay = params?.autoplay === 'true';
-  return <MusicPageClient initialTrackId={trackId} initialAlbumId={albumId} autoplay={autoplay} />;
+  const shared = params?.shared === 'true';
+  return <MusicPageClient initialTrackId={trackId} initialAlbumId={albumId} autoplay={autoplay} shared={shared} />;
 }
 // Rebuild Wed Feb  4 04:23:49 EST 2026

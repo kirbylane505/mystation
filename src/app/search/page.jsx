@@ -518,7 +518,7 @@ function SearchPageInner() {
                         onClick={() => usePlayerStore.getState().openSubscribeModal()}
                         className="px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold rounded-full hover:opacity-90 transition"
                       >
-                        Subscribe — Plans from $4.99/mo
+                        Subscribe for $4.99/mo
                       </button>
                     </div>
                   </div>
@@ -570,7 +570,7 @@ function SearchPageInner() {
               }}
               className="block w-full py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-bold rounded-xl text-center text-sm hover:opacity-90 transition"
             >
-              Upgrade to Premium — $9.99/mo
+              Upgrade to Premium, $9.99/mo
             </Link>
             <p className="text-white/30 text-[10px] text-center mt-2">Includes global Spotify search, early drops, Fan Zone, DJ access & more</p>
           </div>

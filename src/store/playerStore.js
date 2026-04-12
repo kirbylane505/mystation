@@ -29,6 +29,11 @@ export const usePlayerStore = create(
   vaultUnlocked: false,
   setVaultUnlocked: (val) => set({ vaultUnlocked: val }),
 
+  // Shared link — one track gets full play (bypass 30s preview)
+  sharedTrackId: null,
+  setSharedTrackId: (id) => set({ sharedTrackId: id }),
+  clearSharedTrack: () => set({ sharedTrackId: null }),
+
   // Engagement tracking
   playCount: 0,
   uniquePlaysThisSession: [],
@@ -210,21 +215,26 @@ export const usePlayerStore = create(
 }),
     {
       name: 'mystation-player',
-      version: 8, // v8: removed browse timer / lockout system entirely
+      version: 9, // v9: persist currentTrack + queue for instant resume
       partialize: (state) => ({
         volume: state.volume,
         isMuted: state.isMuted,
         shuffle: state.shuffle,
         repeat: state.repeat,
+        currentTrack: state.currentTrack,
+        queue: state.queue,
+        queueIndex: state.queueIndex,
       }),
       migrate: (persisted, version) => {
-        // v8: removed browse timer / lockout — keep user preferences only
-        if (version < 8) {
+        if (version < 9) {
           return {
             volume: persisted.volume ?? 0.8,
             isMuted: persisted.isMuted ?? false,
             shuffle: persisted.shuffle ?? false,
             repeat: persisted.repeat ?? 'all',
+            currentTrack: persisted.currentTrack ?? null,
+            queue: persisted.queue ?? [],
+            queueIndex: persisted.queueIndex ?? 0,
           };
         }
         return persisted;
@@ -346,6 +356,9 @@ export const useUserStore = create(
   )
 );
 
+// FREE PLAY MODE — set to false to re-enable 30s preview gate (target: 10K users)
+const FREE_PLAY_MODE = true;
+
 // Specific free tracks — ALWAYS full-length for everyone
 // "I Want This One" (500) & "R.U.N or R U Out" (501)
 const FREE_TRACK_IDS = [500, 501];
@@ -362,13 +375,20 @@ export function isGated(/* track */) {
 
 /**
  * isPreviewOnly — returns true if this track should be limited to 30-second preview.
+ * When FREE_PLAY_MODE is true, ALL tracks play full for everyone.
  * Full tracks: free track IDs + subscribers + friends.
  */
 export function isPreviewOnly(track) {
+  if (FREE_PLAY_MODE) return false;
+
   if (!track?.id) return false;
 
   // Free tracks are ALWAYS full-length
   if (FREE_TRACK_IDS.includes(track.id)) return false;
+
+  // Shared link track — one track gets full play, no preview cutoff
+  const { sharedTrackId } = usePlayerStore.getState();
+  if (sharedTrackId && track.id === sharedTrackId) return false;
 
   // Check Zustand subscriber state first (fastest, no DOM access)
   const { isSubscribed } = useUserStore.getState();

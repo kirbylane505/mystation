@@ -5,24 +5,141 @@ import Link from 'next/link';
 
 export default function DashboardOverview() {
   const [stats, setStats] = useState(null);
+  const [creator, setCreator] = useState(null);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const getEmail = () => decodeURIComponent(
+    document.cookie.split('; ').find((c) => c.startsWith('mystation-email='))?.split('=')[1] || ''
+  );
 
   useEffect(() => {
-    const email = document.cookie
-      .split('; ')
-      .find((c) => c.startsWith('mystation-email='))
-      ?.split('=')[1];
+    const email = getEmail();
+    if (!email) return;
 
-    if (email) {
-      fetch(`/api/creators/analytics?email=${encodeURIComponent(decodeURIComponent(email))}&summary=true`)
-        .then((r) => r.json())
-        .then(setStats)
-        .catch(console.error);
-    }
+    fetch(`/api/creators/analytics?email=${encodeURIComponent(email)}&summary=true`)
+      .then((r) => r.json())
+      .then(setStats)
+      .catch(console.error);
+
+    fetch(`/api/creators/me?email=${encodeURIComponent(email)}`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.creator) {
+          setCreator(d.creator);
+          if (!d.creator.onboarding_dismissed) {
+            setShowOnboarding(true);
+          }
+        }
+      })
+      .catch(console.error);
   }, []);
 
-  const cards = [
+  const dismissOnboarding = async () => {
+    setShowOnboarding(false);
+    const email = getEmail();
+    if (!email) return;
+    await fetch('/api/creators/settings', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, onboarding_dismissed: true }),
+    });
+  };
+
+  const copyProfileLink = () => {
+    if (!creator?.slug) return;
+    navigator.clipboard.writeText(`https://mystationlive.com/artist/${creator.slug}`);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  // Category-specific onboarding steps
+  const getSteps = (c) => {
+    if (!c) return [];
+
+    // Universal steps everyone gets
+    const universal = [
+      { label: 'Upload your profile photo', done: !!c.avatar_url, action: '/dashboard/settings', actionLabel: 'Go to Settings' },
+      { label: 'Upload your banner image', done: !!c.banner_url, action: '/dashboard/settings', actionLabel: 'Go to Settings' },
+      { label: 'Write your bio', done: !!(c.bio && c.bio.length > 0), action: '/dashboard/settings', actionLabel: 'Go to Settings' },
+    ];
+
+    // Category-specific steps
+    const categorySteps = {
+      musician: [
+        { label: 'Upload your first track', done: (c.track_count || 0) > 0, action: '/dashboard/upload', actionLabel: 'Upload Track' },
+        { label: 'Create your first merch item', done: false, action: '/dashboard/merch', actionLabel: 'Create Merch' },
+      ],
+      producer: [
+        { label: 'Upload your first beat', done: (c.track_count || 0) > 0, action: '/dashboard/upload', actionLabel: 'Upload Beat' },
+        { label: 'Create your first merch item', done: false, action: '/dashboard/merch', actionLabel: 'Create Merch' },
+      ],
+      dj: [
+        { label: 'Upload a mix', done: (c.track_count || 0) > 0, action: '/dashboard/upload', actionLabel: 'Upload Mix' },
+        { label: 'Go live with a set', done: false, action: '/podstation/go-live', actionLabel: 'Go Live' },
+      ],
+      podcaster: [
+        { label: 'Go live with your first episode', done: false, action: '/podstation/go-live', actionLabel: 'Go Live' },
+        { label: 'Save a replay to your videos', done: false, action: '/dashboard/videos', actionLabel: 'View Videos' },
+      ],
+      fitness_wellness: [
+        { label: 'Go live with your first stream', done: false, action: '/podstation/go-live', actionLabel: 'Go Live' },
+        { label: 'Save a workout video', done: false, action: '/dashboard/videos', actionLabel: 'View Videos' },
+      ],
+      barber_stylist: [
+        { label: 'Upload a video of your work', done: false, action: '/dashboard/videos', actionLabel: 'View Videos' },
+        { label: 'Add your booking link to your bio', done: !!(c.bio && c.bio.length > 0), action: '/dashboard/settings', actionLabel: 'Edit Bio' },
+      ],
+      visual_artist: [
+        { label: 'Upload a video of your process', done: false, action: '/dashboard/videos', actionLabel: 'View Videos' },
+        { label: 'Create merch from your art', done: false, action: '/dashboard/merch', actionLabel: 'Create Merch' },
+      ],
+      chef_food: [
+        { label: 'Go live with a cooking session', done: false, action: '/podstation/go-live', actionLabel: 'Go Live' },
+        { label: 'Save a recipe video', done: false, action: '/dashboard/videos', actionLabel: 'View Videos' },
+      ],
+      educator_coach: [
+        { label: 'Go live with your first session', done: false, action: '/podstation/go-live', actionLabel: 'Go Live' },
+        { label: 'Save a lesson to your videos', done: false, action: '/dashboard/videos', actionLabel: 'View Videos' },
+      ],
+      comedian: [
+        { label: 'Go live with a set', done: false, action: '/podstation/go-live', actionLabel: 'Go Live' },
+        { label: 'Save a clip to your videos', done: false, action: '/dashboard/videos', actionLabel: 'View Videos' },
+      ],
+      model_fashion: [
+        { label: 'Upload a video or lookbook', done: false, action: '/dashboard/videos', actionLabel: 'View Videos' },
+        { label: 'Create your first merch item', done: false, action: '/dashboard/merch', actionLabel: 'Create Merch' },
+      ],
+    };
+
+    // Default for custom or unknown
+    const defaultSteps = [
+      { label: 'Upload a video', done: false, action: '/dashboard/videos', actionLabel: 'View Videos' },
+      { label: 'Go live on PodStation', done: false, action: '/podstation/go-live', actionLabel: 'Go Live' },
+    ];
+
+    const specific = categorySteps[c.category] || defaultSteps;
+
+    // Share step always last
+    const share = { label: 'Share your page', done: false, action: null, actionLabel: copied ? 'Copied!' : 'Copy Link', onClick: copyProfileLink };
+
+    return [...universal, ...specific, share];
+  };
+
+  const steps = getSteps(creator);
+
+  const completedCount = steps.filter((s) => s.done).length;
+
+  const isMusic = creator && ['musician', 'producer', 'dj'].includes(creator.category);
+
+  const cards = isMusic ? [
     { label: 'Total Plays', value: stats?.totalPlays ?? 0, color: 'text-blue-400' },
     { label: 'Tracks', value: stats?.trackCount ?? 0, color: 'text-purple-400' },
+    { label: 'Followers', value: stats?.followerCount ?? 0, color: 'text-green-400' },
+    { label: 'Merch Items', value: stats?.merchCount ?? 0, color: 'text-[#D4AF37]' },
+  ] : [
+    { label: 'Views', value: stats?.totalPlays ?? 0, color: 'text-blue-400' },
+    { label: 'Videos', value: stats?.trackCount ?? 0, color: 'text-purple-400' },
     { label: 'Followers', value: stats?.followerCount ?? 0, color: 'text-green-400' },
     { label: 'Merch Items', value: stats?.merchCount ?? 0, color: 'text-[#D4AF37]' },
   ];
@@ -37,6 +154,72 @@ export default function DashboardOverview() {
   return (
     <div>
       <h1 className="text-2xl font-bold text-white mb-6">Dashboard</h1>
+
+      {/* Onboarding Guide */}
+      {showOnboarding && (
+        <div className="bg-[#18181b] border-2 border-[#D4AF37]/40 rounded-xl p-6 mb-8 relative">
+          <button
+            onClick={dismissOnboarding}
+            className="absolute top-4 right-4 text-[#71717a] hover:text-white transition-colors"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+
+          <h2 className="text-lg font-bold text-[#D4AF37] mb-1">Set Up Your Station</h2>
+          <p className="text-sm text-[#a1a1aa] mb-4">{completedCount} of {steps.length} complete</p>
+
+          {/* Progress bar */}
+          <div className="w-full h-2 bg-[#27272a] rounded-full mb-5">
+            <div
+              className="h-full bg-[#D4AF37] rounded-full transition-all duration-500"
+              style={{ width: `${(completedCount / steps.length) * 100}%` }}
+            />
+          </div>
+
+          <div className="space-y-3">
+            {steps.map((step, i) => (
+              <div key={i} className="flex items-center gap-3">
+                {/* Checkbox */}
+                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                  step.done ? 'bg-[#D4AF37] border-[#D4AF37]' : 'border-[#52525b]'
+                }`}>
+                  {step.done && (
+                    <svg className="w-3.5 h-3.5 text-black" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  )}
+                </div>
+
+                {/* Label */}
+                <span className={`flex-1 text-sm ${step.done ? 'text-[#52525b] line-through' : 'text-white'}`}>
+                  {step.label}
+                </span>
+
+                {/* Action button */}
+                {!step.done && (
+                  step.action ? (
+                    <Link
+                      href={step.action}
+                      className="px-3 py-1.5 text-xs font-medium bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30 rounded-lg hover:bg-[#D4AF37]/20 transition-colors"
+                    >
+                      {step.actionLabel}
+                    </Link>
+                  ) : (
+                    <button
+                      onClick={step.onClick}
+                      className="px-3 py-1.5 text-xs font-medium bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30 rounded-lg hover:bg-[#D4AF37]/20 transition-colors"
+                    >
+                      {step.actionLabel}
+                    </button>
+                  )
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {cards.map((c) => (

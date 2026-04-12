@@ -72,7 +72,7 @@ export default function Hero() {
             </div>
             <div className="flex items-center justify-between mt-3">
               <p className="text-white/30 text-xs uppercase tracking-[0.2em]">
-                "Caught That" — Official 4K Video
+                "Caught That" | Official 4K Video
               </p>
               <div className="flex items-center gap-3">
                 <button
@@ -105,7 +105,7 @@ export default function Hero() {
             </div>
             <div className="flex items-center justify-between mt-3">
               <p className="text-white/30 text-xs uppercase tracking-[0.2em]">
-                "To The Money" — Official 4K Video
+                "To The Money" | Official 4K Video
               </p>
               <div className="flex items-center gap-3">
                 <button

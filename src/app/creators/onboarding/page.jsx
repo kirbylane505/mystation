@@ -86,7 +86,7 @@ function OnboardingContent() {
             onClick={handleSkip}
             className="w-full py-2 text-[#71717a] text-sm hover:text-white transition-colors"
           >
-            Skip for now — I'll set this up later
+            Skip for now. I'll set this up later.
           </button>
         </div>
 

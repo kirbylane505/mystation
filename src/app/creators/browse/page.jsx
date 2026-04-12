@@ -9,7 +9,15 @@ const CATEGORIES = [
   { value: 'podcaster', label: 'Podcasters' },
   { value: 'producer', label: 'Producers' },
   { value: 'dj', label: 'DJs' },
+  { value: 'fitness_wellness', label: 'Fitness' },
+  { value: 'barber_stylist', label: 'Barbers' },
+  { value: 'visual_artist', label: 'Artists' },
+  { value: 'chef_food', label: 'Food' },
+  { value: 'educator_coach', label: 'Educators' },
+  { value: 'comedian', label: 'Comedy' },
+  { value: 'model_fashion', label: 'Fashion' },
   { value: 'content_creator', label: 'Creators' },
+  { value: 'custom', label: 'Other' },
 ];
 
 export default function BrowseCreators() {
@@ -86,7 +94,7 @@ export default function BrowseCreators() {
         <div className="text-center py-20">
           <p className="text-[#71717a] text-lg mb-2">No creators found</p>
           <Link href="/creators/signup" className="text-[#D4AF37] hover:underline text-sm">
-            Be the first — Join as a Creator
+            Be the first! Join as a Creator
           </Link>
         </div>
       ) : (

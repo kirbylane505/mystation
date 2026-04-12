@@ -317,7 +317,7 @@ export default function VaultPage() {
               <div>
                 <h1 className="text-3xl font-black text-white">THE VAULT</h1>
                 <p className="text-purple-400 text-sm font-medium">
-                  {isFullFanAccess ? 'Full Access — Stream Everything' : `Pick ${vaultAccess.picks - vaultPicks.length} more song${vaultAccess.picks - vaultPicks.length !== 1 ? 's' : ''}`}
+                  {isFullFanAccess ? 'Full Access: Stream Everything' : `Pick ${vaultAccess.picks - vaultPicks.length} more song${vaultAccess.picks - vaultPicks.length !== 1 ? 's' : ''}`}
                 </p>
               </div>
             </div>

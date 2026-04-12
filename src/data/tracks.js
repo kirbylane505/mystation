@@ -1207,6 +1207,34 @@ export const tracks = [
     genre: 'Hip-Hop',
     producer: 'The Cubist'
   },
+  {
+    id: 513,
+    title: "My Way",
+    artist: "Mike Page",
+    album: "IDMG Mixtape",
+    year: 2026,
+    duration: "4:06",
+    trackNumber: 14,
+    albumId: 'idmg-mixtape',
+    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/idmg-mixtape/my-way.m4a',
+    hitScore: 93,
+    genre: 'Hip-Hop',
+    producer: 'The Cubist'
+  },
+  {
+    id: 514,
+    title: "Get A Little Closer",
+    artist: "Mike Page",
+    album: "IDMG Mixtape",
+    year: 2026,
+    duration: "2:50",
+    trackNumber: 15,
+    albumId: 'idmg-mixtape',
+    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/idmg-mixtape/get-a-little-closer.m4a',
+    hitScore: 93,
+    genre: 'Hip-Hop',
+    producer: 'The Cubist'
+  },
   // ========================================
   // GRAMMY NIGHTS VOL. 1 - VB & MP (PRIVATE)
   // Access: MP2026 (Mike Page), VB2026 (Vincent Berry)
@@ -2005,7 +2033,7 @@ export const featuredSong = {
   audioFile: '/audio/Mike Page - One Of A Kind_MASTERED.m4a',
   coverGradient: "from-purple-600 via-fuchsia-600 to-rose-700",
   weekOf: "February 12, 2026",
-  description: "Mike Page and Bea (BeautifulEvenAfter) deliver a smooth, one-of-a-kind R&B record. Co-produced by Mike Page & The Cubist — only on MyStation.",
+  description: "Mike Page and Bea (BeautifulEvenAfter) deliver a smooth, one-of-a-kind R&B record. Co-produced by Mike Page & The Cubist. Only on MyStation.",
   stats: {
     bpm: 0,
     key: "",
@@ -2146,7 +2174,7 @@ export const albums = [
     isComingSoon: true,
     accessCodes: ['MP2026', 'VB2026'],
     trackIds: grammyNightsTrackIds,
-    description: "Grammy Nights Vol. 1 — VB & Mike Page. Church&Mudd x IDMG. 19 tracks. Coming Soon."
+    description: "Grammy Nights Vol. 1: VB & Mike Page. Church&Mudd x IDMG. 19 tracks. Coming Soon."
   }
 ];
 

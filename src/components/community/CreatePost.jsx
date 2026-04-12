@@ -19,7 +19,7 @@ export default function CreatePost({ channel, username, isOwner, isSubscriber, o
           <Lock size={20} className="text-purple-400 shrink-0" />
           <div>
             <p className="text-white/70 text-sm font-medium">Subscribe to join the conversation</p>
-            <p className="text-white/40 text-xs">$4.99/mo — post, reply, and connect with the community</p>
+            <p className="text-white/40 text-xs">$4.99/mo. Post, reply, and connect with the community.</p>
           </div>
         </div>
       </div>

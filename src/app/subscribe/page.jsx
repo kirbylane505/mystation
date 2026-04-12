@@ -17,7 +17,7 @@ const USE_CASES = [
     title: 'Musicians',
     color: 'blue',
     items: [
-      'Upload your music — no distributor, no approval wait',
+      'Upload your music. No distributor, no approval wait.',
       'Sell beats, albums, singles',
       'Build your fanbase with zero algorithm interference',
       'Create playlists, curate your sound',
@@ -28,7 +28,7 @@ const USE_CASES = [
     title: 'Hairstylists',
     color: 'pink',
     items: [
-      'Showcase your portfolio — braids, locs, wigs, color, natural hair',
+      'Showcase your portfolio: braids, locs, wigs, color, natural hair',
       'Sell hair products, bundles, tools',
       'Book clients right from your station',
       'Your brand, your page, your clientele',
@@ -39,7 +39,7 @@ const USE_CASES = [
     title: 'Nail Techs',
     color: 'purple',
     items: [
-      'Display your sets — acrylics, gel, press-ons, nail art',
+      'Display your sets: acrylics, gel, press-ons, nail art',
       'Sell custom press-on sets and nail care products',
       'Build your client list without depending on IG',
       'Your work speaks, your station amplifies',
@@ -64,7 +64,7 @@ const USE_CASES = [
       'Sell workout programs, meal plans, coaching packages',
       'Post routines, transformations, client results',
       'Build a community around YOUR method',
-      'Keep 100% — no platform taking 30%',
+      'Keep 100%. No platform taking 30%.',
     ],
   },
   {
@@ -75,7 +75,7 @@ const USE_CASES = [
       'Sell t-shirts, hoodies, hats, accessories',
       'No Etsy fees, no Shopify monthly, no middleman',
       'Full storefront on YOUR station',
-      'Analytics — see what\'s selling and who\'s buying',
+      'Analytics: see what\'s selling and who\'s buying',
     ],
   },
 ];
@@ -90,16 +90,16 @@ const COLOR_MAP = {
 };
 
 const DIAMOND_FEATURES = [
-  { icon: Globe, text: 'Your own station — your name, your brand, your page' },
+  { icon: Globe, text: 'Your own station. Your name, your brand, your page.' },
   { icon: Music, text: 'Upload content directly to the platform' },
   { icon: ShoppingBag, text: 'Sell digital, physical, or service-based products' },
   { icon: DollarSign, text: 'Keep 100% of your revenue' },
   { icon: BarChart3, text: 'Full analytics dashboard' },
-  { icon: Users, text: 'Own your audience — no algorithm, no gatekeepers' },
+  { icon: Users, text: 'Own your audience. No algorithm, no gatekeepers.' },
   { icon: ShoppingBag, text: '10% off all MyStation merch' },
-  { icon: Lock, text: 'Full Vault access — unreleased music' },
-  { icon: Crown, text: 'Grammy Nights access — the private collection' },
-  { icon: Gem, text: 'Diamond badge — verified everywhere' },
+  { icon: Lock, text: 'Full Vault access, unreleased music' },
+  { icon: Crown, text: 'Grammy Nights access, the private collection' },
+  { icon: Gem, text: 'Diamond badge, verified everywhere' },
   { icon: Radio, text: 'Unlimited streaming of the entire catalog' },
   { icon: Zap, text: 'Global Spotify Search (100M+ songs)' },
   { icon: ListMusic, text: 'DJ Turntables, Fan Zone, Kickback Lounge' },
@@ -228,7 +228,7 @@ export default function SubscribePage() {
 
         {/* Use Cases Grid */}
         <div className="mb-16">
-          <h2 className="text-2xl font-bold text-white text-center mb-2">Whatever You Do — Own It</h2>
+          <h2 className="text-2xl font-bold text-white text-center mb-2">Whatever You Do, Own It</h2>
           <p className="text-white/50 text-center mb-8">Your station supports ANY hustle</p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {USE_CASES.map((uc) => {
@@ -258,7 +258,7 @@ export default function SubscribePage() {
           {/* Anything Else */}
           <div className="mt-4 glass rounded-2xl p-6 text-center border border-white/10">
             <p className="text-white/80 text-lg font-semibold mb-2">Cooking? Photography? Art? Tutoring? Consulting? Coaching? Skincare?</p>
-            <p className="text-white/50">If you do ANYTHING — MyStation gives you the platform to OWN IT.</p>
+            <p className="text-white/50">If you do ANYTHING, MyStation gives you the platform to OWN IT.</p>
           </div>
         </div>
 
@@ -350,7 +350,7 @@ export default function SubscribePage() {
                       className={`w-full py-3 bg-gradient-to-r ${tier.btnClass} text-white font-bold rounded-xl hover:opacity-90 transition flex items-center justify-center gap-2 text-sm shadow-lg disabled:opacity-50`}
                     >
                       <CreditCard size={16} />
-                      {subscribing === tier.id ? 'Loading...' : `Subscribe — $${tier.price}/mo`}
+                      {subscribing === tier.id ? 'Loading...' : `Subscribe, $${tier.price}/mo`}
                     </button>
                   )}
                 </button>
@@ -366,7 +366,7 @@ export default function SubscribePage() {
               className={`w-full py-4 bg-gradient-to-r ${tiers.find(t => t.id === selectedTier)?.btnClass} text-white font-bold rounded-xl hover:opacity-90 transition flex items-center justify-center gap-2 shadow-lg text-lg disabled:opacity-50`}
             >
               <CreditCard size={20} />
-              {subscribing === selectedTier ? 'Loading...' : `Subscribe — $${tiers.find(t => t.id === selectedTier)?.price}/mo`}
+              {subscribing === selectedTier ? 'Loading...' : `Subscribe, $${tiers.find(t => t.id === selectedTier)?.price}/mo`}
             </button>
             <p className="text-white/30 text-xs text-center mt-3">First month FREE for everyone. Cancel anytime. All proceeds support youth & community programs.</p>
           </div>
@@ -383,9 +383,9 @@ export default function SubscribePage() {
               So I built my own. And now I'm giving YOU the keys.
             </p>
             <p className="text-white font-bold text-xl">
-              You subscribing means the world to me. Independent PAGE — I'm nothing without you.
+              You subscribing means the world to me. Independent PAGE. I'm nothing without you.
             </p>
-            <p className="text-white/40 text-sm mt-4">— Mike Page</p>
+            <p className="text-white/40 text-sm mt-4">- Mike Page</p>
           </div>
         </div>
 

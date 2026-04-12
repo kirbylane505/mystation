@@ -134,7 +134,7 @@ export default function AdminMerchOrdersPage() {
           Merch Orders
         </h1>
         <p style={{ margin: '4px 0 0', color: '#94a3b8', fontSize: 14 }}>
-          Every merch order tracked — Printful + Printify
+          Every merch order tracked, Printful + Printify
         </p>
       </div>
 

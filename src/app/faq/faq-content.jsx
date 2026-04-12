@@ -7,7 +7,7 @@ const faqs = [
   {
     category: 'Subscription',
     items: [
-      { q: 'How do I subscribe to MyStation?', a: 'Tap the "Subscribe" button on any page. Choose your plan ($4.99/month) and complete checkout with your card. You get a 30-day free trial — your card won\'t be charged until the trial ends.' },
+      { q: 'How do I subscribe to MyStation?', a: 'Tap the "Subscribe" button on any page. Choose your plan ($4.99/month) and complete checkout with your card. You get a 30-day free trial, and your card won\'t be charged until the trial ends.' },
       { q: 'What\'s included with a subscription?', a: 'Full access to the entire music catalog, exclusive tracks, early releases, merch discounts, and a FREE Early Bird ticket to Love on the Lawn Day 2026 (if you subscribe before April 12, 2026 and stay subscribed through the event).' },
       { q: 'How do I cancel my subscription?', a: 'Email us at mystationlive@gmail.com with the subject "Cancel Subscription" and we\'ll take care of it. You\'ll keep access through the end of your current billing period.' },
       { q: 'When am I billed?', a: 'After your 30-day free trial, you\'re billed $4.99 on the same date each month. Your card on file is charged automatically.' },
@@ -26,7 +26,7 @@ const faqs = [
     items: [
       { q: 'How long does shipping take?', a: 'Most orders ship within 3-7 business days. Delivery typically takes 5-10 business days within the US. International orders may take 2-4 weeks.' },
       { q: 'How do I track my order?', a: 'You\'ll receive a confirmation email with tracking info once your order ships. Check your email (including spam folder) for updates from our print partners.' },
-      { q: 'What is the return policy?', a: 'We accept returns within 30 days for defective or damaged items. Since merch is printed on demand, we can\'t accept returns for sizing — please check the size chart before ordering.' },
+      { q: 'What is the return policy?', a: 'We accept returns within 30 days for defective or damaged items. Since merch is printed on demand, we can\'t accept returns for sizing, so please check the size chart before ordering.' },
       { q: 'Do you ship internationally?', a: 'Yes! We ship worldwide. International shipping rates and delivery times vary by location.' },
     ],
   },
@@ -41,13 +41,13 @@ const faqs = [
   {
     category: 'LOTL Deal',
     items: [
-      { q: 'How do I get a free LOTL ticket?', a: 'Subscribe to MyStation ($4.99/mo) before April 12, 2026 and remain subscribed through Love on the Lawn Day (September 5, 2026). You\'ll receive a free Early Bird ticket — a $35 value!' },
+      { q: 'How do I get a free LOTL ticket?', a: 'Subscribe to MyStation ($4.99/mo) before April 12, 2026 and remain subscribed through Love on the Lawn Day (September 5, 2026). You\'ll receive a free Early Bird ticket, a $35 value!' },
     ],
   },
   {
     category: 'General',
     items: [
-      { q: 'What is MyStation?', a: 'MyStation is the official music streaming platform for IDMG (Impossible Dreamz Music Group). Stream exclusive music, shop official merch, and connect with the community — all in one place.' },
+      { q: 'What is MyStation?', a: 'MyStation is the official music streaming platform for IDMG (Impossible Dreamz Music Group). Stream exclusive music, shop official merch, and connect with the community, all in one place.' },
       { q: 'How do I contact support?', a: 'Email us at mystationlive@gmail.com. We typically respond within 24 hours.' },
     ],
   },

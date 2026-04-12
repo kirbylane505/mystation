@@ -23,8 +23,8 @@ import { GAME_TYPES, PLAYER_COLORS } from '@/lib/games/constants';
 import { Users, Share2, Play, LogOut, Loader2, Bot, Eye, ChevronDown, Zap } from 'lucide-react';
 
 const GAME_TIPS = {
-  blackjack: ['Hit below 11 — you can\'t bust', 'Stand on 17+ for safety', 'Aces count as 1 or 11'],
-  pool: ['Aim carefully — angles matter', 'Pocket your set (solids or stripes)', 'Sink the 8-ball last'],
+  blackjack: ['Hit below 11, you can\'t bust', 'Stand on 17+ for safety', 'Aces count as 1 or 11'],
+  pool: ['Aim carefully, angles matter', 'Pocket your set (solids or stripes)', 'Sink the 8-ball last'],
   spades: ['Count tricks before you bid', 'Lead off-suit to control', 'Save spades for big plays'],
   dominoes: ['Match tile numbers to play', 'Block your opponent', 'Clear your hand first to win'],
   quiz: ['10 questions per round', 'Speed bonus for fast answers', '230 questions across 10 categories'],

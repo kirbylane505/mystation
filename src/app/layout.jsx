@@ -58,7 +58,7 @@ export const viewport = {
 export const metadata = {
   metadataBase: new URL('https://mystationlive.com'),
   title: {
-    default: 'MyStation — Stream Mike Page Music Free | IDMG',
+    default: 'MyStation | Stream Mike Page Music Free | IDMG',
     template: '%s | MyStation',
   },
   description: 'Stream Mike Page music for free. Official IDMG merch, Love on the Lawn Festival tickets, and exclusive content. All proceeds support youth music programs.',
@@ -71,13 +71,13 @@ export const metadata = {
 
   // Open Graph
   openGraph: {
-    title: 'MyStation — Stream Mike Page Music Free',
+    title: 'MyStation | Stream Mike Page Music Free',
     description: 'Stream Mike Page music for free. Official merch, Love on the Lawn Festival tickets, and more. All donations support youth music programs.',
     url: 'https://mystationlive.com',
     siteName: 'MyStation',
     locale: 'en_US',
     type: 'website',
-    images: [{ url: '/images/og-image.png', width: 1200, height: 630, alt: 'MyStation — Stream Mike Page Music Free' }],
+    images: [{ url: '/images/og-image.png', width: 1200, height: 630, alt: 'MyStation | Stream Mike Page Music Free' }],
   },
 
   // Twitter Card
@@ -85,7 +85,7 @@ export const metadata = {
     card: 'summary_large_image',
     site: '@idmgatl',
     creator: '@idmgatl',
-    title: 'MyStation — Stream Mike Page Music Free',
+    title: 'MyStation | Stream Mike Page Music Free',
     description: 'Stream Mike Page music for free. Official merch & Love on the Lawn Festival tickets.',
     images: ['/images/og-image.png'],
   },
@@ -138,7 +138,7 @@ export default function RootLayout({ children }) {
                 "https://tiktok.com/@idmgatl",
                 "https://instagram.com/loveonthelawnfestival"
               ],
-              "description": "Stream music, shop merch, support youth — MyStation by Mike Page Foundation",
+              "description": "Stream music, shop merch, support youth. MyStation by Mike Page Foundation.",
               "foundingDate": "2026",
               "founder": {
                 "@type": "Person",
@@ -182,7 +182,7 @@ export default function RootLayout({ children }) {
               "name": "Mike Page",
               "url": "https://mystationlive.com",
               "genre": ["Hip-Hop", "R&B"],
-              "description": "Mike Page — hip-hop/R&B artist, founder of IDMG and the Love on the Lawn Festival",
+              "description": "Mike Page, hip-hop/R&B artist, founder of IDMG and the Love on the Lawn Festival",
               "sameAs": [
                 "https://instagram.com/idmgatl",
                 "https://tiktok.com/@idmgatl"

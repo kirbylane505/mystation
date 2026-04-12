@@ -231,7 +231,7 @@ export default function Player() {
 
   // Share handlers
   const shareTrack = (platform) => {
-    const trackUrl = `https://mystationlive.com/song/${currentTrack.id}`;
+    const trackUrl = `https://mystationlive.com/song/${currentTrack.id}?shared=true`;
     const artistDisplay = currentTrack.artist || 'Mike Page';
     const text = `Listen to "${currentTrack.title}" by ${artistDisplay} on MyStation! ${currentTrack.featured ? `ft. ${currentTrack.featured}` : ''} #MyStation #IDMG`;
     const shareUrls = {

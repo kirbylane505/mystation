@@ -15,13 +15,13 @@ import { X, Zap, Users, Globe, ChevronDown, Loader2, Sparkles } from 'lucide-rea
 
 const GAME_TIPS = {
   blackjack: [
-    'Hit below 11 — you can\'t bust',
+    'Hit below 11, you can\'t bust',
     'Stand on 17+ for safety',
     'Aces count as 1 or 11',
     'Double down on 10 or 11',
   ],
   pool: [
-    'Aim carefully — angles matter',
+    'Aim carefully, angles matter',
     'Pocket your set first (solids or stripes)',
     'Sink the 8-ball last to win',
     'Use spin to control the cue ball',
@@ -46,7 +46,7 @@ const GAME_TIPS = {
   ],
   galaga: [
     'Arrow keys or WASD to move',
-    'Space to shoot — auto-fire on mobile',
+    'Space to shoot, auto-fire on mobile',
     'Collect power-ups from destroyed enemies',
     'Build combos for massive score multipliers',
   ],
