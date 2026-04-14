@@ -1,15 +1,24 @@
 'use client';
 import { useEffect, useState, useRef } from 'react';
-import { Radio, Search, Power } from 'lucide-react';
-import { useSearchParams } from 'next/navigation';
+import { Radio, Search, Power, ArrowLeft } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useRadioStore } from '@/store/radioStore';
 import { usePlayerStore } from '@/store/playerStore';
 import RadioNowPlaying from '@/components/RadioNowPlaying';
 import RadioStationTile from '@/components/RadioStationTile';
 
 export default function MyStationRadioClient() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const urlStation = searchParams.get('station');
+
+  const handleBack = () => {
+    if (typeof window !== 'undefined' && window.history.length > 1) {
+      router.back();
+    } else {
+      router.push('/');
+    }
+  };
   const { startStation, activeStation, queue, cursor, isRadioActive } = useRadioStore();
   const isPlaying = usePlayerStore((s) => s.isPlaying);
   const [catalog, setCatalog] = useState([]);
@@ -83,6 +92,14 @@ export default function MyStationRadioClient() {
           role="button"
           tabIndex={0}
         >
+          <button
+            onClick={(e) => { e.stopPropagation(); handleBack(); }}
+            className="absolute top-6 left-6 z-10 flex items-center gap-2 px-4 py-3 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 text-white transition-all"
+            aria-label="Back"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            <span className="text-sm font-semibold">Back</span>
+          </button>
           <div className="text-[#FFD700] text-xs font-bold tracking-[4px] uppercase mb-4">
             MyStation Radio
           </div>
@@ -107,7 +124,15 @@ export default function MyStationRadioClient() {
         </div>
       )}
 
-      <div className="max-w-3xl mx-auto px-6 pt-12">
+      <div className="max-w-3xl mx-auto px-6 pt-6">
+        <button
+          onClick={handleBack}
+          className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 active:scale-95 text-white/80 hover:text-white transition-all mb-4"
+          aria-label="Back"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span className="text-sm font-semibold">Back</span>
+        </button>
         <div className="flex items-center gap-2 text-[#FFD700] text-xs font-bold tracking-[3px] uppercase mb-3">
           <Radio className="w-4 h-4" /> MyStation Radio
         </div>
