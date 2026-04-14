@@ -14,7 +14,7 @@ import { useCartStore } from '@/store/cartStore';
 import { useUserStore, usePlayerStore } from '@/store/playerStore';
 import {
   Home, Music, Heart, Users, ShoppingBag,
-  Search, User, LogOut, X, Play, Menu, Mail, Crown, Newspaper, Gamepad2, Ticket, Film, MoreHorizontal, HelpCircle, MessageCircle, Download, Mic2, Radio
+  Search, User, LogOut, X, Play, Menu, Mail, Crown, Newspaper, Gamepad2, Ticket, Film, MoreHorizontal, HelpCircle, MessageCircle, Download, Mic2, Radio, Disc3
 } from 'lucide-react';
 import { useEngagementStore } from '@/store/engagementStore';
 import { tracks } from '@/data/tracks';
@@ -50,7 +50,8 @@ export default function Navbar() {
   const navItems = [
     { href: '/', icon: Home, label: 'Home', mobileOrder: 1 },
     { href: '/music', icon: Music, label: 'Music', mobileOrder: 2 },
-    { href: '/community', icon: MessageCircle, label: 'Community', mobileOrder: 3 },
+    { href: '/mystationradio', icon: Disc3, label: 'Radio', mobileOrder: 3 },
+    { href: '/community', icon: MessageCircle, label: 'Community', mobileOrder: 4 },
     { href: '/merch', icon: ShoppingBag, label: 'Merch', mobileOrder: 4 },
     { href: '/lounge', icon: Gamepad2, label: 'Lounge', highlight: true, mobileOrder: 5 },
     { href: '/events', icon: Ticket, label: 'Events', mobileOrder: 6 },
