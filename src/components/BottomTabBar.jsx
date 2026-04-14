@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Music, Search, ShoppingBag, MessageCircle, Radio, User } from 'lucide-react';
+import { Home, Music, Search, ShoppingBag, Radio, User, Mic } from 'lucide-react';
 import { useUserStore } from '@/store/playerStore';
 
 export default function BottomTabBar() {
@@ -23,10 +23,10 @@ export default function BottomTabBar() {
   const tabs = [
     { href: '/', icon: Home, label: 'Home' },
     { href: '/music', icon: Music, label: 'Music' },
-    { href: '/community', icon: MessageCircle, label: 'Community' },
+    { href: '/mystationradio', icon: Radio, label: 'Radio' },
     { href: '/search', icon: Search, label: 'Search' },
     { href: creatorSlug ? `/artist/${creatorSlug}` : '/merch', icon: creatorSlug ? User : ShoppingBag, label: creatorSlug ? 'My Profile' : 'Shop' },
-    { href: '/podstation', icon: Radio, label: 'Live' },
+    { href: '/podstation', icon: Mic, label: 'Live' },
   ];
 
   // Hide during active game rooms (not lounge lobby)
