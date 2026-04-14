@@ -68,7 +68,10 @@ export const useRadioStore = create((set, get) => ({
     if (!activeStation || refilling) return;
     set({ refilling: true });
     try {
-      const res = await fetch(`/api/mystationradio/station?artist=${encodeURIComponent(activeStation.slug)}&offset=${Date.now()}`);
+      // Exclude every track already in the current queue so the refill never repeats
+      const exclude = queue.map((t) => String(t.id)).join(',');
+      const url = `/api/mystationradio/station?artist=${encodeURIComponent(activeStation.slug)}&exclude=${encodeURIComponent(exclude)}`;
+      const res = await fetch(url);
       if (res.ok) {
         const { queue: more } = await res.json();
         if (more?.length) set({ queue: [...queue, ...more] });
