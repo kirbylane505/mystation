@@ -22,7 +22,14 @@ export const useRadioStore = create((set, get) => ({
     usePlayerStore.getState().setTrack(queue[0]);
   },
 
-  advance: () => {
+  peekNext: () => {
+    const { queue, cursor, isRadioActive } = get();
+    if (!isRadioActive || !queue.length) return null;
+    return queue[cursor + 1] || null;
+  },
+
+  advance: (opts = {}) => {
+    const { silent = false } = opts;
     const { queue, cursor, isRadioActive, history } = get();
     if (!isRadioActive || !queue.length) return;
     const nextIdx = cursor + 1;
@@ -33,7 +40,18 @@ export const useRadioStore = create((set, get) => ({
       cursor: nextIdx,
       history: prevTrack ? [prevTrack, ...history].slice(0, 20) : history,
     });
-    usePlayerStore.getState().setTrack(nextTrack);
+    if (silent) {
+      // Update currentTrack without triggering the audio-reload useEffect.
+      // The caller has already swapped audio elements — setTrack would re-load.
+      usePlayerStore.setState({
+        currentTrack: nextTrack,
+        progress: 0,
+        isPlaying: true,
+        lastPlayedTrack: nextTrack,
+      });
+    } else {
+      usePlayerStore.getState().setTrack(nextTrack);
+    }
     // Background refill when running low
     if (queue.length - nextIdx < 20) get().refillQueue();
   },

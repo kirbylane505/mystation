@@ -19,6 +19,44 @@ let audioUnlocked = false;
 let lastSkipTime = 0;
 let consecutiveErrors = 0;
 
+// DJ Blend — dual-audio crossfade for MyStation Radio
+// Second audio element reserved for the incoming track during a crossfade.
+let prefetchAudio = null;
+const CROSSFADE_DURATION = 6; // seconds
+const CROSSFADE_TRIGGER = 7;  // start when this many seconds remain
+let crossfadeState = {
+  active: false,
+  startedAt: 0,
+  targetVolume: 0.8,
+  nextTrack: null,
+  rafId: null,
+};
+
+function getPrefetchAudio() {
+  if (typeof window === 'undefined') return null;
+  if (!prefetchAudio) {
+    prefetchAudio = new Audio();
+    prefetchAudio.preload = 'auto';
+    prefetchAudio.setAttribute('playsinline', '');
+    prefetchAudio.setAttribute('webkit-playsinline', '');
+  }
+  return prefetchAudio;
+}
+
+function resetCrossfade() {
+  if (crossfadeState.rafId) {
+    cancelAnimationFrame(crossfadeState.rafId);
+  }
+  crossfadeState = { active: false, startedAt: 0, targetVolume: 0.8, nextTrack: null, rafId: null };
+  if (prefetchAudio) {
+    try {
+      prefetchAudio.pause();
+      prefetchAudio.removeAttribute('src');
+      prefetchAudio.load();
+    } catch {}
+  }
+}
+
 // 30-second preview system — non-subscribers hear 30s then get prompted
 const PREVIEW_DURATION = 30; // seconds
 const FADE_DURATION = 3; // seconds to fade out
@@ -179,6 +217,8 @@ export default function AudioPlayer() {
   const getAudioUrl = useCallback(async (track) => {
     if (!track) return null;
     if (!track.audioFile) return null;
+    // Radio tracks from creators may have direct R2 URLs — pass through
+    if (track.audioFile.startsWith('http')) return track.audioFile;
     // ALL tracks go through the gate — no HTTP bypass
     try {
       const resp = await fetch('/api/audio/token', {
@@ -216,13 +256,141 @@ export default function AudioPlayer() {
 
     setupIOSAudioUnlock();
 
+    // DJ Blend helpers — crossfade between the current track and the next radio track.
+    const startCrossfade = async (fromAudio, nextTrack) => {
+      if (crossfadeState.active) return;
+      const prefetch = getPrefetchAudio();
+      if (!prefetch) return;
+      const nextUrl = await getAudioUrl(nextTrack);
+      if (!nextUrl) return;
+      if (!useRadioStore.getState().isRadioActive) return;
+
+      const { volume: storeVol, isMuted: muted } = usePlayerStore.getState();
+      const targetVol = muted ? 0 : storeVol;
+
+      crossfadeState = {
+        active: true,
+        startedAt: performance.now(),
+        targetVolume: targetVol,
+        nextTrack,
+        rafId: null,
+      };
+
+      prefetch.src = nextUrl;
+      prefetch.volume = 0;
+      try { prefetch.load(); } catch {}
+
+      const onPrefetchReady = () => {
+        prefetch.removeEventListener('canplay', onPrefetchReady);
+        prefetch.play().catch(() => {});
+        rampCrossfade(fromAudio, prefetch, targetVol);
+      };
+      prefetch.addEventListener('canplay', onPrefetchReady);
+
+      // Safety timeout — if canplay never fires, abort
+      setTimeout(() => {
+        if (crossfadeState.active && prefetch.readyState < 2) {
+          resetCrossfade();
+        }
+      }, 4000);
+    };
+
+    const rampCrossfade = (fromAudio, toAudio, targetVol) => {
+      const durationMs = CROSSFADE_DURATION * 1000;
+      const startTime = performance.now();
+      crossfadeState.startedAt = startTime;
+
+      const tick = () => {
+        if (!crossfadeState.active) return;
+        // Abort if radio turned off mid-fade (user pressed STOP)
+        if (!useRadioStore.getState().isRadioActive) {
+          resetCrossfade();
+          return;
+        }
+        const elapsed = performance.now() - startTime;
+        const t = Math.min(1, elapsed / durationMs);
+        try {
+          fromAudio.volume = targetVol * (1 - t);
+          toAudio.volume = targetVol * t;
+        } catch {}
+        if (t >= 1) {
+          completeCrossfade(fromAudio, toAudio, targetVol);
+          return;
+        }
+        crossfadeState.rafId = requestAnimationFrame(tick);
+      };
+      crossfadeState.rafId = requestAnimationFrame(tick);
+    };
+
+    const completeCrossfade = (fromAudio, toAudio, targetVol) => {
+      try {
+        fromAudio.pause();
+        fromAudio.volume = targetVol;
+      } catch {}
+      // Move prefetch audio into globalAudio slot via src copy + seek.
+      // Browser audio buffer for same URL is cached — seek is instant.
+      const nextTrack = crossfadeState.nextTrack;
+      const resumePos = toAudio.currentTime;
+      const srcUrl = toAudio.src;
+
+      // Mark the next track as "already loaded" to skip the reload effect
+      lastTrackIdRef.current = nextTrack.id;
+      isLoadingRef.current = false;
+
+      try {
+        globalAudio.src = srcUrl;
+        globalAudio.load();
+        const onResumeReady = () => {
+          globalAudio.removeEventListener('canplay', onResumeReady);
+          try {
+            globalAudio.currentTime = resumePos;
+            globalAudio.volume = targetVol;
+            globalAudio.play().catch(() => {});
+          } catch {}
+        };
+        globalAudio.addEventListener('canplay', onResumeReady);
+        // Fallback — if canplay doesn't fire fast, try anyway
+        setTimeout(() => {
+          if (globalAudio.readyState >= 2) {
+            try {
+              globalAudio.currentTime = resumePos;
+              globalAudio.volume = targetVol;
+              globalAudio.play().catch(() => {});
+            } catch {}
+          }
+        }, 300);
+      } catch {}
+
+      // Pause prefetch + clear
+      try { toAudio.pause(); } catch {}
+      resetCrossfade();
+
+      // Update radioStore + playerStore silently (no audio reload).
+      // The [currentTrack, isPlaying] media-session effect picks up the new track automatically.
+      useRadioStore.getState().advance({ silent: true });
+    };
+
     const onTimeUpdate = () => {
       progressBridge.set(audio.currentTime, audio.duration || 0);
       if (consecutiveErrors > 0) consecutiveErrors = 0;
 
-      // 30-second preview cutoff for non-subscribers
+      // DJ Blend — crossfade into next radio track during last CROSSFADE_TRIGGER seconds
+      const radioNow = useRadioStore.getState();
+      if (
+        radioNow.isRadioActive &&
+        audio.duration > CROSSFADE_DURATION * 2 &&
+        audio.duration - audio.currentTime <= CROSSFADE_TRIGGER &&
+        !crossfadeState.active
+      ) {
+        const nextTrack = radioNow.peekNext();
+        if (nextTrack) {
+          startCrossfade(audio, nextTrack);
+        }
+      }
+
+      // 30-second preview cutoff for non-subscribers (disabled during radio)
       const currentTrackNow = usePlayerStore.getState().currentTrack;
-      if (currentTrackNow && isPreviewOnly(currentTrackNow)) {
+      if (!radioNow.isRadioActive && currentTrackNow && isPreviewOnly(currentTrackNow)) {
         const timeLeft = PREVIEW_DURATION - audio.currentTime;
 
         // Start fade at 3 seconds before cutoff
@@ -271,6 +439,8 @@ export default function AudioPlayer() {
       // Radio mode: if the radio is active, let it advance its own queue
       const radio = useRadioStore.getState();
       if (radio.isRadioActive) {
+        // Skip — completeCrossfade() handles track swap when DJ blend is running
+        if (crossfadeState.active) return;
         radio.advance();
         return;
       }
@@ -419,6 +589,11 @@ export default function AudioPlayer() {
 
     const isNewTrack = lastTrackIdRef.current !== currentTrack.id;
     if (!isNewTrack) return;
+
+    // Cancel any in-progress crossfade when a new track is loaded via normal path
+    if (crossfadeState.active) {
+      resetCrossfade();
+    }
 
     const { isPlaying: playing, vaultUnlocked } = usePlayerStore.getState();
 
