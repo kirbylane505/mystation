@@ -7,10 +7,18 @@ export const dynamic = 'force-dynamic';
 const QUEUE_SIZE = 200;
 const R2_BASE = 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/';
 
+// Tracks that exist in the catalog but have no file uploaded to R2
+const MISSING_TRACK_IDS = new Set([186, 187, 188]);
+
 function normalizeMikePageTrack(t) {
-  const audioFile = t.audioFile?.startsWith('http')
-    ? t.audioFile
-    : `${R2_BASE}${(t.audioFile || '').replace(/^\/audio\//, '')}`;
+  let audioFile;
+  if (t.audioFile?.startsWith('http')) {
+    audioFile = t.audioFile;
+  } else {
+    // R2 bucket is flat — use filename only, matching /api/audio/stream
+    const filename = (t.audioFile || '').split('/').pop();
+    audioFile = `${R2_BASE}${encodeURIComponent(filename)}`;
+  }
   return {
     id: `mp-${t.id}`,
     title: t.title,
@@ -74,7 +82,7 @@ export async function GET(request) {
   let primaryPool = [];
   if (slug === 'mike-page') {
     primaryPool = mikePageTracks
-      .filter((t) => t.audioFile)
+      .filter((t) => t.audioFile && !MISSING_TRACK_IDS.has(t.id) && !t.isComingSoon)
       .map(normalizeMikePageTrack);
   } else {
     const { data: creator } = await supabase
@@ -105,7 +113,11 @@ export async function GET(request) {
   let otherPool = await getAllCreatorTracksExcept(supabase, slug);
   // Also mix mike-page into non-mike-page stations
   if (slug !== 'mike-page') {
-    otherPool.push(...mikePageTracks.filter((t) => t.audioFile).map(normalizeMikePageTrack));
+    otherPool.push(
+      ...mikePageTracks
+        .filter((t) => t.audioFile && !MISSING_TRACK_IDS.has(t.id) && !t.isComingSoon)
+        .map(normalizeMikePageTrack)
+    );
   }
   otherPool = otherPool.filter((t) => !excludeSet.has(String(t.id)));
 
@@ -114,7 +126,9 @@ export async function GET(request) {
   if (everythingExcluded) {
     // Re-hydrate primary pool from scratch without exclusion so the radio never goes silent
     if (slug === 'mike-page') {
-      primaryPool = mikePageTracks.filter((t) => t.audioFile).map(normalizeMikePageTrack);
+      primaryPool = mikePageTracks
+        .filter((t) => t.audioFile && !MISSING_TRACK_IDS.has(t.id) && !t.isComingSoon)
+        .map(normalizeMikePageTrack);
     } else {
       const { data: creator } = await supabase
         .from('creators')
