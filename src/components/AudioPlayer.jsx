@@ -8,6 +8,7 @@
 
 import { useEffect, useRef, useCallback } from 'react';
 import { usePlayerStore, useUserStore, isGated, isPreviewOnly } from '@/store/playerStore';
+import { useRadioStore } from '@/store/radioStore';
 import { useEngagementStore } from '@/store/engagementStore';
 import { progressBridge } from '@/lib/progressBridge';
 
@@ -267,6 +268,13 @@ export default function AudioPlayer() {
     };
 
     const onEnded = () => {
+      // Radio mode: if the radio is active, let it advance its own queue
+      const radio = useRadioStore.getState();
+      if (radio.isRadioActive) {
+        radio.advance();
+        return;
+      }
+
       // Don't auto-advance during track loading — prevents iOS audio unlock
       // silence WAV from triggering nextTrack() when its ended event races
       // with the real track load (off-by-one bug)
