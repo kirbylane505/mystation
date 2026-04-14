@@ -1,6 +1,6 @@
 'use client';
-import { useEffect, useState } from 'react';
-import { Radio, Search } from 'lucide-react';
+import { useEffect, useState, useRef } from 'react';
+import { Radio, Search, Power } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { useRadioStore } from '@/store/radioStore';
 import { usePlayerStore } from '@/store/playerStore';
@@ -11,10 +11,12 @@ export default function MyStationRadioClient() {
   const searchParams = useSearchParams();
   const urlStation = searchParams.get('station');
   const { startStation, activeStation, queue, cursor, isRadioActive } = useRadioStore();
+  const isPlaying = usePlayerStore((s) => s.isPlaying);
   const [catalog, setCatalog] = useState([]);
   const [q, setQ] = useState('');
   const [results, setResults] = useState([]);
-  const [bootstrapped, setBootstrapped] = useState(false);
+  const [tunedIn, setTunedIn] = useState(false); // user has tapped the tuner (audio unlocked)
+  const pendingStationRef = useRef(null); // station to start after first tap
 
   // Load catalog
   useEffect(() => {
@@ -24,17 +26,38 @@ export default function MyStationRadioClient() {
       .catch(() => {});
   }, []);
 
-  // URL-based auto-play (shared links)
+  // Pre-resolve which station to tune into (from URL or default Mike Page)
   useEffect(() => {
-    if (bootstrapped) return;
     if (catalog.length === 0) return;
     const slug = urlStation || 'mike-page';
     const station = catalog.find((s) => s.slug === slug) || catalog.find((s) => s.slug === 'mike-page');
-    if (station && !isRadioActive) {
-      startStation(station);
-    }
-    setBootstrapped(true);
-  }, [catalog, urlStation, isRadioActive, startStation, bootstrapped]);
+    if (station) pendingStationRef.current = station;
+  }, [catalog, urlStation]);
+
+  // Attempt autoplay once catalog ready — will succeed if audio was already unlocked by a prior gesture
+  useEffect(() => {
+    if (tunedIn || isRadioActive) return;
+    if (!pendingStationRef.current) return;
+    // Fire and forget — if browser blocks, the TUNE IN overlay stays visible
+    startStation(pendingStationRef.current);
+  }, [catalog, tunedIn, isRadioActive, startStation]);
+
+  // Once audio confirmed playing, hide the tuner overlay permanently for this session
+  useEffect(() => {
+    if (isRadioActive && isPlaying) setTunedIn(true);
+  }, [isRadioActive, isPlaying]);
+
+  // First-tap handler — explicitly unlocks iOS audio + starts the station in the gesture
+  const handleTuneIn = () => {
+    // Try to kick audio right now in the gesture window
+    try {
+      const el = typeof window !== 'undefined' ? window.__mystation_audio : null;
+      if (el) { el.play().catch(() => {}); }
+    } catch {}
+    const s = pendingStationRef.current || catalog.find((c) => c.slug === 'mike-page');
+    if (s) startStation(s);
+    setTunedIn(true);
+  };
 
   // Live search
   useEffect(() => {
@@ -48,9 +71,42 @@ export default function MyStationRadioClient() {
   }, [q]);
 
   const upcoming = queue.slice(cursor + 1, cursor + 6);
+  const showTuner = !tunedIn && !(isRadioActive && isPlaying);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#0a0a0a] via-[#0f0a1c] to-[#0a0a0a] text-white pb-32">
+      {/* FULL-SCREEN TUNE IN — appears until audio is confirmed playing */}
+      {showTuner && (
+        <div
+          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gradient-to-b from-[#0a0a0a] via-[#1a0f05] to-[#0a0a0a] backdrop-blur-sm"
+          onClick={handleTuneIn}
+          role="button"
+          tabIndex={0}
+        >
+          <div className="text-[#FFD700] text-xs font-bold tracking-[4px] uppercase mb-4">
+            MyStation Radio
+          </div>
+          <div className="text-6xl md:text-8xl font-black mb-4">
+            <span className="bg-gradient-to-r from-[#FFD700] via-[#FFC107] to-[#B8860B] bg-clip-text text-transparent">
+              24/7
+            </span>
+          </div>
+          <div className="text-xl md:text-2xl text-white/70 font-semibold mb-10 text-center px-6">
+            {pendingStationRef.current?.name || 'Mike Page'} Radio
+          </div>
+          <button
+            onClick={handleTuneIn}
+            className="group relative flex flex-col items-center justify-center w-56 h-56 md:w-64 md:h-64 rounded-full bg-gradient-to-br from-[#FFD700] to-[#FFA500] shadow-[0_0_80px_rgba(255,215,0,0.6)] hover:shadow-[0_0_120px_rgba(255,215,0,0.9)] active:scale-95 transition-all"
+          >
+            <Power className="w-20 h-20 md:w-24 md:h-24 text-black mb-2 fill-black" strokeWidth={2.5} />
+            <div className="text-black font-black text-2xl md:text-3xl tracking-wide">TUNE IN</div>
+          </button>
+          <div className="mt-8 text-white/40 text-sm text-center px-6">
+            Tap once. Plays all day.
+          </div>
+        </div>
+      )}
+
       <div className="max-w-3xl mx-auto px-6 pt-12">
         <div className="flex items-center gap-2 text-[#FFD700] text-xs font-bold tracking-[3px] uppercase mb-3">
           <Radio className="w-4 h-4" /> MyStation Radio

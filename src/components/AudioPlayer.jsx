@@ -118,6 +118,16 @@ function setupIOSAudioUnlock() {
         if (p) p.then(() => { audio.pause(); audio.currentTime = 0; audio.src = ''; }).catch(() => { audio.src = ''; });
       }
     }
+    // Also unlock the DJ-blend prefetch element in the same gesture so it can
+    // play its first track later without needing its own user interaction.
+    const pf = getPrefetchAudio();
+    if (pf) {
+      try {
+        pf.src = SILENCE_DATA_URL;
+        const pp = pf.play();
+        if (pp) pp.then(() => { pf.pause(); pf.currentTime = 0; pf.removeAttribute('src'); pf.load(); }).catch(() => { pf.removeAttribute('src'); });
+      } catch {}
+    }
     document.removeEventListener('touchstart', unlock, true);
     document.removeEventListener('touchend', unlock, true);
     document.removeEventListener('click', unlock, true);
