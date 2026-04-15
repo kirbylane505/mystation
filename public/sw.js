@@ -1,13 +1,27 @@
 /**
- * MyStation Service Worker v6 — PWA Edition
- * Network-first with audio caching for offline playback.
+ * MyStation Service Worker v11 — Offline Radio Edition
+ * Caches R2 audio URLs (cross-origin) for offline playback.
+ * Pre-caches IDMG drops on install so the radio always has bumpers ready.
  * Push notification support.
  */
 
-const CACHE_NAME = 'mystation-v10';
-const AUDIO_CACHE = 'mystation-audio-v1';
+const CACHE_NAME = 'mystation-v11';
+const AUDIO_CACHE = 'mystation-audio-v2';
+const RADIO_API_CACHE = 'mystation-radio-api-v1';
 const OFFLINE_URL = '/offline.html';
-const MAX_AUDIO_CACHE_ITEMS = 10;
+const MAX_AUDIO_CACHE_ITEMS = 60;
+
+const R2_ORIGIN = 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev';
+
+// Drops — pre-cached on install so offline radio always has bumpers
+const DROP_URLS = [
+  R2_ORIGIN + '/idmg-drop-01.m4a',
+  R2_ORIGIN + '/idmg-drop-02.m4a',
+  R2_ORIGIN + '/idmg-drop-03.m4a',
+  R2_ORIGIN + '/idmg-drop-04.m4a',
+  R2_ORIGIN + '/idmg-drop-05.m4a',
+  R2_ORIGIN + '/idmg-drop-06.m4a',
+];
 
 // Assets to cache for offline fallback
 const PRECACHE_ASSETS = [
@@ -16,10 +30,22 @@ const PRECACHE_ASSETS = [
   '/icons/icon-512x512.png',
 ];
 
-// Install — cache offline assets, skip waiting
+// Install — cache offline assets + drops, skip waiting
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_ASSETS))
+    Promise.all([
+      caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_ASSETS)),
+      // Pre-cache drops as opaque cross-origin requests
+      caches.open(AUDIO_CACHE).then((cache) =>
+        Promise.all(
+          DROP_URLS.map((url) =>
+            fetch(url, { mode: 'no-cors' })
+              .then((res) => cache.put(url, res))
+              .catch(() => {})
+          )
+        )
+      ),
+    ])
   );
   self.skipWaiting();
 });
@@ -30,7 +56,7 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((cacheNames) =>
       Promise.all(
         cacheNames
-          .filter((name) => name !== CACHE_NAME && name !== AUDIO_CACHE)
+          .filter((name) => name !== CACHE_NAME && name !== AUDIO_CACHE && name !== RADIO_API_CACHE)
           .map((name) => caches.delete(name))
       )
     )
@@ -44,15 +70,29 @@ self.addEventListener('fetch', (event) => {
 
   var url = new URL(event.request.url);
 
-  // Skip API calls (except audio streaming)
+  // --- Cross-origin R2 audio files (radio tracks + drops) ---
+  // Cache-first so offline playback works. Opaque responses are still
+  // playable by <audio> elements.
+  if (url.origin === R2_ORIGIN && /\.(mp3|m4a|wav|aac|ogg|mp4)$/i.test(url.pathname)) {
+    event.respondWith(handleR2AudioRequest(event.request));
+    return;
+  }
+
+  // All other cross-origin requests — pass through
+  if (!url.href.startsWith(self.location.origin)) return;
+
+  // --- Radio API responses — cache for offline fallback ---
+  if (url.pathname.startsWith('/api/mystationradio/')) {
+    event.respondWith(handleRadioApiRequest(event.request));
+    return;
+  }
+
+  // Skip other API calls (except audio streaming proxy)
   if (url.pathname.startsWith('/api/') && !url.pathname.startsWith('/api/audio/stream')) {
     return;
   }
 
-  // External requests — pass through (MUST be before audio check so R2 CDN URLs aren't intercepted)
-  if (!url.href.startsWith(self.location.origin)) return;
-
-  // Audio streaming — cache for offline playback (same-origin only)
+  // Same-origin audio streaming proxy — cache for offline playback
   if (url.pathname.startsWith('/api/audio/stream') ||
       url.pathname.endsWith('.mp3') ||
       url.pathname.endsWith('.m4a')) {
@@ -96,7 +136,30 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// Audio request handler — network first, cache for offline
+// Cross-origin R2 audio — cache-first (offline playback)
+async function handleR2AudioRequest(request) {
+  var cache = await caches.open(AUDIO_CACHE);
+  var cached = await cache.match(request);
+  if (cached) {
+    // Background refresh if online — don't await
+    fetch(request, { mode: 'no-cors' })
+      .then(function(fresh) {
+        if (fresh) cache.put(request, fresh.clone()).catch(() => {});
+      })
+      .catch(() => {});
+    return cached;
+  }
+  try {
+    var response = await fetch(request, { mode: 'no-cors' });
+    // Store a clone — opaque responses are fine for <audio>
+    cache.put(request, response.clone()).then(() => trimAudioCache()).catch(() => {});
+    return response;
+  } catch (e) {
+    return new Response('Offline — track not cached', { status: 503 });
+  }
+}
+
+// Same-origin audio request handler — network first, cache for offline
 async function handleAudioRequest(request) {
   try {
     var response = await fetch(request);
@@ -114,14 +177,42 @@ async function handleAudioRequest(request) {
   }
 }
 
-// Keep audio cache within limits (FIFO eviction)
+// Radio API — stale-while-revalidate so offline gets last-known catalog/queue
+async function handleRadioApiRequest(request) {
+  var cache = await caches.open(RADIO_API_CACHE);
+  var cached = await cache.match(request);
+  var networkPromise = fetch(request)
+    .then(function(response) {
+      if (response && response.status === 200) {
+        cache.put(request, response.clone()).catch(() => {});
+      }
+      return response;
+    })
+    .catch(function() { return null; });
+
+  if (cached) {
+    networkPromise.catch(() => {});
+    return cached;
+  }
+  var fresh = await networkPromise;
+  if (fresh) return fresh;
+  return new Response(JSON.stringify({ error: 'offline', queue: [], artists: [] }), {
+    status: 503,
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
+
+// Keep audio cache within limits (FIFO eviction, protect drops)
 async function trimAudioCache() {
   var cache = await caches.open(AUDIO_CACHE);
   var keys = await cache.keys();
-  if (keys.length > MAX_AUDIO_CACHE_ITEMS) {
-    var toDelete = keys.slice(0, keys.length - MAX_AUDIO_CACHE_ITEMS);
-    await Promise.all(toDelete.map(function(key) { return cache.delete(key); }));
-  }
+  if (keys.length <= MAX_AUDIO_CACHE_ITEMS) return;
+  // Protect drop URLs from eviction — they're tiny and always needed
+  var protectedSet = new Set(DROP_URLS);
+  var evictable = keys.filter(function(k) { return !protectedSet.has(k.url); });
+  var overflow = keys.length - MAX_AUDIO_CACHE_ITEMS;
+  var toDelete = evictable.slice(0, overflow);
+  await Promise.all(toDelete.map(function(key) { return cache.delete(key); }));
 }
 
 // Push notification handler

@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState, useRef } from 'react';
-import { Radio, Search, Power, ArrowLeft } from 'lucide-react';
+import { Radio, Search, Power, ArrowLeft, WifiOff } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useRadioStore } from '@/store/radioStore';
 import { usePlayerStore } from '@/store/playerStore';
@@ -25,7 +25,22 @@ export default function MyStationRadioClient() {
   const [q, setQ] = useState('');
   const [results, setResults] = useState([]);
   const [tunedIn, setTunedIn] = useState(false); // user has tapped the tuner (audio unlocked)
+  const [isOnline, setIsOnline] = useState(true);
   const pendingStationRef = useRef(null); // station to start after first tap
+
+  // Track online/offline state
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    setIsOnline(navigator.onLine);
+    const onOnline = () => setIsOnline(true);
+    const onOffline = () => setIsOnline(false);
+    window.addEventListener('online', onOnline);
+    window.addEventListener('offline', onOffline);
+    return () => {
+      window.removeEventListener('online', onOnline);
+      window.removeEventListener('offline', onOffline);
+    };
+  }, []);
 
   // Load catalog
   useEffect(() => {
@@ -135,6 +150,11 @@ export default function MyStationRadioClient() {
         </button>
         <div className="flex items-center gap-2 text-[#FFD700] text-xs font-bold tracking-[3px] uppercase mb-3">
           <Radio className="w-4 h-4" /> MyStation Radio
+          {!isOnline && (
+            <span className="ml-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-500/20 text-red-300 text-[10px]">
+              <WifiOff className="w-3 h-3" /> OFFLINE
+            </span>
+          )}
         </div>
         <h1 className="text-5xl md:text-6xl font-black tracking-tight mb-3">
           <span className="bg-gradient-to-r from-[#FFD700] via-[#FFC107] to-[#B8860B] bg-clip-text text-transparent">

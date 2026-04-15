@@ -1,9 +1,32 @@
 /**
  * MYSTATION RADIO — Station + queue state
  * Pairs with playerStore (audio engine) to power the /mystationradio tab.
+ * Persists last queue to localStorage so offline playback has a fallback.
  */
 import { create } from 'zustand';
 import { usePlayerStore } from './playerStore';
+
+const LAST_QUEUE_KEY = 'mystation-radio-last-queue';
+
+function saveLastQueue(station, queue) {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(LAST_QUEUE_KEY, JSON.stringify({
+      station,
+      queue,
+      savedAt: Date.now(),
+    }));
+  } catch {}
+}
+
+function loadLastQueue() {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = localStorage.getItem(LAST_QUEUE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch { return null; }
+}
 
 export const useRadioStore = create((set, get) => ({
   activeStation: null, // { slug, name, avatar }
@@ -14,10 +37,26 @@ export const useRadioStore = create((set, get) => ({
   refilling: false,
 
   startStation: async (station) => {
-    const res = await fetch(`/api/mystationradio/station?artist=${encodeURIComponent(station.slug)}`);
-    if (!res.ok) return;
-    const { queue } = await res.json();
+    let queue = null;
+    try {
+      const res = await fetch(`/api/mystationradio/station?artist=${encodeURIComponent(station.slug)}`);
+      if (res.ok) {
+        const data = await res.json();
+        queue = data.queue;
+      }
+    } catch {}
+
+    // Offline fallback — load last-saved queue for this station (or any)
+    if (!queue || !queue.length) {
+      const saved = loadLastQueue();
+      if (saved?.queue?.length) {
+        queue = saved.queue;
+        station = saved.station || station;
+      }
+    }
+
     if (!queue?.length) return;
+    saveLastQueue(station, queue);
     set({ activeStation: station, queue, cursor: 0, isRadioActive: true, history: [] });
     usePlayerStore.getState().setTrack(queue[0]);
   },
