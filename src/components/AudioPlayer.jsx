@@ -24,12 +24,14 @@ let consecutiveErrors = 0;
 let prefetchAudio = null;
 const CROSSFADE_DURATION = 6; // seconds
 const CROSSFADE_TRIGGER = 7;  // start when this many seconds remain
+const CROSSFADE_SAFETY_MS = (CROSSFADE_DURATION + 6) * 1000; // force-reset if stuck
 let crossfadeState = {
   active: false,
   startedAt: 0,
   targetVolume: 0.8,
   nextTrack: null,
-  rafId: null,
+  intervalId: null,
+  safetyTimeoutId: null,
 };
 
 function getPrefetchAudio() {
@@ -44,10 +46,16 @@ function getPrefetchAudio() {
 }
 
 function resetCrossfade() {
-  if (crossfadeState.rafId) {
-    cancelAnimationFrame(crossfadeState.rafId);
-  }
-  crossfadeState = { active: false, startedAt: 0, targetVolume: 0.8, nextTrack: null, rafId: null };
+  if (crossfadeState.intervalId) clearInterval(crossfadeState.intervalId);
+  if (crossfadeState.safetyTimeoutId) clearTimeout(crossfadeState.safetyTimeoutId);
+  crossfadeState = {
+    active: false,
+    startedAt: 0,
+    targetVolume: 0.8,
+    nextTrack: null,
+    intervalId: null,
+    safetyTimeoutId: null,
+  };
   if (prefetchAudio) {
     try {
       prefetchAudio.pause();
@@ -307,29 +315,47 @@ export default function AudioPlayer() {
 
     const rampCrossfade = (fromAudio, toAudio, targetVol) => {
       const durationMs = CROSSFADE_DURATION * 1000;
-      const startTime = performance.now();
+      const startTime = Date.now();
       crossfadeState.startedAt = startTime;
 
-      const tick = () => {
-        if (!crossfadeState.active) return;
-        // Abort if radio turned off mid-fade (user pressed STOP)
+      // setInterval is throttled but continues firing in backgrounded tabs on
+      // iOS (rAF does NOT), so screen-lock doesn't freeze the ramp mid-fade.
+      const STEP_MS = 50;
+      crossfadeState.intervalId = setInterval(() => {
+        if (!crossfadeState.active) {
+          clearInterval(crossfadeState.intervalId);
+          return;
+        }
         if (!useRadioStore.getState().isRadioActive) {
           resetCrossfade();
           return;
         }
-        const elapsed = performance.now() - startTime;
+        const elapsed = Date.now() - startTime;
         const t = Math.min(1, elapsed / durationMs);
+        // Equal-power crossfade — feels smoother than linear
+        const fadeOut = Math.cos((t * Math.PI) / 2);
+        const fadeIn = Math.sin((t * Math.PI) / 2);
         try {
-          fromAudio.volume = targetVol * (1 - t);
-          toAudio.volume = targetVol * t;
+          fromAudio.volume = targetVol * fadeOut;
+          toAudio.volume = targetVol * fadeIn;
         } catch {}
         if (t >= 1) {
+          clearInterval(crossfadeState.intervalId);
+          crossfadeState.intervalId = null;
           completeCrossfade(fromAudio, toAudio, targetVol);
-          return;
         }
-        crossfadeState.rafId = requestAnimationFrame(tick);
-      };
-      crossfadeState.rafId = requestAnimationFrame(tick);
+      }, STEP_MS);
+
+      // Safety: if crossfade runs for too long (locked screen, stalled fetch),
+      // force-reset so the radio never gets stuck in a dead state.
+      crossfadeState.safetyTimeoutId = setTimeout(() => {
+        if (crossfadeState.active) {
+          resetCrossfade();
+          // Trigger a plain advance as a fallback so playback continues
+          const radio = useRadioStore.getState();
+          if (radio.isRadioActive) radio.advance();
+        }
+      }, CROSSFADE_SAFETY_MS);
     };
 
     const completeCrossfade = (fromAudio, toAudio, targetVol) => {
@@ -384,16 +410,19 @@ export default function AudioPlayer() {
       progressBridge.set(audio.currentTime, audio.duration || 0);
       if (consecutiveErrors > 0) consecutiveErrors = 0;
 
-      // DJ Blend — crossfade into next radio track during last CROSSFADE_TRIGGER seconds
+      // DJ Blend — crossfade into next radio track during last CROSSFADE_TRIGGER seconds.
+      // Skip if the current or next track is a drop (drops are short, play as clean cuts).
       const radioNow = useRadioStore.getState();
+      const currentRadioTrack = usePlayerStore.getState().currentTrack;
       if (
         radioNow.isRadioActive &&
         audio.duration > CROSSFADE_DURATION * 2 &&
         audio.duration - audio.currentTime <= CROSSFADE_TRIGGER &&
-        !crossfadeState.active
+        !crossfadeState.active &&
+        !currentRadioTrack?.isDrop
       ) {
         const nextTrack = radioNow.peekNext();
-        if (nextTrack) {
+        if (nextTrack && !nextTrack.isDrop) {
           startCrossfade(audio, nextTrack);
         }
       }
@@ -446,11 +475,13 @@ export default function AudioPlayer() {
     };
 
     const onEnded = () => {
-      // Radio mode: if the radio is active, let it advance its own queue
+      // Radio mode: always advance when a track ends.
+      // If a crossfade is stuck (e.g., rAF paused during screen lock),
+      // kill it first so advance can proceed. Never let an ended track
+      // sit in a state where something else could replay it from 0.
       const radio = useRadioStore.getState();
       if (radio.isRadioActive) {
-        // Skip — completeCrossfade() handles track swap when DJ blend is running
-        if (crossfadeState.active) return;
+        if (crossfadeState.active) resetCrossfade();
         radio.advance();
         return;
       }
@@ -523,6 +554,15 @@ export default function AudioPlayer() {
       setTimeout(() => {
         const state = usePlayerStore.getState();
         if (state.isPlaying && audio.paused && audio.readyState >= 2 && !isLoadingRef.current) {
+          // NEVER replay an ended track — during radio, advance instead.
+          if (audio.ended) {
+            const radio = useRadioStore.getState();
+            if (radio.isRadioActive) {
+              if (crossfadeState.active) resetCrossfade();
+              radio.advance();
+            }
+            return;
+          }
           safePlay(audio).then(played => {
             if (!played && document.visibilityState === 'visible') {
               storeActionsRef.current.pause();
@@ -537,6 +577,15 @@ export default function AudioPlayer() {
       if (document.visibilityState === 'visible') {
         const state = usePlayerStore.getState();
         if (state.isPlaying && audio.paused) {
+          // NEVER replay an ended track — during radio, advance instead.
+          if (audio.ended) {
+            const radio = useRadioStore.getState();
+            if (radio.isRadioActive) {
+              if (crossfadeState.active) resetCrossfade();
+              radio.advance();
+            }
+            return;
+          }
           safePlay(audio).then(played => {
             // User is looking — if we can't resume, sync store so play button shows paused
             if (!played) storeActionsRef.current.pause();

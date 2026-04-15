@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/creatorAuth';
 import { tracks as mikePageTracks } from '@/data/tracks';
+import { radioDrops, DROPS_EVERY_N } from '@/data/radioDrops';
 
 export const dynamic = 'force-dynamic';
 
@@ -181,10 +182,36 @@ export async function GET(request) {
     }
   }
 
+  // Interleave IDMG drops — short vocal tags/bumpers between tracks.
+  // Format: drops look like regular queue entries with isDrop: true
+  // If no drops configured, queue passes through unchanged.
+  const withDrops = [];
+  if (radioDrops.length > 0) {
+    for (let i = 0; i < queue.length; i++) {
+      withDrops.push(queue[i]);
+      if ((i + 1) % DROPS_EVERY_N === 0 && i < queue.length - 1) {
+        const drop = radioDrops[Math.floor(Math.random() * radioDrops.length)];
+        withDrops.push({
+          id: `drop-${drop.id}-${i}`,
+          title: drop.title,
+          artist: 'IDMG',
+          album: 'Drops',
+          duration: drop.duration || '0:04',
+          audioFile: drop.audioFile,
+          coverArt: '/images/idmg-logo-white.png',
+          stationArtist: slug,
+          isDrop: true,
+        });
+      }
+    }
+  }
+  const finalQueue = withDrops.length > 0 ? withDrops : queue;
+
   return NextResponse.json({
     station: { slug, name: slug === 'mike-page' ? 'Mike Page' : slug },
-    queue, // already unique, no shuffle needed (interleave order preserved)
+    queue: finalQueue,
     primaryCount: queue.filter((t) => t.stationArtist === slug).length,
     otherCount: queue.filter((t) => t.stationArtist !== slug).length,
+    dropCount: finalQueue.length - queue.length,
   });
 }
