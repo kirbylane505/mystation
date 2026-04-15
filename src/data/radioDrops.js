@@ -26,11 +26,15 @@
 const R2_BASE = 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/';
 
 export const radioDrops = [
-  // Placeholder slots — replace URLs with real drop files as they're uploaded.
-  // Uncomment entries after files are on R2.
-  // { id: 'drop-01', title: 'IDMG Tag', audioFile: `${R2_BASE}idmg-drop-01.m4a`, duration: '0:04' },
-  // { id: 'drop-02', title: 'IDMG Airhorn', audioFile: `${R2_BASE}idmg-drop-02.m4a`, duration: '0:03' },
-  // { id: 'drop-03', title: 'Mike Page Ident', audioFile: `${R2_BASE}mp-drop-01.m4a`, duration: '0:05' },
+  // Drops extracted from Mike Page catalog intros (first 4-6s of named tracks).
+  // Replace these with custom IDMG vocal tag files anytime — just upload to
+  // R2 bucket root and update the URL here.
+  { id: 'drop-01', title: 'Fantasy Drop',        audioFile: `${R2_BASE}idmg-drop-01.m4a`, duration: '0:04' },
+  { id: 'drop-02', title: 'Please Don\u2019t Drop', audioFile: `${R2_BASE}idmg-drop-02.m4a`, duration: '0:04' },
+  { id: 'drop-03', title: 'IDMG 305 Vinyl Drop', audioFile: `${R2_BASE}idmg-drop-03.m4a`, duration: '0:06' },
+  { id: 'drop-04', title: 'It Was A Dream Drop', audioFile: `${R2_BASE}idmg-drop-04.m4a`, duration: '0:04' },
+  { id: 'drop-05', title: 'Favorite Person Drop',audioFile: `${R2_BASE}idmg-drop-05.m4a`, duration: '0:04' },
+  { id: 'drop-06', title: 'Lizzo Drop',          audioFile: `${R2_BASE}idmg-drop-06.m4a`, duration: '0:04' },
 ];
 
 // Insert a drop every N real tracks. 4 = drop every 5 slots (4 tracks + 1 drop)
