@@ -70,15 +70,9 @@ self.addEventListener('fetch', (event) => {
 
   var url = new URL(event.request.url);
 
-  // --- Cross-origin R2 audio files (radio tracks + drops) ---
-  // Cache-first so offline playback works. Opaque responses are still
-  // playable by <audio> elements.
-  if (url.origin === R2_ORIGIN && /\.(mp3|m4a|wav|aac|ogg|mp4)$/i.test(url.pathname)) {
-    event.respondWith(handleR2AudioRequest(event.request));
-    return;
-  }
-
-  // All other cross-origin requests — pass through
+  // Cross-origin requests — pass through untouched.
+  // R2 audio URLs (pub-*.r2.dev) MUST NOT be intercepted — iOS Safari PWA
+  // can't play opaque (no-cors) responses from service workers. ERR-0056.
   if (!url.href.startsWith(self.location.origin)) return;
 
   // --- Radio API responses — cache for offline fallback ---
