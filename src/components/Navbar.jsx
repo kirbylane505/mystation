@@ -14,7 +14,7 @@ import { useCartStore } from '@/store/cartStore';
 import { useUserStore, usePlayerStore } from '@/store/playerStore';
 import {
   Home, Music, Heart, Users, ShoppingBag,
-  Search, User, LogOut, X, Play, Menu, Mail, Crown, Newspaper, Gamepad2, Ticket, Film, MoreHorizontal, HelpCircle, MessageCircle, Download, Mic2, Radio, Disc3
+  Search, User, LogOut, X, Play, Menu, Mail, Crown, Newspaper, Ticket, Film, MoreHorizontal, HelpCircle, Download, Mic2, Radio, Disc3
 } from 'lucide-react';
 import { useEngagementStore } from '@/store/engagementStore';
 import { tracks } from '@/data/tracks';
@@ -51,11 +51,9 @@ export default function Navbar() {
     { href: '/', icon: Home, label: 'Home', mobileOrder: 1 },
     { href: '/music', icon: Music, label: 'Music', mobileOrder: 2 },
     { href: '/mystationradio', icon: Disc3, label: 'Radio', mobileOrder: 3 },
-    { href: '/community', icon: MessageCircle, label: 'Community', mobileOrder: 4 },
     { href: '/merch', icon: ShoppingBag, label: 'Merch', mobileOrder: 4 },
-    { href: '/lounge', icon: Gamepad2, label: 'Lounge', highlight: true, mobileOrder: 5 },
-    { href: '/events', icon: Ticket, label: 'Events', mobileOrder: 6 },
-    { href: '/podstation', icon: Radio, label: 'PodStation', mobileOrder: 7 },
+    { href: '/events', icon: Ticket, label: 'Events', mobileOrder: 5 },
+    { href: '/podstation', icon: Radio, label: 'PodStation', mobileOrder: 6 },
   ];
 
   // More menu items (shown in dropdown)

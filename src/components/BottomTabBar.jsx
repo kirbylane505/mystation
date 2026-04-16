@@ -29,10 +29,6 @@ export default function BottomTabBar() {
     { href: '/podstation', icon: Mic, label: 'Live' },
   ];
 
-  // Hide during active game rooms (not lounge lobby)
-  const isGameRoom = pathname?.startsWith('/lounge/') && pathname !== '/lounge';
-  if (isGameRoom) return null;
-
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-[#0a0a1a]/95 backdrop-blur-xl border-t border-white/[0.06] pb-[env(safe-area-inset-bottom)]">
       <div className="flex items-center justify-around h-14">
