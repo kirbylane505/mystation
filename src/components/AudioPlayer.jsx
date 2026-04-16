@@ -19,12 +19,13 @@ let audioUnlocked = false;
 let lastSkipTime = 0;
 let consecutiveErrors = 0;
 
-// DJ Blend — dual-audio crossfade for MyStation Radio
-// Second audio element reserved for the incoming track during a crossfade.
+// DJ Blend — Kid Capri style dual-audio crossfade for MyStation Radio.
+// Two elements alternate roles: one plays, the other preloads the next track.
+// On crossfade complete, pointers SWAP — no src reassignment, zero gap.
 let prefetchAudio = null;
-const CROSSFADE_DURATION = 6; // seconds
-const CROSSFADE_TRIGGER = 7;  // start when this many seconds remain
-const CROSSFADE_SAFETY_MS = (CROSSFADE_DURATION + 6) * 1000; // force-reset if stuck
+const CROSSFADE_DURATION = 8; // seconds — smooth Kid Capri blend
+const CROSSFADE_TRIGGER = 10; // start when this many seconds remain
+const CROSSFADE_SAFETY_MS = (CROSSFADE_DURATION + 6) * 1000;
 let crossfadeState = {
   active: false,
   startedAt: 0,
@@ -33,6 +34,25 @@ let crossfadeState = {
   intervalId: null,
   safetyTimeoutId: null,
 };
+
+// Listener swap system — after crossfade, move listeners to the new active element.
+let storedListeners = {};
+let listenersAttachedTo = null;
+
+function swapListenersTo(newAudio) {
+  if (listenersAttachedTo === newAudio) return;
+  const old = listenersAttachedTo;
+  if (old) {
+    for (const [evt, fn] of Object.entries(storedListeners)) {
+      if (fn) old.removeEventListener(evt, fn);
+    }
+  }
+  for (const [evt, fn] of Object.entries(storedListeners)) {
+    if (fn) newAudio.addEventListener(evt, fn);
+  }
+  listenersAttachedTo = newAudio;
+  if (typeof window !== 'undefined') window.__mystation_audio = newAudio;
+}
 
 function getPrefetchAudio() {
   if (typeof window === 'undefined') return null;
@@ -56,13 +76,6 @@ function resetCrossfade() {
     intervalId: null,
     safetyTimeoutId: null,
   };
-  if (prefetchAudio) {
-    try {
-      prefetchAudio.pause();
-      prefetchAudio.removeAttribute('src');
-      prefetchAudio.load();
-    } catch {}
-  }
 }
 
 // 30-second preview system — non-subscribers hear 30s then get prompted
@@ -359,54 +372,37 @@ export default function AudioPlayer() {
     };
 
     const completeCrossfade = (fromAudio, toAudio, targetVol) => {
+      // Kid Capri style — zero gap pointer swap. toAudio is ALREADY playing
+      // at full volume. We just stop fromAudio and promote toAudio.
       try {
         fromAudio.pause();
         fromAudio.volume = targetVol;
+        fromAudio.removeAttribute('src');
+        fromAudio.load();
       } catch {}
-      // Move prefetch audio into globalAudio slot via src copy + seek.
-      // Browser audio buffer for same URL is cached — seek is instant.
-      const nextTrack = crossfadeState.nextTrack;
-      const resumePos = toAudio.currentTime;
-      const srcUrl = toAudio.src;
 
-      // Mark the next track as "already loaded" to skip the reload effect
+      const nextTrack = crossfadeState.nextTrack;
       lastTrackIdRef.current = nextTrack.id;
       isLoadingRef.current = false;
 
-      try {
-        globalAudio.src = srcUrl;
-        globalAudio.load();
-        const onResumeReady = () => {
-          globalAudio.removeEventListener('canplay', onResumeReady);
-          try {
-            globalAudio.currentTime = resumePos;
-            globalAudio.volume = targetVol;
-            globalAudio.play().catch(() => {});
-          } catch {}
-        };
-        globalAudio.addEventListener('canplay', onResumeReady);
-        // Fallback — if canplay doesn't fire fast, try anyway
-        setTimeout(() => {
-          if (globalAudio.readyState >= 2) {
-            try {
-              globalAudio.currentTime = resumePos;
-              globalAudio.volume = targetVol;
-              globalAudio.play().catch(() => {});
-            } catch {}
-          }
-        }, 300);
-      } catch {}
+      // SWAP pointers — toAudio becomes globalAudio, fromAudio becomes prefetch.
+      // Move all event listeners to the new active element so timeupdate/ended fire.
+      globalAudio = toAudio;
+      prefetchAudio = fromAudio;
+      swapListenersTo(globalAudio);
 
-      // Pause prefetch + clear
-      try { toAudio.pause(); } catch {}
+      // Ensure volume is correct on the now-active element
+      try { globalAudio.volume = targetVol; } catch {}
+
       resetCrossfade();
 
       // Update radioStore + playerStore silently (no audio reload).
-      // The [currentTrack, isPlaying] media-session effect picks up the new track automatically.
       useRadioStore.getState().advance({ silent: true });
     };
 
     const onTimeUpdate = () => {
+      // Shadow outer `audio` with current active element (may have swapped during crossfade)
+      const audio = getGlobalAudio();
       progressBridge.set(audio.currentTime, audio.duration || 0);
       if (consecutiveErrors > 0) consecutiveErrors = 0;
 
@@ -475,10 +471,10 @@ export default function AudioPlayer() {
     };
 
     const onEnded = () => {
+      // Shadow outer `audio` with current active element
+      const audio = getGlobalAudio();
+
       // Radio mode: always advance when a track ends.
-      // If a crossfade is stuck (e.g., rAF paused during screen lock),
-      // kill it first so advance can proceed. Never let an ended track
-      // sit in a state where something else could replay it from 0.
       const radio = useRadioStore.getState();
       if (radio.isRadioActive) {
         if (crossfadeState.active) resetCrossfade();
@@ -486,13 +482,8 @@ export default function AudioPlayer() {
         return;
       }
 
-      // Don't auto-advance during track loading — prevents iOS audio unlock
-      // silence WAV from triggering nextTrack() when its ended event races
-      // with the real track load (off-by-one bug)
       if (isLoadingRef.current) return;
 
-      // Ignore silence WAV endings — iOS audio unlock artifact
-      // The silence WAV is a data: URL; real tracks are streaming URLs
       if (!audio.src || audio.src.startsWith('data:') || audio.duration < 0.5) return;
 
       if (repeatRef.current === 'one') {
@@ -547,6 +538,17 @@ export default function AudioPlayer() {
     audio.addEventListener('stalled', onStalled);
     audio.addEventListener('waiting', onStalled);
 
+    // Store listener refs for crossfade element-swap
+    storedListeners = {
+      timeupdate: onTimeUpdate,
+      loadedmetadata: onLoadedMetadata,
+      ended: onEnded,
+      error: onError,
+      stalled: onStalled,
+      waiting: onStalled,
+    };
+    listenersAttachedTo = audio;
+
     // Background audio persistence — auto-resume if system pauses audio
     // Only tries once per pause event. If resume fails, syncs store to paused
     // so the UI doesn't show "playing" with no audio (ghost state).
@@ -572,6 +574,7 @@ export default function AudioPlayer() {
       }, 150);
     };
     audio.addEventListener('pause', onAudioPause);
+    storedListeners.pause = onAudioPause;
 
     const onVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
