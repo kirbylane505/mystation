@@ -3,7 +3,7 @@
 import { usePathname } from 'next/navigation';
 import Player from './Player';
 
-const HIDDEN_ROUTES = ['/quickplay', '/mystationradio'];
+const HIDDEN_ROUTES = ['/quickplay'];
 
 export default function PlayerMount() {
   const pathname = usePathname();
