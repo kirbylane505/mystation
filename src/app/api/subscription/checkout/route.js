@@ -12,12 +12,19 @@ const CHECKOUT_ALLOWED_TIERS = new Set(['premium', 'creator']);
 
 export async function POST(request) {
   try {
-    const { tier, email } = await request.json();
+    const { tier, email, commitment_agreed } = await request.json();
 
     const canonicalTier = normalizeTier(tier);
     if (!CHECKOUT_ALLOWED_TIERS.has(canonicalTier)) {
       return NextResponse.json(
         { error: 'Invalid tier. Must be: premium or creator' },
+        { status: 400 }
+      );
+    }
+
+    if (canonicalTier === 'premium' && !commitment_agreed) {
+      return NextResponse.json(
+        { error: 'Premium requires 6-month commitment agreement.' },
         { status: 400 }
       );
     }
@@ -62,17 +69,29 @@ export async function POST(request) {
       }
     }
 
+    const isPremium = canonicalTier === 'premium';
+    const commitmentMetadata = isPremium
+      ? { commitment_months: '6', commitment_start: new Date().toISOString() }
+      : {};
+
+    const subMetadata = { tier: canonicalTier, priceId, source: 'mystation', ...commitmentMetadata };
+
     // Create Checkout Session
     const sessionParams = {
       mode: 'subscription',
       line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `https://mystationlive.com/subscribe/success?session_id={CHECKOUT_SESSION_ID}&tier=${canonicalTier}`,
-      cancel_url: 'https://mystationlive.com/subscribe',
+      success_url: isPremium
+        ? `https://mystationlive.com/premium/success?session_id={CHECKOUT_SESSION_ID}`
+        : `https://mystationlive.com/subscribe/success?session_id={CHECKOUT_SESSION_ID}&tier=${canonicalTier}`,
+      cancel_url: isPremium
+        ? 'https://mystationlive.com/premium'
+        : 'https://mystationlive.com/subscribe',
       subscription_data: {
-        trial_period_days: 30,
-        metadata: { tier: canonicalTier, priceId, source: 'mystation' },
+        // Premium tier commits for 6 months — no trial. Creator tier keeps 30-day trial.
+        ...(isPremium ? {} : { trial_period_days: 30 }),
+        metadata: subMetadata,
       },
-      metadata: { tier: canonicalTier, priceId, source: 'mystation' },
+      metadata: subMetadata,
       allow_promotion_codes: true,
     };
 
