@@ -1,14 +1,17 @@
 /**
  * MYSTATION - Verify OTP API Route
  * Verifies a 6-digit SMS OTP via Supabase Phone Auth, creates a session,
- * upserts profile row (phone, auth_method='phone'), looks up tier,
- * and sets mystation-auth + mystation-sub cookies.
+ * upserts the profile row, looks up tier, and sets the same cookie scheme
+ * the email login uses — keyed on phone instead of email so session route
+ * + middleware + client gates recognize phone users identically to email users.
  */
 
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { createHmac } from 'crypto';
 
 const CODE_REGEX = /^\d{6}$/;
+const AUDIO_SECRET = process.env.AUDIO_SECRET;
 
 const supabaseAnon = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -19,6 +22,14 @@ const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
+
+// Mirrors src/app/api/auth/login/route.js createAuthCookie but keyed on phone
+function createAuthCookie(phone) {
+  const timestamp = Date.now();
+  const payload = `${phone}:${timestamp}`;
+  const sig = createHmac('sha256', AUDIO_SECRET).update(`auth:${payload}`).digest('hex').slice(0, 32);
+  return `${payload}:${sig}`;
+}
 
 export async function POST(request) {
   let body;
@@ -46,59 +57,65 @@ export async function POST(request) {
   }
 
   const userId = data.user.id;
-  const accessToken = data.session.access_token;
 
-  // Upsert profile row — service role bypasses RLS intentionally
+  // Upsert profile — service role bypasses RLS intentionally
   try {
-    const { error: upsertErr } = await supabaseAdmin
+    await supabaseAdmin
       .from('profiles')
       .upsert(
-        {
-          id: userId,
-          phone,
-          auth_method: 'phone',
-          email_auth_retired: false,
-        },
+        { id: userId, phone, auth_method: 'phone', email_auth_retired: false },
         { onConflict: 'id' }
       );
-    if (upsertErr) console.error('[verify-otp] profile upsert:', upsertErr);
   } catch (err) {
-    console.error('[verify-otp] profile upsert exception:', err);
+    console.error('[verify-otp] profile upsert:', err);
   }
 
-  // Look up tier from subscribers table
+  // Look up tier from subscribers
   let tier = 'free';
+  let isSubscribed = false;
   try {
     const { data: sub } = await supabaseAdmin
       .from('subscribers')
-      .select('tier')
+      .select('tier, status, free_until')
       .eq('user_id', userId)
       .single();
-    if (sub?.tier) tier = sub.tier;
+    if (sub) {
+      if (sub.status === 'active') {
+        isSubscribed = true;
+        tier = sub.tier || 'premium';
+      } else if (sub.free_until && new Date(sub.free_until) > new Date()) {
+        isSubscribed = true;
+        tier = sub.tier || 'free';
+      }
+    }
   } catch {}
 
   const response = NextResponse.json({
     success: true,
-    user: { id: userId, phone },
+    user: { id: userId, phone, tier, isSubscribed },
   });
 
-  // Session cookie (30 days) — httpOnly, mirrors login flags
-  response.cookies.set('mystation-auth', accessToken, {
+  const COOKIE_DEFAULTS = {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/',
-    maxAge: 30 * 24 * 60 * 60,
-  });
+    maxAge: 365 * 24 * 60 * 60,
+  };
 
-  // Tier cookie (30 days) — client-readable per spec
-  response.cookies.set('mystation-sub', tier, {
-    httpOnly: false,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    path: '/',
-    maxAge: 30 * 24 * 60 * 60,
-  });
+  // HMAC auth cookie — same format as login route, keyed on phone
+  response.cookies.set('mystation-auth', createAuthCookie(phone), COOKIE_DEFAULTS);
+
+  // Phone identity cookie — parallel to mystation-email. Session route reads either.
+  response.cookies.set('mystation-phone', phone, COOKIE_DEFAULTS);
+
+  // Subscription cookies — only if actually subscribed (mirror login flow)
+  if (isSubscribed) {
+    const subTs = Date.now();
+    const subSig = createHmac('sha256', AUDIO_SECRET).update(`sub:${subTs}`).digest('hex').slice(0, 32);
+    response.cookies.set('mystation-sub', `${subTs}.${subSig}`, COOKIE_DEFAULTS);
+    response.cookies.set('mystation-sub-flag', '1', { ...COOKIE_DEFAULTS, httpOnly: false });
+  }
 
   return response;
 }
