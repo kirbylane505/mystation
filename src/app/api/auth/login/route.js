@@ -41,6 +41,35 @@ export async function POST(request) {
       );
     }
 
+    // Phone-migration gate: users pre-linked to phone are locked out of email login;
+    // users without a phone yet are asked to add one before a session is issued.
+    try {
+      const { getSupabaseAdmin } = await import('@/lib/supabaseAdmin');
+      const supabase = getSupabaseAdmin();
+      if (supabase && data?.user?.id) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('phone, email_auth_retired')
+          .eq('id', data.user.id)
+          .maybeSingle();
+        if (profile?.email_auth_retired) {
+          return NextResponse.json(
+            { success: false, error: 'This account now uses phone login.' },
+            { status: 410 }
+          );
+        }
+        if (!profile?.phone) {
+          return NextResponse.json(
+            { success: false, needs_phone_migration: true, user_id: data.user.id },
+            { status: 200 }
+          );
+        }
+      }
+    } catch (err) {
+      console.error('[login] migration check:', err);
+      // Fail open — do not block legacy login on a profile lookup error
+    }
+
     // Check subscription status
     let isSubscribed = false;
     let tier = 'free';
