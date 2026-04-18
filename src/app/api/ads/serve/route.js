@@ -1,8 +1,22 @@
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import { getSupabaseAdmin } from '@/lib/creatorAuth';
+import { isMonetizationEnforced, gateFor } from '@/lib/monetization';
 
 export async function GET() {
   try {
+    // Grow mode: ads are dormant — no ad served to anyone.
+    if (!isMonetizationEnforced()) {
+      return NextResponse.json({ ad: null });
+    }
+
+    // Enforce mode: subscribed users skip ads, everyone else gets one.
+    const cookieStore = await cookies();
+    const subFlag = cookieStore.get('mystation-sub-flag')?.value === '1';
+    const userTier = subFlag ? 'premium' : 'free';
+    const { allowed } = gateFor('ad_free', userTier);
+    if (allowed) return NextResponse.json({ ad: null });
+
     const supabase = getSupabaseAdmin();
 
     // Get a random active ad within its date range
