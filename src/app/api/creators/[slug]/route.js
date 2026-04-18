@@ -19,6 +19,14 @@ export async function GET(request, { params }) {
     return NextResponse.json({ error: 'Creator not found' }, { status: 404 });
   }
 
+  // Premium fan-tier badge: is this creator also an active Premium subscriber?
+  const { data: sub } = await supabase
+    .from('subscribers')
+    .select('tier, status')
+    .eq('user_id', creator.id)
+    .maybeSingle();
+  creator.is_premium = sub?.tier === 'premium' && sub?.status === 'active';
+
   // Get their tracks
   const { data: tracks } = await supabase
     .from('creator_tracks')

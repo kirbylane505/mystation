@@ -16,13 +16,19 @@ export default function ChatMessage({ msg, isSubscriber }) {
         {isEmoji ? (
           <span className="text-sm">
             {msg.isSubscriber && <Crown className="w-3 h-3 text-yellow-400 inline mr-1" />}
-            <span className="font-medium text-orange-400">{msg.user_name}</span>
+            <span
+              data-tier={msg.isSubscriber ? 'premium' : 'free'}
+              className={`font-medium ${msg.isSubscriber ? 'text-yellow-400' : 'text-orange-400'}`}
+            >{msg.user_name}</span>
             <span className="ml-2 text-lg">{msg.emoji}</span>
           </span>
         ) : (
           <p className="text-sm break-words">
             {msg.isSubscriber && <Crown className="w-3 h-3 text-yellow-400 inline mr-1" />}
-            <span className="font-medium text-orange-400">{msg.user_name}</span>
+            <span
+              data-tier={msg.isSubscriber ? 'premium' : 'free'}
+              className={`font-medium ${msg.isSubscriber ? 'text-yellow-400' : 'text-orange-400'}`}
+            >{msg.user_name}</span>
             <span className="text-gray-300 ml-2">{msg.message}</span>
           </p>
         )}

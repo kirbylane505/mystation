@@ -8,6 +8,36 @@ export const tracks = [
   // NEW SINGLES - 2026
   // ========================================
   {
+    id: 516,
+    title: "FOR US (Freestyle)",
+    artist: "Mike Page",
+    album: "Singles",
+    year: 2026,
+    duration: "2:17",
+    trackNumber: 1,
+    albumId: 'singles-2026',
+    audioFile: '/audio/singles/Mike Page - For Us Freestyle_MASTERED.m4a',
+    isNew: true,
+    isFeatured: true,
+    featuredWeek: '2026-04-18',
+    producer: 'IDMG'
+  },
+  {
+    id: 515,
+    title: "Embellishments",
+    artist: "Mike Page x TKP",
+    album: "Coming Soon",
+    year: 2026,
+    duration: "4:05",
+    trackNumber: 1,
+    albumId: 'singles-2026',
+    audioFile: '/audio/singles/Mike Page x TKP - Embellishments_MASTERED.m4a',
+    isNew: true,
+    isFeatured: true,
+    featuredWeek: '2026-04-16',
+    producer: 'The Cubist'
+  },
+  {
     id: 97,
     title: "Fantasy",
     artist: "Mike Page ft. Q Parker (112)",

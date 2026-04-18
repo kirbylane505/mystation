@@ -263,6 +263,15 @@ export default function ArtistProfile() {
                   <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
                 </svg>
               )}
+              {creator.is_premium && (
+                <span
+                  data-tier="premium"
+                  className="inline-flex items-center gap-1 px-2.5 py-1 bg-yellow-400/20 border border-yellow-400/50 rounded-full text-xs font-black text-yellow-400 flex-shrink-0"
+                  title="Premium Supporter"
+                >
+                  🏆 PREMIUM
+                </span>
+              )}
               {/* === 3. LIVE NOW BADGE === */}
               {creator.is_live && (
                 <Link
