@@ -11,13 +11,19 @@ const US_CA_REGEX = /^\+1\d{10}$/;
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
 const lastSentByPhone = new Map();
 
 export async function POST(request) {
-  const { phone } = await request.json();
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON body.' }, { status: 400 });
+  }
+  const { phone } = body;
 
   if (!phone || !US_CA_REGEX.test(phone)) {
     return NextResponse.json(
