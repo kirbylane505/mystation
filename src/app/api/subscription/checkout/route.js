@@ -5,15 +5,19 @@
  */
 
 import { NextResponse } from 'next/server';
-import { TIER_PRICES } from '@/lib/tiers';
+import { normalizeTier, priceIdFor } from '@/lib/tiers';
+
+// Only paid tiers are selectable at checkout. 'free' has no Stripe price.
+const CHECKOUT_ALLOWED_TIERS = new Set(['premium', 'creator']);
 
 export async function POST(request) {
   try {
     const { tier, email } = await request.json();
 
-    if (!tier || !TIER_PRICES[tier]) {
+    const canonicalTier = normalizeTier(tier);
+    if (!CHECKOUT_ALLOWED_TIERS.has(canonicalTier)) {
       return NextResponse.json(
-        { error: 'Invalid tier. Must be: supporter, premium, or diamond' },
+        { error: 'Invalid tier. Must be: premium or creator' },
         { status: 400 }
       );
     }
@@ -28,9 +32,9 @@ export async function POST(request) {
     const Stripe = (await import('stripe')).default;
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-    const priceId = TIER_PRICES[tier];
+    const priceId = priceIdFor(canonicalTier);
     if (!priceId) {
-      console.error(`Missing STRIPE_PRICE for tier: ${tier}`);
+      console.error(`Missing STRIPE_PRICE for tier: ${canonicalTier}`);
       return NextResponse.json(
         { error: 'Subscription not configured' },
         { status: 500 }
@@ -53,7 +57,7 @@ export async function POST(request) {
         return NextResponse.json({
           error: 'Already subscribed. Use upgrade to change tier.',
           alreadySubscribed: true,
-          currentTier: subs.data[0].metadata?.tier || 'supporter',
+          currentTier: normalizeTier(subs.data[0].metadata?.tier),
         }, { status: 409 });
       }
     }
@@ -62,13 +66,13 @@ export async function POST(request) {
     const sessionParams = {
       mode: 'subscription',
       line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `https://mystationlive.com/subscribe/success?session_id={CHECKOUT_SESSION_ID}&tier=${tier}`,
+      success_url: `https://mystationlive.com/subscribe/success?session_id={CHECKOUT_SESSION_ID}&tier=${canonicalTier}`,
       cancel_url: 'https://mystationlive.com/subscribe',
       subscription_data: {
         trial_period_days: 30,
-        metadata: { tier, priceId, source: 'mystation' },
+        metadata: { tier: canonicalTier, priceId, source: 'mystation' },
       },
-      metadata: { tier, priceId, source: 'mystation' },
+      metadata: { tier: canonicalTier, priceId, source: 'mystation' },
       allow_promotion_codes: true,
     };
 

@@ -4,16 +4,19 @@
  */
 
 import { NextResponse } from 'next/server';
-import { TIER_PRICES, getTierLevel } from '@/lib/tiers';
+import { normalizeTier, priceIdFor, tierLevel } from '@/lib/tiers';
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
+
+const UPGRADE_ALLOWED_TIERS = new Set(['premium', 'creator']);
 
 export async function POST(request) {
   try {
     const { email, newTier } = await request.json();
 
-    if (!email || !newTier || !TIER_PRICES[newTier]) {
+    const canonicalNewTier = normalizeTier(newTier);
+    if (!email || !UPGRADE_ALLOWED_TIERS.has(canonicalNewTier)) {
       return NextResponse.json(
-        { error: 'Email and valid tier required' },
+        { error: 'Email and valid tier (premium or creator) required' },
         { status: 400 }
       );
     }
@@ -62,7 +65,7 @@ export async function POST(request) {
       );
     }
 
-    if (subscriber.tier === newTier) {
+    if (normalizeTier(subscriber.tier) === canonicalNewTier) {
       return NextResponse.json(
         { error: 'Already on this tier' },
         { status: 400 }
@@ -79,7 +82,7 @@ export async function POST(request) {
       );
     }
 
-    const newPriceId = TIER_PRICES[newTier];
+    const newPriceId = priceIdFor(canonicalNewTier);
 
     // Update the subscription item to new price
     const updated = await stripe.subscriptions.update(subscriber.stripe_subscription_id, {
@@ -88,14 +91,14 @@ export async function POST(request) {
         price: newPriceId,
       }],
       proration_behavior: 'create_prorations',
-      metadata: { tier: newTier, source: 'mystation' },
+      metadata: { tier: canonicalNewTier, source: 'mystation' },
     });
 
     // Update Supabase immediately (webhook will also fire as backup)
     const { error: updateErr } = await supabase
       .from('subscribers')
       .update({
-        tier: newTier,
+        tier: canonicalNewTier,
         current_period_end: new Date(updated.current_period_end * 1000).toISOString(),
       })
       .eq('email', email.toLowerCase());
@@ -103,16 +106,16 @@ export async function POST(request) {
       // current_period_end column may not exist yet — update just the tier
       await supabase
         .from('subscribers')
-        .update({ tier: newTier })
+        .update({ tier: canonicalNewTier })
         .eq('email', email.toLowerCase());
     }
 
-    const isUpgrade = getTierLevel(newTier) > getTierLevel(subscriber.tier);
+    const isUpgrade = tierLevel(canonicalNewTier) > tierLevel(subscriber.tier);
 
     return NextResponse.json({
       success: true,
-      previousTier: subscriber.tier,
-      newTier,
+      previousTier: normalizeTier(subscriber.tier),
+      newTier: canonicalNewTier,
       action: isUpgrade ? 'upgraded' : 'downgraded',
       currentPeriodEnd: new Date(updated.current_period_end * 1000).toISOString(),
     });

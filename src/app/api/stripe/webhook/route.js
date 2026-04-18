@@ -642,7 +642,8 @@ async function handleSubscriptionCheckout(session, stripe) {
   }
 
   const email = customerEmail.toLowerCase();
-  const tier = session.metadata?.tier || 'supporter';
+  const { normalizeTier } = await import('@/lib/tiers');
+  const tier = normalizeTier(session.metadata?.tier);
   const customerId = session.customer;
   const subscriptionId = session.subscription;
 
@@ -745,16 +746,19 @@ async function handleInvoicePaid(invoice) {
     if (!supabase) return;
 
     // Detect tier from price ID (reliable) with amount fallback
-    const { tierFromPriceId } = await import('@/lib/tiers');
+    const { tierFromPriceId, normalizeTier, tierLevel } = await import('@/lib/tiers');
     const subItem = invoice.lines?.data?.[0];
     const priceId = subItem?.price?.id;
-    let tier = priceId ? tierFromPriceId(priceId) : 'supporter';
-    // Fallback: detect from amount if price ID not available
+    let tier = priceId ? tierFromPriceId(priceId) : 'premium';
+    // Fallback: detect from amount if price ID not available.
+    // Post-redesign: Creator is $14.99, Premium is $4.99, everything else → free.
     if (!priceId) {
       const amountPaid = invoice.amount_paid || 0;
-      if (amountPaid >= 1499) tier = 'diamond';
-      else if (amountPaid >= 999) tier = 'premium';
+      if (amountPaid >= 1499) tier = 'creator';
+      else if (amountPaid >= 499) tier = 'premium';
+      else tier = 'free';
     }
+    tier = normalizeTier(tier);
 
     // Extend subscription
     const thirtyDaysFromNow = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
@@ -767,9 +771,11 @@ async function handleInvoicePaid(invoice) {
       .single();
 
     if (existing) {
-      // Only upgrade tier, never downgrade (they might have been manually upgraded)
-      const tierRank = { free: 0, regular: 1, supporter: 1, premium: 2, diamond: 3 };
-      const newTier = (tierRank[tier] || 0) >= (tierRank[existing.tier] || 0) ? tier : existing.tier;
+      // Only upgrade tier, never downgrade (they might have been manually upgraded).
+      // Compare by canonical access level so legacy diamond/supporter strings normalize correctly.
+      const incomingLevel = tierLevel(tier);
+      const existingLevel = tierLevel(existing.tier);
+      const newTier = incomingLevel >= existingLevel ? tier : normalizeTier(existing.tier);
       await supabase
         .from('subscribers')
         .update({
@@ -924,14 +930,16 @@ async function registerNewSubscriber(customerEmail, amountCents) {
     }
 
     // Detect tier from price ID (reliable) with amount fallback
-    const { tierFromPriceId } = await import('@/lib/tiers');
+    const { tierFromPriceId, normalizeTier } = await import('@/lib/tiers');
     const lineItem = session.line_items?.data?.[0] || {};
     const priceId = lineItem.price?.id || session.metadata?.priceId;
-    let tier = priceId ? tierFromPriceId(priceId) : 'supporter';
+    let tier = priceId ? tierFromPriceId(priceId) : 'premium';
     if (!priceId) {
-      if (amountCents >= 1499) tier = 'diamond';
-      else if (amountCents >= 999) tier = 'premium';
+      if (amountCents >= 1499) tier = 'creator';
+      else if (amountCents >= 499) tier = 'premium';
+      else tier = 'free';
     }
+    tier = normalizeTier(tier);
 
     // Get next subscriber number
     const { count } = await supabase
@@ -1004,9 +1012,9 @@ async function handleSubscriptionUpdated(subscription) {
     }
 
     // Detect new tier from price
-    const { tierFromPriceId } = await import('@/lib/tiers');
+    const { tierFromPriceId, normalizeTier } = await import('@/lib/tiers');
     const priceId = subscription.items?.data?.[0]?.price?.id;
-    const newTier = priceId ? tierFromPriceId(priceId) : subscriber.tier;
+    const newTier = normalizeTier(priceId ? tierFromPriceId(priceId) : subscriber.tier);
     const isActive = subscription.status === 'active' || subscription.status === 'trialing';
 
     // Try full update with new columns, fall back to base columns
