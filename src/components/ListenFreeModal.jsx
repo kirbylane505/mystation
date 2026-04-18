@@ -3,7 +3,8 @@
  * Zero-friction phone OTP sign-in.
  * Phone -> Code -> Home (?welcome=1) -> Music autoplays.
  *
- * Task 4 of phone-OTP rollout. Migration mode is Task 6.
+ * Task 4 of phone-OTP rollout. Migration mode (Task 6) is gated via
+ * `mode="migration"` + `userId` for legacy email users attaching a phone.
  */
 
 'use client';
@@ -27,7 +28,7 @@ function formatPhoneDisplay(raw) {
   return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
 }
 
-export default function ListenFreeModal({ open, onClose }) {
+export default function ListenFreeModal({ open, onClose, mode = 'signup', userId }) {
   const router = useRouter();
   const [step, setStep] = useState('phone'); // 'phone' | 'code'
   const [phone, setPhone] = useState('');
@@ -35,6 +36,8 @@ export default function ListenFreeModal({ open, onClose }) {
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const isMigration = mode === 'migration';
 
   // Reset state when modal closes
   useEffect(() => {
@@ -68,11 +71,20 @@ export default function ListenFreeModal({ open, onClose }) {
       setError('Enter a valid phone number.');
       return;
     }
+    if (isMigration && !userId) {
+      setLoading(false);
+      setError('Missing account reference. Please sign in again.');
+      return;
+    }
     try {
-      const res = await fetch('/api/auth/send-otp', {
+      const endpoint = isMigration ? '/api/auth/migrate-link' : '/api/auth/send-otp';
+      const body = isMigration
+        ? { user_id: userId, phone: normalized }
+        : { phone: normalized };
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: normalized }),
+        body: JSON.stringify(body),
       });
       const data = await res.json().catch(() => ({}));
       setLoading(false);
@@ -93,10 +105,14 @@ export default function ListenFreeModal({ open, onClose }) {
     setLoading(true);
     setError('');
     try {
-      const res = await fetch('/api/auth/verify-otp', {
+      const endpoint = isMigration ? '/api/auth/migrate-link' : '/api/auth/verify-otp';
+      const body = isMigration
+        ? { user_id: userId, phone, code }
+        : { phone, code };
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone, code }),
+        body: JSON.stringify(body),
       });
       const data = await res.json().catch(() => ({}));
       setLoading(false);
@@ -105,7 +121,8 @@ export default function ListenFreeModal({ open, onClose }) {
         return;
       }
       onClose();
-      router.push('/?welcome=1');
+      // Migrating users are returning — skip the welcome autoplay flag.
+      router.push(isMigration ? '/' : '/?welcome=1');
       router.refresh();
     } catch (err) {
       setLoading(false);
@@ -113,11 +130,25 @@ export default function ListenFreeModal({ open, onClose }) {
     }
   }
 
+  const title = isMigration
+    ? (step === 'phone' ? 'Add your phone' : 'Enter Your Code')
+    : (step === 'phone' ? 'Listen Free' : 'Enter Your Code');
+
+  const subtitle = step === 'phone'
+    ? (isMigration
+        ? 'We moved to phone login. Add your number to keep your account.'
+        : 'Your number is your account. No password.')
+    : `Sent to ${phone}`;
+
+  const primaryLabel = isMigration
+    ? (step === 'phone' ? (loading ? 'Sending…' : 'Send Code') : (loading ? 'Linking…' : 'Link Phone'))
+    : (step === 'phone' ? (loading ? 'Sending…' : 'Send Code') : (loading ? 'Verifying…' : 'Listen Free'));
+
   return (
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="Listen Free — phone sign in"
+      aria-label={isMigration ? 'Add your phone to your account' : 'Listen Free — phone sign in'}
       className="fixed inset-0 z-[700] flex items-end md:items-center justify-center"
       onClick={onClose}
     >
@@ -144,12 +175,10 @@ export default function ListenFreeModal({ open, onClose }) {
             <Headphones size={28} className="text-white" />
           </div>
           <h2 className="text-2xl font-bold text-white mb-1">
-            {step === 'phone' ? 'Listen Free' : 'Enter Your Code'}
+            {title}
           </h2>
           <p className="text-white/50 text-sm">
-            {step === 'phone'
-              ? 'Your number is your account. No password.'
-              : `Sent to ${phone}`}
+            {subtitle}
           </p>
         </div>
 
@@ -186,7 +215,7 @@ export default function ListenFreeModal({ open, onClose }) {
                 disabled={loading || phoneDisplay.replace(/\D/g, '').length < 10}
                 className="w-full py-4 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-500/40 disabled:cursor-not-allowed text-white font-bold rounded-xl transition shadow-lg shadow-blue-500/30 text-base"
               >
-                {loading ? 'Sending…' : 'Send Code'}
+                {primaryLabel}
               </button>
 
               <p className="text-[11px] text-white/30 text-center leading-relaxed pt-2">
@@ -225,7 +254,7 @@ export default function ListenFreeModal({ open, onClose }) {
                 disabled={loading || code.length !== 6}
                 className="w-full py-4 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-500/40 disabled:cursor-not-allowed text-white font-bold rounded-xl transition shadow-lg shadow-blue-500/30 text-base"
               >
-                {loading ? 'Verifying…' : 'Listen Free'}
+                {primaryLabel}
               </button>
 
               <button

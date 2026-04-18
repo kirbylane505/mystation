@@ -8,6 +8,7 @@
 import { useState } from 'react';
 import { X, Mail, Lock, User, Check, Heart, Music, Sparkles } from 'lucide-react';
 import { useUserStore } from '@/store/playerStore';
+import ListenFreeModal from './ListenFreeModal';
 
 export default function AuthModal({ isOpen, onClose, initialMode = 'signup' }) {
   const [mode, setMode] = useState(initialMode);
@@ -16,7 +17,24 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signup' }) {
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [migrationUserId, setMigrationUserId] = useState(null);
   const { setUser } = useUserStore();
+
+  // If login returned needs_phone_migration, show the ListenFreeModal in
+  // migration mode ON TOP OF / instead of the email form.
+  if (migrationUserId) {
+    return (
+      <ListenFreeModal
+        open={true}
+        onClose={() => {
+          setMigrationUserId(null);
+          onClose();
+        }}
+        mode="migration"
+        userId={migrationUserId}
+      />
+    );
+  }
 
   if (!isOpen) return null;
 
@@ -36,6 +54,14 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signup' }) {
         body: JSON.stringify(body),
       });
       const data = await res.json();
+
+      // Phone-migration branch: legacy email user needs to attach a phone.
+      // Open ListenFreeModal in migration mode with the user_id we just got.
+      if (data && data.needs_phone_migration && data.user_id) {
+        setLoading(false);
+        setMigrationUserId(data.user_id);
+        return;
+      }
 
       if (!data.success) {
         throw new Error(data.error || 'Authentication failed');
