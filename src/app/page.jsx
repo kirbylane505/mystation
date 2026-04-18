@@ -11,6 +11,7 @@ import Hero from '@/components/Hero';
 import TrackList from '@/components/TrackList';
 import EmailCapture from '@/components/EmailCapture';
 import LOTLCountdown from '@/components/LOTLCountdown';
+import ListenFreeModal from '@/components/ListenFreeModal';
 import { tracks, albums, getOfficialTracks, getNonVaultTracks } from '@/data/tracks';
 import { usePlayerStore, isGated } from '@/store/playerStore';
 import { Play, ExternalLink, Headphones, ChevronLeft, Shuffle, ShoppingBag, Gamepad2, Film, Lock } from 'lucide-react';
@@ -25,6 +26,7 @@ export default function HomePage() {
   const isPlaying = usePlayerStore(s => s.isPlaying);
   const [activeAlbum, setActiveAlbum] = useState(null);
   const [freshMerch, setFreshMerch] = useState([]);
+  const [listenOpen, setListenOpen] = useState(false);
 
   useEffect(() => {
     // Curated Fresh Merch — 4 diverse product types (hoodie, tee, slides, cap)
@@ -54,6 +56,35 @@ export default function HomePage() {
       })
       .catch(() => {});
   }, []);
+
+  // Welcome autoplay — fires when user lands on /?welcome=1 after phone OTP sign-in.
+  // Reuses local tracks dataset (no new API needed). Picks first non-vault, non-gated
+  // official track and kicks it into the queue so music starts the moment they arrive.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const welcome = params.get('welcome');
+    if (welcome !== '1') return;
+
+    // Only autoplay if the phone cookie is present (logged-in check without a roundtrip).
+    const cookies = typeof document !== 'undefined' ? document.cookie : '';
+    const loggedIn = cookies.includes('mystation-phone=') || cookies.includes('mystation-auth=');
+    if (!loggedIn) return;
+
+    // Pick a welcome track: first free, non-vault, non-gated official track.
+    const candidates = getNonVaultTracks().filter(t => !isGated(t));
+    if (candidates.length === 0) return;
+    const pick = candidates[0];
+
+    // Fire once — avoid re-triggering on re-renders.
+    const already = sessionStorage.getItem('mystation_welcome_fired');
+    if (already === '1') return;
+    sessionStorage.setItem('mystation_welcome_fired', '1');
+
+    // Small delay so AudioPlayer is mounted + gesture context is fresh from modal click.
+    const t = setTimeout(() => setQueue(candidates, 0), 250);
+    return () => clearTimeout(t);
+  }, [setQueue]);
 
   // Get official tracks only
   const officialTracks = getOfficialTracks();
@@ -116,6 +147,25 @@ export default function HomePage() {
 
       {/* Hero Section */}
       <Hero />
+
+      {/* Listen Free CTA — phone OTP entry (zero friction) */}
+      <section className="max-w-screen-xl mx-auto px-6 pt-4 pb-10 -mt-8 md:-mt-16 relative z-20">
+        <div className="glass rounded-2xl p-6 md:p-8 bg-gradient-to-br from-blue-600/20 via-blue-500/10 to-purple-500/10 border border-blue-400/20 text-center">
+          <h2 className="text-2xl md:text-3xl font-black text-white mb-2">
+            Your Phone. Your Music. Right Now.
+          </h2>
+          <p className="text-white/60 text-sm md:text-base mb-5 max-w-md mx-auto">
+            No email. No password. Just your number — and the music starts.
+          </p>
+          <button
+            onClick={() => setListenOpen(true)}
+            className="inline-flex items-center gap-3 px-8 py-4 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-full transition shadow-xl shadow-blue-500/30 text-base md:text-lg"
+          >
+            <Headphones size={22} />
+            Listen Free
+          </button>
+        </div>
+      </section>
 
       {/* Scrolling IDMG Marquee — 4 spans (2x is enough for seamless loop) */}
       <div className="w-full overflow-hidden py-6 border-t border-b border-white/5 bg-gradient-to-r from-transparent via-white/[0.02] to-transparent">
@@ -591,7 +641,7 @@ export default function HomePage() {
                 <li><Link href="/about" className="hover:text-blue-400 transition">About Us</Link></li>
                 <li><Link href="/about" className="hover:text-blue-400 transition">Programs</Link></li>
                 <li><a href="https://lotlfest.com" target="_blank" rel="noopener noreferrer" className="hover:text-blue-400 transition flex items-center gap-2">Love on the Lawn <ExternalLink size={12} /></a></li>
-                <li><a href="https://cash.app/$RIDE4PAGEMUSIC847" target="_blank" rel="noopener noreferrer" className="hover:text-blue-400 transition flex items-center gap-2">Donate <ExternalLink size={12} /></a></li>
+                <li><a href="https://www.mikepagefoundation.org/donate" target="_blank" rel="noopener noreferrer" className="hover:text-blue-400 transition flex items-center gap-2">Donate <ExternalLink size={12} /></a></li>
               </ul>
             </div>
             <div>
@@ -627,6 +677,9 @@ export default function HomePage() {
           </div>
         </div>
       </footer>
+
+      {/* Listen Free Modal — phone OTP (Task 4) */}
+      <ListenFreeModal open={listenOpen} onClose={() => setListenOpen(false)} />
     </div>
   );
 }
