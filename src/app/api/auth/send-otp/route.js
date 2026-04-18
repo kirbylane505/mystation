@@ -6,6 +6,7 @@
 
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { createRateLimiter } from '@/lib/rateLimit';
 
 const US_CA_REGEX = /^\+1\d{10}$/;
 
@@ -15,8 +16,12 @@ const supabase = createClient(
 );
 
 const lastSentByPhone = new Map();
+const sendOtpIpLimiter = createRateLimiter('send-otp', 5, 3600000); // 5 per IP per hour
 
 export async function POST(request) {
+  const limited = sendOtpIpLimiter(request);
+  if (limited) return limited;
+
   let body;
   try {
     body = await request.json();

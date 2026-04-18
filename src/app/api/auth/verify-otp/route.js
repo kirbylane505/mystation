@@ -9,9 +9,12 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { createHmac } from 'crypto';
+import { createRateLimiter } from '@/lib/rateLimit';
 
 const CODE_REGEX = /^\d{6}$/;
 const AUDIO_SECRET = process.env.AUDIO_SECRET;
+const MAX_FAILS_PER_PHONE = 5;
+const FAIL_WINDOW_MS = 15 * 60 * 1000;
 
 const supabaseAnon = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -23,6 +26,30 @@ const supabaseAdmin = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
+const verifyOtpIpLimiter = createRateLimiter('verify-otp', 20, 900000); // 20 per IP per 15 min
+const failsByPhone = new Map();
+
+function recordPhoneFail(phone) {
+  const now = Date.now();
+  const rec = failsByPhone.get(phone);
+  if (!rec || now - rec.firstAt > FAIL_WINDOW_MS) {
+    failsByPhone.set(phone, { count: 1, firstAt: now });
+    return 1;
+  }
+  rec.count++;
+  return rec.count;
+}
+
+function isPhoneLocked(phone) {
+  const rec = failsByPhone.get(phone);
+  if (!rec) return false;
+  if (Date.now() - rec.firstAt > FAIL_WINDOW_MS) {
+    failsByPhone.delete(phone);
+    return false;
+  }
+  return rec.count >= MAX_FAILS_PER_PHONE;
+}
+
 // Mirrors src/app/api/auth/login/route.js createAuthCookie but keyed on phone
 function createAuthCookie(phone) {
   const timestamp = Date.now();
@@ -32,6 +59,9 @@ function createAuthCookie(phone) {
 }
 
 export async function POST(request) {
+  const limited = verifyOtpIpLimiter(request);
+  if (limited) return limited;
+
   let body;
   try {
     body = await request.json();
@@ -45,6 +75,13 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Invalid code format.' }, { status: 400 });
   }
 
+  if (isPhoneLocked(phone)) {
+    return NextResponse.json(
+      { error: 'Too many failed attempts. Request a new code.' },
+      { status: 429 }
+    );
+  }
+
   const { data, error } = await supabaseAnon.auth.verifyOtp({
     phone,
     token: code,
@@ -52,10 +89,12 @@ export async function POST(request) {
   });
 
   if (error || !data?.session || !data?.user) {
+    recordPhoneFail(phone);
     console.error('[verify-otp]', error);
     return NextResponse.json({ error: 'Invalid or expired code.' }, { status: 401 });
   }
 
+  failsByPhone.delete(phone);
   const userId = data.user.id;
 
   // Upsert profile — service role bypasses RLS intentionally
@@ -63,7 +102,7 @@ export async function POST(request) {
     await supabaseAdmin
       .from('profiles')
       .upsert(
-        { id: userId, phone, auth_method: 'phone', email_auth_retired: false },
+        { id: userId, phone, auth_method: 'phone' },
         { onConflict: 'id' }
       );
   } catch (err) {
