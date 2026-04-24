@@ -28,7 +28,6 @@ import BottomTabBar from '@/components/BottomTabBar';
 import SecurityShield from '@/components/SecurityShield';
 import PWAInstallModal from '@/components/PWAInstallModal';
 import PWAInstallBanner from '@/components/PWAInstallBanner';
-import OfflineBanner from '@/components/OfflineBanner';
 import PushPermission from '@/components/PushPermission';
 
 // Lazy-loaded utilities — code-split into separate chunks (loaded async after hydration)
@@ -217,7 +216,6 @@ export default function RootLayout({ children }) {
           <SecurityShield />
           <PWAInstallModal />
           <PWAInstallBanner />
-          <OfflineBanner />
           <PushPermission />
         </ClientProviders>
         <Script id="register-sw" strategy="afterInteractive">
