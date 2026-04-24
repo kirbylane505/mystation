@@ -936,7 +936,7 @@ export default function MerchPage() {
                 <Link href="#shop" className="btn-primary flex items-center gap-2 hover:scale-105 hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-300">
                   <ShoppingBag size={18} /> Shop Now
                 </Link>
-                <a href="https://cash.app/$RIDE4PAGEMUSIC847" target="_blank" rel="noopener noreferrer" className="btn-secondary flex items-center gap-2 hover:scale-105 transition-all duration-300">
+                <a href="https://www.mikepagefoundation.org/donate" target="_blank" rel="noopener noreferrer" className="btn-secondary flex items-center gap-2 hover:scale-105 transition-all duration-300">
                   <Heart size={18} /> Donate Direct
                 </a>
               </div>
@@ -1279,7 +1279,7 @@ export default function MerchPage() {
               </p>
               <div className={`flex flex-wrap gap-4 justify-center transition-all duration-700 delay-900 ${ctaVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
                 <Link href="/about" className="btn-primary hover:scale-105 hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-300">Learn About the Foundation</Link>
-                <a href="https://cash.app/$RIDE4PAGEMUSIC847" target="_blank" rel="noopener noreferrer" className="btn-secondary flex items-center gap-2 hover:scale-105 transition-all duration-300">
+                <a href="https://www.mikepagefoundation.org/donate" target="_blank" rel="noopener noreferrer" className="btn-secondary flex items-center gap-2 hover:scale-105 transition-all duration-300">
                   <Heart size={18} /> Donate Now
                 </a>
               </div>

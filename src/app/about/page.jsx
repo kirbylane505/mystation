@@ -303,13 +303,13 @@ export default function AboutPage() {
         </p>
         <div className="flex flex-wrap gap-4 justify-center">
           <a
-            href="https://cash.app/$RIDE4PAGEMUSIC847"
+            href="https://www.mikepagefoundation.org/donate"
             target="_blank"
             rel="noopener noreferrer"
             className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-full hover:shadow-lg hover:shadow-green-500/30 transition flex items-center gap-2"
           >
             <Heart size={20} />
-            Donate via CashApp
+            Donate (Tax-Deductible)
           </a>
           <a
             href="/merch"

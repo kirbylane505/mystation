@@ -8,7 +8,7 @@ import '@/styles/globals.css';
 
 // Critical components — eagerly loaded (needed for initial render)
 import Navbar from '@/components/Navbar';
-import Player from '@/components/Player';
+import PlayerMount from '@/components/PlayerMount';
 import AudioPlayer from '@/components/AudioPlayer';
 import SubscribeModal from '@/components/SubscribeModal';
 import ClientProviders from '@/components/ClientProviders';
@@ -204,7 +204,7 @@ export default function RootLayout({ children }) {
             <Suspense><ReferralDetector /></Suspense>
             <PageTransition>{children}</PageTransition>
           </main>
-          <Player />
+          <PlayerMount />
           <BottomTabBar />
           <AudioPlayer />
           <SubscribeModal />
