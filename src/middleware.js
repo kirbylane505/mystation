@@ -83,7 +83,7 @@ export async function middleware(request) {
   }
 
   // Admin pages — allow through (each page handles its own auth client-side)
-  if (pathname.startsWith('/admin/analytics') || pathname.startsWith('/admin/orders') || pathname.startsWith('/admin/merch-orders') || pathname.startsWith('/admin/check-in') || pathname.startsWith('/admin/listeners') || pathname.startsWith('/admin/fans')) {
+  if (pathname.startsWith('/admin/analytics') || pathname.startsWith('/admin/orders') || pathname.startsWith('/admin/merch-orders') || pathname.startsWith('/admin/check-in') || pathname.startsWith('/admin/listeners') || pathname.startsWith('/admin/fans') || pathname.startsWith('/admin/quickplay')) {
     // Allow page load — auth happens client-side via admin key
   }
 
