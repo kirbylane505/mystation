@@ -150,6 +150,33 @@ class PrintifyClient {
   }
 
   /**
+   * Send an existing on-hold order to production (separate call so create + production can be tried independently)
+   */
+  async sendToProduction(orderId) {
+    return this.request(`/shops/${this.shopId}/orders/${orderId}/send_to_production.json`, {
+      method: 'POST'
+    });
+  }
+
+  /**
+   * Find an order by external_id by paging shop orders.
+   * Used as a recovery path when createOrder fails with 409 (order already exists at Printify).
+   * Slow (paginates). Only call from error-recovery paths.
+   */
+  async findOrderByExternalId(externalId, maxPages = 5) {
+    if (!externalId) return null;
+    for (let page = 1; page <= maxPages; page++) {
+      const resp = await this.request(`/shops/${this.shopId}/orders.json?page=${page}&limit=50`);
+      const orders = resp?.data || resp || [];
+      if (!Array.isArray(orders) || orders.length === 0) return null;
+      const hit = orders.find(o => o.external_id === externalId);
+      if (hit) return hit;
+      if (orders.length < 50) return null;
+    }
+    return null;
+  }
+
+  /**
    * Get a single order by ID
    */
   async getOrder(orderId) {

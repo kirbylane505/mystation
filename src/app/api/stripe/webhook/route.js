@@ -211,35 +211,19 @@ async function handleCheckoutCompleted(session, stripe) {
     }
 
     // ========================================
-    // IDEMPOTENCY — Skip if already processed
-    // ========================================
-    try {
-      const { getSupabaseAdmin } = await import('@/lib/supabaseAdmin');
-      const supabase = getSupabaseAdmin();
-      if (supabase) {
-        const { data: existingOrder } = await supabase
-          .from('merch_orders')
-          .select('id')
-          .eq('stripe_session_id', session.id)
-          .maybeSingle();
-        if (existingOrder) {
-          console.log('Duplicate webhook — order already processed for session:', session.id);
-          return;
-        }
-      }
-    } catch (e) {
-      console.error('Idempotency check failed (non-blocking):', e.message);
-    }
-
-    // ========================================
-    // ORDER TRACKING — Log to merch_orders
+    // ATOMIC IDEMPOTENCY — single INSERT relies on UNIQUE(stripe_session_id) constraint.
+    // Replaces the prior SELECT-then-INSERT pattern, which had a race window where two
+    // concurrent webhook deliveries could both pass the SELECT, both INSERT, then both
+    // hit Printify with the same external_id and 409 the second one. The DB constraint
+    // (merch_orders_stripe_session_id_unique, migration 2026-05-10) now atomically
+    // rejects the second INSERT with Postgres code 23505 — that's our duplicate signal.
     // ========================================
     let orderRecordId = null;
     try {
       const { getSupabaseAdmin } = await import('@/lib/supabaseAdmin');
       const supabase = getSupabaseAdmin();
       if (supabase) {
-        const { data: orderRecord } = await supabase.from('merch_orders').insert({
+        const { data: orderRecord, error: insertError } = await supabase.from('merch_orders').insert({
           stripe_session_id: session.id,
           customer_email: customerEmail || 'unknown',
           customer_name: customerName,
@@ -252,8 +236,20 @@ async function handleCheckoutCompleted(session, stripe) {
           printify_status: parsedPrintifyItems ? 'pending' : 'none',
           status: 'pending',
         }).select('id').single();
-        orderRecordId = orderRecord?.id;
-        console.log('Order logged to merch_orders:', orderRecordId);
+
+        if (insertError) {
+          // 23505 = unique_violation. This is a duplicate webhook delivery — the original
+          // call is already creating the Printify order. Bail out cleanly.
+          if (insertError.code === '23505') {
+            console.log('Duplicate webhook (constraint hit) — original handler already running for:', session.id);
+            return;
+          }
+          // Any other DB error: log non-blocking, continue without orderRecordId tracking.
+          console.error('Failed to log order to merch_orders (non-blocking):', insertError.message);
+        } else {
+          orderRecordId = orderRecord?.id;
+          console.log('Order logged to merch_orders:', orderRecordId);
+        }
       }
     } catch (e) {
       console.error('Failed to log order to merch_orders (non-blocking):', e.message);
@@ -377,34 +373,101 @@ async function handleCheckoutCompleted(session, stripe) {
         },
       };
 
-      // Try up to 2 times
-      for (let attempt = 1; attempt <= 2; attempt++) {
-        try {
-          console.log(`Creating Printify order (attempt ${attempt}):`, JSON.stringify(printifyOrder, null, 2));
-          const order = await printify.createOrder(printifyOrder, true);
-          console.log('Printify order created:', order.id);
-          printifyResult = { printifyOrderId: order.id, sent_to_production: order.sent_to_production };
-          await updateOrderRecord({ printify_order_id: order.id, printify_status: 'created' });
-          break; // Success
-        } catch (e) {
-          console.error(`Printify order attempt ${attempt} failed:`, e.message);
-          if (attempt === 2) {
-            const errorMsg = e.message || 'Unknown Printify error';
-            await updateOrderRecord({ printify_status: 'failed', printify_error: errorMsg });
+      // Two-phase Printify flow — separated so each step is independently recoverable.
+      //
+      // Phase A: CREATE the order (POST /orders.json). On 409, the order already exists
+      //   at Printify (likely a duplicate webhook delivery or prior partial success).
+      //   Recover by looking up the existing order via external_id rather than retrying
+      //   create with the same external_id (which would 409 forever).
+      //
+      // Phase B: SEND TO PRODUCTION (POST /orders/{id}/send_to_production.json). If this
+      //   fails, the order is still safely at Printify on-hold. Mark our DB so a human
+      //   knows to push it manually, and alert. Do NOT retry the create.
+      //
+      // This is the structural fix for the 2026-05-09 K Possible incident.
+      let createdOrder = null;
+      try {
+        console.log(`Creating Printify order:`, JSON.stringify(printifyOrder, null, 2));
+        createdOrder = await printify.createOrder(printifyOrder, false); // confirm=false → no production yet
+        console.log('Printify order created:', createdOrder.id);
+        await updateOrderRecord({ printify_order_id: createdOrder.id, printify_status: 'created_pending_production' });
+      } catch (e) {
+        const msg = e.message || '';
+        const is409 = msg.includes('Printify API error 409') || msg.includes('409');
+        if (is409) {
+          console.warn(`Printify create returned 409 — looking up existing order by external_id ${printifyOrder.external_id}`);
+          try {
+            const existing = await printify.findOrderByExternalId(printifyOrder.external_id);
+            if (existing) {
+              console.log(`Recovered existing Printify order ${existing.id} for external_id ${printifyOrder.external_id}`);
+              createdOrder = existing;
+              await updateOrderRecord({ printify_order_id: existing.id, printify_status: existing.status === 'on-hold' ? 'created_pending_production' : 'created' });
+            } else {
+              console.error(`409 received but order not found by external_id — manual triage required`);
+              await updateOrderRecord({ printify_status: 'failed', printify_error: `409 with no recoverable order for external_id ${printifyOrder.external_id}: ${msg}` });
+              sendOrderFailedAlert({
+                provider: 'Printify',
+                error: `409 Conflict but order not found by external_id ${printifyOrder.external_id}. Manual triage required.`,
+                customerName, customerEmail, items: itemsForEmail, total: totalAmount,
+                shippingAddress: shipping?.address, stripeSessionId: session.id,
+                printifyItems: parsedPrintifyItems,
+              }).catch(err => console.error('Printify 409 alert error:', err));
+            }
+          } catch (lookupErr) {
+            console.error(`409 recovery lookup failed: ${lookupErr.message}`);
+            await updateOrderRecord({ printify_status: 'failed', printify_error: `409 lookup failed: ${lookupErr.message}` });
             sendOrderFailedAlert({
               provider: 'Printify',
-              error: errorMsg,
-              customerName, customerEmail,
-              items: itemsForEmail,
-              total: totalAmount,
-              shippingAddress: shipping?.address,
-              stripeSessionId: session.id,
+              error: `409 Conflict; lookup failed: ${lookupErr.message}`,
+              customerName, customerEmail, items: itemsForEmail, total: totalAmount,
+              shippingAddress: shipping?.address, stripeSessionId: session.id,
               printifyItems: parsedPrintifyItems,
-            }).catch(err => console.error('Printify fail alert email error:', err));
+            }).catch(err => console.error('Printify 409 lookup alert error:', err));
+          }
+        } else {
+          console.error(`Printify create failed (non-409): ${msg}`);
+          await updateOrderRecord({ printify_status: 'failed', printify_error: msg });
+          sendOrderFailedAlert({
+            provider: 'Printify',
+            error: msg,
+            customerName, customerEmail, items: itemsForEmail, total: totalAmount,
+            shippingAddress: shipping?.address, stripeSessionId: session.id,
+            printifyItems: parsedPrintifyItems,
+          }).catch(err => console.error('Printify create-fail alert error:', err));
+        }
+      }
+
+      // Phase B — send to production, only if we have an order id and it's not already produced
+      if (createdOrder?.id && createdOrder.status !== 'in_production' && createdOrder.status !== 'in-production') {
+        try {
+          console.log(`Sending Printify order ${createdOrder.id} to production`);
+          await printify.sendToProduction(createdOrder.id);
+          printifyResult = { printifyOrderId: createdOrder.id, sent_to_production: true };
+          await updateOrderRecord({ printify_status: 'created' });
+        } catch (e) {
+          // Order is at Printify on-hold. Customer paid. Alert Mike, do not retry create.
+          const msg = e.message || 'Unknown send_to_production error';
+          console.error(`Printify send_to_production failed for ${createdOrder.id}: ${msg}`);
+          // Code 8502 means "already sending" — actually a success in disguise.
+          if (msg.includes('8502') || msg.toLowerCase().includes('sending_to_production_delegate')) {
+            console.log('send_to_production already in progress at Printify — treating as success');
+            printifyResult = { printifyOrderId: createdOrder.id, sent_to_production: true };
+            await updateOrderRecord({ printify_status: 'created' });
           } else {
-            await new Promise(r => setTimeout(r, 2000));
+            await updateOrderRecord({ printify_status: 'on_hold', printify_error: `send_to_production failed: ${msg}. Order ${createdOrder.id} is at Printify on-hold; push manually from dashboard.` });
+            sendOrderFailedAlert({
+              provider: 'Printify',
+              error: `Order ${createdOrder.id} created but send_to_production failed: ${msg}. Order is on-hold at Printify — push manually.`,
+              customerName, customerEmail, items: itemsForEmail, total: totalAmount,
+              shippingAddress: shipping?.address, stripeSessionId: session.id,
+              printifyItems: parsedPrintifyItems,
+            }).catch(err => console.error('Printify on-hold alert error:', err));
+            printifyResult = { printifyOrderId: createdOrder.id, sent_to_production: false };
           }
         }
+      } else if (createdOrder?.id) {
+        // Already in production — count as success
+        printifyResult = { printifyOrderId: createdOrder.id, sent_to_production: true };
       }
     } else if (parsedPrintifyItems && !hasShipping) {
       sendOrderFailedAlert({
@@ -1069,9 +1132,27 @@ async function handleInvoicePaymentFailed(invoice) {
 
   console.log('Payment failed for:', customerEmail);
 
+  // Generate a working Stripe Billing Portal session URL so customer can update card.
+  // NOT hosted_invoice_url — that's a static invoice viewer that goes dead after
+  // Stripe finishes retries and voids the invoice.
+  let updateUrl = null;
+  try {
+    if (invoice.customer) {
+      const Stripe = (await import('stripe')).default;
+      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+      const session = await stripe.billingPortal.sessions.create({
+        customer: invoice.customer,
+        return_url: 'https://mystationlive.com/account',
+      });
+      updateUrl = session.url;
+    }
+  } catch (err) {
+    console.error('Billing portal session creation failed:', err);
+  }
+
   sendPaymentFailedEmail({
     customerEmail,
     customerName: invoice.customer_name || customerEmail.split('@')[0],
-    invoiceUrl: invoice.hosted_invoice_url || null,
+    invoiceUrl: updateUrl || invoice.hosted_invoice_url || null,
   }).catch(err => console.error('Payment failed email error:', err));
 }
