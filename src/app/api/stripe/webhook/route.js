@@ -48,6 +48,29 @@ function cleanLine2(line2) {
   return bogus.includes(line2.trim().toLowerCase()) ? '' : line2;
 }
 
+// Printify rejects orders where first_name or last_name has < 2 alphanumeric chars.
+// Stripe collects shipping.name as a single field; naive split-on-space leaves single-
+// letter first tokens (e.g. "J Smith" → first="J") that fail validation downstream.
+// Two rejections seen 2026-05-13 + 2026-05-18 (orders 26418542.10 + 12059873.234).
+function splitNameForPrintify(rawName) {
+  const full = (rawName || '').trim();
+  const parts = full.split(/\s+/).filter(Boolean);
+  const alphaNum = (s) => (s || '').replace(/[^A-Za-z0-9]/g, '').length;
+  const first = parts[0] || '';
+  const rest = parts.slice(1).join(' ');
+
+  if (alphaNum(first) >= 2 && alphaNum(rest) >= 2) {
+    return { first_name: first, last_name: rest };
+  }
+  if (alphaNum(first) >= 2) {
+    return { first_name: first, last_name: first };
+  }
+  if (alphaNum(full) >= 2) {
+    return { first_name: full, last_name: full };
+  }
+  return { first_name: 'Customer', last_name: full || 'Recipient' };
+}
+
 export async function POST(request) {
   try {
     const body = await request.text();
@@ -360,8 +383,7 @@ async function handleCheckoutCompleted(session, stripe) {
         shipping_method: 1,
         send_shipping_notification: true,
         address_to: {
-          first_name: (shipping.name || '').split(' ')[0] || 'Customer',
-          last_name: (shipping.name || '').split(' ').slice(1).join(' ') || '',
+          ...splitNameForPrintify(shipping.name),
           email: customerEmail || '',
           phone: fullSession.customer_details?.phone || '',
           country: shipping.address.country || 'US',
