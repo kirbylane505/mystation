@@ -193,6 +193,17 @@ export default function RootLayout({ children }) {
             })
           }}
         />
+        {/* Plausible Analytics — privacy-friendly */}
+        <Script
+          defer
+          src="https://plausible.io/js/pa-pJoXICJqyd1KAWUR4eo0J.js"
+          strategy="afterInteractive"
+        />
+        <Script id="plausible-init" strategy="afterInteractive">
+          {`window.plausible = window.plausible || function() { (plausible.q = plausible.q || []).push(arguments) }
+plausible.init = plausible.init || function(i) { plausible.o = i || {} }
+plausible.init()`}
+        </Script>
       </head>
       <body className="min-h-screen bg-mystation-darker">
         <ClientProviders>
