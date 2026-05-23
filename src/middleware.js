@@ -148,11 +148,11 @@ export async function middleware(request) {
   // Content Security Policy - prevent XSS and data injection
   const csp = [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://vercel.live https://www.youtube.com https://us-assets.i.posthog.com https://www.googletagmanager.com https://www.google-analytics.com https://connect.facebook.net",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://vercel.live https://www.youtube.com https://us-assets.i.posthog.com https://www.googletagmanager.com https://www.google-analytics.com https://connect.facebook.net https://plausible.io",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "img-src 'self' data: blob: https:",
     "font-src 'self' https://fonts.gstatic.com",
-    "connect-src 'self' https://api.stripe.com https://*.supabase.co https://vercel.live https://p.scdn.co https://us.i.posthog.com https://us-assets.i.posthog.com https://www.google-analytics.com https://analytics.google.com https://connect.facebook.net wss:",
+    "connect-src 'self' https://api.stripe.com https://*.supabase.co https://vercel.live https://p.scdn.co https://us.i.posthog.com https://us-assets.i.posthog.com https://www.google-analytics.com https://analytics.google.com https://connect.facebook.net https://plausible.io wss:",
     "frame-src https://js.stripe.com https://hooks.stripe.com https://www.youtube.com",
     "media-src 'self' data: blob: https:",
     "object-src 'none'",
