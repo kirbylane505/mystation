@@ -93,7 +93,7 @@ export async function middleware(request) {
   }
 
   // ─── AUDIO FILE PROTECTION ───
-  // Token-gated: valid signed token = serve from CDN, no token = 403
+  // Token-gated: valid signed token = serve from CDN, no token = 404 (404 keeps these out of Search Console)
   if (pathname.match(/\.(mp3|wav|m4a|flac|ogg|aac)$/i)) {
     const token = searchParams.get('_t');
     if (token && await verifyAudioToken(token, pathname)) {
@@ -106,7 +106,7 @@ export async function middleware(request) {
       response.headers.set('Cross-Origin-Resource-Policy', 'same-origin');
       return response;
     }
-    return new NextResponse('Access Denied', { status: 403 });
+    return new NextResponse('Not Found', { status: 404 });
   }
 
   // ─── PAGE ACCESS GATING ───

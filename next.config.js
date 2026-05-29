@@ -72,6 +72,21 @@ const nextConfig = {
         destination: '/artists/the-cubist',
         permanent: true,
       },
+      {
+        source: '/mpf/donate',
+        destination: 'https://www.mikepagefoundation.org/donate',
+        permanent: false,
+      },
+      {
+        source: '/mpf',
+        destination: 'https://www.mikepagefoundation.org',
+        permanent: false,
+      },
+      {
+        source: '/donate',
+        destination: 'https://www.mikepagefoundation.org/donate',
+        permanent: false,
+      },
     ];
   },
 };

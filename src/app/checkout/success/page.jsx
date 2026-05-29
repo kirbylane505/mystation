@@ -60,47 +60,36 @@ function Fireworks() {
   return null;
 }
 
-// LOTL Coupon component
-function LOTLCoupon({ orderTotal }) {
-  const couponCode = 'LOTL50OFF';
-  const [copied, setCopied] = useState(false);
-
-  const copyCode = () => {
-    navigator.clipboard.writeText(couponCode);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  if (orderTotal < 26) return null;
+// Free LOTL Ticket Callout — every merch order qualifies
+function FreeLotlTicketCallout() {
+  const claimEmail = 'contact@lotlfest.com';
+  const subject = encodeURIComponent('FREE LOTL TICKET - Pic of me in my MyStation merch');
+  const body = encodeURIComponent(
+    'Hey LOTL crew,\n\nAttached is a pic of me wearing my MyStation merch. Send my free LOTL Day 2026 ticket to this email.\n\nThanks.\n'
+  );
+  const mailto = `mailto:${claimEmail}?subject=${subject}&body=${body}`;
 
   return (
-    <div className="mb-6 p-5 bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-orange-500/20 border border-purple-500/30 rounded-2xl">
+    <div className="mb-6 p-5 bg-gradient-to-r from-yellow-500/15 via-amber-500/15 to-yellow-500/15 border-2 border-yellow-400/50 rounded-2xl">
       <div className="flex items-center gap-2 mb-3">
-        <PartyPopper className="text-yellow-400" size={24} />
-        <h3 className="text-lg font-bold text-white">🎉 SPECIAL REWARD!</h3>
+        <Ticket className="text-yellow-400" size={26} />
+        <h3 className="text-lg font-bold text-white">FREE LOTL DAY TICKET INSIDE THIS ORDER</h3>
       </div>
-      <p className="text-white/80 text-sm mb-4">
-        Your order qualifies for <strong className="text-green-400">50% OFF</strong> a
-        <strong className="text-purple-400"> Love on the Lawn 2026 Festival</strong> ticket!
+      <p className="text-white/85 text-sm mb-4 leading-relaxed">
+        Send a pic of you wearing your gear to{' '}
+        <strong className="text-yellow-300">{claimEmail}</strong> and we email back your{' '}
+        <strong className="text-yellow-300">FREE ticket</strong> to Love on the Lawn Day, September 5, 2026 at Festival Park, Elgin IL.
       </p>
-      <div className="flex items-center gap-3">
-        <div className="flex-1 bg-black/30 rounded-xl px-4 py-3 flex items-center justify-between">
-          <div>
-            <p className="text-white/50 text-xs">Your Coupon Code</p>
-            <p className="text-2xl font-bold text-white tracking-wider">{couponCode}</p>
-          </div>
-          <Ticket className="text-purple-400" size={32} />
-        </div>
-        <button
-          onClick={copyCode}
-          className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-3 rounded-xl font-bold transition"
-        >
-          {copied ? '✓ Copied!' : 'Copy'}
-        </button>
-      </div>
-      <p className="text-white/50 text-xs mt-3">
-        Use this code when purchasing your LOTL ticket at checkout. Valid for one use.
+      <p className="text-white/70 text-xs mb-4">
+        Receipt arrives within minutes. Ticket arrives once we get your pic. Tag <strong>@lotlfest</strong> on social for bonus love.
       </p>
+      <a
+        href={mailto}
+        className="inline-flex items-center justify-center gap-2 bg-yellow-400 hover:bg-yellow-300 text-black px-5 py-3 rounded-xl font-bold transition"
+      >
+        <Gift size={18} />
+        Send Your Pic to Claim
+      </a>
     </div>
   );
 }
@@ -183,8 +172,8 @@ function SuccessContent() {
           </div>
         )}
 
-        {/* LOTL Coupon for orders $26+ */}
-        <LOTLCoupon orderTotal={orderTotal} />
+        {/* FREE LOTL Day ticket — every merch order qualifies */}
+        <FreeLotlTicketCallout />
 
         <div className="glass rounded-2xl p-6 mb-6 text-left">
           <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">

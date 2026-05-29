@@ -61,7 +61,7 @@ function SearchPageInner() {
 
   // Everyone can search Spotify — but interacting with results requires subscription
   const hasSpotifyAccess = true;
-  const canUseSpotifyResults = isSubscribed || supporterTier !== 'free';
+  const canUseSpotifyResults = true; // FREE FOR ALL — paywall stripped
 
   // Search MyStation catalog locally
   const searchMyStation = useCallback((q) => {
@@ -305,15 +305,10 @@ function SearchPageInner() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {popularTracks.map((track) => {
                     const trackIsPlaying = currentTrack?.id === track.id && isPlaying;
-                    const locked = isGated(track);
                     return (
                       <button
                         key={track.id}
                         onClick={() => {
-                          if (locked) {
-                            usePlayerStore.getState().openSubscribeModal(track);
-                            return;
-                          }
                           const playable = myStationTracks.filter(t => !t.isVault && !t.comingSoon);
                           const idx = playable.findIndex(t => t.id === track.id);
                           setQueue(playable, idx >= 0 ? idx : 0);
@@ -322,7 +317,7 @@ function SearchPageInner() {
                           trackIsPlaying
                             ? 'bg-blue-500/15 border border-blue-500/30'
                             : 'bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.06]'
-                        } ${locked ? 'opacity-50' : ''}`}
+                        }`}
                       >
                         <div className="relative w-11 h-11 rounded-lg overflow-hidden shrink-0 bg-gradient-to-br from-indigo-600/60 to-purple-800/80">
                           {track.albumArt ? (
@@ -333,7 +328,7 @@ function SearchPageInner() {
                             </div>
                           )}
                           <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition">
-                            {locked ? <Lock size={14} className="text-white/70" /> : trackIsPlaying ? <Pause size={14} className="text-white" fill="white" /> : <Play size={14} className="text-white ml-0.5" fill="white" />}
+                            {trackIsPlaying ? <Pause size={14} className="text-white" fill="white" /> : <Play size={14} className="text-white ml-0.5" fill="white" />}
                           </div>
                         </div>
                         <div className="flex-1 min-w-0">
@@ -439,8 +434,8 @@ function SearchPageInner() {
                   key={`ms-${track.id}`}
                   track={track}
                   isPlaying={isTrackPlaying(track)}
-                  isLocked={isGated(track)}
-                  onPlay={() => isGated(track) ? usePlayerStore.getState().openSubscribeModal(track) : playMyStation(track)}
+                  isLocked={false}
+                  onPlay={() => playMyStation(track)}
                   onAddToPlaylist={() => setShowPlaylistPicker(track.id)}
                   showPlaylistPicker={showPlaylistPicker === track.id}
                   playlists={playlists}

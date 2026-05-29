@@ -355,22 +355,18 @@ export default function PlaylistsPage() {
             {openPlaylist.tracks.map((track, idx) => {
               const playing = isTrackPlaying(track);
               const hasAudio = track.source === 'mystation' || track.previewUrl;
-              const locked = track.source === 'mystation' && isGated(track);
               return (
                 <div
                   key={idx}
-                  onClick={() => locked ? usePlayerStore.getState().openSubscribeModal(track) : undefined}
-                  className={`flex items-center gap-3 p-3 rounded-xl transition group ${locked ? 'opacity-40 cursor-pointer' : ''} ${playing ? 'bg-blue-500/15 border border-blue-500/30' : 'bg-white/5 hover:bg-white/10 border border-transparent'}`}
+                  className={`flex items-center gap-3 p-3 rounded-xl transition group ${playing ? 'bg-blue-500/15 border border-blue-500/30' : 'bg-white/5 hover:bg-white/10 border border-transparent'}`}
                 >
                   {/* Number */}
-                  <span className="w-6 text-center text-white/30 text-sm">
-                    {locked ? <Lock size={12} className="text-white/30 mx-auto" /> : idx + 1}
-                  </span>
+                  <span className="w-6 text-center text-white/30 text-sm">{idx + 1}</span>
 
                   {/* Art + Play */}
                   <button
-                    onClick={() => locked ? usePlayerStore.getState().openSubscribeModal(track) : hasAudio && playTrack(track)}
-                    disabled={!hasAudio && !locked}
+                    onClick={() => hasAudio && playTrack(track)}
+                    disabled={!hasAudio}
                     className="relative w-10 h-10 rounded-lg overflow-hidden shrink-0"
                   >
                     {getTrackArt(track) ? (
@@ -379,8 +375,8 @@ export default function PlaylistsPage() {
                     <div className={`absolute inset-0 bg-gradient-to-br from-blue-600/40 to-purple-900/60 flex items-center justify-center ${getTrackArt(track) ? 'hidden' : ''}`}>
                       <Music size={14} className="text-blue-400/60" />
                     </div>
-                    <div className={`absolute inset-0 bg-black/40 flex items-center justify-center ${locked ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition`}>
-                      {locked ? <Lock size={14} className="text-white/70" /> : playing ? <Pause size={14} className="text-white" fill="white" /> : <Play size={14} className="text-white ml-0.5" fill="white" />}
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+                      {playing ? <Pause size={14} className="text-white" fill="white" /> : <Play size={14} className="text-white ml-0.5" fill="white" />}
                     </div>
                   </button>
 
@@ -388,7 +384,6 @@ export default function PlaylistsPage() {
                   <div className="flex-1 min-w-0">
                     <p className={`font-semibold text-sm truncate ${playing ? 'text-blue-400' : 'text-white'}`}>
                       {track.title}
-                      {locked && <span className="ml-1.5 text-[10px] font-medium text-blue-400/80 bg-blue-500/15 px-1.5 py-0.5 rounded-full align-middle">Subscribe to Unlock</span>}
                     </p>
                     <p className="text-white/50 text-xs truncate">{track.artist}</p>
                   </div>
@@ -396,16 +391,13 @@ export default function PlaylistsPage() {
                   {/* Source */}
                   <span className={`text-[10px] px-2 py-0.5 rounded-full ${
                     track.source === 'spotify' ? 'text-green-400/60 bg-green-500/10' :
-                    track.source === 'spotify' ? 'text-green-400/60 bg-green-500/10' :
                     'text-blue-400/60 bg-blue-500/10'
                   }`}>
                     {track.source === 'mystation' ? 'Full' : '30s Preview'}
                   </span>
 
                   {/* Duration */}
-                  <span className="text-white/30 text-xs w-12 text-right">
-                    {locked ? <Lock size={12} className="text-white/30 inline" /> : track.duration}
-                  </span>
+                  <span className="text-white/30 text-xs w-12 text-right">{track.duration}</span>
 
                   {/* Remove */}
                   <button
