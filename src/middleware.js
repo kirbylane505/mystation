@@ -2,13 +2,8 @@ import { NextResponse } from 'next/server';
 
 /**
  * MYSTATION SECURITY MIDDLEWARE
- * Protects against common web attacks + token-gated audio streaming
+ * Protects against common web attacks
  */
-
-const AUDIO_SECRET = process.env.AUDIO_SECRET;
-if (!AUDIO_SECRET && process.env.NODE_ENV === 'production') {
-  console.error('FATAL: AUDIO_SECRET env var is not set');
-}
 
 // Rate limiting store (in-memory, resets on deploy)
 const rateLimitStore = new Map();
@@ -32,49 +27,8 @@ function checkRateLimit(ip) {
   return true;
 }
 
-// Verify audio token using Web Crypto API (Edge-compatible HMAC-SHA256)
-async function verifyAudioToken(token, pathname) {
-  if (!AUDIO_SECRET) return false;
-  try {
-    const base64 = token.replace(/-/g, '+').replace(/_/g, '/');
-    const pad = base64.length % 4 === 0 ? '' : '='.repeat(4 - (base64.length % 4));
-    const decoded = atob(base64 + pad);
-
-    // Token format: audioFilePath:expires:signature
-    const lastColon = decoded.lastIndexOf(':');
-    const sig = decoded.slice(lastColon + 1);
-    const rest = decoded.slice(0, lastColon);
-    const secondLastColon = rest.lastIndexOf(':');
-    const expires = rest.slice(secondLastColon + 1);
-    const audioPath = rest.slice(0, secondLastColon);
-
-    // Verify path matches and token not expired (decode %20 → spaces for comparison)
-    if (audioPath !== decodeURIComponent(pathname)) return false;
-    if (Date.now() > parseInt(expires)) return false;
-
-    // Verify HMAC-SHA256 signature
-    const encoder = new TextEncoder();
-    const key = await crypto.subtle.importKey(
-      'raw', encoder.encode(AUDIO_SECRET),
-      { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
-    );
-    const sigBuf = await crypto.subtle.sign('HMAC', key, encoder.encode(`${audioPath}:${expires}`));
-    const hex = Array.from(new Uint8Array(sigBuf)).map(b => b.toString(16).padStart(2, '0')).join('');
-    // Timing-safe comparison to prevent timing attacks
-    const expected = hex.slice(0, 32);
-    if (expected.length !== sig.length) return false;
-    let diff = 0;
-    for (let i = 0; i < expected.length; i++) {
-      diff |= expected.charCodeAt(i) ^ sig.charCodeAt(i);
-    }
-    return diff === 0;
-  } catch {
-    return false;
-  }
-}
-
 export async function middleware(request) {
-  const { pathname, searchParams } = request.nextUrl;
+  const { pathname } = request.nextUrl;
 
   // ─── BLOCK SOURCE MAPS & SENSITIVE FILES ───
   if (pathname.endsWith('.map') || pathname.endsWith('.ts') || pathname.endsWith('.tsx') ||
@@ -90,23 +44,6 @@ export async function middleware(request) {
   // Block unknown /admin routes — redirect to home
   else if (pathname.startsWith('/admin') && !pathname.startsWith('/api/admin')) {
     return NextResponse.redirect(new URL('/', request.url));
-  }
-
-  // ─── AUDIO FILE PROTECTION ───
-  // Token-gated: valid signed token = serve from CDN, no token = 404 (404 keeps these out of Search Console)
-  if (pathname.match(/\.(mp3|wav|m4a|flac|ogg|aac)$/i)) {
-    const token = searchParams.get('_t');
-    if (token && await verifyAudioToken(token, pathname)) {
-      // Valid token — serve static file with anti-download headers
-      const response = NextResponse.next();
-      response.headers.set('Content-Disposition', 'inline');
-      response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
-      response.headers.set('X-Content-Type-Options', 'nosniff');
-      response.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive');
-      response.headers.set('Cross-Origin-Resource-Policy', 'same-origin');
-      return response;
-    }
-    return new NextResponse('Not Found', { status: 404 });
   }
 
   // ─── PAGE ACCESS GATING ───
