@@ -365,26 +365,28 @@ export default function MerchPage() {
   const { addItem, openCart } = useCartStore();
   const { queue, setQueue } = usePlayerStore();
 
-  // Queue "Never Let The Money" for merch page — ready to play on user tap
-  // Does NOT auto-play — just loads the queue so player shows the track
+  // Queue "R.U.N or R U Out" for merch page — ready to play on user tap.
+  // Does NOT auto-play — just loads the queue so player shows the track.
+  // Switched from track 138 to 501 on June 28 2026 per Mike directive
+  // "TAKE 138 OFF COMPLETLY". R.U.N is the public single LOTL spin sends.
   useEffect(() => {
     const state = usePlayerStore.getState();
     if (state.isPlaying || state.currentTrack) return; // Don't interrupt active or queued playback
     const lotlTrack = {
-      id: 138,
-      title: "Never Let The Money",
-      artist: "Vincent Berry II",
-      featured: "Mike Page",
-      album: "Coming Soon",
+      id: 501,
+      title: "R.U.N or R U Out",
+      artist: "Mike Page",
+      featured: "Vincent Berry",
+      album: "IDMG Mixtape",
       year: 2026,
-      duration: "3:48",
-      trackNumber: 8,
-      albumId: 'singles-2026',
-      audioFile: '/audio/grammy-nights/04-love-on-the-lawn.m4a',
+      duration: "4:01",
+      trackNumber: 2,
+      albumId: 'idmg-mixtape',
+      audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/idmg-mixtape/02-run-or-r-u-out.m4a',
       isNew: true,
     };
     const officialTracks = getOfficialTracks();
-    const newReleaseTracks = officialTracks.filter(t => t.isNew && t.id !== 138);
+    const newReleaseTracks = officialTracks.filter(t => t.isNew && t.id !== 501);
     const fullQueue = [lotlTrack, ...newReleaseTracks];
     // Set queue + track without auto-playing
     usePlayerStore.setState({

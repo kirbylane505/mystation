@@ -32,7 +32,6 @@ export const moodPlaylists = [
     gradient: 'from-red-700 to-orange-600',
     trackIds: [
       100,  // Favorite Person (150 BPM — banger)
-      138,  // Never Let The Money (160 BPM — hardest tempo)
       505,  // No Weapon (hitScore 95 — aggressive)
       103,  // Crash Out (135 BPM — Trap)
       153,  // Wet (Trap)

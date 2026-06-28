@@ -202,23 +202,10 @@ export const tracks = [
   // ========================================
   // NEW RELEASES
   // ========================================
-  {
-    id: 138,
-    title: "Never Let The Money",
-    artist: "Vincent Berry II",
-    featured: "Mike Page",
-    album: "Coming Soon",
-    year: 2026,
-    duration: "3:48",
-    trackNumber: 8,
-    albumId: 'singles-2026',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/grammy-nights/04-love-on-the-lawn.m4a',
-    isNew: true,
-    bpm: 160,
-    key: 'B Minor',
-    hitScore: 92,
-    producer: 'The Cubist'
-  },
+  // (Track id:138 "Never Let The Money" removed June 28 2026 per Mike directive
+  // "TAKE 138 OFF COMPLETLY". The entry's audioFile pointed at the wrong R2
+  // file — 04-love-on-the-lawn.m4a — making the play link play the wrong song.
+  // EmpireWelcome + merch page hero now play R.U.N or R U Out (id:501).)
   {
     id: 139,
     title: "I Need Her",

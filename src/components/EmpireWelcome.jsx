@@ -2,7 +2,7 @@
  * MYSTATION - Empire Welcome
  * When visitors arrive from LOTL or MyTicketsLive (?ref=empire),
  * show a welcome modal with options: Shop Merch, Get Tickets, Subscribe
- * Auto-plays "Never Let The Money" track
+ * Auto-plays "R.U.N or R U Out" track
  */
 
 'use client';
@@ -13,18 +13,22 @@ import { usePlayerStore } from '@/store/playerStore';
 import { ShoppingBag, Ticket, Music, X, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 
-// LOTL track — public single (ID 138)
+// LOTL track — R.U.N or R U Out (ID 501)
+// Switched June 28 2026 per Mike directive: track 138 retired
+// (audioFile pointed at the wrong R2 file). R.U.N is the public
+// single that LOTL Spin to Win sends to every music winner — same
+// song every fan hears on the welcome modal AND on the spin email.
 const LOTL_TRACK = {
-  id: 138,
-  title: "Never Let The Money",
-  artist: "Vincent Berry II",
-  featured: "Mike Page",
-  album: "Coming Soon",
+  id: 501,
+  title: "R.U.N or R U Out",
+  artist: "Mike Page",
+  featured: "Vincent Berry",
+  album: "IDMG Mixtape",
   year: 2026,
-  duration: "3:48",
-  trackNumber: 8,
-  albumId: 'singles-2026',
-  audioFile: '/audio/grammy-nights/04-love-on-the-lawn.m4a',
+  duration: "4:01",
+  trackNumber: 2,
+  albumId: 'idmg-mixtape',
+  audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/idmg-mixtape/02-run-or-r-u-out.m4a',
   isNew: true,
 };
 
@@ -78,7 +82,7 @@ export default function EmpireWelcome() {
                 <span className="text-[#D4AF37] text-xs font-bold tracking-wider uppercase">Welcome to MyStation</span>
               </div>
               <h2 className="text-2xl font-bold text-white mb-2">
-                Never Let The Money
+                R.U.N or R U Out
                 <span className="text-[#D4AF37]"> is Playing</span>
               </h2>
               <p className="text-white/40 text-sm">
@@ -150,7 +154,7 @@ export default function EmpireWelcome() {
                 <span className="w-0.5 h-3.5 bg-[#D4AF37] rounded-full animate-pulse" style={{ animationDelay: '450ms' }} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-white/60 text-xs truncate">Now Playing: <span className="text-[#D4AF37]">Never Let The Money</span></p>
+                <p className="text-white/60 text-xs truncate">Now Playing: <span className="text-[#D4AF37]">R.U.N or R U Out</span></p>
                 <p className="text-white/30 text-[10px]">Vincent Berry II ft. Mike Page</p>
               </div>
             </div>
