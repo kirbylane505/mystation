@@ -1,106 +1,405 @@
-# MyStation PWYW Pivot — Phase 1 Implementation Plan
+# MyStation PWYW Pivot — Implementation Plan (v2, CORRECTED)
 
-> **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
+> **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans (or superpowers:subagent-driven-development for same-session execution) to implement this plan task-by-task.
 
-**Goal:** Kill all paywalls on mystationlive.com so every visitor lands on a fully-free site (all music, vault, search included), while grandfathered paying subscribers keep charging on their current cycle undisturbed.
+**Goal:** Swap the fixed-tier subscribe UI ($4.99 / $9.99 / $14.99 buttons) for a pay-what-you-want amount input (suggested $4.99 / $14.99, minimum $1/mo). Layout stays the same everywhere. Content stays gated. Grandfathered subs keep charging at their current price. Backend uses Stripe `price_data.unit_amount` inline instead of fixed Price IDs.
 
-**Architecture:** Surgical patch — flip the default `isSubscribed` state to `true` in the player store, redirect the dead password gate, rewrite the subscribe/premium pages as placeholders, hide subscribe CTAs in the Navbar, refresh hero/meta copy, and add a defensive `410 Gone` on the subscription-checkout API to prevent any rogue new signups. Nine commits, one per change, all reversible via `git revert`. Existing subs' Stripe charges continue via the untouched webhook.
+**Architecture:** Frontend swap in 3 files (SubscribeModal, `/subscribe`, `/premium`). Backend swap in 2 files (checkout route contract change + webhook amount capture). 1 DB migration adding `monthly_amount_cents` column with backfill. Optional polish on `/account` page. Single deployment, ~4 hours total.
 
-**Tech Stack:** Next.js 15 (App Router), React 18, Zustand (player store), Tailwind CSS, Stripe (untouched sub webhook), Supabase (untouched `subscribers` table).
+**Tech Stack:** Next.js 15 App Router, React 18, Tailwind, Zustand (untouched), Stripe (dynamic `price_data`), Supabase Postgres.
 
-**Reference:** Full design at `docs/plans/2026-08-16-pwyw-pivot-design.md`. Section 5 has the 35-check verification plan — reference it, don't re-derive it.
+**Reference:** Full design at `docs/plans/2026-08-16-pwyw-pivot-design.md` (v2). This plan supersedes v1 (committed as `49f08f8`) which was built for the wrong "rip out paywall + add tip jar" interpretation.
 
-**Ship target:** Wed Aug 20, 2026 (business hours). Then 48h monitor + Founding Supporter email by Fri Aug 22.
+**Ship target:** Sun Aug 17 — Mon Aug 18, 2026.
 
-**Testing model:** MyStation has no automated test framework. Verification is manual `curl` + `grep` + browser checks. Every task below includes a specific manual verification step in place of "run pytest."
+**Testing model:** MyStation has no test framework. Verification is manual `curl` + `grep` + `npm run build` + browser + Stripe dashboard.
 
 ---
 
 ## Pre-Flight Context (READ BEFORE TASK 1)
 
-Reading the actual codebase before writing this plan surfaced two things the design doc assumed slightly wrong. Bake these into every task:
+The 5 wrong-direction commits from earlier this session were reverted in `f70bce7` (local only, never pushed). Working tree state matches pre-pivot code. Verify with:
 
-1. **`isGated()` already returns `false`** (`src/store/playerStore.js:372`) and `FREE_PLAY_MODE = true` is already set (line 360). The design's "Change 1: flip isGated to false" is already done. The REAL enforcement point for gated content is the `isSubscribed` default in `useUserStore` — Task 1 targets that.
+```bash
+cd ~/MikePageEmpire/apps/mystation
+git status                                          # expect: clean
+git log --oneline -3                                # expect: f70bce7 (revert) is HEAD
+grep -n "isSubscribed: false" src/store/playerStore.js       # expect: line 252 (original)
+wc -l src/app/subscribe/page.jsx src/app/premium/page.jsx    # expect: 403 + 117
+```
 
-2. **`isPreviewOnly()`** (line 381) is what enforces the 30-second-preview paywall for non-subscribers on non-free tracks. It short-circuits to `false` when `FREE_PLAY_MODE` is true, so it's already dead-code'd. Leave it alone — Task 1 makes `isSubscribed=true` default which makes the whole conditional moot anyway.
+If any of the above is off, STOP and investigate before proceeding.
 
-3. **Vault access:** `src/components/AudioPlayer.jsx:663` gates vault tracks via `!vaultUnlocked`. `vaultUnlocked` is set to `true` in `MusicPageClient.jsx:89` when `isSubscribed || vaultUnlocked`. Task 1's flip cascades here automatically — flipping default `isSubscribed=true` unlocks the vault for everyone without touching vault code.
-
-4. **Working directly on `main`** — no feature branch. All 9 commits go straight to `main` locally, then Task 10 verifies, Task 11 deploys. This matches the established pattern in the repo (see recent purge session commits `3f27acf`, `0702238`, `7a00d49`).
+**Working directly on `main`** — Mike consented, matches established pattern in this repo, tiny reversible commits.
 
 ---
 
-## Task 1: Flip default `isSubscribed` to `true` in playerStore
+## Task Order
+
+| #      | Task                                                            | Est                         | Blocking    |
+| ------ | --------------------------------------------------------------- | --------------------------- | ----------- |
+| P2-T1  | DB migration — add `monthly_amount_cents` column + backfill     | 20 min                      | —           |
+| P2-T2  | Rewrite `/api/subscription/checkout/route.js` for PWYW contract | 45 min                      | P2-T1       |
+| P2-T3  | Extend `/api/stripe/webhook/route.js` to capture amount         | 30 min                      | P2-T1       |
+| P2-T4  | Rewrite SubscribeModal.jsx for PWYW input                       | 45 min                      | P2-T2       |
+| P2-T5  | Rewrite `/subscribe/page.jsx` for PWYW form (suggested $4.99)   | 30 min                      | P2-T4       |
+| P2-T6  | Rewrite `/premium/page.jsx` for PWYW form (suggested $14.99)    | 20 min                      | P2-T4       |
+| P2-T7  | (Polish) `/account/page.jsx` show "You support at $X/mo"        | 20 min                      | P2-T3       |
+| P2-T8  | Local pre-push verification                                     | 15 min                      | P2-T1–P2-T7 |
+| P2-T9  | Push + deploy                                                   | 10 min ship + 3-7 min build | P2-T8 green |
+| P2-T10 | Live E2E verification with real test card                       | 20 min                      | P2-T9       |
+| P2-T11 | Rollback (only if P2-T10 fails)                                 | 30s to 4 min                | —           |
+
+**Total: ~4 hours code + 25 min verify + 3-7 min deploy.**
+
+Tasks P2-T2, P2-T3 depend on P2-T1 landing first (DB column must exist before code writes to it). Tasks P2-T5, P2-T6 depend on P2-T4 (Modal is imported by both pages — actually no, wait: /subscribe and /premium are page-level PWYW forms, not modal-triggered. Confirm during T4 whether they share a component.).
+
+---
+
+## Task P2-T1: DB migration — add `monthly_amount_cents` column + backfill
 
 **Files:**
 
-- Modify: `src/store/playerStore.js:252`
+- Create: `migrations/2026-08-16-subscribers-monthly-amount.sql`
+- Apply: to Supabase production via dashboard (Mike has service role) or via `psql` if wired
 
-**Step 1: Read the current state (verify line numbers haven't drifted)**
+**Step 1: Create the migration file**
 
-Run: `grep -n "isSubscribed: false" src/store/playerStore.js`
+Write `migrations/2026-08-16-subscribers-monthly-amount.sql`:
 
-Expected output: `252:      isSubscribed: false,`
+```sql
+-- 2026-08-16 PWYW pivot: add monthly_amount_cents to subscribers
+-- Design ref: docs/plans/2026-08-16-pwyw-pivot-design.md (v2)
+-- Backfills grandfathered subs based on their existing tier so they
+-- keep charging at their original price and /account can display "You
+-- support at $X/mo".
 
-If line number differs, adjust the edit target.
+ALTER TABLE public.subscribers
+  ADD COLUMN IF NOT EXISTS monthly_amount_cents integer;
 
-**Step 2: Make the change**
+CREATE INDEX IF NOT EXISTS idx_subscribers_monthly_amount
+  ON public.subscribers(monthly_amount_cents);
 
-Edit `src/store/playerStore.js` line 252:
+-- Backfill from existing tier values.
+UPDATE public.subscribers SET monthly_amount_cents = 499  WHERE tier = 'premium'   AND monthly_amount_cents IS NULL;
+UPDATE public.subscribers SET monthly_amount_cents = 999  WHERE tier = 'creator'   AND monthly_amount_cents IS NULL;
+UPDATE public.subscribers SET monthly_amount_cents = 1499 WHERE tier = 'diamond'   AND monthly_amount_cents IS NULL;
+UPDATE public.subscribers SET monthly_amount_cents = 499  WHERE tier = 'supporter' AND monthly_amount_cents IS NULL;
 
-Before:
+-- Validate future writes: min $1/mo, max $999/mo.
+ALTER TABLE public.subscribers
+  DROP CONSTRAINT IF EXISTS subscribers_monthly_amount_cents_range;
+ALTER TABLE public.subscribers
+  ADD CONSTRAINT subscribers_monthly_amount_cents_range
+  CHECK (monthly_amount_cents IS NULL OR (monthly_amount_cents >= 100 AND monthly_amount_cents <= 99900));
+
+-- Verification queries (run manually after apply):
+-- SELECT tier, count(*), min(monthly_amount_cents), max(monthly_amount_cents)
+--   FROM public.subscribers GROUP BY tier;
+-- Expect: premium/creator/diamond/supporter rows all have non-null amounts;
+-- other rows (free, cancelled) may still have null.
+```
+
+**Step 2: Verify SQL syntax with a dry-run**
+
+If a local Supabase container is running, apply against it. Otherwise skip — apply to prod in Step 3.
+
+**Step 3: Apply to Supabase production**
+
+Two options (pick whichever Mike prefers):
+
+- **Supabase dashboard:** SQL Editor → paste the migration → Run
+- **Automated:** if `SUPABASE_DB_URL` is in env, `psql "$SUPABASE_DB_URL" -f migrations/2026-08-16-subscribers-monthly-amount.sql`
+
+**Verify with:**
+
+```sql
+SELECT tier, count(*), min(monthly_amount_cents), max(monthly_amount_cents)
+FROM public.subscribers GROUP BY tier;
+```
+
+Expect: every non-null tier has a non-null amount.
+
+**Step 4: Commit the migration file to repo (ARC20 Law 3 — schema of record)**
+
+```bash
+cd ~/MikePageEmpire/apps/mystation
+git add migrations/2026-08-16-subscribers-monthly-amount.sql
+git commit -m "$(cat <<'EOF'
+feat(pwyw): DB migration — add subscribers.monthly_amount_cents + backfill
+
+Adds monthly_amount_cents column to subscribers table. Backfills
+grandfathered subs based on their existing tier so they keep charging
+at their original price and /account can show "You support at $X/mo":
+
+  premium   -> 499 cents ($4.99/mo)
+  creator   -> 999 cents ($9.99/mo)
+  diamond   -> 1499 cents ($14.99/mo)
+  supporter -> 499 cents (default assumption)
+
+Includes CHECK constraint validating min $1/mo, max $999/mo.
+
+Applied to Supabase production before this commit lands, per ARC20 Law
+3 (immutable evidence — schema of record in repo).
+
+Ref: pwyw-pivot-design v2 (DB Migration section)
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+---
+
+## Task P2-T2: Rewrite `/api/subscription/checkout/route.js` for PWYW contract
+
+**Files:**
+
+- Modify: `src/app/api/subscription/checkout/route.js` (currently 114 lines)
+
+**Contract change:**
+
+- Before: `{ tier, email, commitment_agreed }`
+- After: `{ email, amount_cents }`
+
+**Step 1: Read the current file to understand what to preserve**
+
+```bash
+cat src/app/api/subscription/checkout/route.js
+```
+
+Note: existing logic includes `stripe.customers.list` lookup + `stripe.subscriptions.list` to prevent duplicate active subs. **Preserve that logic** — critical for grandfather safety.
+
+**Step 2: Rewrite the POST handler**
+
+Replace the entire POST function body with this pattern (keep the existing imports at the top):
 
 ```javascript
-      isSubscribed: false,
-      supporterTier: 'free', // 'free', 'regular', 'premium', 'diamond'
+export async function POST(request) {
+  try {
+    const body = await request.json();
+    const { email, amount_cents } = body;
+
+    // Validation
+    if (!email || typeof email !== "string" || !email.includes("@")) {
+      return NextResponse.json(
+        { error: "Valid email required" },
+        { status: 400 },
+      );
+    }
+
+    const amount = Number(amount_cents);
+    if (!Number.isInteger(amount) || amount < 100 || amount > 99900) {
+      return NextResponse.json(
+        {
+          error:
+            "amount_cents must be an integer between 100 ($1) and 99900 ($999)",
+        },
+        { status: 400 },
+      );
+    }
+
+    const Stripe = (await import("stripe")).default;
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+    // Grandfather safety: check for existing active sub
+    const existingCustomers = await stripe.customers.list({ email, limit: 1 });
+    let customerId;
+    if (existingCustomers.data.length > 0) {
+      customerId = existingCustomers.data[0].id;
+      const subs = await stripe.subscriptions.list({
+        customer: customerId,
+        status: "active",
+        limit: 1,
+      });
+      if (subs.data.length > 0) {
+        return NextResponse.json(
+          {
+            error:
+              "You already have an active subscription. Manage it in your account.",
+            existing_subscription_id: subs.data[0].id,
+          },
+          { status: 409 },
+        );
+      }
+    }
+
+    const APP_URL =
+      process.env.NEXT_PUBLIC_APP_URL || "https://mystationlive.com";
+
+    const session = await stripe.checkout.sessions.create({
+      mode: "subscription",
+      customer: customerId, // undefined = Stripe creates new
+      customer_email: customerId ? undefined : email,
+      line_items: [
+        {
+          price_data: {
+            currency: "usd",
+            product_data: {
+              name: "MyStation Supporter",
+              description:
+                "Monthly support for IDMG artists and Mike Page Foundation programs.",
+            },
+            unit_amount: amount,
+            recurring: { interval: "month" },
+          },
+          quantity: 1,
+        },
+      ],
+      metadata: {
+        type: "subscription",
+        tier: "supporter",
+        amount_cents: String(amount),
+      },
+      subscription_data: {
+        metadata: {
+          type: "subscription",
+          tier: "supporter",
+          amount_cents: String(amount),
+        },
+      },
+      success_url: `${APP_URL}/subscribe/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${APP_URL}/subscribe`,
+    });
+
+    return NextResponse.json({ url: session.url, sessionId: session.id });
+  } catch (err) {
+    console.error("subscription/checkout error:", err);
+    return NextResponse.json(
+      { error: "Failed to create checkout session", detail: err?.message },
+      { status: 500 },
+    );
+  }
+}
 ```
 
-After:
+**Step 3: Drop the top-level `CHECKOUT_ALLOWED_TIERS` constant and the `normalizeTier`/`priceIdFor` imports if they're no longer used**
+
+Check after edit:
+
+```bash
+grep -n "normalizeTier\|priceIdFor\|CHECKOUT_ALLOWED_TIERS" src/app/api/subscription/checkout/route.js
+```
+
+Expect: 0 hits.
+
+**Step 4: Verify build passes**
+
+```bash
+npm run build 2>&1 | tail -10
+```
+
+Expect `✓ Compiled successfully`.
+
+**Step 5: Commit**
+
+```bash
+git add src/app/api/subscription/checkout/route.js
+git commit -m "$(cat <<'EOF'
+feat(pwyw): rewrite subscription checkout for name-your-price amount
+
+Contract change:
+  Before: { tier, email, commitment_agreed }
+  After:  { email, amount_cents }
+
+Uses Stripe price_data.unit_amount inline for the fan's chosen monthly
+amount instead of fixed priceIdFor(tier). Preserves grandfather safety
+check (existing active sub -> 409). Preserves customer dedup via
+stripe.customers.list. Drops the 6-month commitment gate (PWYW subs
+are cancel-anytime via Stripe portal).
+
+Validation: amount_cents must be integer, 100 <= n <= 99900.
+
+New sub metadata: tier='supporter', amount_cents=<chosen>. Webhook
+(handleSubscriptionCheckout) reads amount_subtotal or metadata to
+populate the new subscribers.monthly_amount_cents column.
+
+Existing subs unaffected — Stripe manages their renewals via
+subscription-mode webhooks, doesn't hit this route.
+
+Ref: pwyw-pivot-design v2 (Backend Contract section)
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+---
+
+## Task P2-T3: Extend `/api/stripe/webhook/route.js` to capture amount
+
+**Files:**
+
+- Modify: `src/app/api/stripe/webhook/route.js` (large file, ~1400+ lines after earlier reflow)
+
+**Step 1: Locate `handleSubscriptionCheckout` or the checkout.session.completed subscription handler**
+
+```bash
+grep -n "handleSubscriptionCheckout\|subscription checkout\|mode.*subscription" src/app/api/stripe/webhook/route.js | head -10
+```
+
+**Step 2: Extract `monthly_amount_cents` when writing the subscribers row**
+
+Add this near the top of `handleSubscriptionCheckout(session)` (adjust to actual function shape):
 
 ```javascript
-      isSubscribed: true, // PWYW pivot 2026-08-16: default full access for all visitors
-      supporterTier: 'supporter', // 'supporter' is the default post-pivot; grandfathered subs get their own tier from auth
+const monthlyAmountCents =
+  Number(session.amount_subtotal) ||
+  Number(session.metadata?.amount_cents) ||
+  null;
 ```
 
-**Do NOT touch** the setter functions below (lines 260-292). Those correctly set `isSubscribed` from the auth API response — grandfathered subs still get `isSubscribed: true` from their real subscription row.
+Then include `monthly_amount_cents: monthlyAmountCents` in the `.upsert()` or `.insert()` call that writes to `subscribers`.
 
-**Step 3: Verify the change**
+**Step 3: Handle amount changes via `customer.subscription.updated`**
 
-Run: `grep -n "isSubscribed:" src/store/playerStore.js | head -5`
+Locate the existing handler for `customer.subscription.updated` (or add one if missing). At the top of the handler:
 
-Expected output includes:
-
+```javascript
+if (event.type === "customer.subscription.updated") {
+  const sub = event.data.object;
+  const newAmount = sub.items?.data?.[0]?.price?.unit_amount ?? null;
+  if (newAmount !== null) {
+    const supabase = getSupabaseAdmin();
+    if (supabase) {
+      await supabase
+        .from("subscribers")
+        .update({ monthly_amount_cents: newAmount })
+        .eq("stripe_subscription_id", sub.id);
+    }
+  }
+  // ... existing handler continues
+}
 ```
-252:      isSubscribed: true, // PWYW pivot 2026-08-16: default full access for all visitors
+
+**Step 4: Verify build**
+
+```bash
+npm run build 2>&1 | tail -10
 ```
-
-**Step 4: Verify local build still passes**
-
-Run: `npm run build 2>&1 | tail -10`
-
-Expected: `✓ Compiled successfully` (or equivalent no-error). If build fails, revert with `git checkout src/store/playerStore.js` and investigate.
 
 **Step 5: Commit**
 
 ```bash
-git add src/store/playerStore.js
+git add src/app/api/stripe/webhook/route.js
 git commit -m "$(cat <<'EOF'
-feat(pwyw): flip default isSubscribed to true — free access for all visitors
+feat(pwyw): capture subscription amount in webhook (monthly_amount_cents)
 
-Default state for useUserStore.isSubscribed changes from false to true.
-Result: any visitor (logged in or not) gets full content access — vault,
-non-free tracks, everything. This is the core mechanism of the Phase 1
-PWYW pivot per docs/plans/2026-08-16-pwyw-pivot-design.md.
+Extends the Stripe webhook to store the fan's chosen monthly amount
+in the new subscribers.monthly_amount_cents column.
 
-Grandfathered subs unaffected — their setUser() call still writes
-isSubscribed from the auth API response, and Stripe subscription
-webhook keeps their DB row current.
+Two paths covered:
+1. checkout.session.completed (subscription mode): reads
+   session.amount_subtotal OR session.metadata.amount_cents fallback,
+   writes to subscribers row on upsert.
+2. customer.subscription.updated: reads new price.unit_amount from
+   the subscription item, updates subscribers.monthly_amount_cents.
+   Covers fan-initiated amount changes via Stripe portal.
 
-isGated() already returns false and FREE_PLAY_MODE was already true,
-so this flip cascades cleanly: vault unlock (MusicPageClient.jsx:89),
-preview cutoff (playerStore.js:394) both short-circuit to full-access.
+Grandfathered subs unaffected — their existing rows keep the
+backfilled amount from the T1 migration.
 
-Ref: pwyw-pivot-design Change 2 (Section: Phase 1)
+Ref: pwyw-pivot-design v2 (Webhook Handler Extension section)
 
 Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
 EOF
@@ -109,66 +408,192 @@ EOF
 
 ---
 
-## Task 2: Redirect `/password` → `/`
+## Task P2-T4: Rewrite SubscribeModal.jsx for PWYW input
 
 **Files:**
 
-- Modify (replace entire file): `src/app/password/page.jsx`
+- Modify: `src/components/SubscribeModal.jsx` (382 lines)
 
-**Step 1: Read the current file (context only)**
+**Design constraint:** keep the modal's overall visual layout (header, close button, footer, styling). Replace only the tier-card selector + Start-Free-Trial button with:
 
-Run: `wc -l src/app/password/page.jsx`
+- 5 preset chips: $3 / $5 / $10 / $25 / Custom
+- Amount input field (bound to selected chip; editable in Custom mode)
+- Suggested-amount hint below input
+- "Continue to Checkout" button (POSTs to `/api/subscription/checkout` with `{ email, amount_cents }`)
 
-Expected: `95 src/app/password/page.jsx`
+**Step 1: Read the current SubscribeModal to understand structure**
 
-**Step 2: Replace the entire file**
+```bash
+sed -n '1,50p' src/components/SubscribeModal.jsx      # imports, tier data
+sed -n '200,290p' src/components/SubscribeModal.jsx   # tier picker JSX + submit button
+```
 
-Overwrite `src/app/password/page.jsx` with:
+Note where:
+
+- `tiers` array is defined (line ~100)
+- Tier selector renders (`selectedTier` state)
+- Submit button calls Stripe (line ~287)
+
+**Step 2: Replace tier data + selector**
+
+Remove the `tiers` array (lines ~100–160 approx). Replace with a PWYW state block near the top of the component:
+
+```javascript
+const PRESET_AMOUNTS = [300, 500, 1000, 2500]; // $3, $5, $10, $25
+const SUGGESTED_AMOUNT = 499; // $4.99 default
+const MIN_CENTS = 100;
+const MAX_CENTS = 99900;
+
+const [selectedPreset, setSelectedPreset] = useState(SUGGESTED_AMOUNT);
+const [customMode, setCustomMode] = useState(false);
+const [customAmount, setCustomAmount] = useState(SUGGESTED_AMOUNT);
+
+const finalAmountCents = customMode ? customAmount : selectedPreset;
+const amountDisplay = (finalAmountCents / 100).toFixed(2);
+const isValidAmount =
+  finalAmountCents >= MIN_CENTS && finalAmountCents <= MAX_CENTS;
+```
+
+**Step 3: Replace the tier selector JSX with PWYW UI**
+
+Where the tier cards render, replace with:
 
 ```jsx
-import { redirect } from "next/navigation";
+<div className="mb-6">
+  <p className="text-sm text-gray-400 mb-3">Pay what you want, monthly:</p>
+  <div className="flex flex-wrap gap-2 mb-4">
+    {PRESET_AMOUNTS.map((cents) => (
+      <button
+        key={cents}
+        type="button"
+        onClick={() => {
+          setSelectedPreset(cents);
+          setCustomMode(false);
+        }}
+        className={`px-4 py-2 rounded-lg font-bold text-sm transition ${
+          !customMode && selectedPreset === cents
+            ? "bg-blue-500 text-white shadow-lg shadow-blue-500/30"
+            : "bg-white/10 text-white/70 hover:bg-white/20"
+        }`}
+      >
+        ${cents / 100}
+      </button>
+    ))}
+    <button
+      type="button"
+      onClick={() => setCustomMode(true)}
+      className={`px-4 py-2 rounded-lg font-bold text-sm transition ${
+        customMode
+          ? "bg-blue-500 text-white shadow-lg shadow-blue-500/30"
+          : "bg-white/10 text-white/70 hover:bg-white/20"
+      }`}
+    >
+      Custom
+    </button>
+  </div>
 
-/**
- * /password — DEPRECATED as of 2026-08-16 PWYW pivot.
- * The private-beta gate is retired; every visitor gets full free access.
- * This route now permanently redirects to the homepage.
- * Kept as a route (not deleted) so bookmarks + backlinks don't 404.
- */
-export default function PasswordPage() {
-  redirect("/");
+  <div className="relative">
+    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/60 font-bold">
+      $
+    </span>
+    <input
+      type="number"
+      min="1"
+      max="999"
+      step="0.01"
+      value={amountDisplay}
+      onChange={(e) => {
+        const cents = Math.round(parseFloat(e.target.value || "0") * 100);
+        setCustomMode(true);
+        setCustomAmount(cents);
+      }}
+      className="w-full pl-10 pr-16 py-3 bg-white/10 border border-white/20 rounded-xl text-white text-lg font-bold focus:outline-none focus:border-blue-500"
+    />
+    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-white/60 text-sm">
+      / month
+    </span>
+  </div>
+
+  <p className="text-xs text-gray-500 mt-2 text-center">
+    Suggested $4.99/mo · Minimum $1/mo · Cancel anytime
+  </p>
+</div>
+```
+
+**Step 4: Replace the submit button**
+
+```jsx
+<button
+  type="button"
+  onClick={handleContinue}
+  disabled={!email || !isValidAmount || loading}
+  className="w-full py-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl text-white font-bold hover:shadow-lg hover:shadow-blue-500/30 transition disabled:opacity-50"
+>
+  {loading ? "Redirecting to checkout..." : `Continue at $${amountDisplay}/mo`}
+</button>
+```
+
+**Step 5: Update `handleContinue` (or equivalent) to POST the new payload**
+
+```javascript
+async function handleContinue() {
+  setLoading(true);
+  try {
+    const res = await fetch("/api/subscription/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, amount_cents: finalAmountCents }),
+    });
+    const data = await res.json();
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      setError(data.error || "Failed to create checkout session");
+      setLoading(false);
+    }
+  } catch (err) {
+    setError("Network error. Please try again.");
+    setLoading(false);
+  }
 }
 ```
 
-**Step 3: Verify the file compiles**
+**Step 6: Delete the `STRIPE_LINKS` const and any tier-related helpers no longer used**
 
-Run: `npm run build 2>&1 | tail -10`
-
-Expected: `✓ Compiled successfully`.
-
-**Step 4: Verify the redirect works locally (optional)**
-
-If you have a dev server: `curl -sI http://localhost:3000/password | head -5`
-
-Expected: `HTTP/1.1 307 Temporary Redirect` + `Location: /`.
-
-Skip if no dev server is running — Task 11 verifies live.
-
-**Step 5: Commit**
+**Step 7: Verify build passes**
 
 ```bash
-git add src/app/password/page.jsx src/app/password/layout.jsx
+npm run build 2>&1 | tail -10
+```
+
+**Step 8: Regression check — no lingering tier-price copy**
+
+```bash
+grep -n "\\$4.99\|\\$9.99\|\\$14.99\|Regular\|Premium\|Diamond" src/components/SubscribeModal.jsx
+```
+
+Expect: only the `SUGGESTED_AMOUNT = 499` constant may match `\\$4.99` indirectly. If any hardcoded tier price copy survives, remove it.
+
+**Step 9: Commit**
+
+```bash
+git add src/components/SubscribeModal.jsx
 git commit -m "$(cat <<'EOF'
-feat(pwyw): redirect /password → / (retire private-beta gate)
+feat(pwyw): SubscribeModal shows name-your-price input, not fixed tiers
 
-Site is now fully free for all visitors. The /password gate served no
-purpose (per Aug 15 audit finding: the mystation_access cookie it set
-was never read anywhere, C2 in the security deep-dive). Replaced the
-whole page with a server-side redirect() to /.
+Replaced the 3-tier picker ($4.99 Regular / $9.99 Premium / $14.99
+Diamond) with a pay-what-you-want UI:
 
-Route kept (not deleted) so bookmarks + backlinks don't 404. The
-layout.jsx from the earlier quick-wins commit (noindex robots) stays.
+- 5 preset chips: $3, $5, $10, $25, Custom
+- Amount input field (bound to selected chip; editable in Custom mode)
+- Suggested $4.99/mo, minimum $1/mo, cancel anytime
+- "Continue at $X.XX/mo" button POSTs to /api/subscription/checkout
+  with { email, amount_cents } (matches the new route contract)
 
-Ref: pwyw-pivot-design Change 3 (Section: Phase 1)
+Modal shell (header, close button, footer, Founding Supporter note)
+unchanged. Removed STRIPE_LINKS const + tier-price copy.
+
+Ref: pwyw-pivot-design v2 (PWYW Modal UX section)
 
 Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
 EOF
@@ -177,110 +602,65 @@ EOF
 
 ---
 
-## Task 3: Rewrite `/subscribe` as PWYW placeholder
+## Task P2-T5: Rewrite `/subscribe/page.jsx` for PWYW form (suggested $4.99)
 
 **Files:**
 
-- Modify (replace entire file): `src/app/subscribe/page.jsx` (currently 403 lines of tier pricing)
+- Modify: `src/app/subscribe/page.jsx` (403 lines)
 
-**Step 1: Read a slice of the current file (context)**
+**Design constraint:** keep the page's visual identity (hero, testimonials, footer, background gradients, all the surrounding design). Replace ONLY the tier ladder / pricing UI with the same PWYW pattern used in SubscribeModal (but rendered as a page, not a modal).
 
-Run: `head -30 src/app/subscribe/page.jsx`
+**Approach:** since the SubscribeModal now has the PWYW component pattern, the fastest path is to extract the PWYW form JSX into a reusable component AT THIS STEP if the copy overlap is high, OR inline the same pattern into the page.
 
-Confirm it's a client component with pricing tiers. We're throwing all of it out.
+**Step 1: Read the current /subscribe page structure**
 
-**Step 2: Replace the entire file**
-
-Overwrite `src/app/subscribe/page.jsx` with:
-
-```jsx
-import Link from "next/link";
-
-export const metadata = {
-  title: "MyStation is Free",
-  description:
-    "MyStation is now free for everyone. No subscription needed. Support your favorite artists directly on any song page.",
-  robots: { index: true, follow: true },
-  alternates: { canonical: "https://mystationlive.com/subscribe" },
-};
-
-export default function SubscribePage() {
-  return (
-    <main className="min-h-[70vh] flex items-center justify-center px-6 pt-24 pb-16 bg-gradient-to-b from-mystation-navy to-black text-white">
-      <div className="max-w-2xl w-full text-center">
-        <p className="text-blue-400 uppercase tracking-widest text-xs font-bold mb-4">
-          PWYW · Pay What You Want
-        </p>
-        <h1 className="text-4xl md:text-5xl font-black mb-6 leading-tight">
-          MyStation is now <span className="text-blue-400">free</span> for
-          everyone.
-        </h1>
-        <p className="text-lg text-gray-300 mb-8 leading-relaxed">
-          No subscription needed. Every song, every video, every playlist — on
-          the house. If you love what you hear, you can support the artist
-          directly on any song page.
-        </p>
-        <div className="flex flex-col sm:flex-row gap-3 justify-center mb-10">
-          <Link
-            href="/music"
-            className="px-8 py-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl font-bold text-white hover:shadow-lg hover:shadow-blue-500/30 transition"
-          >
-            Start Listening
-          </Link>
-          <Link
-            href="/merch"
-            className="px-8 py-3 bg-white/10 border border-white/20 rounded-xl font-bold text-white hover:bg-white/20 transition"
-          >
-            Shop Merch
-          </Link>
-        </div>
-        <p className="text-sm text-gray-400 border-t border-white/10 pt-6">
-          Already subscribing? Thank you — you&apos;re a{" "}
-          <span className="text-blue-400 font-semibold">
-            Founding Supporter
-          </span>{" "}
-          forever. Nothing changes for you. Manage your subscription anytime in{" "}
-          <Link href="/account" className="underline hover:text-white">
-            your account
-          </Link>
-          .
-        </p>
-      </div>
-    </main>
-  );
-}
+```bash
+cat src/app/subscribe/page.jsx | head -100
+grep -n "\\$4.99\|\\$9.99\|\\$14.99\|tier\|Stripe" src/app/subscribe/page.jsx
 ```
 
-**Step 3: Verify the file compiles**
+Identify:
 
-Run: `npm run build 2>&1 | tail -10`
+- The hero section (keep)
+- The tier ladder (replace with PWYW)
+- Any testimonial/social-proof sections (keep)
+- The footer / grandfather note (keep or add if missing)
 
-Expected: `✓ Compiled successfully`.
+**Step 2: Replace the tier ladder with PWYW form**
 
-**Step 4: Regression check — no leftover Diamond/pricing copy**
+Use the same PWYW UI pattern from SubscribeModal (preset chips + amount input + Continue button) but at page scale. Suggested default: `SUGGESTED_AMOUNT = 499` ($4.99).
 
-Run: `grep -n "Diamond\|\\$4.99\|\\$14.99\|Subscribe now" src/app/subscribe/page.jsx`
+Consider extracting a shared `<PWYWForm />` component at `src/components/PWYWForm.jsx` if the same JSX is used in 2+ places. If time-pressed, inline it and refactor later.
 
-Expected: 0 hits (empty output).
+**Step 3: Verify build passes**
+
+```bash
+npm run build 2>&1 | tail -10
+```
+
+**Step 4: Regression check**
+
+```bash
+grep -n "\\$4.99\|\\$9.99\|\\$14.99\|Diamond" src/app/subscribe/page.jsx
+```
+
+Expect: only the `SUGGESTED_AMOUNT = 499` and display copy that says "Suggested $4.99/mo" — no hardcoded tier ladder.
 
 **Step 5: Commit**
 
 ```bash
-git add src/app/subscribe/page.jsx
+git add src/app/subscribe/page.jsx src/components/PWYWForm.jsx  # (if extracted)
 git commit -m "$(cat <<'EOF'
-feat(pwyw): rewrite /subscribe as free-for-all placeholder page
+feat(pwyw): /subscribe page shows PWYW form (suggested \$4.99)
 
-Removed the 403-line tier ladder / Stripe pricing UI. Replaced with a
-concise placeholder that tells visitors MyStation is now free and
-directs them to /music or /merch. Includes a soft note to existing
-subscribers that they're grandfathered as Founding Supporters and
-can manage their sub via /account (Stripe portal).
+Layout preserved — same hero, background gradients, and surrounding
+design as before. Only the tier ladder swapped for the PWYW form
+(same pattern as SubscribeModal).
 
-Existing subscribers' Stripe subs untouched — this only changes what
-new visitors see when they hit /subscribe. The Stripe checkout API
-route gets locked in Task 8.
+Suggested default $4.99/mo (matches old Regular tier for grandfathered
+psychology). Preset chips: \$3, \$5, \$10, \$25, Custom. Minimum \$1/mo.
 
-Ref: pwyw-pivot-design Change 4 (Section: Phase 1)
+Ref: pwyw-pivot-design v2 (Files That Change section)
 
 Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
 EOF
@@ -289,92 +669,33 @@ EOF
 
 ---
 
-## Task 4: Rewrite `/premium` as PWYW placeholder
+## Task P2-T6: Rewrite `/premium/page.jsx` for PWYW form (suggested $14.99)
 
 **Files:**
 
-- Modify (replace entire file): `src/app/premium/page.jsx` (currently 117 lines)
+- Modify: `src/app/premium/page.jsx` (117 lines)
 
-**Step 1: Replace the entire file**
+**Same pattern as P2-T5, but the suggested default is $14.99** (anchors as the "higher-tier support" page).
 
-Overwrite `src/app/premium/page.jsx` with:
-
-```jsx
-import Link from "next/link";
-
-export const metadata = {
-  title: "MyStation is Free",
-  description:
-    "MyStation is now free for everyone — no premium tier needed. Support your favorite artists directly on any song page.",
-  robots: { index: true, follow: true },
-  alternates: { canonical: "https://mystationlive.com/premium" },
-};
-
-export default function PremiumPage() {
-  return (
-    <main className="min-h-[70vh] flex items-center justify-center px-6 pt-24 pb-16 bg-gradient-to-b from-mystation-navy to-black text-white">
-      <div className="max-w-2xl w-full text-center">
-        <p className="text-blue-400 uppercase tracking-widest text-xs font-bold mb-4">
-          PWYW · Pay What You Want
-        </p>
-        <h1 className="text-4xl md:text-5xl font-black mb-6 leading-tight">
-          Premium is now the <span className="text-blue-400">default</span>.
-        </h1>
-        <p className="text-lg text-gray-300 mb-8 leading-relaxed">
-          Every song is full-length. The Vault is open. Search is free. No
-          paywall. If you love the music, you can support the artist directly on
-          any song page.
-        </p>
-        <div className="flex flex-col sm:flex-row gap-3 justify-center mb-10">
-          <Link
-            href="/music"
-            className="px-8 py-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl font-bold text-white hover:shadow-lg hover:shadow-blue-500/30 transition"
-          >
-            Explore the Catalog
-          </Link>
-          <Link
-            href="/vault"
-            className="px-8 py-3 bg-white/10 border border-white/20 rounded-xl font-bold text-white hover:bg-white/20 transition"
-          >
-            Enter the Vault
-          </Link>
-        </div>
-        <p className="text-sm text-gray-400 border-t border-white/10 pt-6">
-          Already on a premium plan? You&apos;re a{" "}
-          <span className="text-blue-400 font-semibold">
-            Founding Supporter
-          </span>{" "}
-          forever. Manage in{" "}
-          <Link href="/account" className="underline hover:text-white">
-            your account
-          </Link>
-          .
-        </p>
-      </div>
-    </main>
-  );
-}
-```
+**Step 1: Same as T5, applied to `/premium/page.jsx` with `SUGGESTED_AMOUNT = 1499`**
 
 **Step 2: Verify build passes**
-
-Run: `npm run build 2>&1 | tail -10`
-
-Expected: `✓ Compiled successfully`.
 
 **Step 3: Commit**
 
 ```bash
 git add src/app/premium/page.jsx
 git commit -m "$(cat <<'EOF'
-feat(pwyw): rewrite /premium as free-for-all placeholder page
+feat(pwyw): /premium page shows PWYW form (suggested $14.99)
 
-Same pattern as /subscribe — replaces the 117-line premium tier page
-with a friendly placeholder that says premium is now the default.
-Directs to /music and /vault (both now free) and links grandfathered
-premium subs to /account for Stripe portal management.
+Same PWYW pattern as /subscribe but with a higher suggested amount
+($14.99/mo vs $4.99). Positions /premium as the higher-tier support
+page while sharing the same PWYW mechanic under the hood.
 
-Ref: pwyw-pivot-design Change 5 (Section: Phase 1)
+Layout + surrounding design preserved. Suggested default $14.99/mo
+matches the old Diamond tier price for grandfathered psychology.
+
+Ref: pwyw-pivot-design v2 (Suggested Amounts section)
 
 Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
 EOF
@@ -383,95 +704,55 @@ EOF
 
 ---
 
-## Task 5: Hide "Subscribe" CTAs in Navbar (desktop + mobile)
+## Task P2-T7 (Polish): `/account/page.jsx` show "You support at $X/mo"
 
 **Files:**
 
-- Modify: `src/components/Navbar.jsx` (2 spots: line 361-370 desktop, line 675-688 mobile)
+- Modify: `src/app/account/page.jsx`
 
-**Step 1: Read the current desktop subscribe block**
+**Nice-to-have. Skip if time-pressed; can ship as follow-up.**
 
-Run: `sed -n '360,372p' src/components/Navbar.jsx`
+**Step 1: Read the current /account page**
 
-Expected roughly:
+```bash
+grep -n "supporterTier\|tier\|monthly_amount" src/app/account/page.jsx
+```
+
+**Step 2: Add a line displaying the monthly amount**
+
+Somewhere in the "Your Plan" / subscription summary block:
 
 ```jsx
 {
-  /* Subscribe Button */
-}
-{
-  !isSubscribed && (
-    <button
-      onClick={() => usePlayerStore.getState().openSubscribeModal()}
-      className="..."
-    >
-      Subscribe
-    </button>
+  isSubscribed && monthlyAmountCents && (
+    <p className="text-sm text-gray-400 mt-2">
+      You support at{" "}
+      <span className="text-white font-bold">
+        ${(monthlyAmountCents / 100).toFixed(2)}/mo
+      </span>
+      . Thank you.
+    </p>
   );
 }
 ```
 
-**Step 2: Comment out (don't delete) the desktop block**
+Where `monthlyAmountCents` comes from an existing user-store field or a `/api/subscription/session` call (already exists per the earlier audit).
 
-Use the Edit tool to replace the `{!isSubscribed && (...)}` desktop Subscribe button block with:
+If the field isn't already exposed to the client, add it to the response of `/api/subscription/session` (the route reads from Supabase — just SELECT the new column too).
 
-```jsx
-{
-  /* Subscribe Button — DISABLED 2026-08-16 PWYW pivot.
-              Kept as commented code for grandfather-sub audit trail.
-              To re-enable, restore the {!isSubscribed && (...)} block. */
-}
-{
-  false && !isSubscribed && (
-    <button
-      onClick={() => usePlayerStore.getState().openSubscribeModal()}
-      className="..."
-    >
-      Subscribe
-    </button>
-  );
-}
-```
-
-**Rationale for `false &&`:** preserves the whole block for future reference / potential re-enable, but React tree-shakes it out. If we ever need it back, one 5-char edit.
-
-**Step 3: Do the same for the mobile block**
-
-Run: `sed -n '673,690p' src/components/Navbar.jsx`
-
-Locate the mobile Subscribe button. Apply the same `{false && !isSubscribed && (...)}` treatment.
-
-**Step 4: Verify neither triggers**
-
-Run: `grep -n "openSubscribeModal" src/components/Navbar.jsx`
-
-Expected: any remaining references should be inside `{false && ...}` blocks. Confirm visually.
-
-**Step 5: Verify build passes**
-
-Run: `npm run build 2>&1 | tail -10`
-
-Expected: `✓ Compiled successfully` — no ESLint warnings about `false && ` (Next.js is fine with it).
-
-**Step 6: Commit**
+**Step 3: Verify build + commit**
 
 ```bash
-git add src/components/Navbar.jsx
+git add src/app/account/page.jsx  # + any API route touched
 git commit -m "$(cat <<'EOF'
-feat(pwyw): hide Subscribe CTAs in Navbar (desktop + mobile)
+polish(pwyw): show "You support at \$X/mo" on /account
 
-Both Subscribe buttons in Navbar.jsx are wrapped in {false && ...} —
-preserves the block for audit trail + easy re-enable if needed, but
-React skips rendering. Grandfathered subs still see the same nav
-(their !isSubscribed evaluates false anyway, so nothing changes for
-them).
+Displays each subscriber's actual monthly amount (from the new
+subscribers.monthly_amount_cents column) instead of a generic tier
+label. Grandfathered subs see their backfilled amount ($4.99 for
+premium, $14.99 for diamond etc.).
 
-Does NOT delete SubscribeModal itself (may still fire from other
-call sites for grandfathered edge cases). Full cleanup deferred to
-Phase 3 (6 months post-pivot when most grandfathered subs have
-naturally churned).
-
-Ref: pwyw-pivot-design Change 6 (Section: Phase 1)
+Ref: pwyw-pivot-design v2 (Polish section)
 
 Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
 EOF
@@ -480,584 +761,187 @@ EOF
 
 ---
 
-## Task 6: Update homepage hero copy
-
-**Files:**
-
-- Modify: `src/app/page.jsx` (hero section — needs to locate exact lines)
-
-**Step 1: Locate the hero copy**
-
-Run: `grep -n "Stream\|Subscribe\|Get full\|Free preview\|Sign up" src/app/page.jsx | head -20`
-
-Look for the primary hero headline and any subscribe-adjacent copy. Note the exact line numbers.
-
-**Step 2: Read the hero section fully (~20 lines around the found lines)**
-
-Use the Read tool to grab the hero section. Identify:
-
-- The main H1 headline
-- Any subhead / CTA copy that mentions subscribing or paywall
-- Any "Preview limited to 30s" or similar friction copy
-
-**Step 3: Rewrite hero copy**
-
-Target message (adapt to the actual JSX structure):
-
-- **Main headline:** `Stream all of IDMG's music free.`
-- **Sub-headline:** `Support what you love. Zero paywall.`
-- **Primary CTA button:** `Start Listening` → links to `/music` (or wherever it went before)
-- **Secondary CTA button:** keep whatever was there for merch/events
-
-**Do NOT** change layout, animations, images, or the underlying component structure. Text-only edit.
-
-**Explicit removals:**
-
-- Any "Subscribe" CTA in the hero
-- Any "Preview" / "30 seconds" / "Free trial" copy
-- Any "$4.99/mo" or price mention in the hero
-
-**Step 4: Regression check**
-
-Run: `grep -in "subscribe\|premium\|paywall\|30 second\|preview" src/app/page.jsx | head -10`
-
-Expected: 0 hits for those words in the hero context. If any survive, verify they're in an unrelated section (e.g., a featured LOTL card) and either leave or clean up in the same commit.
-
-**Step 5: Verify build**
-
-Run: `npm run build 2>&1 | tail -10`
-
-Expected: `✓ Compiled successfully`.
-
-**Step 6: Commit**
-
-```bash
-git add src/app/page.jsx
-git commit -m "$(cat <<'EOF'
-feat(pwyw): rewrite homepage hero for free-for-all model
-
-Replaced subscribe/paywall-adjacent copy in the hero with the new
-positioning: "Stream all of IDMG's music free. Support what you love."
-Removed any 30-second-preview or subscription CTAs. Kept layout,
-animations, and images untouched — text-only edit.
-
-Ref: pwyw-pivot-design Change 7 (Section: Phase 1)
-
-Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
-EOF
-)"
-```
-
----
-
-## Task 7: Update `layout.jsx` root metadata
-
-**Files:**
-
-- Modify: `src/app/layout.jsx` (metadata block at line 57-115, specifically the `description` fields)
-
-**Step 1: Read the current metadata**
-
-Run: `sed -n '57,115p' src/app/layout.jsx`
-
-Note the current `description`, `openGraph.description`, and `twitter.description` values.
-
-**Step 2: Update all three description fields**
-
-Change:
-
-- **Root `description`** (line ~63):
-  - Before: whatever it is now (something about "Stream Mike Page music for free…")
-  - After: `'Free streaming of all IDMG music. No paywall, no login, no limits. Support your favorite artists directly. Official IDMG merch and Love on the Lawn Festival tickets.'`
-
-- **`openGraph.description`** (line ~74):
-  - After: `'Free streaming of all IDMG music. Support what you love. Official merch and Love on the Lawn Festival tickets.'`
-
-- **`twitter.description`** (line ~96):
-  - After: `'Free streaming of all IDMG music. Support the artists. Official merch and LOTL Festival tickets.'`
-
-**Do NOT** change the `title` fields (already updated in the earlier quick-wins commit) or any other metadata.
-
-**Step 3: Verify build passes**
-
-Run: `npm run build 2>&1 | tail -10`
-
-Expected: `✓ Compiled successfully`.
-
-**Step 4: Regression check**
-
-Run: `grep -n "Stream Mike Page music for free" src/app/layout.jsx`
-
-Expected: 0 hits (old copy fully replaced).
-
-**Step 5: Commit**
-
-```bash
-git add src/app/layout.jsx
-git commit -m "$(cat <<'EOF'
-feat(pwyw): update root SEO metadata for free-for-all positioning
-
-Rewrote description / og:description / twitter:description to lead
-with "Free streaming" instead of the old paywall-adjacent phrasing.
-Titles unchanged (already updated in earlier quick-wins commit).
-
-Ref: pwyw-pivot-design Change 7 (Section: Phase 1)
-
-Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
-EOF
-)"
-```
-
----
-
-## Task 8: Add `410 Gone` guard to `/api/subscription/checkout`
-
-**Files:**
-
-- Modify: `src/app/api/subscription/checkout/route.js` (add early-return in POST handler)
-
-**Step 1: Read the current file**
-
-Run: `head -40 src/app/api/subscription/checkout/route.js`
-
-Locate the `export async function POST(request) {` line (~line 12) and the first line inside the try block.
-
-**Step 2: Add the guard as the very first thing inside POST**
-
-Edit `src/app/api/subscription/checkout/route.js`. Immediately after `export async function POST(request) {` (before the `try` block), add:
-
-```javascript
-export async function POST(request) {
-  // PWYW pivot 2026-08-16: MyStation is now free for all.
-  // New subscriptions are no longer accepted. Grandfathered subs
-  // continue via Stripe (server-to-server, doesn't hit this route).
-  // Existing subs cancel via Stripe Customer Portal at /api/subscription/portal.
-  return new Response(
-    JSON.stringify({
-      error: 'MyStation is now free — no subscription needed.',
-      message:
-        'Every song, video, and playlist is free. Support your favorite artists directly on any song page.',
-      redirect: '/subscribe',
-    }),
-    {
-      status: 410,
-      headers: { 'Content-Type': 'application/json' },
-    }
-  );
-
-  // --- LEGACY CODE BELOW: unreachable after 410 above.
-  // Kept for grandfathered-sub audit trail and easy revert. ---
-  try {
-    // ... existing code stays here, unmodified
-```
-
-**Rationale:** early `return` before the legacy code makes this a one-line revert if needed (delete the return block). Existing subs never hit this route (Stripe manages their renewals via webhooks), so no grandfather impact.
-
-**Step 3: Also add a GET-handler guard (if GET is exported)**
-
-Run: `grep -n "export async function" src/app/api/subscription/checkout/route.js`
-
-If `export async function GET(` exists, add the same 410 return at the top of GET. If only POST is exported, skip.
-
-**Step 4: Verify build passes**
-
-Run: `npm run build 2>&1 | tail -10`
-
-Expected: `✓ Compiled successfully`. Next.js may warn about unreachable code — that's expected (documented in the comment).
-
-**Step 5: Verify the guard works locally (optional)**
-
-If you have a dev server running:
-
-```bash
-curl -sX POST http://localhost:3000/api/subscription/checkout \
-  -H "Content-Type: application/json" \
-  -d '{"tier":"premium","email":"test@test.com","commitment_agreed":true}' \
-  -w "\nHTTP %{http_code}\n"
-```
-
-Expected: `HTTP 410` + JSON body with the "MyStation is now free" message.
-
-Skip if no dev server — Task 11 verifies live.
-
-**Step 6: Commit**
-
-```bash
-git add src/app/api/subscription/checkout/route.js
-git commit -m "$(cat <<'EOF'
-feat(pwyw): return 410 Gone on /api/subscription/checkout
-
-Defensive guard against any rogue new subscription signup after the
-PWYW pivot. Adds an early-return at the top of POST that returns
-HTTP 410 with a friendly JSON message. Legacy code below the guard
-is kept intact (unreachable) so this is a one-line revert if needed.
-
-Existing subscribers unaffected — Stripe manages their renewals via
-webhooks (server-to-server), not through this route. They cancel via
-the Stripe Customer Portal at /api/subscription/portal.
-
-Ref: pwyw-pivot-design "Blocking NEW Subs" (Section 4.4)
-
-Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
-EOF
-)"
-```
-
----
-
-## Task 9: Local pre-push verification (35-check gauntlet)
+## Task P2-T8: Local pre-push verification
 
 **Files:** none modified. Read-only checks.
 
-**Step 1: Run the pre-push local gates from design Section 5.1**
-
-Run each command, verify expected output:
+**Step 1: Build cleanly**
 
 ```bash
 cd ~/MikePageEmpire/apps/mystation
-
-# 1. Build cleanly — 0 errors
-echo "=== BUILD ==="
-npm run build 2>&1 | tail -5
-# Expect: "✓ Compiled successfully"
+npm run build 2>&1 | tail -10
 ```
+
+Expect `✓ Compiled successfully`.
+
+**Step 2: Regression sentinels**
 
 ```bash
-# 2. Grep for regression sentinels
-echo "=== REGRESSION SENTINELS ==="
-grep -rn "'Coming Soon'" src/app/password/ && echo "FAIL: password page not rewritten" || echo "OK: password page clean"
-grep -rn "track.gated" src/store/playerStore.js || echo "OK: no gated logic left"
+# 1. Confirm PWYW contract on checkout route
+grep -n "amount_cents\|price_data\|unit_amount" src/app/api/subscription/checkout/route.js | head -5
+# Expect: 3+ hits
+
+# 2. Confirm webhook captures amount
+grep -n "monthly_amount_cents\|amount_subtotal" src/app/api/stripe/webhook/route.js | head -5
+# Expect: 2+ hits
+
+# 3. Confirm SubscribeModal has PWYW input
+grep -n "PRESET_AMOUNTS\|customAmount\|amount_cents" src/components/SubscribeModal.jsx | head -5
+# Expect: 3+ hits
+
+# 4. Confirm no leftover fixed tier prices in the 3 UI files
+grep -n "\\$4.99\|\\$9.99\|\\$14.99" src/components/SubscribeModal.jsx src/app/subscribe/page.jsx src/app/premium/page.jsx
+# Expect: only in "Suggested $4.99/mo" copy or SUGGESTED_AMOUNT constants — no tier ladder
+
+# 5. Confirm DB migration file exists
+ls -la migrations/2026-08-16-subscribers-monthly-amount.sql
 ```
+
+**Step 3: Verify DB migration was applied to prod**
 
 ```bash
-# 3. Confirm NEW subscription CTAs are gone from Navbar
-echo "=== NAVBAR SUBSCRIBE CTAs ==="
-# Every occurrence should be inside a {false && ...} block
-grep -B2 "openSubscribeModal" src/components/Navbar.jsx | head -20
+# Via Supabase SQL editor or psql:
+# SELECT tier, count(*), min(monthly_amount_cents), max(monthly_amount_cents)
+#   FROM public.subscribers GROUP BY tier;
 ```
 
-```bash
-# 4. Confirm grandfather 410 guard is in place
-echo "=== 410 GUARD ==="
-grep -n "status: 410\|410 Gone" src/app/api/subscription/checkout/route.js
-# Expect: at least one hit
-```
+Any non-null tier should have non-null monthly_amount_cents. If migration NOT yet applied, apply it before pushing.
 
-```bash
-# 5. Confirm isSubscribed default flipped
-echo "=== DEFAULT isSubscribed ==="
-grep -n "isSubscribed: true" src/store/playerStore.js | head -3
-# Expect: line ~252 with "PWYW pivot" comment
-```
-
-```bash
-# 6. Confirm /subscribe + /premium rewritten
-echo "=== SUBSCRIBE / PREMIUM PAGE COPY ==="
-grep -c "MyStation is now free\|Founding Supporter" src/app/subscribe/page.jsx src/app/premium/page.jsx
-# Expect: 2+ in each file (title + body)
-```
-
-```bash
-# 7. Confirm hero copy updated
-echo "=== HERO COPY ==="
-grep -in "Stream all of IDMG" src/app/page.jsx | head -3
-# Expect: 1+ hit
-```
-
-```bash
-# 8. Confirm metadata updated
-echo "=== METADATA ==="
-grep -in "Free streaming of all IDMG" src/app/layout.jsx | head -3
-# Expect: 3 hits (root desc + og desc + twitter desc)
-```
-
-**Step 2: Interpret results**
-
-If ANY check fails: STOP. Do not deploy. Fix the failing item, re-run verification.
-
-If ALL 8 checks pass: proceed to Task 10.
-
-**Step 3: (No commit — this is a verification task.)**
+**Step 4: (No commit — verification only)**
 
 ---
 
-## Task 10: Push to `origin/main` and deploy to prod
+## Task P2-T9: Push + deploy
 
-**Files:** none.
-
-**Step 1: Confirm branch and commit count**
+**Step 1: Confirm commit count**
 
 ```bash
 git log --oneline main -8
 ```
 
-Expected: 8 recent commits from Tasks 1-8 (in order), on top of the last pre-pivot commit.
+Expect: recent commits from Tasks T1–T7 plus the revert `f70bce7`.
 
-**Step 2: Push to origin**
+**Step 2: Push**
 
 ```bash
 git push origin main 2>&1 | tail -5
 ```
 
-Expected: `X..Y  main -> main` — no rejections, no `--force` needed.
-
-**Step 3: Trigger the deploy (Vercel Git auto-deploy is NOT connected — must use CLI)**
+**Step 3: Trigger deploy**
 
 ```bash
-cd ~/MikePageEmpire/apps/mystation
-echo "=== Deploy trigger at $(date +%H:%M:%S) ==="
+echo "=== Deploy at $(date +%H:%M:%S) ==="
 ./deploy.sh 2>&1 | tail -30
 ```
 
-Expected final line: `=== DEPLOY COMPLETE ===` from deploy.sh.
-
-**Step 4: Note the deploy URL and timestamp**
-
-Deploy.sh output includes the Vercel deploy URL and verify results for /, /music, /search, /merch, /events, /events/lotl-2026, /lotl, /premium, /subscribe.
-
-Record: deploy URL + timestamp + all page statuses. If ANY page returns non-200, proceed to Task 12 (rollback) immediately.
-
-**Step 5: (No commit — this is a deploy task.)**
+Expect final line: `=== DEPLOY COMPLETE ===`.
 
 ---
 
-## Task 11: Post-deploy live verification (design Section 5.2)
-
-**Files:** none. All curl + browser checks.
+## Task P2-T10: Live E2E verification with real test card
 
 **Step 1: HTTP status sweep**
 
 ```bash
-for p in "/" "/music" "/merch" "/lotl" "/events/lotl-2026" "/community" \
-         "/subscribe" "/premium" "/password" "/account" "/api/trending"; do
+for p in "/" "/music" "/merch" "/lotl" "/events/lotl-2026" "/subscribe" "/premium" "/account"; do
   STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://mystationlive.com${p}")
   printf "  %-38s %s\n" "$p" "$STATUS"
 done
 ```
 
-Expected:
+All 200. If not → Task 11 rollback.
 
-- `/password` → **307** or **308** (redirect to /)
-- `/subscribe`, `/premium` → **200** (rewritten placeholders)
-- All others → **200**
-
-If any fail: STOP. Go to Task 12 (rollback).
-
-**Step 2: Verify the /password redirect actually points to /**
+**Step 2: New checkout API contract**
 
 ```bash
-curl -sI https://mystationlive.com/password | grep -iE "location|http/"
-```
-
-Expected: `location: /` (bare-domain redirect).
-
-**Step 3: Verify /subscribe rewrite is live**
-
-```bash
-curl -s https://mystationlive.com/subscribe | grep -c "MyStation is now free\|Founding Supporter"
-```
-
-Expected: `>= 2` (title + body copy).
-
-**Step 4: Verify 410 guard is live**
-
-```bash
+# Old contract should be rejected (or accepted with sensible defaults if backward-compat kept)
 curl -sX POST https://mystationlive.com/api/subscription/checkout \
   -H "Content-Type: application/json" \
-  -d '{"tier":"premium","email":"regressiontest@example.com","commitment_agreed":true}' \
+  -d '{"tier":"premium","email":"test@test.com","commitment_agreed":true}' \
   -w "\nHTTP %{http_code}\n"
+# Expect: 400 "amount_cents required"
+
+# New contract returns a Stripe URL
+curl -sX POST https://mystationlive.com/api/subscription/checkout \
+  -H "Content-Type: application/json" \
+  -d '{"email":"regression-test@example.com","amount_cents":700}' \
+  -w "\nHTTP %{http_code}\n"
+# Expect: 200 + { url: "https://checkout.stripe.com/..." }
 ```
 
-Expected: `HTTP 410` + JSON body with "MyStation is now free — no subscription needed."
+**Step 3: Browser E2E with real test card**
 
-**Step 5: Browser smoke tests (manual, ~15 min)**
+1. Open `https://mystationlive.com/subscribe` in incognito
+2. See PWYW form with $4.99 suggested
+3. Enter email `regression-test@example.com` + $7 amount
+4. Click "Continue at $7.00/mo"
+5. Land on Stripe Checkout — verify "MyStation Supporter · $7.00 / month"
+6. Complete with test card `4242 4242 4242 4242` any future expiry, any CVC, any ZIP
+7. Land on `/subscribe/success` page
+8. Verify Supabase `subscribers` table: new row with `monthly_amount_cents = 700`
+9. Verify Stripe dashboard: subscription active, next charge $7.00
+10. Visit `/vault` in that session — content unlocks (isSubscribed=true from webhook)
+11. Repeat with `/premium` — verify default is $14.99
 
-Open a fresh **incognito window** and run through:
+**Step 4: Grandfather sub test**
 
-| #   | Action                                | Expected result                                         |
-| --- | ------------------------------------- | ------------------------------------------------------- |
-| B1  | Visit `https://mystationlive.com`     | Homepage loads, no gate, no "Coming Soon"               |
-| B2  | Click any song                        | Plays immediately, no modal, no paywall                 |
-| B3  | Navigate to `/music`                  | Full catalog visible, no upgrade CTA in Navbar          |
-| B4  | Navigate to `/vault`                  | Vault tracks accessible + playable                      |
-| B5  | Navigate to `/search`, search "drake" | Results appear (or pre-existing Spotify bug documented) |
-| B6  | Navigate to `/password`               | Redirects to `/`                                        |
-| B7  | Navigate to `/subscribe`              | Placeholder copy visible, no pricing table              |
-| B8  | Navigate to `/premium`                | Placeholder copy visible, no pricing table              |
+Log in as a known grandfathered sub. Verify:
 
-Any FAIL → Task 12 rollback.
+- `/account` shows their actual monthly amount (from backfilled column)
+- Nothing about their Stripe subscription changed
+- They can still access gated content
 
-**Step 6: Grandfather sub check (need a real test account)**
+**Step 5: Critical money paths still work**
 
-Log into a known grandfathered sub account:
+```bash
+# Merch checkout — smoke test only
+# LOTL ticket buy — smoke test only
+# MPF donation link — verify still redirects to mikepagefoundation.org
+```
 
-| #   | Action                      | Expected                                                                         |
-| --- | --------------------------- | -------------------------------------------------------------------------------- |
-| G1  | `/account` renders          | Shows sub info + Founding Supporter framing (may need Task 13's UI polish later) |
-| G2  | Click "Manage subscription" | Routes to Stripe Customer Portal successfully                                    |
-| G3  | View any song page          | Same free-access experience (they had this, everyone does)                       |
-| G4  | Check Stripe dashboard      | Their subscription still shows `active`, next charge date unchanged              |
-
-**Step 7: Critical money-path smoke tests (design Section 5.4)**
-
-These CANNOT be broken by this pivot. Verify each:
-
-| Path              | Test                                                                                                                                            |
-| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| Merch checkout    | Add a tee to cart on `/merch`, complete Stripe test-mode checkout with `4242 4242 4242 4242` — order lands in `merch_orders`, admin email fires |
-| LOTL ticket buy   | Buy a GA ticket via `/events/lotl-2026` → verify MTL flow completes                                                                             |
-| MPF donation link | Verify any footer/nav link to `mikepagefoundation.org/donate` still works                                                                       |
-
-Any FAIL → Task 12 rollback (this is untouchable per iron locks).
-
-**Step 8: Stripe webhook regression**
-
-Open Stripe dashboard → Webhooks → MyStation endpoint.
-
-Verify:
-
-- No failed deliveries since deploy timestamp
-- Recent `checkout.session.completed` events processed with 200
-- Recent `customer.subscription.updated` events (from grandfathered subs) processed with 200
-
-**Step 9: Record verification results**
-
-Save a brief report of what passed/failed to your session notes. If everything green, proceed to Task 13 (email).
-
-If anything red: Task 12 (rollback).
+Any fail → Task P2-T11 rollback.
 
 ---
 
-## Task 12: Rollback (ONLY if Task 11 uncovers regressions)
-
-**Files:** none — pure recovery ops.
-
-**Step 1: Instant Vercel rollback**
+## Task P2-T11: Rollback (only if P2-T10 fails)
 
 ```bash
 cd ~/MikePageEmpire/apps/mystation
-vercel rollback --yes 2>&1 | tail -10
-```
 
-Expected: reverts to previous production deploy. ~30 second downtime.
+# Instant Vercel rollback (30 sec)
+vercel rollback --yes
 
-**Step 2: Verify pre-pivot behavior restored**
-
-```bash
-for p in "/" "/subscribe" "/password"; do
-  curl -s -o /dev/null -w "%{http_code} $p\n" "https://mystationlive.com${p}"
-done
-```
-
-Expected: pre-pivot statuses (/password back to 200 with "Coming Soon" splash, /subscribe with pricing tiers).
-
-**Step 3: (If Vercel rollback insufficient) Git revert all 8 commits**
-
-```bash
-git revert --no-edit <task-1-commit>..<task-8-commit>
+# If still broken: revert the pivot commits
+git revert <p2-t1-sha>..<p2-t7-sha> --no-edit
 git push origin main
 ./deploy.sh
+
+# DB rollback (rare — the ADD COLUMN is non-destructive so likely unneeded):
+# ALTER TABLE public.subscribers DROP CONSTRAINT subscribers_monthly_amount_cents_range;
+# (leave the column in place — no data corruption risk)
 ```
-
-**Step 4: Alert + retrospective**
-
-Post to Mike:
-
-- What broke (specific test that failed)
-- Which task's change caused it
-- Recovery time
-- Next step (fix + reship, or defer)
-
-Then STOP the plan execution here until Mike decides direction.
 
 ---
 
-## Task 13: Send Founding Supporter email (Aug 22 or ~48h post-deploy)
+## Post-Ship Follow-Up (not in this plan)
 
-**Files:** none — email ops via Resend.
-
-**Step 1: Confirm 48-hour monitor window passed cleanly**
-
-Check:
-
-- Sentry (once wired): no new error class
-- Stripe dashboard: no spike in failed payments or refund requests
-- Support inbox (`mystationlive@gmail.com`): no confusion tickets
-- Admin dashboard fan count: unchanged
-
-**Step 2: Draft the email using the design's approved copy (Section 4.5)**
-
-Use the exact copy from `docs/plans/2026-08-16-pwyw-pivot-design.md` — Section "Communication email".
-
-From: `hello@mystationlive.com`
-To: every row in `subscribers` WHERE `status = 'active'`
-Subject: `You made MyStation free 🙏`
-
-**Step 3: Get Mike's approval on the exact copy**
-
-Per iron-lock feedback (`feedback_show_me_before_every_post.md`) — Mike must see + approve every send before it fires. Present the drafted email to Mike. Wait for explicit "SEND IT."
-
-**Step 4: Fire via Resend (curl per ERR-0054)**
-
-```bash
-# Pseudo — actual command depends on how many recipients + templating
-export RESEND_API_KEY=$(netlify env:get RESEND_API_KEY | tail -1)
-# Batch send via Resend audience API or per-recipient loop
-```
-
-**Step 5: Log to memory**
-
-Add a `project` type memory entry noting: pivot Phase 1 shipped, X grandfathered subs emailed on YYYY-MM-DD.
-
----
-
-## Post-Phase-1 Follow-Up (NOT part of this plan)
-
-- **Aug 23 – Sept 5:** LOTL freeze. No PWYW changes. Only critical fixes.
-- **Sept 8+:** Phase 2 tip flow — its own implementation plan gets written post-LOTL.
-- **6 months out:** subscription vestige cleanup (rip out SubscribeModal, AccountWall, sub webhook events) once ~90% of grandfathered subs have naturally churned.
+- Metric review Sept 15 (30 days post-ship)
+- Optional: `/account` amount-adjust button that opens Stripe portal directly
+- Optional: "You've supported for X months, thanks!" badge on profile
+- Optional: extract `<PWYWForm />` into a shared component if inlined during T5/T6
+- Long-term: rip out `STRIPE_LINKS` and `TIERS` object once grandfathered subs churn out
 
 ---
 
 ## Rollback Cheat Sheet
 
-**One commit went bad:** `git revert <commit-sha> && git push && ./deploy.sh`
-
+**One commit went bad:** `git revert <sha> && git push && ./deploy.sh`
 **Whole deploy went bad:** `vercel rollback --yes` (30 seconds)
-
-**Whole pivot went bad:** `git revert <task-1-sha>..<task-8-sha> --no-edit && git push && ./deploy.sh` (4 minutes)
-
-**Nuclear option:** `git reset --hard <pre-pivot-sha> && git push --force` — DO NOT USE without Mike's explicit word.
+**Whole pivot went bad:** `git revert <t1-sha>..<t7-sha> && git push && ./deploy.sh` (4 minutes)
+**DB migration went bad:** column is non-destructive (nullable, additive). Only rollback the CHECK constraint if it blocks legitimate writes.
 
 ---
 
-## Plan Summary
+## Plan complete. Saved to `docs/plans/2026-08-16-mystation-pwyw-phase-1-implementation.md`.
 
-| Task                          | Owner                 | Effort                                           | Blocking                  |
-| ----------------------------- | --------------------- | ------------------------------------------------ | ------------------------- |
-| 1. Flip isSubscribed default  | Claude                | 5 min                                            | —                         |
-| 2. Redirect /password         | Claude                | 5 min                                            | Task 1                    |
-| 3. Rewrite /subscribe         | Claude                | 10 min                                           | Task 1                    |
-| 4. Rewrite /premium           | Claude                | 10 min                                           | Task 1                    |
-| 5. Hide Navbar Subscribe CTAs | Claude                | 10 min                                           | Task 1                    |
-| 6. Update hero copy           | Claude                | 10 min                                           | Task 1                    |
-| 7. Update metadata            | Claude                | 5 min                                            | Task 1                    |
-| 8. Add 410 guard              | Claude                | 5 min                                            | Task 1                    |
-| 9. Local verification         | Claude                | 10 min                                           | Tasks 1-8                 |
-| 10. Push + deploy             | Claude + Mike         | 5 min ship + 3-7 min build                       | Task 9 green              |
-| 11. Live verification         | Claude                | 20 min                                           | Task 10                   |
-| 12. Rollback (if needed)      | Claude                | 30 sec to 4 min                                  | —                         |
-| 13. Founding Supporter email  | Claude + Mike approve | 20 min                                           | 48h monitor after Task 11 |
-| **TOTAL implementation**      |                       | **~2 hrs code + 25 min verify + 3-7 min deploy** |                           |
-
----
-
-## Plan complete and saved to `docs/plans/2026-08-16-mystation-pwyw-phase-1-implementation.md`.
-
-Two execution options:
-
-**1. Subagent-Driven (this session)** — I dispatch fresh subagent per task, review between tasks, fast iteration. Fits well because tasks are short (5-10 min each) and independent enough that a fresh subagent can execute one without needing the full prior context.
-
-**2. Parallel Session (separate)** — Open new session in a worktree with the executing-plans skill, batch execution with checkpoints. Better if you want to walk away and come back to results, or if you want a clean context specifically for the build.
-
-**Which approach?**
+Ready for execution once Mike approves the v2 design + this v2 plan.

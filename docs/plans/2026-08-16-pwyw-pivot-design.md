@@ -1,632 +1,483 @@
-# MyStation PWYW Pivot — Design Document
+# MyStation PWYW Pivot — Design Document (v2, CORRECTED)
 
 **Date:** 2026-08-16
 **Author:** CHANDLA, with Mike Page
-**Status:** Approved — ready for implementation planning
-**Model reference:** Even.com (pay-what-you-want music platform)
+**Status:** Approved (v2 corrected) — ready for implementation planning
+**Model reference:** Even.com (name-your-price music pricing)
 **Anchor:** LOTL Day 2026-09-05 (20 days out from design date)
 
 ---
 
-## Origin
+## Origin + Correction Trail
 
-Mike Page's direct instruction (2026-08-16):
+**Mike's first instruction (2026-08-16 morning):**
 
-> "site is free for all pay what you want
-> thats how i want it it like even.com kinda"
+> "site is free for all pay what you want thats how i want it it like even.com kinda"
 
-Follow-up on grandfathered subs:
+CHANDLA misinterpreted this as "rip out the paywall + add a tip jar." Built a full design + implementation plan under that assumption. Started executing, shipped 5 local commits (never pushed).
 
-> "people thats paying can stay paying if they want to not pay we will not cut them out, or take them off."
+**Mike's correction (2026-08-16 evening):**
 
-This document captures the full design agreed between Mike and CHANDLA on Aug 16, 2026, ready to feed into an implementation plan.
+> "i want my layout the same i was just saying prices like even.com"
+
+The actual pivot: **keep the layout the same, only change the pricing mechanic to pay-what-you-want**. All 5 wrong-direction commits reverted in `f70bce7` (local only, zero prod impact). This v2 design captures the real intent.
+
+**Follow-up decisions confirmed (2026-08-16 evening):**
+
+- Content stays gated (Vault etc. — same paywall UX as today)
+- Suggested $4.99/mo on `/subscribe`, $14.99/mo on `/premium` (matches current tier prices — preserves grandfathered psychology)
+- Minimum $1/mo
+- Recurring monthly subscription at the fan's chosen amount
+- Existing subs keep charging on their current price (grandfathered)
+- `/premium` stays as a distinct page with higher suggested amount
 
 ---
 
-## The Twelve Decisions
+## The Model in One Sentence
 
-| #   | Decision                                                                            | Rationale                                         |
-| --- | ----------------------------------------------------------------------------------- | ------------------------------------------------- |
-| 1   | **Model:** Even.com-style pay-what-you-want                                         | Mike's exact word                                 |
-| 2   | **Money route:** MyStation LLC Stripe (`acct_1T1jP1R0BloCNd9r`)                     | Same account as merch. Zero new Stripe infra.     |
-| 3   | **Content gating:** Truly everything free (Vault included, Spotify search included) | Pure Even.com. No half-measures.                  |
-| 4   | **Existing subs:** Grandfather in, no force-cancel, no refund                       | Mike's word: "not cut them out, or take them off" |
-| 5   | **Timing:** Phased — free access before LOTL, tip flow after                        | Zero LOTL risk, two press moments                 |
-| 6   | **Approach:** Surgical patch — flip enforcement points, keep code                   | Reversible per-commit, grandfather-safe           |
-| 7   | **Suggested tip amounts:** $3 / $7 / $21 / Any (min $1)                             | Bimodal casual/superfan pattern                   |
-| 8   | **Supporter badge (any tipper):** Yes, visible but non-gating                       | Recognition without violating "free for all"      |
-| 9   | **Founding Supporter badge (grandfathered sub):** Yes, permanent, visually distinct | Honors the people who paid when it mattered       |
-| 10  | **New subs after Phase 1:** Blocked (`410 Gone` on subscription checkout)           | Prevents rogue signups after pivot                |
-| 11  | **MPF donation pipeline:** Untouched (iron-locked)                                  | Standing iron lock                                |
-| 12  | **Merch + LOTL tickets:** Real prices, unchanged                                    | Physical goods can't be PWYW                      |
+Everything on MyStation stays exactly the same — layout, gating, Subscribe button, `/subscribe` page, `/premium` page, Subscribe modal — **except the fan now picks their own monthly amount** instead of choosing between fixed $4.99 / $9.99 / $14.99 tiers.
+
+## Ten Decisions
+
+| #   | Decision                                                                     | Rationale                                                                    |
+| --- | ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| 1   | **Model:** Name-your-price monthly subscription                              | Even.com PRICING pattern (not their content-free model)                      |
+| 2   | **Layout:** unchanged everywhere                                             | Mike's explicit correction: "i want my layout the same"                      |
+| 3   | **Content gating:** unchanged (Vault etc. stays gated behind `isSubscribed`) | Mike confirmed via clarifying Q1                                             |
+| 4   | **Suggested amounts:** $4.99/mo on `/subscribe`, $14.99/mo on `/premium`     | Preserves grandfathered psychology, keeps distinct upsell page               |
+| 5   | **Minimum:** $1/mo                                                           | Fair floor, blocks $0 abuse, matches Even.com/Bandcamp defaults              |
+| 6   | **Maximum:** $999/mo                                                         | Sanity ceiling (client + server validation)                                  |
+| 7   | **Recurrence:** monthly recurring                                            | Same as today's subs; MRR-preserving; grandfather-compatible                 |
+| 8   | **Existing subs:** untouched, keep charging at current price                 | Grandfather-safe; no forced migration                                        |
+| 9   | **Money route:** MyStation LLC Stripe (`acct_1T1jP1R0BloCNd9r`)              | Same as today; no new Stripe infra                                           |
+| 10  | **New sub tier assignment:** all new PWYW subs get `tier = 'supporter'`      | Simplifies tier logic; `monthly_amount_cents` column carries the real signal |
 
 ---
 
 ## Architecture Overview
 
-MyStation becomes two things stapled together:
-
 ```
-┌─────────────────────────────────────────────────────┐
-│  FREE ACCESS LAYER (Phase 1 — this week)           │
-│  Every stream, video, playlist, vault, search      │
-│  → isGated() returns false universally              │
-│  → isSubscribed check returns true for content unlock│
-│  → No login required to listen                     │
-└─────────────────────────────────────────────────────┘
-                       +
-┌─────────────────────────────────────────────────────┐
-│  TIP LAYER (Phase 2 — post-LOTL)                    │
-│  "Support the artist" button on song/artist/home   │
-│  → Stripe Checkout (MyStation LLC — reuses acct)   │
-│  → tips table logs every payment                   │
-│  → Optional "Supporter" badge in profile           │
-│  → No gated content behind it (pure gratitude)     │
-└─────────────────────────────────────────────────────┘
-
-  Untouched forever:
-  ┌─ Merch checkout (real prices) ─┐
-  ┌─ LOTL tickets (real prices) ───┐
-  ┌─ MPF donation pipeline (iron)  ─┐
-  └─ Existing subscribers (grandfather) ─┘
+┌─────────────────────────────────────────────────────────────┐
+│  LAYOUT (unchanged)                                          │
+│    Navbar Subscribe button                                   │
+│    /subscribe page (403 lines of design stay)                │
+│    /premium page (117 lines of design stay)                  │
+│    SubscribeModal (382 lines — layout stays)                 │
+│    /vault, gated content, isSubscribed checks — all same    │
+└─────────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│  PWYW SWAP (the only real change)                            │
+│  Inside the modal / subscribe page / premium page:           │
+│                                                              │
+│  BEFORE:  [Regular $4.99] [Premium $9.99] [Diamond $14.99]  │
+│                                                              │
+│  AFTER:   Choose your monthly support:                       │
+│           [$3] [$5] [$10] [$25] [Custom: $__]                │
+│           Suggested: $4.99 (or $14.99 on /premium)           │
+│           Minimum $1/mo                                      │
+│                                                              │
+│  Fan hits Subscribe → Stripe Checkout in subscription mode  │
+│  with dynamic price_data.unit_amount = chosen amount        │
+└─────────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│  BACKEND (small changes)                                     │
+│  /api/subscription/checkout: accepts amount_cents param,     │
+│    replaces priceIdFor() call with inline price_data         │
+│  /api/stripe/webhook: stores amount in new column            │
+│    subscribers.monthly_amount_cents                          │
+│  DB migration: add column + backfill grandfathered subs      │
+│    (premium = 499, diamond = 1499, other = null)             │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 **Two Stripe accounts total** (both already exist, no new ones):
 
-- **MyStation LLC** `acct_1T1jP1R0BloCNd9r` → grandfathered subs + merch + tips
+- **MyStation LLC** `acct_1T1jP1R0BloCNd9r` → all subscriptions (grandfathered + new PWYW) + merch
 - **MPF Foundation** (iron-locked) → nonprofit donations only, untouched
 
-**Key architectural decision:** we do NOT touch the `subscribers` table or the Stripe webhook subscription-event logic. Existing paying subscribers keep their `mystation-sub` cookie, `isSubscribed=true`, everything they had. We just make that same experience the default for everyone. New signups after Phase 1 skip the subscribe flow entirely.
+---
+
+## Files That Change
+
+### Frontend (3 files)
+
+| File                                | Change                                                                                                                                                                                     |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `src/components/SubscribeModal.jsx` | Replace tier-card selector with PWYW input (preset chips + custom amount + "Continue" button). Keep header, close button, footer copy, "Founding Supporter" grandfather note, all styling. |
+| `src/app/subscribe/page.jsx`        | Same swap: tier ladder → PWYW input. Default suggested $4.99. Everything else (hero, testimonials, footer) stays.                                                                          |
+| `src/app/premium/page.jsx`          | Same swap. Default suggested $14.99. Different anchor, same mechanic.                                                                                                                      |
+
+### Backend (2 files)
+
+| File                                         | Change                                                                                                                                                                                                                                                                                                   |
+| -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/app/api/subscription/checkout/route.js` | Accept `{ email, amount_cents }` instead of `{ email, tier, commitment_agreed }`. Validate: `100 <= amount_cents <= 99900`. Use Stripe `price_data.unit_amount` inline instead of `priceIdFor(tier)`. Drop the 6-month commitment gate (PWYW = fan-choice, no commitment).                               |
+| `src/app/api/stripe/webhook/route.js`        | On `checkout.session.completed` with `metadata.type = 'subscription'`, extract `amount_cents` from `session.metadata` OR from `session.amount_subtotal`, store in `subscribers.monthly_amount_cents`. Also handle `customer.subscription.updated` to sync amount changes (fan-initiated portal updates). |
+
+### DB (1 migration)
+
+| File                                                   | Change                                                                                                                                                                                                                              |
+| ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `migrations/2026-08-16-subscribers-monthly-amount.sql` | `ALTER TABLE subscribers ADD COLUMN monthly_amount_cents integer;` + backfill: `UPDATE subscribers SET monthly_amount_cents = 499 WHERE tier = 'premium';` and `= 1499 WHERE tier = 'diamond';` and `= 999 WHERE tier = 'creator';` |
+
+### Polish (1 file, optional)
+
+| File                       | Change                                                                            |
+| -------------------------- | --------------------------------------------------------------------------------- |
+| `src/app/account/page.jsx` | Display "You support at $X/mo" using the new column. Nice-to-have — not blocking. |
+
+**Total: 6 files. Estimated ~4 hours implementation + verify + deploy.**
 
 ---
 
-## Phase 1 — Free Access (Aug 16–22, ~2 hours of work)
+## What Explicitly DOESN'T Change
 
-**Goal:** by end of week, any visitor lands on mystationlive.com and can stream anything without a login, gate, or modal. Existing subs stay whole. Zero data changes.
-
-### 7 changes, one commit per change
-
-**Change 1 — Flip `isGated()` to always return false**
-
-- File: `src/store/playerStore.js`
-- Change: `export function isGated(track) { return false; }`
-- Blast radius: used in 5 files (page.jsx, MusicPageClient, playlists, search) — all instantly become free-access.
-
-**Change 2 — Auto-satisfy `isSubscribed` in playerStore default state**
-
-- File: `src/store/playerStore.js` — `useUserStore` default
-- Change: `isSubscribed: true` (default = full access; grandfathered subs still get their own true from auth flow)
-- Why: paywall enforcement uses `if (isSubscribed || vaultUnlocked)`. Flipping default = free access without ripping out the conditionals.
-
-**Change 3 — Redirect `/password` → `/`**
-
-- File: `src/app/password/page.jsx`
-- Change: replace body with `redirect('/')` from `next/navigation`
-- Result: anyone hitting the old "Coming Soon" gate lands on the real homepage.
-
-**Change 4 — Rewrite `/subscribe` as Phase 2 placeholder**
-
-- File: `src/app/subscribe/page.jsx`
-- New copy: "MyStation is now free — no subscription needed. Support your favorite artists directly on any song page."
-- Existing subs: unaffected (their subscribers row + cookies stay).
-
-**Change 5 — Same for `/premium`**
-
-- File: `src/app/premium/page.jsx`
-- Same rewrite pattern. Route to `/music`.
-
-**Change 6 — Hide "Subscribe" CTAs in Navbar + homepage + Hero**
-
-- Files: `src/components/Navbar.jsx`, `src/app/page.jsx`, any `SubscribeModal` triggers
-- Change: delete or comment out subscribe nav items, upgrade CTAs, "Go Premium" ribbons
-- Keep: `SubscribeModal` component itself (may still fire for grandfathered subs in edge cases).
-
-**Change 7 — Update homepage hero copy + `layout.jsx` meta description**
-
-- Files: `src/app/page.jsx` (hero), `src/app/layout.jsx` (SEO meta)
-- New hero: **"Stream all of IDMG's music free. Support what you love."**
-- Meta description: lead with "Free streaming" instead of paywall-adjacent phrasing.
-
-### Grandfather guard (defensive)
-
-Add to `src/app/api/subscription/checkout/route.js`:
-
-```javascript
-// Refuse new subs. Grandfathered subs manage via Stripe portal.
-return NextResponse.json(
-  { error: "MyStation is now free — no subscription needed." },
-  { status: 410 },
-);
-```
-
-Result: existing subs keep renewing (Stripe handles that server-to-server, not via our API). New signups get `410 Gone`. Zero risk of a rogue signup after the pivot.
-
-### Phase 1 impact summary
-
-| Metric                 | Before                  | After Phase 1                              |
-| ---------------------- | ----------------------- | ------------------------------------------ |
-| New-visitor experience | Gated / paywall / modal | Instant free access                        |
-| Existing subs          | Full access             | Full access (unchanged)                    |
-| Grandfathered charges  | Continue                | Continue                                   |
-| Stripe webhook logic   | Live                    | Live (untouched)                           |
-| `subscribers` table    | Live                    | Live (untouched)                           |
-| Files modified         | —                       | 5 pages + 1 store + 1 layout + 1 API route |
-| New DB migrations      | —                       | 0                                          |
-| New env vars           | —                       | 0                                          |
-| Rollback               | —                       | `git revert <commit>` — instant            |
+- Navbar Subscribe button — stays visible for non-subscribers
+- `isGated()` / `isSubscribed` / `FREE_PLAY_MODE` — all untouched
+- Vault gating — still requires `isSubscribed = true`
+- `/password` gate — untouched (was decorative anyway; not related to PWYW)
+- Any existing subscriber's charges — unaffected
+- `TIERS` object in `src/lib/tiers.js` — kept for backward compat (grandfathered rows still reference it)
+- `priceIdFor()` function — kept but no longer called from the checkout route (only used for legacy grandfathered lookups if needed)
+- Existing Stripe Price IDs (`STRIPE_PRICE_PREMIUM`, `STRIPE_PRICE_CREATOR`) — stay in env, kept for grandfather safety
+- MPF donation pipeline — iron locked, never touched
+- Merch checkout, LOTL ticketing — unaffected
 
 ---
 
-## Phase 2 — Tip Flow (Sept 8–15, ~5 hours of work)
-
-**Goal:** Even.com-style "tip the artist" flow. One-tap for suggested amount, free-form for custom, optional message, no login required.
-
-### Tip button placement
-
-Where the button appears:
-
-- **Song page** (`/song/[id]`) — prominent below the play controls: `♥ Support The Cubist`
-- **Artist page** (`/artist/[slug]`) — top-right of artist header: `♥ Support This Artist`
-- **Mini-player** (persistent bottom bar) — icon-only heart button next to currently playing track
-- **Homepage hero** — soft callout: `Love what you hear? Support the movement →`
-- **Album pages** — one button below the album title, tips attribute to the album's primary artist
-
-### The Tip Modal (`<TipModal>` component)
+## PWYW Modal UX (the actual visual change)
 
 ```
+Current:
 ┌──────────────────────────────────────────┐
-│                                    ✕     │
-│    Support The Cubist                   │
-│    ─────────────────────                │
+│  Choose your support level               │
 │                                          │
-│    Choose an amount                     │
-│    ┌────┐  ┌────┐  ┌────┐  ┌─────┐    │
-│    │ $3 │  │ $7 │  │$21 │  │ Any │    │
-│    └────┘  └────┘  └────┘  └─────┘    │
+│  [ REGULAR    ]  [ PREMIUM  ]  [DIAMOND] │
+│  $4.99/mo        $9.99/mo      $14.99/mo │
 │                                          │
-│    Message (optional)                   │
-│    ┌────────────────────────────────┐  │
-│    │ this song saved my life...     │  │
-│    └────────────────────────────────┘  │
+│    [Start Free Trial, $9.99/mo after]   │
+└──────────────────────────────────────────┘
+
+After PWYW:
+┌──────────────────────────────────────────┐
+│  Support MyStation                       │
 │                                          │
-│    Email (for receipt only)            │
-│    ┌────────────────────────────────┐  │
-│    │ you@email.com                   │  │
-│    └────────────────────────────────┘  │
+│  Pay what you want, monthly:             │
 │                                          │
-│    ┌──────────────────────────────┐   │
-│    │  Support with Apple Pay ─────│   │
-│    └──────────────────────────────┘   │
-│    or continue with card                │
+│  [ $3 ] [ $5 ] [ $10 ] [ $25 ] [Custom] │
 │                                          │
-│    100% goes to the artist. No fees    │
-│    charged to you.                     │
+│  Amount:  $[  5.00  ] / month           │
+│                                          │
+│  Suggested: $4.99/mo · Min $1/mo         │
+│                                          │
+│    [ Continue to Checkout ]              │
+│                                          │
+│  Already supporting? You're a Founding   │
+│  Supporter — nothing changes for you.    │
 └──────────────────────────────────────────┘
 ```
 
 **Design rules:**
 
-- Suggested amounts: $3 / $7 / $21 / Any (custom min $1)
-- No signup required. Email captured at Stripe Checkout only (for receipt).
-- Message field stored with the tip — Mike / artist can see fan love in the admin cockpit.
-- Apple Pay / Google Pay / Link enabled by default (Stripe Payment Element).
-- Mobile: full-screen bottom sheet, not centered modal.
+- 5 preset chips: $3, $5, $10, $25, Custom
+- Selecting a chip fills the amount input
+- Custom lets fan type any amount (bounded $1–$999)
+- Suggested amount defaults to $4.99 on `/subscribe`, $14.99 on `/premium`, `$5` on generic modal invocation
+- No 6-month commitment (PWYW = fan-choice, they can cancel any time via Stripe portal)
+- Keep the "Founding Supporter" grandfather note visible at the bottom
 
-### Stripe route (`/api/tip/create-session/route.js`)
+---
 
-Pattern: copy from `src/app/api/podstation/donate/route.js` (already working).
+## Backend Contract
+
+### `POST /api/subscription/checkout`
+
+**Before:**
 
 ```javascript
-// POST /api/tip/create-session
-// Body: { songId?, artistSlug?, amount, message?, email? }
+{ tier: 'premium', email: 'a@b.com', commitment_agreed: true }
+```
 
+**After:**
+
+```javascript
+{ email: 'a@b.com', amount_cents: 500 }
+```
+
+Validation:
+
+- `email` required, must contain `@`
+- `amount_cents` required, integer, `100 <= amount_cents <= 99900`
+- No `commitment_agreed` — PWYW subs have no commitment, cancellable anytime
+
+Response: unchanged (Stripe Checkout Session URL).
+
+### Stripe Session Config
+
+```javascript
 const session = await stripe.checkout.sessions.create({
-  mode: "payment", // one-time, not subscription
-  payment_method_types: ["card"], // Apple/Google Pay auto-enabled at dashboard level
+  mode: "subscription",
+  customer_email: email,
   line_items: [
     {
       price_data: {
         currency: "usd",
         product_data: {
-          name: `Tip for ${artistName}${songTitle ? ` — "${songTitle}"` : ""}`,
+          name: "MyStation Supporter",
+          description:
+            "Monthly support for IDMG artists and Mike Page Foundation programs.",
         },
-        unit_amount: amount * 100, // cents
+        unit_amount: amount_cents,
+        recurring: { interval: "month" },
       },
       quantity: 1,
     },
   ],
   metadata: {
-    type: "tip",
-    songId: songId || "",
-    artistSlug: artistSlug || "",
-    message: message?.slice(0, 500) || "",
+    type: "subscription",
+    tier: "supporter",
+    amount_cents: String(amount_cents),
   },
-  success_url: `${APP_URL}/tip/thank-you?session_id={CHECKOUT_SESSION_ID}`,
-  cancel_url: `${APP_URL}${cancelPath}`,
+  success_url: `${APP_URL}/subscribe/success?session_id={CHECKOUT_SESSION_ID}`,
+  cancel_url: `${APP_URL}/subscribe`,
 });
 ```
 
-- **Auth:** public (no login required per Even.com model)
-- **Rate limit:** 10 tips/hour per IP (prevents spam)
-- **Idempotency:** Stripe session ID uniqueness (webhook handles dupes)
+### Webhook Handler Extension
 
-### Stripe webhook handler (extends existing)
-
-Add a new event branch in `api/stripe/webhook/route.js`:
+In `handleSubscriptionCheckout()` (existing function), extract the amount:
 
 ```javascript
-case 'checkout.session.completed':
-  if (session.metadata?.type === 'tip') {
-    await handleTipCompleted(session);
-    break;
-  }
-  // ... existing merch + sub handlers stay untouched
+const amountCents =
+  session.amount_subtotal ??
+  parseInt(session.metadata?.amount_cents || "0", 10) ??
+  null;
+
+await supabase.from("subscribers").upsert({
+  email: customerEmail,
+  stripe_customer_id: session.customer,
+  stripe_subscription_id: session.subscription,
+  tier: "supporter",
+  status: "active",
+  monthly_amount_cents: amountCents, // NEW column
+  // ... existing fields untouched
+});
 ```
 
-`handleTipCompleted()`:
+Also handle `customer.subscription.updated` (fan changed amount via Stripe portal):
 
-1. Insert row into `tips` table
-2. Send confirmation email via Resend (thank you + optional receipt PDF later)
-3. Send admin alert to `mystationlive@gmail.com`: `[TIP $21] Anonymous → The Cubist — "this song saved my life"`
-4. If email present + not already in `subscribers` table, add as supporter
+```javascript
+if (event.type === "customer.subscription.updated") {
+  const newAmountCents =
+    event.data.object.items.data[0]?.price?.unit_amount ?? null;
+  if (newAmountCents !== null) {
+    await supabase
+      .from("subscribers")
+      .update({ monthly_amount_cents: newAmountCents })
+      .eq("stripe_subscription_id", event.data.object.id);
+  }
+}
+```
 
-### `tips` table schema
+### DB Migration
 
 ```sql
-CREATE TABLE public.tips (
-  id                  bigserial PRIMARY KEY,
-  stripe_session_id   text UNIQUE NOT NULL,       -- idempotency
-  amount_cents        integer NOT NULL CHECK (amount_cents >= 100),
-  currency            text NOT NULL DEFAULT 'usd',
-  song_id             text,                       -- nullable (artist-level tips)
-  artist_slug         text,                       -- nullable (song tip has both)
-  supporter_email     text,                       -- nullable (Stripe-provided)
-  message             text,                       -- nullable, max 500 chars
-  created_at          timestamptz NOT NULL DEFAULT now()
-);
+-- 2026-08-16-subscribers-monthly-amount.sql
+ALTER TABLE public.subscribers
+  ADD COLUMN IF NOT EXISTS monthly_amount_cents integer;
 
-CREATE INDEX idx_tips_artist_slug ON public.tips(artist_slug);
-CREATE INDEX idx_tips_supporter_email ON public.tips(supporter_email);
-CREATE INDEX idx_tips_created_at ON public.tips(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_subscribers_monthly_amount
+  ON public.subscribers(monthly_amount_cents);
 
-ALTER TABLE public.tips ENABLE ROW LEVEL SECURITY;
--- No public policies. Admin dashboard reads via service role.
+-- Backfill grandfathered subs based on their existing tier.
+UPDATE public.subscribers SET monthly_amount_cents = 499  WHERE tier = 'premium'  AND monthly_amount_cents IS NULL;
+UPDATE public.subscribers SET monthly_amount_cents = 999  WHERE tier = 'creator'  AND monthly_amount_cents IS NULL;
+UPDATE public.subscribers SET monthly_amount_cents = 1499 WHERE tier = 'diamond'  AND monthly_amount_cents IS NULL;
+
+-- Add CHECK constraint for future writes (min $1, max $999).
+ALTER TABLE public.subscribers
+  ADD CONSTRAINT subscribers_monthly_amount_cents_range
+  CHECK (monthly_amount_cents IS NULL OR (monthly_amount_cents >= 100 AND monthly_amount_cents <= 99900));
 ```
-
-**File location:** `migrations/2026-09-XX-tips-table.sql` (per ARC20 Law 3 — schema of record in repo)
-
-### Supporter badge
-
-Derived from `EXISTS (SELECT 1 FROM tips WHERE supporter_email = subscribers.email)`. No new column needed.
-
-Where it shows:
-
-- Fan wall posts (small badge next to name)
-- Admin fan list (visual indicator)
-- **NOT** used to unlock content
-
-### Post-tip thank you page
-
-Route: `/tip/thank-you?session_id=cs_xxx`
-
-- Fetches session from Stripe: `Thank you! Your $21 tip went to The Cubist.`
-- Confetti animation (existing `canvas-confetti` dep)
-- CTA: `Share your favorite track →` (social share)
-- Optional: `Get updates from IDMG artists (opt-in email capture)`
-
-### Phase 2 effort summary
-
-| Piece                           | Files                                  | Effort  |
-| ------------------------------- | -------------------------------------- | ------- |
-| `<TipModal>` component          | new: `src/components/TipModal.jsx`     | 1.5h    |
-| Tip button placements           | song/artist/album/mini-player/homepage | 1h      |
-| `/api/tip/create-session` route | new file, copy from podstation pattern | 30min   |
-| Webhook `handleTipCompleted`    | extend `api/stripe/webhook/route.js`   | 45min   |
-| `tips` DB migration             | new SQL file + apply to prod           | 20min   |
-| `/tip/thank-you` page           | new file                               | 30min   |
-| Supporter badge (virtual field) | admin fan query update                 | 20min   |
-| Copy + design polish            | across all touched files               | 45min   |
-| **TOTAL**                       |                                        | **~5h** |
-
-### Phase 2 explicit exclusions
-
-- Recurring tips (Patreon-style — different model, out of Even.com scope)
-- Multi-artist tip splits (all tips go to single artist per song)
-- Physical thank-you cards / merch rewards (Kickstarter-style, out of scope)
-- Anonymous browsing of who tipped what (privacy default = private)
 
 ---
 
-## Grandfather Migration
+## Grandfather Behavior
 
-### What existing subs SEE after Phase 1
+| Scenario                            | Behavior                                                                                        |
+| ----------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Existing sub, does nothing          | Keeps paying at old fixed price ($4.99 or $14.99). `monthly_amount_cents` backfilled from tier. |
+| Existing sub visits `/account`      | Sees "You support at $4.99/mo" (or whatever their tier maps to)                                 |
+| Existing sub wants to change amount | Uses Stripe Customer Portal → adjust subscription → webhook updates `monthly_amount_cents`      |
+| Existing sub cancels                | Stripe portal → cancel at period end → existing webhook handler runs                            |
+| New visitor after PWYW ships        | Hits Subscribe modal → picks amount → charges monthly at that amount                            |
+| Fan wants to increase support       | Cancels + re-subscribes at new amount, OR uses Stripe portal (either works)                     |
 
-- Homepage / any page: no visible change (they had free access, everyone does now)
-- `/account`:
-
-  Before:
-
-  ```
-  Your Plan: Diamond
-  Next charge: $14.99 · Nov 15, 2026
-  [Manage subscription]
-  ```
-
-  After Phase 1:
-
-  ```
-  ✨ FOUNDING SUPPORTER
-  Thank you for supporting us early. MyStation is now free for everyone —
-  your $14.99/mo continues funding the music.
-  Next charge: $14.99 · Nov 15
-  [Manage subscription →]
-  ```
-
-**Key UX rule:** never trigger SubscribeModal on a grandfathered sub. They already paid — no upsell.
-
-### The cancel path (self-serve, Stripe-native)
-
-"Manage subscription" button → Stripe Customer Portal (already implemented in `src/app/api/subscription/portal/route.js`).
-
-- Fan lands on Stripe-hosted portal
-- Update card, download invoices, cancel anytime
-- Cancel = subscription runs until end of period, then stops
-- On final period end, existing webhook (`customer.subscription.deleted`) fires → `subscribers.status = 'cancelled'`
-- After cancellation: content access unchanged (everything is free)
-
-### What DOESN'T happen (explicitly)
-
-- ❌ Auto-cancel anyone's subscription
-- ❌ Auto-refund
-- ❌ Change the `subscribers` table schema
-- ❌ Modify Stripe webhook subscription handlers (except adding tip branch)
-- ❌ Delete SubscribeModal component (may still render for grandfathered edge cases)
-- ❌ Hide their Stripe subscription from them
-
-### Communication email (opt-in, sent ~24h post-Phase-1)
-
-- **From:** `hello@mystationlive.com`
-- **To:** every row in `subscribers` with `status='active'`
-- **Subject:** `You made MyStation free 🙏`
-- **Body:**
-  > Hey [name],
-  >
-  > Something changed. MyStation is now free for everyone — every song, every video, no paywall.
-  >
-  > You were paying $[X.XX]/mo when we needed you most. That's why we could do this. You're a Founding Supporter forever. Your badge is live on your profile.
-  >
-  > **What happens now?** Your subscription keeps going as long as you want it to. Nothing changes for you. If you'd rather stop supporting monthly, [click here to manage your subscription] and cancel anytime. No hurt feelings — you already built this.
-  >
-  > Either way, thank you.
-  >
-  > — Mike
-
-**Tone rules:** gratitude, transparency, zero guilt, cancel path visible.
-
-### Grandfather summary
-
-| Scenario                                                              | Behavior                                                                        |
-| --------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| Existing sub, does nothing                                            | Keeps paying, keeps founding badge, gets everything free (like everyone)        |
-| Existing sub, wants to cancel                                         | Uses Stripe portal → cancels → keeps founding badge → keeps free access         |
-| Trial user mid-trial (Phase 1 day)                                    | Trial ends normally; if it converts they become a sub; if not they stay free    |
-| Someone who cancelled 3 months ago                                    | Still has founding badge, free access                                           |
-| Brand new visitor after Phase 1                                       | Zero friction, free access, no sub option shown, tip button available (Phase 2) |
-| Attacker POSTs directly to `/api/subscription/checkout` after Phase 1 | 410 Gone response, no session created                                           |
+**Nothing about the grandfathered experience changes.** Their price is locked to what they signed up for. Only NEW subs get the PWYW input.
 
 ---
 
 ## Testing & Verification
-
-MyStation has zero automated tests. Everything is manual + curl + browser. The 35-check verification plan below IS the test suite.
 
 ### Pre-push local gates
 
 ```bash
 cd ~/MikePageEmpire/apps/mystation
 
-# 1. Build cleanly — 0 errors
+# 1. Build cleanly
 npm run build 2>&1 | tail -5
 
-# 2. Grep for regression sentinels
-grep -rn "'Coming Soon'" src/app/password/
-grep -rn "return true.*// paywall\|track.gated" src/store/playerStore.js
+# 2. Regression sentinels — old tier logic still works
+grep -n "priceIdFor\|normalizeTier" src/lib/tiers.js
+# Expect: functions still exist (grandfather compat)
 
-# 3. Confirm no NEW subscription CTAs got missed
-grep -rn "Subscribe.*Diamond\|Subscribe.*Premium\|Upgrade to" src/components/Navbar.jsx src/app/page.jsx
+# 3. New checkout accepts amount_cents
+grep -n "amount_cents\|price_data" src/app/api/subscription/checkout/route.js
+# Expect: both present
 
-# 4. Confirm grandfather guard intact
-grep -n "410" src/app/api/subscription/checkout/route.js
+# 4. Modal has PWYW input
+grep -n "amount\|preset\|Pay what you want" src/components/SubscribeModal.jsx
+# Expect: multiple hits
 ```
 
 ### Post-deploy live verification
 
-HTTP status checks:
+HTTP status sweep — all pages still 200:
 
 ```bash
-for p in "/" "/music" "/merch" "/lotl" "/events/lotl-2026" "/community" \
-         "/subscribe" "/premium" "/password" "/account" "/api/trending" \
-         "/api/spotify/search?q=drake"; do
+for p in "/" "/music" "/merch" "/lotl" "/events/lotl-2026" \
+         "/subscribe" "/premium" "/password" "/account"; do
   STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://mystationlive.com${p}")
   printf "  %-38s %s\n" "$p" "$STATUS"
 done
 ```
 
-Expected:
-
-- `/password` → 307 or 308 (redirect to /)
-- `/subscribe`, `/premium` → 200 (rewritten placeholder pages)
-- All others → 200
-
-### Behavior checks (browser required)
-
-| #   | Test                                              | Expected                                        |
-| --- | ------------------------------------------------- | ----------------------------------------------- |
-| B1  | Open homepage in fresh incognito                  | Loads, no login gate, no "Coming Soon"          |
-| B2  | Click any song                                    | Plays immediately, no modal, no paywall         |
-| B3  | Navigate to `/music` in incognito                 | Full catalog visible, no upgrade CTA            |
-| B4  | Navigate to `/vault` in incognito                 | Vault accessible (per "truly everything free")  |
-| B5  | Navigate to `/search`, search "drake"             | Results appear (if Spotify API fix landed)      |
-| B6  | Navigate to `/password`                           | Redirects to `/`                                |
-| B7  | Navigate to `/subscribe`                          | Placeholder "MyStation is now free", no pricing |
-| B8  | Try POST to `/api/subscription/checkout` via curl | Returns 410 with friendly message               |
-
-### Grandfather sub check (real test account needed)
-
-| #   | Test                                            | Expected                                                  |
-| --- | ----------------------------------------------- | --------------------------------------------------------- |
-| G1  | Log in as known grandfathered sub               | `/account` shows "Founding Supporter" badge + next charge |
-| G2  | Click "Manage subscription"                     | Routes to Stripe Customer Portal                          |
-| G3  | View a song page                                | Same free-access experience as non-sub                    |
-| G4  | Stripe dashboard: verify their sub still active | Still charging on schedule                                |
-
-### Critical money paths (CANNOT break)
-
-| Path            | Test                                                              | Verification                                                 |
-| --------------- | ----------------------------------------------------------------- | ------------------------------------------------------------ |
-| Merch checkout  | Add a tee, complete checkout with test card `4242 4242 4242 4242` | Order in `merch_orders`, admin email, Printify order created |
-| LOTL ticket buy | Buy GA via `/events/lotl-2026` → MTL                              | Ticket in MTL, confirmation email                            |
-| MPF donation    | Verify link still works from any footer/nav                       | Iron-locked, do not touch                                    |
-
-**If any of these three break → rollback immediately.**
-
-### Rollback plan
+Verify the new checkout API contract:
 
 ```bash
-cd ~/MikePageEmpire/apps/mystation
+# Should return 400 for old tier-based call (deprecated schema)
+curl -sX POST https://mystationlive.com/api/subscription/checkout \
+  -H "Content-Type: application/json" \
+  -d '{"tier":"premium","email":"test@test.com","commitment_agreed":true}' \
+  -w "\nHTTP %{http_code}\n"
+# Expect: 400 "Missing amount_cents" or similar (or 200 if you kept backward-compat — see plan)
 
-# Instant rollback (Vercel)
+# Should return 200 with Stripe Checkout URL for new schema
+curl -sX POST https://mystationlive.com/api/subscription/checkout \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@test.com","amount_cents":500}' \
+  -w "\nHTTP %{http_code}\n"
+# Expect: 200 + { url: "https://checkout.stripe.com/..." }
+```
+
+Browser E2E:
+
+1. Open `/subscribe` in incognito → see PWYW form with $4.99 suggested
+2. Enter email + $7 → hit Continue → land on Stripe Checkout → verify amount is $7/month
+3. Use test card `4242 4242 4242 4242` → complete → land on success page
+4. Verify DB: new row in `subscribers` with `monthly_amount_cents = 700`
+5. Verify Stripe: subscription active at $7/mo
+6. Visit `/vault` in that session → content unlocked (isSubscribed=true from webhook)
+
+### Rollback
+
+```bash
+# Instant Vercel rollback
 vercel rollback --yes
 
-# Verify pre-pivot behavior returns
-for p in "/" "/subscribe" "/password"; do
-  curl -s -o /dev/null -w "%{http_code} $p\n" "https://mystationlive.com${p}"
-done
-
-# If needed: git revert + redeploy
-git revert <phase-1-commit-sha> --no-edit
+# Or git revert the pivot commit(s)
+git revert <pwyw-commit-sha>
 git push origin main
 ./deploy.sh
 ```
 
-**Time to rollback:** ~30 seconds (Vercel) or ~4 minutes (git revert + redeploy).
+Time to rollback: ~30 seconds (Vercel) or ~4 minutes (git + redeploy).
 
 ---
 
 ## Timeline
 
-Anchor: today = Aug 16, 2026 (Sat). LOTL = Sept 5, 2026 (Sat). 20 days out.
+Because scope is small (~4 hours vs original 35-day two-phase plan):
 
 ```
-Aug 16 (Sat) ─── Design doc committed
-Aug 17-18 ────── Implementation (7 commits)
-Aug 19 ────────── Local test (35 checks)
-Aug 20 (Wed) ─── Deploy Phase 1 (business hours)
-Aug 20-22 ────── 48h monitor + Founding Supporter email
-Aug 23 – Sept 5 ❄️ LOTL FREEZE (no PWYW changes, only critical fixes)
-Sept 5 (Sat) ─── 🎉 LOTL DAY
-Sept 8 (Mon) ─── Post-LOTL retro
-Sept 9-10 ────── Phase 2 implementation
-Sept 11 ────────── Local test
-Sept 12 (Fri) ─── Deploy Phase 2
-Sept 12-14 ───── 48h monitor
-Sept 15 (Mon) ── "Even.com-style tip flow live" announcement
-Sept 20 ──────── First metrics review
+Aug 16 (Sat) — Design doc v2 committed (this file)
+Aug 16 (Sat) — Implementation plan v2 committed
+Aug 16 (Sat) — Section-by-section design approval from Mike
+Aug 17 (Sun) — Implementation (6 files, subagent-driven, one commit per change)
+Aug 17 (Sun) — Local verification + deploy
+Aug 17 (Sun) — Live E2E test with real test card
+Aug 18-19    — 48h monitor window (Stripe dashboard, support inbox)
+Aug 20+      — LOTL final prep (unrelated to PWYW)
 ```
 
-**Total elapsed: 35 days from today to full pivot live.**
+**Total elapsed: 1-2 days from design commit to live PWYW.**
 
 ---
 
-## Success Metrics (to review Sept 20)
+## Success Metrics (Sept 15 review)
 
-| Metric                    | Baseline             | 30-day target                                 |
-| ------------------------- | -------------------- | --------------------------------------------- |
-| New free signups / week   | ~0 (paywall blocked) | 50-200                                        |
-| Tip conversion rate       | 0 (no mechanic)      | 0.5-2% of song-page visitors                  |
-| Average tip amount        | —                    | $7-15 (bimodal $3 + $21+)                     |
-| Grandfathered sub churn   | ?                    | < 20% cancelled in first 30 days              |
-| Total monthly revenue     | Sub MRR              | Sub MRR (grandfather) + tip volume ≥ baseline |
-| Site sessions (Plausible) | —                    | +30-50%                                       |
-| Time-to-first-play        | —                    | Drops (no login step)                         |
+| Metric                  | Baseline                 | 30-day target                                    |
+| ----------------------- | ------------------------ | ------------------------------------------------ |
+| Average new-sub amount  | $4.99 (only tier picked) | $5-8 (bimodal: casual $3 + superfan $10+)        |
+| New signups per week    | X (measure)              | +30-50% (lower friction to enter)                |
+| Grandfathered sub churn | ?                        | <10% (nothing changes for them)                  |
+| Total MRR               | current                  | equal or higher (PWYW upside from superfans)     |
+| Support inbox confusion | ?                        | Minimal (layout unchanged = no visible surprise) |
 
 ---
 
-## Kill Criteria (when we roll back)
+## Kill Criteria (rollback triggers)
 
-If ANY of these happen in the 30 days post-Phase-1:
+- Stripe webhook fails on `checkout.session.completed` with new payload
+- New subs' Stripe subscription created at wrong amount
+- Backfill migration corrupts existing `subscribers` rows
+- Grandfathered sub sees their price change unexpectedly
+- Merch checkout or LOTL ticketing breaks (untouched but verify)
 
-- **> 30% grandfathered sub churn in first week** — messaging failed
-- **Merch or LOTL ticket revenue drops** — pivot cannibalized real-money paths
-- **Support inbox floods with confused/angry fans** — messaging too abrupt
-- **Live-site 5xx spike** — subtle regression in free-access flip
-
-**Rollback path:** `vercel rollback` + email Founding Supporters "we're taking a beat, everything reverts, more soon."
-
----
-
-## Files That Change
-
-### Phase 1 (Aug 16-22)
-
-- `src/store/playerStore.js` — `isGated()` returns false, `isSubscribed` default true
-- `src/app/password/page.jsx` — redirect to `/`
-- `src/app/subscribe/page.jsx` — placeholder copy
-- `src/app/premium/page.jsx` — placeholder copy
-- `src/components/Navbar.jsx` — hide Subscribe CTAs
-- `src/app/page.jsx` — hero copy update
-- `src/app/layout.jsx` — meta description update
-- `src/app/api/subscription/checkout/route.js` — 410 Gone for new signups
-- 7 commits total, one per change
-
-### Phase 2 (Sept 8-15)
-
-- NEW `src/components/TipModal.jsx`
-- NEW `src/app/api/tip/create-session/route.js`
-- NEW `src/app/tip/thank-you/page.jsx`
-- NEW `migrations/2026-09-XX-tips-table.sql`
-- `src/app/api/stripe/webhook/route.js` — extended with tip handler
-- `src/app/song/[id]/*` — tip button mount
-- `src/app/artist/[slug]/*` — tip button mount
-- Mini-player component — tip icon
-- Homepage hero — soft callout
+Any = `vercel rollback --yes` + investigate.
 
 ---
 
-## What Stays Untouched (Forever)
+## Open Questions (won't block ship)
 
-- MPF donation pipeline (iron locked)
-- Merch checkout + Printify/Printful webhook logic
-- LOTL ticketing (routes to MTL)
-- Stripe subscription webhook events (grandfathered subs keep renewing)
-- `subscribers` table schema
-- `AccountWall`, `SubscribeModal`, `ListenFreeModal` component files (may still render for grandfathered edge cases)
-
----
-
-## Open Questions (won't block Phase 1)
-
-1. **Internal tip distribution:** The tip modal promises "100% goes to the artist." How does MyStation LLC pay The Cubist his cut monthly? Manual payout? Stripe Connect? Post-LOTL problem.
-2. **Public tip leaderboard:** Does the world see "The Cubist earned $342 this month in tips"? Defaults to private. Can add public leaderboard later if it drives more support.
-3. **Recurring tips (Patreon-style):** Out of Phase 2 scope. If a superfan wants to auto-tip $10/mo, that's Phase 3.
-4. **Anonymous vs named tips:** Default private (fan email captured for receipt only). Opt-in for name visibility on artist pages.
-5. **Tax handling:** MyStation LLC receives tips as revenue (not tax-deductible for the fan since it's a for-profit LLC). Accountant call before Phase 2 ship — 1099-K reporting from Stripe?
-6. **Post-Phase-2 marketing:** How loud on the "MyStation is free" announcement? Press release? Blog post? Social campaign? SCARFACE agent territory.
-7. **Long-term subscription vestige cleanup:** In 6 months when ~90% of grandfathered subs have naturally churned, we can rip out SubscribeModal / AccountWall / subscription webhook events. Not urgent.
+1. **Should `/subscribe/success` page mention the exact amount?** Nice-to-have; can add later.
+2. **Auto-badge tiers based on amount?** E.g., $10+/mo shows "Diamond Supporter" badge. Not in v1 — everyone is just "Supporter."
+3. **Public leaderboard?** Not in v1 — privacy default.
+4. **Tax handling:** MyStation LLC receives PWYW subs same as before. No new 1099-K exposure since it's the same account. Accountant already knows the setup.
 
 ---
 
 ## Approval Trail
 
-- **Money route** (MyStation LLC): approved 2026-08-16
-- **Content gating** (truly everything free): approved 2026-08-16
-- **Timing** (phased, free access before LOTL): approved 2026-08-16
-- **Grandfather** (no force-cancel): Mike's direct instruction 2026-08-16
-- **Approach A** (surgical patch, not full rip): approved 2026-08-16
-- **Full 7-section design**: approved 2026-08-16, section by section
+- **Pricing model** (PWYW / name-your-price): Mike explicit clarification 2026-08-16 evening
+- **Layout unchanged**: Mike direct quote "i want my layout the same"
+- **Content gating stays**: confirmed via clarifying Q1
+- **Suggested $4.99 / $14.99 minimums $1**: confirmed via clarifying Q2
+- **Recurring monthly at chosen amount**: confirmed via clarifying Q3
+- **`/premium` kept distinct with $14.99 anchor**: confirmed via post-rollback Q2
+
+---
+
+## What This Doc Supersedes
+
+`docs/plans/2026-08-16-pwyw-pivot-design.md` v1 (committed as `c457cd5`) — described a full free-for-all + tip-jar model. **Wrong interpretation.** Left in git history for reference but does NOT reflect current intent.
+
+`docs/plans/2026-08-16-mystation-pwyw-phase-1-implementation.md` — the wrong-model implementation plan. Being rewritten in the next commit.
+
+Local commits reverted in `f70bce7`:
+
+- `2644385` flipped isSubscribed default (wrong — content should stay gated)
+- `f984262` Zustand migrate (wrong — not needed if default stays false)
+- `0c5205c` /password redirect (unrelated to PWYW — could re-apply later if desired)
+- `8f56ae8` /subscribe placeholder (wrong — layout should stay)
+- `3a798a6` /premium placeholder (wrong — layout should stay)
 
 ---
 
 ## Next Step
 
-Invoke the `writing-plans` skill to break Phase 1 into a task-by-task implementation plan. That plan becomes the roadmap for the Aug 17-18 build days. Nothing gets built until Mike approves the implementation plan too.
+Rewrite the implementation plan at `docs/plans/2026-08-16-mystation-pwyw-phase-1-implementation.md` to match this v2 design. Then present for Mike's section-by-section approval. Then execute via subagent-driven-development.
