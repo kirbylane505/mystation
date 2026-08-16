@@ -80,7 +80,7 @@ vercel --prod 2>&1
 echo ""
 echo -e "${YELLOW}Verifying production...${NC}"
 sleep 5
-for page in "/" "/music" "/search" "/merch" "/events" "/events/lotl-2026"; do
+for page in "/" "/music" "/search" "/merch" "/events" "/events/lotl-2026" "/lotl" "/premium" "/subscribe"; do
     STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://mystationlive.com${page}")
     if [ "$STATUS" = "200" ]; then
         echo -e "  ${GREEN}${page} — ${STATUS} OK${NC}"

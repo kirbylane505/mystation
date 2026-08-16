@@ -9,6 +9,11 @@ Disallow: /checkout
 Disallow: /station/dashboard
 Disallow: /admin/
 Disallow: /vault
+Disallow: /qr
+Disallow: /ref
+Disallow: /account
+Disallow: /dashboard
+Disallow: /audio/
 
 # Sitemap
 Sitemap: https://mystationlive.com/sitemap.xml
