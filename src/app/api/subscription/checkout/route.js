@@ -1,114 +1,104 @@
 /**
- * MYSTATION — Stripe Checkout Session Creator
- * Replaces Payment Links with server-created sessions for full control.
- * Supports new subscriptions with 30-day free trial.
+ * MYSTATION — Stripe Checkout Session Creator (PWYW)
+ * Creates a subscription checkout for the fan's chosen monthly amount
+ * using Stripe's inline price_data.unit_amount (no fixed Price IDs).
  */
 
-import { NextResponse } from 'next/server';
-import { normalizeTier, priceIdFor } from '@/lib/tiers';
-
-// Only paid tiers are selectable at checkout. 'free' has no Stripe price.
-const CHECKOUT_ALLOWED_TIERS = new Set(['premium', 'creator']);
+import { NextResponse } from "next/server";
 
 export async function POST(request) {
   try {
-    const { tier, email, commitment_agreed } = await request.json();
+    const body = await request.json();
+    const { email, amount_cents } = body;
 
-    const canonicalTier = normalizeTier(tier);
-    if (!CHECKOUT_ALLOWED_TIERS.has(canonicalTier)) {
+    // Validation
+    if (!email || typeof email !== "string" || !email.includes("@")) {
       return NextResponse.json(
-        { error: 'Invalid tier. Must be: premium or creator' },
-        { status: 400 }
+        { error: "Valid email required" },
+        { status: 400 },
       );
     }
 
-    if (canonicalTier === 'premium' && !commitment_agreed) {
+    const amount = Number(amount_cents);
+    if (!Number.isInteger(amount) || amount < 100 || amount > 99900) {
       return NextResponse.json(
-        { error: 'Premium requires 6-month commitment agreement.' },
-        { status: 400 }
+        {
+          error:
+            "amount_cents must be an integer between 100 ($1) and 99900 ($999)",
+        },
+        { status: 400 },
       );
     }
 
-    if (!email) {
-      return NextResponse.json(
-        { error: 'Email required' },
-        { status: 400 }
-      );
-    }
-
-    const Stripe = (await import('stripe')).default;
+    const Stripe = (await import("stripe")).default;
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-    const priceId = priceIdFor(canonicalTier);
-    if (!priceId) {
-      console.error(`Missing STRIPE_PRICE for tier: ${canonicalTier}`);
-      return NextResponse.json(
-        { error: 'Subscription not configured' },
-        { status: 500 }
-      );
-    }
-
-    // Check if customer already exists in Stripe
+    // Grandfather safety: check for existing active sub
     const existingCustomers = await stripe.customers.list({ email, limit: 1 });
     let customerId;
     if (existingCustomers.data.length > 0) {
       customerId = existingCustomers.data[0].id;
-
-      // Check if they already have an active subscription
       const subs = await stripe.subscriptions.list({
         customer: customerId,
-        status: 'active',
+        status: "active",
         limit: 1,
       });
       if (subs.data.length > 0) {
-        return NextResponse.json({
-          error: 'Already subscribed. Use upgrade to change tier.',
-          alreadySubscribed: true,
-          currentTier: normalizeTier(subs.data[0].metadata?.tier),
-        }, { status: 409 });
+        return NextResponse.json(
+          {
+            error:
+              "You already have an active subscription. Manage it in your account.",
+            existing_subscription_id: subs.data[0].id,
+          },
+          { status: 409 },
+        );
       }
     }
 
-    const isPremium = canonicalTier === 'premium';
-    const commitmentMetadata = isPremium
-      ? { commitment_months: '6', commitment_start: new Date().toISOString() }
-      : {};
+    const APP_URL =
+      process.env.NEXT_PUBLIC_APP_URL || "https://mystationlive.com";
 
-    const subMetadata = { tier: canonicalTier, priceId, source: 'mystation', ...commitmentMetadata };
-
-    // Create Checkout Session
-    const sessionParams = {
-      mode: 'subscription',
-      line_items: [{ price: priceId, quantity: 1 }],
-      success_url: isPremium
-        ? `https://mystationlive.com/premium/success?session_id={CHECKOUT_SESSION_ID}`
-        : `https://mystationlive.com/subscribe/success?session_id={CHECKOUT_SESSION_ID}&tier=${canonicalTier}`,
-      cancel_url: isPremium
-        ? 'https://mystationlive.com/premium'
-        : 'https://mystationlive.com/subscribe',
-      subscription_data: {
-        // Premium tier commits for 6 months — no trial. Creator tier keeps 30-day trial.
-        ...(isPremium ? {} : { trial_period_days: 30 }),
-        metadata: subMetadata,
+    const session = await stripe.checkout.sessions.create({
+      mode: "subscription",
+      customer: customerId, // undefined = Stripe creates new
+      customer_email: customerId ? undefined : email,
+      line_items: [
+        {
+          price_data: {
+            currency: "usd",
+            product_data: {
+              name: "MyStation Supporter",
+              description:
+                "Monthly support for IDMG artists and Mike Page Foundation programs.",
+            },
+            unit_amount: amount,
+            recurring: { interval: "month" },
+          },
+          quantity: 1,
+        },
+      ],
+      metadata: {
+        type: "subscription",
+        tier: "supporter",
+        amount_cents: String(amount),
       },
-      metadata: subMetadata,
-      allow_promotion_codes: true,
-    };
+      subscription_data: {
+        metadata: {
+          type: "subscription",
+          tier: "supporter",
+          amount_cents: String(amount),
+        },
+      },
+      success_url: `${APP_URL}/subscribe/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${APP_URL}/subscribe`,
+    });
 
-    if (customerId) {
-      sessionParams.customer = customerId;
-    } else {
-      sessionParams.customer_email = email;
-    }
-
-    const session = await stripe.checkout.sessions.create(sessionParams);
-
-    return NextResponse.json({ url: session.url });
+    return NextResponse.json({ url: session.url, sessionId: session.id });
   } catch (err) {
-    console.error('Checkout session error:', err);
+    console.error("subscription/checkout error:", err);
     return NextResponse.json(
-      { error: 'Failed to create checkout session' },
-      { status: 500 }
+      { error: "Failed to create checkout session", detail: err?.message },
+      { status: 500 },
     );
   }
 }
