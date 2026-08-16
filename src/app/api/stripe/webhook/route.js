@@ -997,8 +997,17 @@ async function handleSubscriptionCheckout(session, stripe) {
   const customerId = session.customer;
   const subscriptionId = session.subscription;
 
+  // PWYW: capture the fan's chosen monthly amount so we can display it and
+  // aggregate MRR later. Prefer session.amount_subtotal (Stripe's own total,
+  // matches what the card was charged), fall back to the amount we stamped
+  // into metadata at checkout-creation time.
+  const monthlyAmountCents =
+    Number(session.amount_subtotal) ||
+    Number(session.metadata?.amount_cents) ||
+    null;
+
   console.log(
-    `New subscription: ${email} → ${tier} (customer: ${customerId}, sub: ${subscriptionId})`,
+    `New subscription: ${email} → ${tier} @ ${monthlyAmountCents ?? "?"}¢/mo (customer: ${customerId}, sub: ${subscriptionId})`,
   );
 
   try {
@@ -1040,6 +1049,7 @@ async function handleSubscriptionCheckout(session, stripe) {
       current_period_end: currentPeriodEnd,
       cancel_at_period_end: false,
       subscriber_number: subscriberNumber,
+      monthly_amount_cents: monthlyAmountCents,
       created_at: new Date().toISOString(),
     };
     const { error: upsertErr } = await supabase
@@ -1424,6 +1434,13 @@ async function handleSubscriptionUpdated(subscription) {
     const isActive =
       subscription.status === "active" || subscription.status === "trialing";
 
+    // PWYW: capture the current monthly amount so fan-initiated changes
+    // via the Stripe Billing Portal sync back to our subscribers row.
+    // Stripe fires customer.subscription.updated whenever the subscription
+    // item's price/amount changes; unit_amount is the source of truth.
+    const newAmountCents =
+      subscription.items?.data?.[0]?.price?.unit_amount ?? null;
+
     // Try full update with new columns, fall back to base columns
     const fullUpdate = {
       tier: newTier,
@@ -1433,6 +1450,9 @@ async function handleSubscriptionUpdated(subscription) {
       ).toISOString(),
       cancel_at_period_end: subscription.cancel_at_period_end || false,
     };
+    if (newAmountCents !== null) {
+      fullUpdate.monthly_amount_cents = newAmountCents;
+    }
     const { error: updateErr } = await supabase
       .from("subscribers")
       .update(fullUpdate)
