@@ -366,6 +366,18 @@ export const useUserStore = create(
     }),
     {
       name: "mystation-user",
+      version: 2, // v2: PWYW pivot 2026-08-16 — force isSubscribed=true default for cached state
+      migrate: (persisted, fromVersion) => {
+        // Pre-PWYW visitors had isSubscribed=false cached; force them to the new free-for-all default.
+        if (fromVersion < 2) {
+          return {
+            ...persisted,
+            isSubscribed: true,
+            supporterTier: persisted?.supporterTier || "supporter",
+          };
+        }
+        return persisted;
+      },
       partialize: (state) => ({
         user: state.user,
         isLoggedIn: state.isLoggedIn,
