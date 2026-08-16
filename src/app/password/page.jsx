@@ -87,7 +87,7 @@ export default function PasswordPage() {
 
         {/* Footer */}
         <p className="text-center text-gray-500 text-sm mt-8">
-          Mike Page Empire &copy; 2026
+          IDMG Empire &copy; 2026
         </p>
       </div>
     </div>
