@@ -6,7 +6,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePlayerStore, useUserStore } from "@/store/playerStore";
 import { X, Music, Check, CreditCard, Crown, ShoppingBag } from "lucide-react";
 import Link from "next/link";
@@ -41,6 +41,20 @@ export default function SubscribeModal() {
   const { showSubscribeModal, closeSubscribeModal, pendingTrack, setTrack } =
     usePlayerStore();
   const { subscribe, isSubscribed } = useUserStore();
+
+  // Reset modal state whenever it reopens. Modal is persistent-mounted in
+  // root layout, so without this the last submit's stale email + amount +
+  // error would greet the fan on their next open.
+  useEffect(() => {
+    if (showSubscribeModal) {
+      setError("");
+      setEmail("");
+      setSelectedPreset(SUGGESTED_AMOUNT);
+      setCustomMode(false);
+      setCustomAmount(SUGGESTED_AMOUNT);
+      setLoading(false);
+    }
+  }, [showSubscribeModal]);
 
   // NEVER show subscribe modal to subscribers — they're already in
   if (!showSubscribeModal) return null;
@@ -258,6 +272,7 @@ export default function SubscribeModal() {
                     </span>
                     <input
                       type="number"
+                      inputMode="decimal"
                       min="1"
                       max="999"
                       step="0.01"
