@@ -1,69 +1,82 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { usePlayerStore, useUserStore } from '@/store/playerStore';
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { usePlayerStore, useUserStore } from "@/store/playerStore";
 import {
-  Heart, Music, Sparkles, Crown, CheckCircle, Gem,
-  Globe, ShoppingBag, DollarSign, BarChart3, Users,
-  Lock, Zap, ArrowRight, Headphones, Star, Radio
-} from 'lucide-react';
+  Heart,
+  Music,
+  Sparkles,
+  Crown,
+  CheckCircle,
+  Gem,
+  Globe,
+  ShoppingBag,
+  DollarSign,
+  BarChart3,
+  Users,
+  Lock,
+  Zap,
+  ArrowRight,
+  Headphones,
+  Star,
+  Radio,
+} from "lucide-react";
 
 const TIER_CONFIG = {
   diamond: {
-    name: 'Diamond',
+    name: "Diamond",
     icon: Gem,
-    color: 'amber',
-    gradient: 'from-amber-500 to-yellow-500',
-    bgGradient: 'from-amber-500/20 via-yellow-500/10 to-amber-500/5',
-    borderColor: 'border-amber-500/40',
-    textColor: 'text-amber-400',
-    headline: 'Welcome to the Diamond Club',
-    subtitle: 'You now have the keys to your own empire.',
+    color: "amber",
+    gradient: "from-amber-500 to-yellow-500",
+    bgGradient: "from-amber-500/20 via-yellow-500/10 to-amber-500/5",
+    borderColor: "border-amber-500/40",
+    textColor: "text-amber-400",
+    headline: "Welcome to the Diamond Club",
+    subtitle: "You now have the keys to your own empire.",
     features: [
-      { icon: Globe, text: 'Your own station. Your name, your page.' },
-      { icon: ShoppingBag, text: 'Upload & sell anything, keep 100%' },
-      { icon: BarChart3, text: 'Full analytics dashboard' },
-      { icon: Users, text: 'Own your audience. No algorithm.' },
-      { icon: Lock, text: 'Full Vault + Grammy Nights access' },
-      { icon: Gem, text: 'Diamond badge everywhere' },
-      { icon: ShoppingBag, text: '10% off all MyStation merch' },
-      { icon: Radio, text: 'Unlimited streaming + Spotify Search' },
+      { icon: Globe, text: "Your own station. Your name, your page." },
+      { icon: ShoppingBag, text: "Upload & sell anything, keep 100%" },
+      { icon: BarChart3, text: "Full analytics dashboard" },
+      { icon: Users, text: "Own your audience. No algorithm." },
+      { icon: Lock, text: "Full Vault + Grammy Nights access" },
+      { icon: Gem, text: "Diamond badge everywhere" },
+      { icon: ShoppingBag, text: "10% off all MyStation merch" },
+      { icon: Radio, text: "Unlimited streaming of the catalog" },
     ],
   },
   premium: {
-    name: 'Premium',
+    name: "Premium",
     icon: Star,
-    color: 'purple',
-    gradient: 'from-purple-500 to-indigo-500',
-    bgGradient: 'from-purple-500/20 via-indigo-500/10 to-purple-500/5',
-    borderColor: 'border-purple-500/40',
-    textColor: 'text-purple-400',
-    headline: 'Welcome to Premium',
-    subtitle: 'You just unlocked the full MyStation experience.',
+    color: "purple",
+    gradient: "from-purple-500 to-indigo-500",
+    bgGradient: "from-purple-500/20 via-indigo-500/10 to-purple-500/5",
+    borderColor: "border-purple-500/40",
+    textColor: "text-purple-400",
+    headline: "Welcome to Premium",
+    subtitle: "You just unlocked the full MyStation experience.",
     features: [
-      { icon: Zap, text: 'Global Spotify Search, 100M+ songs' },
-      { icon: Music, text: 'Early access to new drops' },
-      { icon: Users, text: 'Full Fan Zone access' },
-      { icon: Radio, text: 'DJ Turntables unlocked' },
-      { icon: Headphones, text: 'Unlimited streaming + background play' },
+      { icon: Music, text: "Early access to new drops" },
+      { icon: Users, text: "Full Fan Zone access" },
+      { icon: Radio, text: "DJ Turntables unlocked" },
+      { icon: Headphones, text: "Unlimited streaming + background play" },
     ],
   },
   regular: {
-    name: 'Supporter',
+    name: "Supporter",
     icon: Headphones,
-    color: 'blue',
-    gradient: 'from-blue-500 to-blue-600',
-    bgGradient: 'from-blue-500/20 via-blue-600/10 to-blue-500/5',
-    borderColor: 'border-blue-500/30',
-    textColor: 'text-blue-400',
-    headline: 'Welcome to the Family',
-    subtitle: 'Thank you for supporting independent music.',
+    color: "blue",
+    gradient: "from-blue-500 to-blue-600",
+    bgGradient: "from-blue-500/20 via-blue-600/10 to-blue-500/5",
+    borderColor: "border-blue-500/30",
+    textColor: "text-blue-400",
+    headline: "Welcome to the Family",
+    subtitle: "Thank you for supporting independent music.",
     features: [
-      { icon: Music, text: 'Unlimited streaming, no limits' },
-      { icon: Headphones, text: 'Background playback & CarPlay' },
-      { icon: Heart, text: 'Supporting youth music programs' },
+      { icon: Music, text: "Unlimited streaming, no limits" },
+      { icon: Headphones, text: "Background playback & CarPlay" },
+      { icon: Heart, text: "Supporting youth music programs" },
     ],
   },
 };
@@ -79,31 +92,38 @@ export default function SubscribeSuccessPage() {
     let cancelled = false;
 
     const params = new URLSearchParams(window.location.search);
-    const tierFromUrl = params.get('tier');
-    const selectedTier = tierFromUrl || localStorage.getItem('mystation-selected-tier') || 'supporter';
+    const tierFromUrl = params.get("tier");
+    const selectedTier =
+      tierFromUrl ||
+      localStorage.getItem("mystation-selected-tier") ||
+      "supporter";
     setTier(selectedTier);
 
     // Get email from localStorage
-    const storedEmail = localStorage.getItem('mystation-email') || '';
+    const storedEmail = localStorage.getItem("mystation-email") || "";
 
     // Mark user as subscribed in client store IMMEDIATELY (Zustand persists to localStorage)
-    subscribe(storedEmail || 'subscriber@mystation.com', selectedTier);
-    localStorage.removeItem('mystation-selected-tier');
+    subscribe(storedEmail || "subscriber@mystation.com", selectedTier);
+    localStorage.removeItem("mystation-selected-tier");
 
     // Set server-side subscription cookie — AWAIT it, retry once on failure
-    const sessionId = params.get('session_id');
+    const sessionId = params.get("session_id");
     const activateSession = async () => {
       for (let attempt = 0; attempt < 2; attempt++) {
         try {
-          const res = await fetch('/api/subscription/session', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'activate', tier: selectedTier, sessionId }),
+          const res = await fetch("/api/subscription/session", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              action: "activate",
+              tier: selectedTier,
+              sessionId,
+            }),
           });
           if (res.ok) return true;
         } catch {}
         // Brief pause before retry
-        if (attempt === 0) await new Promise(r => setTimeout(r, 1000));
+        if (attempt === 0) await new Promise((r) => setTimeout(r, 1000));
       }
       return false;
     };
@@ -112,9 +132,9 @@ export default function SubscribeSuccessPage() {
     const registerSubscriber = async () => {
       if (!storedEmail) return;
       try {
-        await fetch('/api/subscription/subscribe', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+        await fetch("/api/subscription/subscribe", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email: storedEmail, tier: selectedTier }),
         });
       } catch {}
@@ -125,14 +145,14 @@ export default function SubscribeSuccessPage() {
       await Promise.all([activateSession(), registerSubscriber()]);
 
       // Preload pending track audio token so playback is instant on redirect
-      const savedPendingTrack = localStorage.getItem('mystation-pending-track');
+      const savedPendingTrack = localStorage.getItem("mystation-pending-track");
       if (savedPendingTrack) {
         try {
           const track = JSON.parse(savedPendingTrack);
           // Warm the audio token cache — fetching now means instant playback later
-          await fetch('/api/audio/token', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+          await fetch("/api/audio/token", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ trackId: track.id }),
           }).catch(() => {});
         } catch {}
@@ -145,21 +165,26 @@ export default function SubscribeSuccessPage() {
     setTimeout(() => setShowContent(true), 300);
 
     // Auto-redirect for Supporter/Premium (not Diamond — they choose)
-    if (selectedTier !== 'diamond') {
+    if (selectedTier !== "diamond") {
       const timer = setTimeout(() => {
         if (cancelled) return;
-        const savedPendingTrack = localStorage.getItem('mystation-pending-track');
+        const savedPendingTrack = localStorage.getItem(
+          "mystation-pending-track",
+        );
         if (savedPendingTrack) {
           try {
             const track = JSON.parse(savedPendingTrack);
             setTrack(track);
             setIsPlaying(true);
           } catch {}
-          localStorage.removeItem('mystation-pending-track');
+          localStorage.removeItem("mystation-pending-track");
         }
-        router.push('/');
+        router.push("/");
       }, 10000);
-      return () => { cancelled = true; clearTimeout(timer); };
+      return () => {
+        cancelled = true;
+        clearTimeout(timer);
+      };
     }
   }, []);
 
@@ -167,32 +192,46 @@ export default function SubscribeSuccessPage() {
 
   const config = TIER_CONFIG[tier] || TIER_CONFIG.regular;
   const TierIcon = config.icon;
-  const isDiamond = tier === 'diamond';
+  const isDiamond = tier === "diamond";
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12">
-      <div className={`max-w-lg w-full text-center transition-all duration-700 ${showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-
+      <div
+        className={`max-w-lg w-full text-center transition-all duration-700 ${showContent ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
+      >
         {/* Tier Icon */}
         <div className="relative mb-8">
-          <div className={`w-28 h-28 mx-auto bg-gradient-to-br ${config.gradient} rounded-full flex items-center justify-center shadow-lg ${isDiamond ? 'shadow-amber-500/30' : ''}`}>
+          <div
+            className={`w-28 h-28 mx-auto bg-gradient-to-br ${config.gradient} rounded-full flex items-center justify-center shadow-lg ${isDiamond ? "shadow-amber-500/30" : ""}`}
+          >
             <TierIcon size={56} className="text-white" />
           </div>
           {isDiamond && (
             <>
-              <Sparkles className="absolute top-0 right-1/4 text-amber-400 animate-bounce" size={24} />
-              <Sparkles className="absolute top-6 right-1/6 text-yellow-300 animate-bounce delay-150" size={18} />
-              <Sparkles className="absolute bottom-4 left-1/4 text-amber-300 animate-bounce delay-300" size={20} />
+              <Sparkles
+                className="absolute top-0 right-1/4 text-amber-400 animate-bounce"
+                size={24}
+              />
+              <Sparkles
+                className="absolute top-6 right-1/6 text-yellow-300 animate-bounce delay-150"
+                size={18}
+              />
+              <Sparkles
+                className="absolute bottom-4 left-1/4 text-amber-300 animate-bounce delay-300"
+                size={20}
+              />
             </>
           )}
         </div>
 
         {/* Headline */}
         <h1 className="text-4xl font-black text-white mb-3">
-          {config.headline.split(' ').map((word, i) => {
-            const lastWord = config.headline.split(' ').pop();
+          {config.headline.split(" ").map((word, i) => {
+            const lastWord = config.headline.split(" ").pop();
             return word === lastWord ? (
-              <span key={i} className={config.textColor}>{word} </span>
+              <span key={i} className={config.textColor}>
+                {word}{" "}
+              </span>
             ) : (
               <span key={i}>{word} </span>
             );
@@ -202,16 +241,22 @@ export default function SubscribeSuccessPage() {
         <p className="text-white/60 text-lg mb-8">{config.subtitle}</p>
 
         {/* Features */}
-        <div className={`bg-gradient-to-b ${config.bgGradient} rounded-2xl p-6 mb-8 border ${config.borderColor}`}>
-          <h3 className={`text-sm font-bold uppercase tracking-wider ${config.textColor} mb-4`}>
-            {isDiamond ? 'Your Diamond Powers' : `Your ${config.name} Benefits`}
+        <div
+          className={`bg-gradient-to-b ${config.bgGradient} rounded-2xl p-6 mb-8 border ${config.borderColor}`}
+        >
+          <h3
+            className={`text-sm font-bold uppercase tracking-wider ${config.textColor} mb-4`}
+          >
+            {isDiamond ? "Your Diamond Powers" : `Your ${config.name} Benefits`}
           </h3>
           <div className="space-y-3 text-left">
             {config.features.map((f, i) => {
               const FeatureIcon = f.icon;
               return (
                 <div key={i} className="flex items-center gap-3">
-                  <div className={`w-8 h-8 bg-gradient-to-br ${config.gradient} rounded-lg flex items-center justify-center shrink-0`}>
+                  <div
+                    className={`w-8 h-8 bg-gradient-to-br ${config.gradient} rounded-lg flex items-center justify-center shrink-0`}
+                  >
                     <FeatureIcon size={16} className="text-white" />
                   </div>
                   <span className="text-white/80 text-sm">{f.text}</span>
@@ -244,14 +289,17 @@ export default function SubscribeSuccessPage() {
         {/* Supporter/Premium — Loading redirect */}
         {!isDiamond && (
           <div className="flex items-center justify-center gap-3 text-white/60 mb-6">
-            <div className={`w-6 h-6 border-2 ${config.borderColor} border-t-transparent rounded-full animate-spin`} />
+            <div
+              className={`w-6 h-6 border-2 ${config.borderColor} border-t-transparent rounded-full animate-spin`}
+            />
             <span>Loading your music...</span>
           </div>
         )}
 
         {/* Foundation note */}
         <p className="text-white/30 text-xs">
-          Every subscription supports the Mike Page Foundation 501(c)(3) | EIN: 41-3820708
+          Every subscription supports the Mike Page Foundation 501(c)(3) | EIN:
+          41-3820708
         </p>
       </div>
     </div>

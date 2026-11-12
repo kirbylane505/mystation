@@ -225,14 +225,6 @@ export default function AccountPage() {
               />
               <span className="text-white/70 text-sm">Background playback</span>
             </div>
-            {currentLevel >= 2 && (
-              <div className="flex items-center gap-3">
-                <div className="w-2 h-2 rounded-full bg-green-400" />
-                <span className="text-white/70 text-sm">
-                  Spotify Search, 100M+ songs
-                </span>
-              </div>
-            )}
             {currentLevel >= 3 && (
               <>
                 <div className="flex items-center gap-3">
@@ -333,7 +325,7 @@ export default function AccountPage() {
                     </div>
                     {opt.tier === "premium" && (
                       <p className="text-white/40 text-xs mt-2 ml-13">
-                        + Spotify Search, DJ Turntables, Fan Zone, Early drops
+                        + DJ Turntables, Fan Zone, Early drops
                       </p>
                     )}
                     {opt.tier === "diamond" && (

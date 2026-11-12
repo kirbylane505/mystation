@@ -1,4 +1,4 @@
-const { withSentryConfig } = require('@sentry/nextjs');
+const { withSentryConfig } = require("@sentry/nextjs");
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -6,41 +6,42 @@ const nextConfig = {
   productionBrowserSourceMaps: false,
   poweredByHeader: false,
   images: {
-    formats: ['image/avif', 'image/webp'],
+    formats: ["image/avif", "image/webp"],
     remotePatterns: [
-      { protocol: 'https', hostname: 'mystationlive.com' },
-      { protocol: 'https', hostname: 'mystation.vercel.app' },
-      { protocol: 'https', hostname: 'i.scdn.co' },
-      { protocol: 'https', hostname: 'mosaic.scdn.co' },
-      { protocol: 'https', hostname: 'e-cdns-images.dzcdn.net' },
-      { protocol: 'https', hostname: 'cdns-images.dzcdn.net' },
-      { protocol: 'https', hostname: 'api.deezer.com' },
-      { protocol: 'https', hostname: 'images.printify.com' },
-      { protocol: 'https', hostname: 'images-api.printify.com' },
-      { protocol: 'https', hostname: 'cdn.printful.com' },
-      { protocol: 'https', hostname: 'mystation.app' },
-      { protocol: 'https', hostname: 'idmg.live' },
-      { protocol: 'https', hostname: 'i.ytimg.com' },
-      ...(process.env.NODE_ENV === 'development'
-        ? [{ protocol: 'http', hostname: 'localhost' }]
+      { protocol: "https", hostname: "mystationlive.com" },
+      { protocol: "https", hostname: "mystation.vercel.app" },
+      { protocol: "https", hostname: "e-cdns-images.dzcdn.net" },
+      { protocol: "https", hostname: "cdns-images.dzcdn.net" },
+      { protocol: "https", hostname: "api.deezer.com" },
+      { protocol: "https", hostname: "images.printify.com" },
+      { protocol: "https", hostname: "images-api.printify.com" },
+      { protocol: "https", hostname: "cdn.printful.com" },
+      { protocol: "https", hostname: "mystation.app" },
+      { protocol: "https", hostname: "idmg.live" },
+      { protocol: "https", hostname: "i.ytimg.com" },
+      ...(process.env.NODE_ENV === "development"
+        ? [{ protocol: "http", hostname: "localhost" }]
         : []),
     ],
   },
   async headers() {
     return [
       {
-        source: '/(.*)',
+        source: "/(.*)",
         headers: [
-          { key: 'X-Frame-Options', value: 'DENY' },
-          { key: 'X-Content-Type-Options', value: 'nosniff' },
-          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
-          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+          { key: "X-Frame-Options", value: "DENY" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           {
-            key: 'Strict-Transport-Security',
-            value: 'max-age=31536000; includeSubDomains; preload',
+            key: "Permissions-Policy",
+            value: "camera=(), microphone=(), geolocation=()",
           },
           {
-            key: 'Content-Security-Policy',
+            key: "Strict-Transport-Security",
+            value: "max-age=31536000; includeSubDomains; preload",
+          },
+          {
+            key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
               "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://js.sentry-cdn.com https://*.posthog.com https://plausible.io",
@@ -48,19 +49,22 @@ const nextConfig = {
               "font-src 'self' https://fonts.gstatic.com",
               "img-src 'self' data: blob: https: http:",
               "media-src 'self' blob: https://*.r2.cloudflarestorage.com https://*.r2.dev",
-              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://*.sentry.io https://*.posthog.com https://api.spotify.com https://api.deezer.com https://*.r2.cloudflarestorage.com https://plausible.io",
+              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://*.sentry.io https://*.posthog.com https://api.deezer.com https://*.r2.cloudflarestorage.com https://plausible.io",
               "frame-src 'self' https://js.stripe.com https://hooks.stripe.com",
               "worker-src 'self'",
               "manifest-src 'self'",
-            ].join('; '),
+            ].join("; "),
           },
         ],
       },
       {
-        source: '/sw.js',
+        source: "/sw.js",
         headers: [
-          { key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' },
-          { key: 'Service-Worker-Allowed', value: '/' },
+          {
+            key: "Cache-Control",
+            value: "no-cache, no-store, must-revalidate",
+          },
+          { key: "Service-Worker-Allowed", value: "/" },
         ],
       },
     ];
@@ -68,23 +72,23 @@ const nextConfig = {
   async redirects() {
     return [
       {
-        source: '/cubist',
-        destination: '/artists/the-cubist',
+        source: "/cubist",
+        destination: "/artists/the-cubist",
         permanent: true,
       },
       {
-        source: '/mpf/donate',
-        destination: 'https://www.mikepagefoundation.org/donate',
+        source: "/mpf/donate",
+        destination: "https://www.mikepagefoundation.org/donate",
         permanent: false,
       },
       {
-        source: '/mpf',
-        destination: 'https://www.mikepagefoundation.org',
+        source: "/mpf",
+        destination: "https://www.mikepagefoundation.org",
         permanent: false,
       },
       {
-        source: '/donate',
-        destination: 'https://www.mikepagefoundation.org/donate',
+        source: "/donate",
+        destination: "https://www.mikepagefoundation.org/donate",
         permanent: false,
       },
     ];

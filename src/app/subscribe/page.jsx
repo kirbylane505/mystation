@@ -155,7 +155,6 @@ const DIAMOND_FEATURES = [
   { icon: Crown, text: "Grammy Nights access, the private collection" },
   { icon: Gem, text: "Diamond badge, verified everywhere" },
   { icon: Radio, text: "Unlimited streaming of the entire catalog" },
-  { icon: Zap, text: "Global Spotify Search (100M+ songs)" },
   { icon: ListMusic, text: "DJ Turntables, Fan Zone, Kickback Lounge" },
   { icon: Headphones, text: "Background playback & CarPlay support" },
 ];
