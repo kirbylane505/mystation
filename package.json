@@ -4,7 +4,7 @@
   "description": "MyStation - Mike Page Foundation Music Platform",
   "private": true,
   "engines": {
-    "node": "20.x"
+    "node": "26.x"
   },
   "scripts": {
     "dev": "next dev",
