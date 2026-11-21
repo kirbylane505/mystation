@@ -156,9 +156,11 @@ function SearchPageInner() {
       debounceRef.current = setTimeout(async () => {
         setLoading(true);
         setSearched(true);
+        // Nov 21 2026: MyStation-only search per Mike's directive.
+        // External music catalogs (Spotify, Deezer) removed — fans only
+        // find Mike Page + IDMG roster tracks here.
         const local = searchMyStation(q);
-        const global = await searchGlobal(q);
-        setResults({ mystation: local, spotify: global.tracks || [] });
+        setResults({ mystation: local, spotify: [] });
         // Save to recent searches if results found
         if (local.length > 0 || (global.tracks && global.tracks.length > 0)) {
           try {
