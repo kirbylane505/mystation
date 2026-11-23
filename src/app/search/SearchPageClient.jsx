@@ -1,7 +1,7 @@
 /**
- * MYSTATION - Global Search
- * Search MyStation catalog + Spotify's 100M+ songs
- * Create playlists with any music in the world
+ * MYSTATION - Catalog Search
+ * Search the MyStation catalog — Mike Page + IDMG roster.
+ * Build playlists from any track in the catalog.
  */
 
 "use client";
@@ -21,12 +21,10 @@ import {
   Pause,
   Plus,
   Music,
-  Disc3,
   Loader2,
   X,
   ListPlus,
   Check,
-  ExternalLink,
   Sparkles,
   Lock,
   Clock,
@@ -34,7 +32,7 @@ import {
   Library,
   ChevronRight,
 } from "lucide-react";
-import { usePlayerStore, useUserStore, isGated } from "@/store/playerStore";
+import { usePlayerStore } from "@/store/playerStore";
 import usePlaylistStore from "@/store/playlistStore";
 import { tracks as myStationTracks } from "@/data/tracks";
 import Link from "next/link";
@@ -58,10 +56,10 @@ function SearchPageInner() {
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get("q") || "";
   const [query, setQuery] = useState(initialQuery);
-  const [results, setResults] = useState({ mystation: [], spotify: [] });
+  const [results, setResults] = useState({ mystation: [] });
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
-  const [addingTo, setAddingTo] = useState(null); // trackId or spotifyId being added
+  const [addingTo, setAddingTo] = useState(null); // trackId being added
   const [showPlaylistPicker, setShowPlaylistPicker] = useState(null);
   const [newPlaylistName, setNewPlaylistName] = useState("");
   const [showCreatePlaylist, setShowCreatePlaylist] = useState(false);
@@ -73,7 +71,6 @@ function SearchPageInner() {
   const { currentTrack, isPlaying, setTrack, setQueue, togglePlay } =
     usePlayerStore();
   const { playlists, createPlaylist, addTrack } = usePlaylistStore();
-  const { isSubscribed, supporterTier } = useUserStore();
 
   // Load recent searches from localStorage on mount
   useEffect(() => {
@@ -92,10 +89,6 @@ function SearchPageInner() {
       .sort((a, b) => (b.hitScore || 0) - (a.hitScore || 0))
       .slice(0, 6);
   }, []);
-
-  // Everyone can search Spotify — but interacting with results requires subscription
-  const hasSpotifyAccess = true;
-  const canUseSpotifyResults = true; // FREE FOR ALL — paywall stripped
 
   // Search MyStation catalog locally
   const searchMyStation = useCallback((q) => {
@@ -118,38 +111,12 @@ function SearchPageInner() {
       }));
   }, []);
 
-  // Unified search — Spotify + local in parallel
-  const searchGlobal = useCallback(async (q) => {
-    for (let attempt = 0; attempt < 2; attempt++) {
-      try {
-        const res = await fetch(
-          `/api/search/unified?q=${encodeURIComponent(q)}&limit=20&_t=${Date.now()}`,
-          { cache: "no-store" },
-        );
-        if (!res.ok) {
-          if (attempt < 1) continue;
-          return { tracks: [], artists: [], deezerOnly: [] };
-        }
-        const data = await res.json();
-        if (data.error) {
-          if (attempt < 1) continue;
-          return { tracks: [], artists: [], deezerOnly: [] };
-        }
-        return data;
-      } catch {
-        if (attempt < 1) continue;
-        return { tracks: [], artists: [], deezerOnly: [] };
-      }
-    }
-    return { tracks: [], artists: [], deezerOnly: [] };
-  }, []);
-
   // Debounced search
   const handleSearch = useCallback(
     (q) => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
       if (!q.trim()) {
-        setResults({ mystation: [], spotify: [] });
+        setResults({ mystation: [] });
         setSearched(false);
         return;
       }
@@ -157,12 +124,12 @@ function SearchPageInner() {
         setLoading(true);
         setSearched(true);
         // Nov 21 2026: MyStation-only search per Mike's directive.
-        // External music catalogs (Spotify, Deezer) removed — fans only
-        // find Mike Page + IDMG roster tracks here.
+        // External music catalogs removed — fans only find Mike Page +
+        // IDMG roster tracks here.
         const local = searchMyStation(q);
-        setResults({ mystation: local, spotify: [] });
+        setResults({ mystation: local });
         // Save to recent searches if results found
-        if (local.length > 0 || (global.tracks && global.tracks.length > 0)) {
+        if (local.length > 0) {
           try {
             const saved = JSON.parse(
               localStorage.getItem("mystation-recent-searches") || "[]",
@@ -178,7 +145,7 @@ function SearchPageInner() {
         setLoading(false);
       }, 300);
     },
-    [searchMyStation, searchGlobal],
+    [searchMyStation],
   );
 
   useEffect(() => {
@@ -197,66 +164,24 @@ function SearchPageInner() {
     }
   };
 
-  // Play a global preview
-  const playGlobalPreview = (track) => {
-    if (!track.previewUrl) return;
-    const trackId = track.spotifyId
-      ? `spotify_${track.spotifyId}`
-      : `deezer_${track.deezerId}`;
-    const globalTrack = {
-      id: trackId,
-      title: track.title,
-      artist: track.artist,
-      album: track.album,
-      audioFile: track.previewUrl,
-      albumArt: track.albumArt,
-      duration: track.durationFormatted,
-      source: track.source || "spotify",
-      spotifyUrl: track.spotifyUrl,
-      isPreview: true,
-    };
-    if (currentTrack?.id === globalTrack.id) {
-      togglePlay();
-    } else {
-      setTrack(globalTrack);
-    }
-  };
-
   // Add track to playlist
   const handleAddToPlaylist = (playlistId, track) => {
-    let formatted;
-    if (track.source === "mystation") {
-      formatted = {
-        id: track.id,
-        title: track.title,
-        artist:
-          track.artist ||
-          (track.featured ? `Mike Page ft. ${track.featured}` : "Mike Page"),
-        album: track.album,
-        albumArt: track.albumArt || "/images/albums/cindys-son.jpg",
-        audioSrc: track.audioFile,
-        duration: track.duration,
-        source: "mystation",
-      };
-    } else {
-      // Spotify or merged track
-      formatted = {
-        spotifyId: track.spotifyId || null,
-        deezerId: track.deezerId || null,
-        title: track.title,
-        artist: track.artist,
-        album: track.album,
-        albumArt: track.albumArt,
-        previewUrl: track.previewUrl,
-        spotifyUrl: track.spotifyUrl || null,
-        duration: track.durationFormatted || track.duration,
-        source: track.source || "spotify",
-      };
-    }
+    const formatted = {
+      id: track.id,
+      title: track.title,
+      artist:
+        track.artist ||
+        (track.featured ? `Mike Page ft. ${track.featured}` : "Mike Page"),
+      album: track.album,
+      albumArt: track.albumArt || "/images/albums/cindys-son.jpg",
+      audioSrc: track.audioFile,
+      duration: track.duration,
+      source: "mystation",
+    };
 
     addTrack(playlistId, formatted);
     setShowPlaylistPicker(null);
-    setAddedFeedback(track.spotifyId || track.deezerId || track.id);
+    setAddedFeedback(track.id);
     setTimeout(() => setAddedFeedback(null), 1500);
   };
 
@@ -270,12 +195,6 @@ function SearchPageInner() {
   };
 
   const isTrackPlaying = (track) => {
-    if (track.spotifyId) {
-      return currentTrack?.id === `spotify_${track.spotifyId}` && isPlaying;
-    }
-    if (track.deezerId) {
-      return currentTrack?.id === `deezer_${track.deezerId}` && isPlaying;
-    }
     return currentTrack?.id === track.id && isPlaying;
   };
 
@@ -299,7 +218,7 @@ function SearchPageInner() {
             </span>
           </h1>
           <p className="text-white/40 text-sm">
-            100M+ songs. Playable previews. Build your perfect playlist.
+            Mike Page + IDMG roster. Build your perfect playlist.
           </p>
         </div>
 
@@ -501,10 +420,10 @@ function SearchPageInner() {
                 <Search size={36} className="text-white/20" />
               </div>
               <p className="text-white/30 text-lg mb-1">
-                Search for Kendrick Lamar, Drake, Mike Page
+                Search Mike Page, IDMG roster, and more
               </p>
               <p className="text-white/20 text-sm mb-8">
-                100 million+ songs from every artist in the world
+                The full MyStation catalog, one search away
               </p>
               <div className="max-w-lg mx-auto">
                 <p className="text-white/20 text-xs uppercase tracking-wider mb-3">
@@ -536,32 +455,29 @@ function SearchPageInner() {
           </div>
         )}
 
-        {searched &&
-          !loading &&
-          results.mystation.length === 0 &&
-          results.spotify.length === 0 && (
-            <div className="text-center py-16">
-              <p className="text-white/40 text-lg">
-                No results for &ldquo;{query}&rdquo;
-              </p>
-              <p className="text-white/20 text-sm mt-2 mb-6">
-                Try a different search
-              </p>
-              <div className="flex flex-wrap justify-center gap-2">
-                {["Mike Page", "Drake", "Kendrick Lamar", "Future"].map(
-                  (artist) => (
-                    <button
-                      key={artist}
-                      onClick={() => setQuery(artist)}
-                      className="trending-chip"
-                    >
-                      {artist}
-                    </button>
-                  ),
-                )}
-              </div>
+        {searched && !loading && results.mystation.length === 0 && (
+          <div className="text-center py-16">
+            <p className="text-white/40 text-lg">
+              No results for &ldquo;{query}&rdquo;
+            </p>
+            <p className="text-white/20 text-sm mt-2 mb-6">
+              Try a different search
+            </p>
+            <div className="flex flex-wrap justify-center gap-2">
+              {["Mike Page", "Drake", "Kendrick Lamar", "Future"].map(
+                (artist) => (
+                  <button
+                    key={artist}
+                    onClick={() => setQuery(artist)}
+                    className="trending-chip"
+                  >
+                    {artist}
+                  </button>
+                ),
+              )}
             </div>
-          )}
+          </div>
+        )}
 
         {/* MyStation Results */}
         {results.mystation.length > 0 && (
@@ -595,157 +511,6 @@ function SearchPageInner() {
                 />
               ))}
             </div>
-          </div>
-        )}
-
-        {/* Global Results */}
-        {results.spotify.length > 0 && (
-          <div className="mb-8 relative">
-            <div className="flex items-center gap-2.5 mb-4">
-              <div className="w-7 h-7 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center shadow-md shadow-purple-500/20">
-                <Disc3 size={14} className="text-white" />
-              </div>
-              <h2 className="text-base font-bold text-white tracking-wide uppercase">
-                Global
-              </h2>
-              {!canUseSpotifyResults && (
-                <span className="text-[10px] text-yellow-300 bg-yellow-500/15 px-2.5 py-0.5 rounded-md font-medium ml-auto">
-                  Subscribe to Unlock
-                </span>
-              )}
-            </div>
-
-            {/* Subscription gate — show blurred results with subscribe CTA */}
-            {!canUseSpotifyResults && (
-              <div className="relative">
-                {/* Show first 2 results normally as a tease */}
-                <div className="space-y-2 mb-2">
-                  {results.spotify.slice(0, 2).map((track) => (
-                    <TrackRow
-                      key={`sp-${track.spotifyId || track.deezerId}`}
-                      track={track}
-                      isPlaying={false}
-                      onPlay={() =>
-                        usePlayerStore.getState().openSubscribeModal()
-                      }
-                      onAddToPlaylist={() =>
-                        usePlayerStore.getState().openSubscribeModal()
-                      }
-                      showPlaylistPicker={false}
-                      playlists={[]}
-                      onSelectPlaylist={() => {}}
-                      onClosePlaylistPicker={() => {}}
-                      onCreatePlaylist={() => {}}
-                      addedFeedback={false}
-                      spotify
-                    />
-                  ))}
-                </div>
-                {/* Blurred remaining results + subscribe overlay */}
-                <div className="relative overflow-hidden rounded-xl">
-                  <div className="blur-sm pointer-events-none opacity-40 space-y-2">
-                    {results.spotify.slice(2, 6).map((track) => (
-                      <TrackRow
-                        key={`sp-blur-${track.spotifyId || track.deezerId}`}
-                        track={track}
-                        isPlaying={false}
-                        onPlay={() => {}}
-                        onAddToPlaylist={() => {}}
-                        showPlaylistPicker={false}
-                        playlists={[]}
-                        onSelectPlaylist={() => {}}
-                        onClosePlaylistPicker={() => {}}
-                        onCreatePlaylist={() => {}}
-                        addedFeedback={false}
-                        spotify
-                      />
-                    ))}
-                  </div>
-                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-t from-mystation-navy/95 via-mystation-navy/80 to-transparent">
-                    <div className="text-center p-6">
-                      <h3 className="text-xl font-bold text-white mb-2">
-                        Subscribe to MyStation
-                      </h3>
-                      <p className="text-white/60 text-sm mb-4">
-                        Get access to 100M+ songs from every artist in the world
-                      </p>
-                      <button
-                        onClick={() =>
-                          usePlayerStore.getState().openSubscribeModal()
-                        }
-                        className="px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold rounded-full hover:opacity-90 transition"
-                      >
-                        Subscribe for $4.99/mo
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Full results for subscribers */}
-            {canUseSpotifyResults && (
-              <div className="space-y-2">
-                {results.spotify.map((track) => (
-                  <TrackRow
-                    key={`sp-${track.spotifyId || track.deezerId}`}
-                    track={track}
-                    isPlaying={isTrackPlaying(track)}
-                    onPlay={() => playGlobalPreview(track)}
-                    onAddToPlaylist={() =>
-                      setShowPlaylistPicker(track.spotifyId || track.deezerId)
-                    }
-                    showPlaylistPicker={
-                      showPlaylistPicker === (track.spotifyId || track.deezerId)
-                    }
-                    playlists={playlists}
-                    onSelectPlaylist={(plId) =>
-                      handleAddToPlaylist(plId, track)
-                    }
-                    onClosePlaylistPicker={() => setShowPlaylistPicker(null)}
-                    onCreatePlaylist={() => setShowCreatePlaylist(true)}
-                    addedFeedback={
-                      addedFeedback === (track.spotifyId || track.deezerId)
-                    }
-                    spotify
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Spotify Upgrade Prompt — shown when trial expired and not Premium+ */}
-        {!hasSpotifyAccess && searched && (
-          <div className="mb-8 p-5 rounded-2xl bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20">
-            <div className="flex items-center gap-3 mb-3">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="#1DB954">
-                <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z" />
-              </svg>
-              <div>
-                <h3 className="text-white font-bold text-sm">
-                  Unlock 100M+ Songs
-                </h3>
-                <p className="text-white/50 text-xs">
-                  Search any artist in the world with Premium
-                </p>
-              </div>
-            </div>
-            <Link
-              href="/subscribe/success"
-              onClick={(e) => {
-                e.preventDefault();
-                window.location.href =
-                  "https://buy.stripe.com/bJe00lcmL2t8cuUcv11oI01";
-              }}
-              className="block w-full py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-bold rounded-xl text-center text-sm hover:opacity-90 transition"
-            >
-              Upgrade to Premium, $9.99/mo
-            </Link>
-            <p className="text-white/30 text-[10px] text-center mt-2">
-              Includes global Spotify search, early drops, Fan Zone, DJ access &
-              more
-            </p>
           </div>
         )}
       </div>
@@ -815,9 +580,8 @@ function TrackRow({
   onClosePlaylistPicker,
   onCreatePlaylist,
   addedFeedback,
-  spotify = false,
 }) {
-  const hasPreview = spotify ? !!track.previewUrl : true;
+  const hasPreview = true;
 
   return (
     <div className={`relative group ${isLocked ? "opacity-40" : ""}`}>
@@ -863,14 +627,12 @@ function TrackRow({
                 className="text-white drop-shadow-lg"
                 fill="white"
               />
-            ) : hasPreview ? (
+            ) : (
               <Play
                 size={20}
                 className="text-white ml-0.5 drop-shadow-lg"
                 fill="white"
               />
-            ) : (
-              <ExternalLink size={14} className="text-white/60" />
             )}
           </div>
           {/* Playable indicator dot */}
@@ -907,26 +669,10 @@ function TrackRow({
         </div>
 
         {/* Source Badge */}
-        {spotify && (
-          <span
-            className={`hidden sm:inline-flex items-center gap-1 text-[10px] px-2 py-1 rounded-md shrink-0 ${
-              hasPreview
-                ? "text-green-300 bg-green-500/15"
-                : "text-white/25 bg-white/5"
-            }`}
-          >
-            {hasPreview && (
-              <span className="w-1.5 h-1.5 rounded-full bg-current" />
-            )}
-            {hasPreview ? "30s" : "No audio"}
-          </span>
-        )}
-        {!spotify && (
-          <span className="hidden sm:inline-flex items-center gap-1 text-[10px] text-blue-300 bg-blue-500/15 px-2 py-1 rounded-md shrink-0">
-            <span className="w-1.5 h-1.5 rounded-full bg-current" />
-            Full
-          </span>
-        )}
+        <span className="hidden sm:inline-flex items-center gap-1 text-[10px] text-blue-300 bg-blue-500/15 px-2 py-1 rounded-md shrink-0">
+          <span className="w-1.5 h-1.5 rounded-full bg-current" />
+          Full
+        </span>
 
         {/* Duration */}
         <span className="text-white/25 text-xs tabular-nums hidden sm:block w-10 text-right shrink-0">
@@ -945,19 +691,6 @@ function TrackRow({
         >
           {addedFeedback ? <Check size={14} /> : <Plus size={14} />}
         </button>
-
-        {/* External Link */}
-        {spotify && track.spotifyUrl && (
-          <a
-            href={track.spotifyUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-11 h-11 rounded-lg bg-white/[0.03] flex items-center justify-center text-white/20 hover:text-green-400 hover:bg-green-500/10 transition shrink-0"
-            title="Open in Spotify"
-          >
-            <ExternalLink size={13} />
-          </a>
-        )}
       </div>
 
       {/* Playlist Picker Dropdown */}

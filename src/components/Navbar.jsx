@@ -724,7 +724,7 @@ export default function Navbar() {
         </div>
       )}
 
-      {/* Mobile Bottom Tab Bar — persistent, Spotify-style */}
+      {/* Mobile Bottom Tab Bar — persistent */}
       <nav
         aria-label="Mobile bottom navigation"
         className="lg:hidden fixed bottom-0 left-0 right-0 z-[450] bg-[#0a0f1a]/98 backdrop-blur-2xl border-t border-white/[0.06]"
