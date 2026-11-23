@@ -3,26 +3,38 @@
  * IDMG logo + brand + "Caught That" video under tagline
  */
 
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { createPortal } from 'react-dom';
-import Image from 'next/image';
-import { MessageCircle, Share2 } from 'lucide-react';
-import CommentSection from './CommentSection';
+import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
+import Image from "next/image";
+import dynamic from "next/dynamic";
+import { MessageCircle, Share2 } from "lucide-react";
+// Heavy comment panel — only loaded after a user taps the comment button.
+const CommentSection = dynamic(() => import("./CommentSection"), {
+  ssr: false,
+  loading: () => null,
+});
 
 export default function Hero() {
   const [commentVideo, setCommentVideo] = useState(null);
   const [mounted, setMounted] = useState(false);
-  useEffect(() => { setMounted(true); }, []);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const shareVideo = async (title, youtubeId) => {
     const url = `https://youtube.com/watch?v=${youtubeId}`;
     const text = `🎬 "${title}" - Mike Page\n\nWatch now!`;
     if (navigator.share) {
-      try { await navigator.share({ title: `${title} - Mike Page`, text, url }); return; } catch {}
+      try {
+        await navigator.share({ title: `${title} - Mike Page`, text, url });
+        return;
+      } catch {}
     }
-    try { await navigator.clipboard.writeText(url); } catch {}
+    try {
+      await navigator.clipboard.writeText(url);
+    } catch {}
   };
 
   return (
@@ -67,7 +79,7 @@ export default function Hero() {
                 title="Mike Page - Caught That (Official 4K Video)"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                 allowFullScreen
-                style={{ border: 'none' }}
+                style={{ border: "none" }}
               />
             </div>
             <div className="flex items-center justify-between mt-3">
@@ -76,14 +88,19 @@ export default function Hero() {
               </p>
               <div className="flex items-center gap-3">
                 <button
-                  onClick={() => shareVideo('Caught That', 'xqw4wV8Npzs')}
+                  onClick={() => shareVideo("Caught That", "xqw4wV8Npzs")}
                   className="flex items-center gap-1.5 text-white/40 hover:text-blue-400 transition text-xs"
                 >
                   <Share2 size={14} />
                   <span>Share</span>
                 </button>
                 <button
-                  onClick={() => setCommentVideo({ id: 'video-caught-that', title: 'Caught That' })}
+                  onClick={() =>
+                    setCommentVideo({
+                      id: "video-caught-that",
+                      title: "Caught That",
+                    })
+                  }
                   className="flex items-center gap-1.5 text-white/40 hover:text-blue-400 transition text-xs"
                 >
                   <MessageCircle size={14} />
@@ -100,7 +117,7 @@ export default function Hero() {
                 title="Mike Page - To The Money (Official 4K Video)"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                 allowFullScreen
-                style={{ border: 'none' }}
+                style={{ border: "none" }}
               />
             </div>
             <div className="flex items-center justify-between mt-3">
@@ -109,14 +126,19 @@ export default function Hero() {
               </p>
               <div className="flex items-center gap-3">
                 <button
-                  onClick={() => shareVideo('To The Money', 'DC9CGQN_DI8')}
+                  onClick={() => shareVideo("To The Money", "DC9CGQN_DI8")}
                   className="flex items-center gap-1.5 text-white/40 hover:text-blue-400 transition text-xs"
                 >
                   <Share2 size={14} />
                   <span>Share</span>
                 </button>
                 <button
-                  onClick={() => setCommentVideo({ id: 'video-to-the-money', title: 'To The Money' })}
+                  onClick={() =>
+                    setCommentVideo({
+                      id: "video-to-the-money",
+                      title: "To The Money",
+                    })
+                  }
                   className="flex items-center gap-1.5 text-white/40 hover:text-blue-400 transition text-xs"
                 >
                   <MessageCircle size={14} />
@@ -129,36 +151,46 @@ export default function Hero() {
       </div>
 
       {/* Video Comment Modal — portaled to body */}
-      {commentVideo && mounted && createPortal(
-        <div className="fixed inset-0 z-[600] flex items-end md:items-center justify-center pb-[72px] md:pb-0" onClick={() => setCommentVideo(null)}>
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      {commentVideo &&
+        mounted &&
+        createPortal(
           <div
-            className="relative w-full md:w-[420px] md:max-h-[80vh] max-h-[65vh] rounded-t-2xl md:rounded-2xl border border-white/10 bg-[#0d1117] shadow-2xl overflow-hidden flex flex-col animate-slide-up"
-            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 z-[600] flex items-end md:items-center justify-center pb-[72px] md:pb-0"
+            onClick={() => setCommentVideo(null)}
           >
-            <div className="px-4 py-3 border-b border-white/10 flex items-center justify-between shrink-0">
-              <div>
-                <h3 className="text-sm font-semibold text-white/80 flex items-center gap-2">
-                  <MessageCircle size={14} className="text-blue-400" />
-                  Comments
-                </h3>
-                <p className="text-[11px] text-white/30 mt-0.5 truncate">{commentVideo.title}</p>
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+            <div
+              className="relative w-full md:w-[420px] md:max-h-[80vh] max-h-[65vh] rounded-t-2xl md:rounded-2xl border border-white/10 bg-[#0d1117] shadow-2xl overflow-hidden flex flex-col animate-slide-up"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="px-4 py-3 border-b border-white/10 flex items-center justify-between shrink-0">
+                <div>
+                  <h3 className="text-sm font-semibold text-white/80 flex items-center gap-2">
+                    <MessageCircle size={14} className="text-blue-400" />
+                    Comments
+                  </h3>
+                  <p className="text-[11px] text-white/30 mt-0.5 truncate">
+                    {commentVideo.title}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setCommentVideo(null)}
+                  className="p-2 text-white/40 hover:text-white transition"
+                >
+                  <span className="text-lg leading-none">&times;</span>
+                </button>
               </div>
-              <button onClick={() => setCommentVideo(null)} className="p-2 text-white/40 hover:text-white transition">
-                <span className="text-lg leading-none">&times;</span>
-              </button>
+              <div className="flex-1 overflow-hidden">
+                <CommentSection
+                  trackId={commentVideo.id}
+                  trackTitle={commentVideo.title}
+                  modalMode={true}
+                />
+              </div>
             </div>
-            <div className="flex-1 overflow-hidden">
-              <CommentSection
-                trackId={commentVideo.id}
-                trackTitle={commentVideo.title}
-                modalMode={true}
-              />
-            </div>
-          </div>
-        </div>,
-        document.body
-      )}
+          </div>,
+          document.body,
+        )}
     </section>
   );
 }

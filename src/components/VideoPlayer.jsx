@@ -3,18 +3,37 @@
  * Includes lyrics overlay toggle
  */
 
-'use client';
+"use client";
 
-import { useEffect, useRef, useState } from 'react';
-import { X, Play, Eye, ExternalLink, Share2, Heart, FileText, ChevronDown, ChevronUp, MessageCircle, Link2, Check, Mail } from 'lucide-react';
-import { useVideoStore } from '@/store/videoStore';
-import { getVisitorId } from '@/store/videoStore';
-import CommentSection from './CommentSection';
+import { useEffect, useRef, useState } from "react";
+import {
+  X,
+  Play,
+  Eye,
+  ExternalLink,
+  Share2,
+  Heart,
+  FileText,
+  ChevronDown,
+  ChevronUp,
+  MessageCircle,
+  Link2,
+  Check,
+  Mail,
+} from "lucide-react";
+import dynamic from "next/dynamic";
+import { useVideoStore } from "@/store/videoStore";
+import { getVisitorId } from "@/store/videoStore";
+// Heavy comment panel — only loaded when a user opens video comments.
+const CommentSection = dynamic(() => import("./CommentSection"), {
+  ssr: false,
+  loading: () => null,
+});
 
 // Sample lyrics - can be moved to data file
 const videoLyrics = {
-  'live-like-a-king': {
-    title: 'Live Like A King',
+  "live-like-a-king": {
+    title: "Live Like A King",
     lyrics: `[Verse 1]
 Started from the bottom, now I'm climbing to the top
 Every single day I grind, I never gonna stop
@@ -69,9 +88,11 @@ export default function VideoPlayer({ video, onClose }) {
   useEffect(() => {
     const vid = getVisitorId();
     if (!video?.id) return;
-    fetch(`/api/video-likes?videoId=${encodeURIComponent(video.id)}&visitorId=${encodeURIComponent(vid)}`)
-      .then(r => r.json())
-      .then(data => {
+    fetch(
+      `/api/video-likes?videoId=${encodeURIComponent(video.id)}&visitorId=${encodeURIComponent(vid)}`,
+    )
+      .then((r) => r.json())
+      .then((data) => {
         setLikeCount(data.likes || 0);
         setIsLiked(!!data.liked);
       })
@@ -88,9 +109,9 @@ export default function VideoPlayer({ video, onClose }) {
     setLikeCount(wasLiked ? prevCount - 1 : prevCount + 1);
     setLikeLoading(true);
     try {
-      const res = await fetch('/api/video-likes', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/video-likes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ videoId: video.id, visitorId: vid }),
       });
       const data = await res.json();
@@ -141,11 +162,11 @@ export default function VideoPlayer({ video, onClose }) {
     try {
       await navigator.clipboard.writeText(videoShareUrl);
     } catch {
-      const ta = document.createElement('textarea');
+      const ta = document.createElement("textarea");
       ta.value = videoShareUrl;
       document.body.appendChild(ta);
       ta.select();
-      document.execCommand('copy');
+      document.execCommand("copy");
       document.body.removeChild(ta);
     }
     setCopied(true);
@@ -159,14 +180,20 @@ export default function VideoPlayer({ video, onClose }) {
 
   const sendVideoEmail = () => {
     const subject = encodeURIComponent(shareTitle);
-    const body = encodeURIComponent(`${shareText}\n\n🎧 Watch here: ${videoShareUrl}`);
+    const body = encodeURIComponent(
+      `${shareText}\n\n🎧 Watch here: ${videoShareUrl}`,
+    );
     window.location.href = `mailto:?subject=${subject}&body=${body}`;
   };
 
   const shareVideoNative = async () => {
     if (navigator.share) {
       try {
-        await navigator.share({ title: shareTitle, text: shareText, url: videoShareUrl });
+        await navigator.share({
+          title: shareTitle,
+          text: shareText,
+          url: videoShareUrl,
+        });
         return;
       } catch {}
     }
@@ -201,7 +228,9 @@ export default function VideoPlayer({ video, onClose }) {
                 <Play size={48} className="text-white/50 ml-2" />
               </div>
               <p className="text-white/50 text-lg">Video coming soon</p>
-              <p className="text-white/30 text-sm mt-2">Check back for updates</p>
+              <p className="text-white/30 text-sm mt-2">
+                Check back for updates
+              </p>
             </div>
           )}
 
@@ -209,7 +238,7 @@ export default function VideoPlayer({ video, onClose }) {
           {showLyrics && lyrics && (
             <div
               className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/95 to-black/80 transition-all duration-300 ${
-                lyricsExpanded ? 'h-full' : 'h-1/2'
+                lyricsExpanded ? "h-full" : "h-1/2"
               }`}
             >
               <div className="h-full flex flex-col">
@@ -253,19 +282,23 @@ export default function VideoPlayer({ video, onClose }) {
         {/* Video Info */}
         <div className="mt-6 flex flex-col md:flex-row justify-between items-start gap-4">
           <div className="flex-1">
-            <h2 className="text-2xl font-bold text-white mb-2">{video.title}</h2>
+            <h2 className="text-2xl font-bold text-white mb-2">
+              {video.title}
+            </h2>
             <p className="text-white/50">{video.description}</p>
 
             {/* Stats */}
             <div className="flex items-center gap-6 mt-4">
               <div className="flex items-center gap-2 text-blue-400">
                 <Eye size={18} />
-                <span className="font-medium">{viewCount.toLocaleString()}</span>
+                <span className="font-medium">
+                  {viewCount.toLocaleString()}
+                </span>
                 <span className="text-white/40 text-sm">MyStation views</span>
               </div>
               <span className="text-white/30">{video.year}</span>
               <span className="px-3 py-1 bg-white/10 rounded-full text-white/60 text-sm capitalize">
-                {video.category.replace('-', ' ')}
+                {video.category.replace("-", " ")}
               </span>
             </div>
           </div>
@@ -278,8 +311,8 @@ export default function VideoPlayer({ video, onClose }) {
                 onClick={() => setShowLyrics(!showLyrics)}
                 className={`p-3 rounded-xl transition flex items-center gap-2 ${
                   showLyrics
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-white/10 hover:bg-white/20 text-white'
+                    ? "bg-blue-500 text-white"
+                    : "bg-white/10 hover:bg-white/20 text-white"
                 }`}
               >
                 <FileText size={20} />
@@ -291,22 +324,27 @@ export default function VideoPlayer({ video, onClose }) {
               disabled={likeLoading}
               className={`p-3 rounded-xl transition flex items-center gap-2 ${
                 isLiked
-                  ? 'bg-red-500/20 hover:bg-red-500/30'
-                  : 'bg-white/10 hover:bg-white/20'
+                  ? "bg-red-500/20 hover:bg-red-500/30"
+                  : "bg-white/10 hover:bg-white/20"
               }`}
             >
               <Heart
                 size={20}
-                className={isLiked ? 'text-red-500' : 'text-white'}
-                fill={isLiked ? 'currentColor' : 'none'}
+                className={isLiked ? "text-red-500" : "text-white"}
+                fill={isLiked ? "currentColor" : "none"}
               />
               {likeCount > 0 && (
-                <span className={`text-sm font-medium ${isLiked ? 'text-red-400' : 'text-white/60'}`}>
+                <span
+                  className={`text-sm font-medium ${isLiked ? "text-red-400" : "text-white/60"}`}
+                >
                   {likeCount.toLocaleString()}
                 </span>
               )}
             </button>
-            <button onClick={() => setShowShare(true)} className="p-3 bg-white/10 rounded-xl hover:bg-white/20 transition">
+            <button
+              onClick={() => setShowShare(true)}
+              className="p-3 bg-white/10 rounded-xl hover:bg-white/20 transition"
+            >
               <Share2 size={20} className="text-white" />
             </button>
             {video.youtubeId && (
@@ -317,7 +355,9 @@ export default function VideoPlayer({ video, onClose }) {
                 className="p-3 bg-red-500/20 rounded-xl hover:bg-red-500/30 transition flex items-center gap-2"
               >
                 <ExternalLink size={20} className="text-red-400" />
-                <span className="text-red-400 text-sm font-medium">YouTube</span>
+                <span className="text-red-400 text-sm font-medium">
+                  YouTube
+                </span>
               </a>
             )}
           </div>
@@ -344,11 +384,18 @@ export default function VideoPlayer({ video, onClose }) {
                     <FileText size={24} className="text-blue-400" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-white">View Lyrics</h3>
-                    <p className="text-white/50 text-sm">Read along while watching</p>
+                    <h3 className="text-lg font-bold text-white">
+                      View Lyrics
+                    </h3>
+                    <p className="text-white/50 text-sm">
+                      Read along while watching
+                    </p>
                   </div>
                 </div>
-                <ChevronUp size={24} className="text-white/40 group-hover:text-white transition" />
+                <ChevronUp
+                  size={24}
+                  className="text-white/40 group-hover:text-white transition"
+                />
               </div>
             </button>
           </div>
@@ -357,40 +404,62 @@ export default function VideoPlayer({ video, onClose }) {
 
       {/* Share Modal */}
       {showShare && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] flex items-center justify-center p-4" onClick={() => setShowShare(false)}>
-          <div className="glass rounded-2xl max-w-md w-full animate-scale-in" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] flex items-center justify-center p-4"
+          onClick={() => setShowShare(false)}
+        >
+          <div
+            className="glass rounded-2xl max-w-md w-full animate-scale-in"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex items-center justify-between p-6 border-b border-white/10">
               <div>
                 <h2 className="text-xl font-bold text-white">Share Video</h2>
                 <p className="text-white/50 text-sm">{video.title}</p>
               </div>
-              <button onClick={() => setShowShare(false)} className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center hover:bg-white/10 transition">
+              <button
+                onClick={() => setShowShare(false)}
+                className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center hover:bg-white/10 transition"
+              >
                 <X size={20} className="text-white" />
               </button>
             </div>
             <div className="p-6 space-y-3">
               {/* Native Share / Instagram */}
-              <button onClick={shareVideoNative} className="w-full flex items-center gap-4 p-4 bg-pink-500/10 hover:bg-pink-500/20 rounded-xl border border-pink-500/30 transition">
+              <button
+                onClick={shareVideoNative}
+                className="w-full flex items-center gap-4 p-4 bg-pink-500/10 hover:bg-pink-500/20 rounded-xl border border-pink-500/30 transition"
+              >
                 <div className="w-12 h-12 bg-pink-500/20 rounded-full flex items-center justify-center">
                   <Share2 size={24} className="text-pink-400" />
                 </div>
                 <div className="text-left">
                   <p className="font-bold text-white">Share to Social</p>
-                  <p className="text-sm text-white/50">Instagram, Twitter, and more</p>
+                  <p className="text-sm text-white/50">
+                    Instagram, Twitter, and more
+                  </p>
                 </div>
               </button>
               {/* SMS */}
-              <button onClick={sendVideoSMS} className="w-full flex items-center gap-4 p-4 bg-green-500/10 hover:bg-green-500/20 rounded-xl border border-green-500/30 transition">
+              <button
+                onClick={sendVideoSMS}
+                className="w-full flex items-center gap-4 p-4 bg-green-500/10 hover:bg-green-500/20 rounded-xl border border-green-500/30 transition"
+              >
                 <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center">
                   <MessageCircle size={24} className="text-green-400" />
                 </div>
                 <div className="text-left">
                   <p className="font-bold text-white">Send via SMS</p>
-                  <p className="text-sm text-white/50">Text the video link to anyone</p>
+                  <p className="text-sm text-white/50">
+                    Text the video link to anyone
+                  </p>
                 </div>
               </button>
               {/* Email */}
-              <button onClick={sendVideoEmail} className="w-full flex items-center gap-4 p-4 bg-blue-500/10 hover:bg-blue-500/20 rounded-xl border border-blue-500/30 transition">
+              <button
+                onClick={sendVideoEmail}
+                className="w-full flex items-center gap-4 p-4 bg-blue-500/10 hover:bg-blue-500/20 rounded-xl border border-blue-500/30 transition"
+              >
                 <div className="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center">
                   <Mail size={24} className="text-blue-400" />
                 </div>
@@ -400,18 +469,31 @@ export default function VideoPlayer({ video, onClose }) {
                 </div>
               </button>
               {/* Copy Link */}
-              <button onClick={copyVideoLink} className="w-full flex items-center gap-4 p-4 bg-purple-500/10 hover:bg-purple-500/20 rounded-xl border border-purple-500/30 transition">
+              <button
+                onClick={copyVideoLink}
+                className="w-full flex items-center gap-4 p-4 bg-purple-500/10 hover:bg-purple-500/20 rounded-xl border border-purple-500/30 transition"
+              >
                 <div className="w-12 h-12 bg-purple-500/20 rounded-full flex items-center justify-center">
-                  {copied ? <Check size={24} className="text-green-400" /> : <Link2 size={24} className="text-purple-400" />}
+                  {copied ? (
+                    <Check size={24} className="text-green-400" />
+                  ) : (
+                    <Link2 size={24} className="text-purple-400" />
+                  )}
                 </div>
                 <div className="text-left">
-                  <p className="font-bold text-white">{copied ? 'Link Copied!' : 'Copy Link'}</p>
-                  <p className="text-sm text-white/50">Share anywhere you want</p>
+                  <p className="font-bold text-white">
+                    {copied ? "Link Copied!" : "Copy Link"}
+                  </p>
+                  <p className="text-sm text-white/50">
+                    Share anywhere you want
+                  </p>
                 </div>
               </button>
             </div>
             <div className="p-4 border-t border-white/10 text-center">
-              <p className="text-white/30 text-xs">Sharing helps support the Mike Page Foundation</p>
+              <p className="text-white/30 text-xs">
+                Sharing helps support the Mike Page Foundation
+              </p>
             </div>
           </div>
         </div>
