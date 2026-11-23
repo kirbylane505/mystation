@@ -149,12 +149,17 @@ export function trackAlbumArt(track, { absolute = false } = {}) {
  */
 export function pickFiveStartingFrom(hero) {
   if (!hero) return [];
+  // Nov 23 2026: companions must be truly PLAYABLE, not just "has an audioFile
+  // string." 35 tracks in the catalog still reference dead `/audio/*` paths
+  // that 404 on prod — those were leaking in as companions and breaking the
+  // auto-advance. Mike's directive: "only use track with real audio."
+  // isPubliclyPlayable requires http(s) audioFile and no vault/comingSoon flags.
+  if (!isPubliclyPlayable(hero)) return [];
   const chosen = [hero];
   const seen = new Set([hero.id]);
   const heroArtist = hero.artist || "Mike Page";
 
-  const playable = (t) =>
-    t && !t.isVault && !t.comingSoon && (t.audioFile || "").length > 0;
+  const playable = (t) => isPubliclyPlayable(t);
 
   const addFrom = (pool) => {
     for (const t of pool) {
