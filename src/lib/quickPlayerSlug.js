@@ -17,6 +17,26 @@
 
 import { tracks } from "@/data/tracks";
 
+/** A track is safe to expose via /p/[slug] only if it's not in the vault,
+ *  not marked coming-soon, and has an audio file that will actually play.
+ *
+ *  Nov 23 2026 investigation found all 36 `/audio/*` relative paths in
+ *  the catalog return 404 on prod — only the 170 R2-hosted (http*) files
+ *  are actually served. So the public player REQUIRES an http audioFile.
+ *  Tracks with dead local paths stay invisible until the masters land on R2.
+ *
+ *  Public shareable links must NEVER leak unreleased, gated, or broken content. */
+export function isPubliclyPlayable(track) {
+  if (!track) return false;
+  if (track.isVault) return false;
+  if (track.comingSoon) return false;
+  if (!track.audioFile) return false;
+  // Only R2-hosted tracks are proven to play on prod. Local /audio/* paths
+  // are broken (verified Nov 23 2026).
+  if (!/^https?:\/\//i.test(track.audioFile)) return false;
+  return true;
+}
+
 export function slugifyTitle(title) {
   if (!title) return "";
   return String(title)
@@ -36,15 +56,17 @@ export function trackSlug(track) {
   return slugifyTitle(track.title);
 }
 
-/** Return every valid slug (for generateStaticParams). */
+/** Return every valid slug (for generateStaticParams). Vault + comingSoon
+ *  tracks are excluded — those must never be reachable via /p/. */
 export function allTrackSlugs() {
+  const publicTracks = tracks.filter(isPubliclyPlayable);
   const counts = new Map();
-  for (const t of tracks) {
+  for (const t of publicTracks) {
     const s = slugifyTitle(t.title);
     counts.set(s, (counts.get(s) || 0) + 1);
   }
   const slugs = [];
-  for (const t of tracks) {
+  for (const t of publicTracks) {
     const base = slugifyTitle(t.title);
     if (!base) continue;
     const slug = counts.get(base) > 1 ? `${base}-${t.id}` : base;
@@ -53,21 +75,24 @@ export function allTrackSlugs() {
   return slugs;
 }
 
-/** Resolve a URL slug back to a track. Tries the base slug first,
- *  then the id-suffixed form, then falls back to id-only. */
+/** Resolve a URL slug back to a track. Only returns PUBLICLY PLAYABLE
+ *  tracks — vault + coming-soon tracks always return null, no matter
+ *  how the slug is constructed. */
 export function findTrackBySlug(slug) {
   if (!slug) return null;
   const lower = String(slug).toLowerCase();
 
-  // Build a counts map to know which titles collide
+  // Search only within the public catalog — vault/comingSoon invisible
+  const publicTracks = tracks.filter(isPubliclyPlayable);
+
   const counts = new Map();
-  for (const t of tracks) {
+  for (const t of publicTracks) {
     const s = slugifyTitle(t.title);
     counts.set(s, (counts.get(s) || 0) + 1);
   }
 
   // 1. direct base-slug match (only if unique OR the only hit we find)
-  const direct = tracks.find((t) => slugifyTitle(t.title) === lower);
+  const direct = publicTracks.find((t) => slugifyTitle(t.title) === lower);
   if (direct && counts.get(lower) === 1) return direct;
 
   // 2. slug ends with -ID → extract and match
@@ -75,20 +100,21 @@ export function findTrackBySlug(slug) {
   if (m) {
     const base = m[1];
     const id = parseInt(m[2], 10);
-    const t = tracks.find((t) => t.id === id && slugifyTitle(t.title) === base);
+    const t = publicTracks.find(
+      (t) => t.id === id && slugifyTitle(t.title) === base,
+    );
     if (t) return t;
-    // Also accept id-suffixed match even if base disagrees — allows callers
-    // to construct `${anyTitle}-${id}` and still get the right track.
-    const byId = tracks.find((t) => t.id === id);
+    // id-suffixed match even if base disagrees — but only if still public
+    const byId = publicTracks.find((t) => t.id === id);
     if (byId) return byId;
   }
 
   // 3. First track with that base slug (collision — pick first stable)
   if (direct) return direct;
 
-  // 4. numeric-only slug: treat as id
+  // 4. numeric-only slug: treat as id (still only public)
   if (/^\d+$/.test(lower)) {
-    const byId = tracks.find((t) => String(t.id) === lower);
+    const byId = publicTracks.find((t) => String(t.id) === lower);
     if (byId) return byId;
   }
 

@@ -17,6 +17,7 @@ import {
   trackAlbumArt,
   pickFiveStartingFrom,
   trackPayload,
+  isPubliclyPlayable,
 } from "@/lib/quickPlayerSlug";
 import QuickPlayerClient from "./QuickPlayerClient";
 
@@ -29,7 +30,8 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }) {
   const { slug } = await params;
   const track = findTrackBySlug(slug);
-  if (!track) {
+  // Defense-in-depth: refuse to leak metadata for vault/unreleased tracks
+  if (!track || !isPubliclyPlayable(track)) {
     return { title: "Track not found · MyStation" };
   }
   const artist = trackDisplayArtist(track);
@@ -65,7 +67,8 @@ export async function generateMetadata({ params }) {
 export default async function QuickPlayerPage({ params }) {
   const { slug } = await params;
   const hero = findTrackBySlug(slug);
-  if (!hero) notFound();
+  // Defense-in-depth: double-check gate at the page body too
+  if (!hero || !isPubliclyPlayable(hero)) notFound();
 
   const playlist = pickFiveStartingFrom(hero).map(trackPayload).filter(Boolean);
 
