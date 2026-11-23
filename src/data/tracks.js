@@ -15,12 +15,12 @@ export const tracks = [
     year: 2026,
     duration: "2:17",
     trackNumber: 1,
-    albumId: 'singles-2026',
-    audioFile: '/audio/singles/Mike Page - For Us Freestyle_MASTERED.m4a',
+    albumId: "singles-2026",
+    audioFile: "/audio/singles/Mike Page - For Us Freestyle_MASTERED.m4a",
     isNew: true,
     isFeatured: true,
-    featuredWeek: '2026-04-18',
-    producer: 'IDMG'
+    featuredWeek: "2026-04-18",
+    producer: "IDMG",
   },
   {
     id: 515,
@@ -30,12 +30,13 @@ export const tracks = [
     year: 2026,
     duration: "4:05",
     trackNumber: 1,
-    albumId: 'singles-2026',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-x-tkp-embellishments.m4a',
+    albumId: "singles-2026",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-x-tkp-embellishments.m4a",
     isNew: true,
     isFeatured: true,
-    featuredWeek: '2026-04-16',
-    producer: 'The Cubist'
+    featuredWeek: "2026-04-16",
+    producer: "The Cubist",
   },
   {
     id: 97,
@@ -45,13 +46,13 @@ export const tracks = [
     year: 2010,
     duration: "4:18",
     trackNumber: 1,
-    albumId: 'singles-2026',
-    audioFile: '/audio/singles/fantasy-ft-q-parker.m4a',
+    albumId: "singles-2026",
+    audioFile: "/audio/singles/fantasy-ft-q-parker.m4a",
     isNew: true,
     isFeatured: true,
-    featuredWeek: '2026-03-08',
+    featuredWeek: "2026-03-08",
     hitScore: 96,
-    producer: 'DJ Boi Wunda'
+    producer: "DJ Boi Wunda",
   },
   {
     id: 98,
@@ -61,13 +62,14 @@ export const tracks = [
     year: 2026,
     duration: "3:42",
     trackNumber: 1,
-    albumId: 'singles-2026',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/djuan-covington-please-dont.m4a',
+    albumId: "singles-2026",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/djuan-covington-please-dont.m4a",
     isNew: true,
     isFeatured: true,
-    featuredWeek: '2026-03-07',
+    featuredWeek: "2026-03-07",
     hitScore: 97,
-    producer: 'The Cubist'
+    producer: "The Cubist",
   },
   {
     id: 99,
@@ -77,10 +79,11 @@ export const tracks = [
     year: 2026,
     duration: "2:26",
     trackNumber: 1,
-    albumId: 'singles-2026',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-lizzo.m4a',
+    albumId: "singles-2026",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-lizzo.m4a",
     isNew: true,
-    producer: 'The Art Teacher'
+    producer: "The Art Teacher",
   },
   {
     id: 100,
@@ -89,15 +92,16 @@ export const tracks = [
     year: 2026,
     duration: "4:34",
     trackNumber: 1,
-    albumId: 'singles-2026',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-favorite-person.m4a',
+    albumId: "singles-2026",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-favorite-person.m4a",
     isNew: true,
     isFeatured: true,
-    featuredWeek: '2026-01-31',
+    featuredWeek: "2026-01-31",
     bpm: 150,
-    key: 'C Minor',
+    key: "C Minor",
     hitScore: 95,
-    producer: 'The Cubist'
+    producer: "The Cubist",
   },
   {
     id: 101,
@@ -107,13 +111,14 @@ export const tracks = [
     year: 2026,
     duration: "3:07",
     trackNumber: 2,
-    albumId: 'singles-2026',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-having-my-way.m4a',
+    albumId: "singles-2026",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-having-my-way.m4a",
     isNew: true,
     bpm: 140,
-    key: 'D Minor',
+    key: "D Minor",
     hitScore: 90,
-    producer: 'The Cubist'
+    producer: "The Cubist",
   },
   {
     id: 102,
@@ -124,13 +129,14 @@ export const tracks = [
     year: 2026,
     duration: "3:55",
     trackNumber: 3,
-    albumId: 'singles-2026',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-rent-due.m4a',
+    albumId: "singles-2026",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-rent-due.m4a",
     isNew: true,
     bpm: 130,
-    key: 'G Minor',
+    key: "G Minor",
     hitScore: 88,
-    producer: 'The Cubist & Jack Thomas'
+    producer: "The Cubist & Jack Thomas",
   },
   {
     id: 103,
@@ -140,13 +146,14 @@ export const tracks = [
     year: 2026,
     duration: "2:23",
     trackNumber: 4,
-    albumId: 'singles-2026',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-crash-out.m4a',
+    albumId: "singles-2026",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-crash-out.m4a",
     isNew: true,
     bpm: 135,
-    key: 'E Minor',
+    key: "E Minor",
     hitScore: 88,
-    producer: 'The Cubist'
+    producer: "The Cubist",
   },
   {
     id: 104,
@@ -156,14 +163,15 @@ export const tracks = [
     year: 2026,
     duration: "3:11",
     trackNumber: 5,
-    albumId: 'singles-2026',
-    albumArt: '/images/singles/4-a-minute.jpg',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-4-a-min.m4a',
+    albumId: "singles-2026",
+    albumArt: "/images/singles/4-a-minute.jpg",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-4-a-min.m4a",
     isNew: true,
     bpm: 130,
-    key: 'F Minor',
+    key: "F Minor",
     hitScore: 88,
-    producer: 'The Cubist'
+    producer: "The Cubist",
   },
   {
     id: 105,
@@ -173,14 +181,15 @@ export const tracks = [
     year: 2026,
     duration: "3:29",
     trackNumber: 6,
-    albumId: 'singles-2026',
-    albumArt: '/images/singles/one-love.jpg',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-one-love.m4a',
+    albumId: "singles-2026",
+    albumArt: "/images/singles/one-love.jpg",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-one-love.m4a",
     isNew: true,
     bpm: 120,
-    key: 'G Minor',
+    key: "G Minor",
     hitScore: 89,
-    producer: 'Gee & The Cubist'
+    producer: "Gee & The Cubist",
   },
   {
     id: 106,
@@ -190,14 +199,15 @@ export const tracks = [
     year: 2026,
     duration: "2:16",
     trackNumber: 7,
-    albumId: 'singles-2026',
-    albumArt: '/images/singles/ten-toes-down.jpg',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-10-toes-down.m4a',
+    albumId: "singles-2026",
+    albumArt: "/images/singles/ten-toes-down.jpg",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-10-toes-down.m4a",
     isNew: true,
     bpm: 130,
-    key: 'E Minor',
+    key: "E Minor",
     hitScore: 90,
-    producer: 'Shawn Hibbler & The Cubist'
+    producer: "Shawn Hibbler & The Cubist",
   },
   // ========================================
   // NEW RELEASES
@@ -214,11 +224,12 @@ export const tracks = [
     year: 2026,
     duration: "4:10",
     trackNumber: 1,
-    albumId: 'singles-2026',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-i-need-her.m4a',
+    albumId: "singles-2026",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-i-need-her.m4a",
     isNew: true,
     hitScore: 91,
-    producer: 'Jack Thomas & The Cubist'
+    producer: "Jack Thomas & The Cubist",
   },
   {
     id: 141,
@@ -229,13 +240,14 @@ export const tracks = [
     year: 2026,
     duration: "4:12",
     trackNumber: 11,
-    albumId: 'singles-2026',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-one-of-a-kind.m4a',
+    albumId: "singles-2026",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-one-of-a-kind.m4a",
     isFeatured: true,
-    featuredWeek: '2026-02-12',
+    featuredWeek: "2026-02-12",
     hitScore: 93,
-    genre: 'R&B',
-    producer: 'Mike Page & The Cubist'
+    genre: "R&B",
+    producer: "Mike Page & The Cubist",
   },
   {
     id: 142,
@@ -246,14 +258,15 @@ export const tracks = [
     year: 2026,
     duration: "3:57",
     trackNumber: 12,
-    albumId: 'singles-2026',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-summers-ours.m4a',
+    albumId: "singles-2026",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-summers-ours.m4a",
     isFeatured: true,
-    featuredWeek: '2026-02-12',
+    featuredWeek: "2026-02-12",
     isNew: true,
     hitScore: 92,
-    genre: 'R&B',
-    producer: 'The Cubist'
+    genre: "R&B",
+    producer: "The Cubist",
   },
   {
     id: 143,
@@ -263,12 +276,13 @@ export const tracks = [
     year: 2026,
     duration: "3:20",
     trackNumber: 13,
-    albumId: 'singles-2026',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-nun-of-dat.m4a',
+    albumId: "singles-2026",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-nun-of-dat.m4a",
     isNew: true,
     hitScore: 90,
-    genre: 'R&B',
-    producer: 'The Cubist & Mike Page'
+    genre: "R&B",
+    producer: "The Cubist & Mike Page",
   },
   {
     id: 144,
@@ -278,12 +292,13 @@ export const tracks = [
     year: 2026,
     duration: "5:02",
     trackNumber: 14,
-    albumId: 'singles-2026',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-please-dont.m4a',
+    albumId: "singles-2026",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-please-dont.m4a",
     isNew: true,
     hitScore: 89,
-    genre: 'R&B',
-    producer: 'Mike Page (Loop Killa)'
+    genre: "R&B",
+    producer: "Mike Page (Loop Killa)",
   },
   {
     id: 145,
@@ -293,12 +308,13 @@ export const tracks = [
     year: 2026,
     duration: "4:07",
     trackNumber: 15,
-    albumId: 'singles-2026',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-naturally.m4a',
+    albumId: "singles-2026",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-naturally.m4a",
     isNew: true,
     hitScore: 91,
-    genre: 'R&B',
-    producer: 'The Cubist'
+    genre: "R&B",
+    producer: "The Cubist",
   },
   {
     id: 146,
@@ -308,12 +324,13 @@ export const tracks = [
     year: 2026,
     duration: "2:56",
     trackNumber: 16,
-    albumId: 'singles-2026',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-now-im-shinnin.m4a',
+    albumId: "singles-2026",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-now-im-shinnin.m4a",
     isNew: true,
     hitScore: 90,
-    genre: 'Alternative Rap',
-    producer: 'The Cubist'
+    genre: "Alternative Rap",
+    producer: "The Cubist",
   },
   {
     id: 147,
@@ -323,12 +340,13 @@ export const tracks = [
     year: 2026,
     duration: "4:03",
     trackNumber: 17,
-    albumId: 'singles-2026',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-im-not-just-a-man.m4a',
+    albumId: "singles-2026",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-im-not-just-a-man.m4a",
     isNew: true,
     hitScore: 91,
-    genre: 'Alternative Rap',
-    producer: 'Mike Page & The Cubist'
+    genre: "Alternative Rap",
+    producer: "Mike Page & The Cubist",
   },
   {
     id: 148,
@@ -338,12 +356,13 @@ export const tracks = [
     year: 2026,
     duration: "3:01",
     trackNumber: 18,
-    albumId: 'singles-2026',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-fk-dat-money.m4a',
+    albumId: "singles-2026",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-fk-dat-money.m4a",
     isNew: true,
     hitScore: 90,
-    genre: 'Alternative Rap',
-    producer: 'The Cubist & Mike Page'
+    genre: "Alternative Rap",
+    producer: "The Cubist & Mike Page",
   },
   {
     id: 149,
@@ -353,12 +372,13 @@ export const tracks = [
     year: 2026,
     duration: "3:48",
     trackNumber: 19,
-    albumId: 'singles-2026',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-i-gotta-go.m4a',
+    albumId: "singles-2026",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-i-gotta-go.m4a",
     isNew: true,
     hitScore: 90,
-    genre: 'Pop',
-    producer: 'The Cubist'
+    genre: "Pop",
+    producer: "The Cubist",
   },
   {
     id: 150,
@@ -368,12 +388,13 @@ export const tracks = [
     year: 2026,
     duration: "4:05",
     trackNumber: 20,
-    albumId: 'singles-2026',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-in-the-city.m4a',
+    albumId: "singles-2026",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-in-the-city.m4a",
     isNew: true,
     hitScore: 90,
-    genre: 'Pop',
-    producer: 'The Art Teacher'
+    genre: "Pop",
+    producer: "The Art Teacher",
   },
   {
     id: 151,
@@ -383,12 +404,13 @@ export const tracks = [
     year: 2026,
     duration: "2:46",
     trackNumber: 21,
-    albumId: 'singles-2026',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-how-that-feel.m4a',
+    albumId: "singles-2026",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-how-that-feel.m4a",
     isNew: true,
     hitScore: 89,
-    genre: 'Pop',
-    producer: 'Mike Page'
+    genre: "Pop",
+    producer: "Mike Page",
   },
   {
     id: 152,
@@ -398,12 +420,12 @@ export const tracks = [
     year: 2026,
     duration: "3:18",
     trackNumber: 22,
-    albumId: 'singles-2026',
-    audioFile: '/audio/Mike Page - Friends On Friends_MASTERED.m4a',
+    albumId: "singles-2026",
+    audioFile: "/audio/Mike Page - Friends On Friends_MASTERED.m4a",
     isNew: true,
     hitScore: 91,
-    genre: 'Hip-Hop',
-    producer: 'The Cubist'
+    genre: "Hip-Hop",
+    producer: "The Cubist",
   },
   {
     id: 153,
@@ -413,12 +435,12 @@ export const tracks = [
     year: 2026,
     duration: "2:58",
     trackNumber: 23,
-    albumId: 'singles-2026',
-    audioFile: '/audio/Mike Page - Wet_MASTERED.mp3',
+    albumId: "singles-2026",
+    audioFile: "/audio/Mike Page - Wet_MASTERED.mp3",
     isNew: true,
     hitScore: 91,
-    genre: 'Trap',
-    producer: 'The Cubist'
+    genre: "Trap",
+    producer: "The Cubist",
   },
   {
     id: 154,
@@ -428,12 +450,12 @@ export const tracks = [
     year: 2026,
     duration: "4:08",
     trackNumber: 24,
-    albumId: 'singles-2026',
-    audioFile: '/audio/Mike Page - Whole Bunch Of Money_MASTERED.mp3',
+    albumId: "singles-2026",
+    audioFile: "/audio/Mike Page - Whole Bunch Of Money_MASTERED.mp3",
     isNew: true,
     hitScore: 91,
-    genre: 'Trap',
-    producer: 'The Cubist'
+    genre: "Trap",
+    producer: "The Cubist",
   },
   {
     id: 155,
@@ -443,12 +465,12 @@ export const tracks = [
     year: 2026,
     duration: "3:12",
     trackNumber: 25,
-    albumId: 'singles-2026',
-    audioFile: '/audio/Mike Page - Lights Come On_MASTERED.mp3',
+    albumId: "singles-2026",
+    audioFile: "/audio/Mike Page - Lights Come On_MASTERED.mp3",
     isNew: true,
     hitScore: 91,
-    genre: 'Trap',
-    producer: 'The Cubist'
+    genre: "Trap",
+    producer: "The Cubist",
   },
   {
     id: 156,
@@ -458,12 +480,12 @@ export const tracks = [
     year: 2026,
     duration: "4:21",
     trackNumber: 26,
-    albumId: 'singles-2026',
-    audioFile: '/audio/Mike Page - Fell In Love Wit Her Trappin_MASTERED.mp3',
+    albumId: "singles-2026",
+    audioFile: "/audio/Mike Page - Fell In Love Wit Her Trappin_MASTERED.mp3",
     isNew: true,
     hitScore: 91,
-    genre: 'Trap',
-    producer: 'The Cubist'
+    genre: "Trap",
+    producer: "The Cubist",
   },
   {
     id: 157,
@@ -473,12 +495,12 @@ export const tracks = [
     year: 2026,
     duration: "4:09",
     trackNumber: 27,
-    albumId: 'singles-2026',
-    audioFile: '/audio/Mike Page - Play Her Part_MASTERED.mp3',
+    albumId: "singles-2026",
+    audioFile: "/audio/Mike Page - Play Her Part_MASTERED.mp3",
     isNew: true,
     hitScore: 91,
-    genre: 'Trap',
-    producer: 'The Cubist'
+    genre: "Trap",
+    producer: "The Cubist",
   },
   {
     id: 158,
@@ -488,12 +510,12 @@ export const tracks = [
     year: 2026,
     duration: "2:15",
     trackNumber: 28,
-    albumId: 'singles-2026',
-    audioFile: '/audio/Mike Page - Where This Shit Began_MASTERED.mp3',
+    albumId: "singles-2026",
+    audioFile: "/audio/Mike Page - Where This Shit Began_MASTERED.mp3",
     isNew: true,
     hitScore: 91,
-    genre: 'Trap',
-    producer: 'Mo Productions (Jaiden Morales)'
+    genre: "Trap",
+    producer: "Mo Productions (Jaiden Morales)",
   },
   {
     id: 159,
@@ -503,12 +525,12 @@ export const tracks = [
     year: 2026,
     duration: "1:57",
     trackNumber: 29,
-    albumId: 'singles-2026',
-    audioFile: '/audio/Mike Page - It Was A Dream_MASTERED.mp3',
+    albumId: "singles-2026",
+    audioFile: "/audio/Mike Page - It Was A Dream_MASTERED.mp3",
     isNew: true,
     hitScore: 91,
-    genre: 'Trap',
-    producer: 'The Cubist'
+    genre: "Trap",
+    producer: "The Cubist",
   },
   {
     id: 160,
@@ -518,12 +540,12 @@ export const tracks = [
     year: 2026,
     duration: "2:24",
     trackNumber: 30,
-    albumId: 'singles-2026',
-    audioFile: '/audio/Mike Page - Eat Eat Eat_MASTERED.mp3',
+    albumId: "singles-2026",
+    audioFile: "/audio/Mike Page - Eat Eat Eat_MASTERED.mp3",
     isNew: true,
     hitScore: 91,
-    genre: 'Trap',
-    producer: 'The Cubist'
+    genre: "Trap",
+    producer: "The Cubist",
   },
   {
     id: 161,
@@ -533,12 +555,12 @@ export const tracks = [
     year: 2026,
     duration: "4:15",
     trackNumber: 31,
-    albumId: 'singles-2026',
-    audioFile: '/audio/Mike Page - Chump Change_MASTERED.mp3',
+    albumId: "singles-2026",
+    audioFile: "/audio/Mike Page - Chump Change_MASTERED.mp3",
     isNew: true,
     hitScore: 91,
-    genre: 'Trap',
-    producer: 'The Cubist'
+    genre: "Trap",
+    producer: "The Cubist",
   },
   {
     id: 162,
@@ -548,12 +570,12 @@ export const tracks = [
     year: 2026,
     duration: "3:54",
     trackNumber: 32,
-    albumId: 'singles-2026',
-    audioFile: '/audio/Mike Page - Youll Do That Shit Again_MASTERED.mp3',
+    albumId: "singles-2026",
+    audioFile: "/audio/Mike Page - Youll Do That Shit Again_MASTERED.mp3",
     isNew: true,
     hitScore: 91,
-    genre: 'Trap',
-    producer: 'The Cubist'
+    genre: "Trap",
+    producer: "The Cubist",
   },
   {
     id: 163,
@@ -563,12 +585,12 @@ export const tracks = [
     year: 2026,
     duration: "4:28",
     trackNumber: 33,
-    albumId: 'singles-2026',
-    audioFile: '/audio/Mike Page - Trap Get Ugly_MASTERED.mp3',
+    albumId: "singles-2026",
+    audioFile: "/audio/Mike Page - Trap Get Ugly_MASTERED.mp3",
     isNew: true,
     hitScore: 91,
-    genre: 'Trap',
-    producer: 'The Cubist'
+    genre: "Trap",
+    producer: "The Cubist",
   },
   {
     id: 164,
@@ -578,12 +600,12 @@ export const tracks = [
     year: 2026,
     duration: "4:02",
     trackNumber: 34,
-    albumId: 'singles-2026',
-    audioFile: '/audio/Mike Page - Bounce Back_MASTERED.mp3',
+    albumId: "singles-2026",
+    audioFile: "/audio/Mike Page - Bounce Back_MASTERED.mp3",
     isNew: true,
     hitScore: 91,
-    genre: 'Trap',
-    producer: 'The Cubist'
+    genre: "Trap",
+    producer: "The Cubist",
   },
   {
     id: 165,
@@ -593,12 +615,12 @@ export const tracks = [
     year: 2026,
     duration: "3:46",
     trackNumber: 35,
-    albumId: 'singles-2026',
-    audioFile: '/audio/Mike Page - Said It I Meant It_MASTERED.mp3',
+    albumId: "singles-2026",
+    audioFile: "/audio/Mike Page - Said It I Meant It_MASTERED.mp3",
     isNew: true,
     hitScore: 91,
-    genre: 'Trap',
-    producer: 'The Cubist'
+    genre: "Trap",
+    producer: "The Cubist",
   },
   {
     id: 166,
@@ -608,12 +630,12 @@ export const tracks = [
     year: 2026,
     duration: "1:32",
     trackNumber: 36,
-    albumId: 'singles-2026',
-    audioFile: '/audio/Mike Page - God N U_MASTERED.mp3',
+    albumId: "singles-2026",
+    audioFile: "/audio/Mike Page - God N U_MASTERED.mp3",
     isNew: true,
     hitScore: 91,
-    genre: 'Trap',
-    producer: 'The Cubist'
+    genre: "Trap",
+    producer: "The Cubist",
   },
   {
     id: 167,
@@ -623,12 +645,12 @@ export const tracks = [
     year: 2026,
     duration: "2:54",
     trackNumber: 37,
-    albumId: 'singles-2026',
-    audioFile: '/audio/Mike Page - Sometime I_MASTERED.mp3',
+    albumId: "singles-2026",
+    audioFile: "/audio/Mike Page - Sometime I_MASTERED.mp3",
     isNew: true,
     hitScore: 90,
-    genre: 'Trap',
-    producer: 'The Cubist'
+    genre: "Trap",
+    producer: "The Cubist",
   },
   // ========================================
   // APPLE MUSIC SINGLES — Official Releases from YouTube
@@ -641,13 +663,18 @@ export const tracks = [
     year: 2024,
     duration: "4:10",
     trackNumber: 38,
-    albumId: 'singles-2026',
-    albumArt: '/images/singles/caught-that.jpg',
-    audioFile: '/audio/Mike Page - caught-that_MASTERED.mp3',
+    albumId: "singles-2026",
+    albumArt: "/images/singles/caught-that.jpg",
+    // Nov 23 2026: original /audio/* path was dead on prod. Stopgap audio
+    // sourced from Mike's own official YouTube video (xqw4wV8Npzs) and
+    // uploaded to R2. This is 160kbps opus→m4a — lossy. REPLACE with the
+    // official Atmos/mastered m4a when Mike or The Cubist provides it.
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-caught-that.m4a",
     isNew: true,
     hitScore: 91,
-    genre: 'Hip-Hop',
-    producer: 'The Cubist'
+    genre: "Hip-Hop",
+    producer: "The Cubist",
   },
   {
     id: 169,
@@ -657,13 +684,13 @@ export const tracks = [
     year: 2024,
     duration: "3:43",
     trackNumber: 39,
-    albumId: 'singles-2026',
-    albumArt: '/images/singles/dominate.jpg',
-    audioFile: '/audio/Mike Page - dominate_MASTERED.mp3',
+    albumId: "singles-2026",
+    albumArt: "/images/singles/dominate.jpg",
+    audioFile: "/audio/Mike Page - dominate_MASTERED.mp3",
     isNew: true,
     hitScore: 89,
-    genre: 'Hip-Hop',
-    producer: 'The Cubist & Splited Stupid'
+    genre: "Hip-Hop",
+    producer: "The Cubist & Splited Stupid",
   },
   {
     id: 170,
@@ -673,13 +700,13 @@ export const tracks = [
     year: 2024,
     duration: "2:56",
     trackNumber: 40,
-    albumId: 'singles-2026',
-    albumArt: '/images/singles/be-right-there.jpg',
-    audioFile: '/audio/Mike Page - be-right-there_MASTERED.mp3',
+    albumId: "singles-2026",
+    albumArt: "/images/singles/be-right-there.jpg",
+    audioFile: "/audio/Mike Page - be-right-there_MASTERED.mp3",
     isNew: true,
     hitScore: 88,
-    genre: 'Hip-Hop',
-    producer: 'The Cubist'
+    genre: "Hip-Hop",
+    producer: "The Cubist",
   },
   {
     id: 171,
@@ -689,13 +716,13 @@ export const tracks = [
     year: 2025,
     duration: "2:53",
     trackNumber: 41,
-    albumId: 'singles-2026',
-    albumArt: '/images/singles/to-the-moon.jpg',
-    audioFile: '/audio/Mike Page - to-the-moon_MASTERED.mp3',
+    albumId: "singles-2026",
+    albumArt: "/images/singles/to-the-moon.jpg",
+    audioFile: "/audio/Mike Page - to-the-moon_MASTERED.mp3",
     isNew: true,
     hitScore: 90,
-    genre: 'Hip-Hop',
-    producer: 'The Cubist'
+    genre: "Hip-Hop",
+    producer: "The Cubist",
   },
   {
     id: 172,
@@ -705,13 +732,13 @@ export const tracks = [
     year: 2025,
     duration: "2:36",
     trackNumber: 42,
-    albumId: 'singles-2026',
-    albumArt: '/images/singles/im-tryin.jpg',
-    audioFile: '/audio/Mike Page - im-tryin_MASTERED.mp3',
+    albumId: "singles-2026",
+    albumArt: "/images/singles/im-tryin.jpg",
+    audioFile: "/audio/Mike Page - im-tryin_MASTERED.mp3",
     isNew: true,
     hitScore: 89,
-    genre: 'Hip-Hop',
-    producer: 'The Cubist'
+    genre: "Hip-Hop",
+    producer: "The Cubist",
   },
   {
     id: 173,
@@ -721,13 +748,13 @@ export const tracks = [
     year: 2023,
     duration: "3:33",
     trackNumber: 43,
-    albumId: 'singles-2026',
-    albumArt: '/images/singles/to-the-money.jpg',
-    audioFile: '/audio/Mike Page - to-the-money_MASTERED.mp3',
+    albumId: "singles-2026",
+    albumArt: "/images/singles/to-the-money.jpg",
+    audioFile: "/audio/Mike Page - to-the-money_MASTERED.mp3",
     isNew: true,
     hitScore: 90,
-    genre: 'Hip-Hop',
-    producer: 'Mike Page'
+    genre: "Hip-Hop",
+    producer: "Mike Page",
   },
   {
     id: 174,
@@ -737,13 +764,13 @@ export const tracks = [
     year: 2023,
     duration: "4:10",
     trackNumber: 44,
-    albumId: 'singles-2026',
-    albumArt: '/images/singles/hammydowns.jpg',
-    audioFile: '/audio/Mike Page - hammydowns_MASTERED.mp3',
+    albumId: "singles-2026",
+    albumArt: "/images/singles/hammydowns.jpg",
+    audioFile: "/audio/Mike Page - hammydowns_MASTERED.mp3",
     isNew: true,
     hitScore: 88,
-    genre: 'Hip-Hop',
-    producer: 'Mike Page'
+    genre: "Hip-Hop",
+    producer: "Mike Page",
   },
   {
     id: 176,
@@ -753,13 +780,13 @@ export const tracks = [
     year: 2023,
     duration: "1:50",
     trackNumber: 46,
-    albumId: 'singles-2026',
-    albumArt: '/images/singles/remain-a-hunnid-proof.jpg',
-    audioFile: '/audio/Mike Page - remain-a-hunnid-proof_MASTERED.mp3',
+    albumId: "singles-2026",
+    albumArt: "/images/singles/remain-a-hunnid-proof.jpg",
+    audioFile: "/audio/Mike Page - remain-a-hunnid-proof_MASTERED.mp3",
     isNew: true,
     hitScore: 86,
-    genre: 'Hip-Hop',
-    producer: 'Mike Page'
+    genre: "Hip-Hop",
+    producer: "Mike Page",
   },
   {
     id: 177,
@@ -769,13 +796,13 @@ export const tracks = [
     year: 2023,
     duration: "2:45",
     trackNumber: 47,
-    albumId: 'singles-2026',
-    albumArt: '/images/singles/obvious.jpg',
-    audioFile: '/audio/Mike Page - obvious_MASTERED.mp3',
+    albumId: "singles-2026",
+    albumArt: "/images/singles/obvious.jpg",
+    audioFile: "/audio/Mike Page - obvious_MASTERED.mp3",
     isNew: true,
     hitScore: 87,
-    genre: 'Hip-Hop',
-    producer: 'Mike Page'
+    genre: "Hip-Hop",
+    producer: "Mike Page",
   },
   {
     id: 178,
@@ -785,13 +812,13 @@ export const tracks = [
     year: 2023,
     duration: "3:38",
     trackNumber: 48,
-    albumId: 'singles-2026',
-    albumArt: '/images/singles/mindset.jpg',
-    audioFile: '/audio/Mike Page - mindset_MASTERED.mp3',
+    albumId: "singles-2026",
+    albumArt: "/images/singles/mindset.jpg",
+    audioFile: "/audio/Mike Page - mindset_MASTERED.mp3",
     isNew: true,
     hitScore: 88,
-    genre: 'Hip-Hop',
-    producer: 'Mike Page'
+    genre: "Hip-Hop",
+    producer: "Mike Page",
   },
   {
     id: 179,
@@ -801,13 +828,13 @@ export const tracks = [
     year: 2022,
     duration: "2:43",
     trackNumber: 49,
-    albumId: 'singles-2026',
-    albumArt: '/images/singles/life-goes-on.jpg',
-    audioFile: '/audio/Mike Page - life-goes-on_MASTERED.mp3',
+    albumId: "singles-2026",
+    albumArt: "/images/singles/life-goes-on.jpg",
+    audioFile: "/audio/Mike Page - life-goes-on_MASTERED.mp3",
     isNew: true,
     hitScore: 87,
-    genre: 'Hip-Hop',
-    producer: 'Mike Page'
+    genre: "Hip-Hop",
+    producer: "Mike Page",
   },
   {
     id: 180,
@@ -817,13 +844,13 @@ export const tracks = [
     year: 2020,
     duration: "3:46",
     trackNumber: 50,
-    albumId: 'singles-2026',
-    albumArt: '/images/singles/piece-of-mind.jpg',
-    audioFile: '/audio/Mike Page - piece-of-mind_MASTERED.m4a',
+    albumId: "singles-2026",
+    albumArt: "/images/singles/piece-of-mind.jpg",
+    audioFile: "/audio/Mike Page - piece-of-mind_MASTERED.m4a",
     isNew: true,
     hitScore: 86,
-    genre: 'Hip-Hop',
-    producer: 'Mike Page'
+    genre: "Hip-Hop",
+    producer: "Mike Page",
   },
   {
     id: 181,
@@ -834,13 +861,13 @@ export const tracks = [
     year: 2021,
     duration: "3:55",
     trackNumber: 51,
-    albumId: 'singles-2026',
-    albumArt: '/images/singles/power-to-the-people.jpg',
-    audioFile: '/audio/Mike Page - power-to-the-people_MASTERED.m4a',
+    albumId: "singles-2026",
+    albumArt: "/images/singles/power-to-the-people.jpg",
+    audioFile: "/audio/Mike Page - power-to-the-people_MASTERED.m4a",
     isNew: true,
     hitScore: 90,
-    genre: 'Hip-Hop',
-    producer: 'Mike Page'
+    genre: "Hip-Hop",
+    producer: "Mike Page",
   },
   {
     id: 182,
@@ -850,13 +877,14 @@ export const tracks = [
     year: 2026,
     duration: "4:14",
     trackNumber: 52,
-    albumId: 'singles-2026',
-    albumArt: '/images/idmg-logo-white.png',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/Mike%20Page%20-%20Do%20You%20Mind%20If%20I_MASTERED.m4a',
+    albumId: "singles-2026",
+    albumArt: "/images/idmg-logo-white.png",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/Mike%20Page%20-%20Do%20You%20Mind%20If%20I_MASTERED.m4a",
     isNew: true,
     hitScore: 91,
-    genre: 'Hip-Hop',
-    producer: 'The Cubist'
+    genre: "Hip-Hop",
+    producer: "The Cubist",
   },
   {
     id: 183,
@@ -866,13 +894,14 @@ export const tracks = [
     year: 2026,
     duration: "3:01",
     trackNumber: 53,
-    albumId: 'singles-2026',
-    albumArt: '/images/idmg-logo-white.png',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/Mike%20Page%20-%20Bottom%20Line_MASTERED.m4a',
+    albumId: "singles-2026",
+    albumArt: "/images/idmg-logo-white.png",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/Mike%20Page%20-%20Bottom%20Line_MASTERED.m4a",
     isNew: true,
     hitScore: 91,
-    genre: 'Hip-Hop',
-    producer: 'The Cubist'
+    genre: "Hip-Hop",
+    producer: "The Cubist",
   },
   {
     id: 184,
@@ -882,13 +911,14 @@ export const tracks = [
     year: 2026,
     duration: "2:00",
     trackNumber: 54,
-    albumId: 'singles-2026',
-    albumArt: '/images/idmg-logo-white.png',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/Mike%20Page%20-%20Unconditionally_MASTERED.m4a',
+    albumId: "singles-2026",
+    albumArt: "/images/idmg-logo-white.png",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/Mike%20Page%20-%20Unconditionally_MASTERED.m4a",
     isNew: true,
     hitScore: 90,
-    genre: 'Hip-Hop',
-    producer: 'The Cubist'
+    genre: "Hip-Hop",
+    producer: "The Cubist",
   },
   {
     id: 185,
@@ -898,13 +928,14 @@ export const tracks = [
     year: 2026,
     duration: "3:50",
     trackNumber: 55,
-    albumId: 'singles-2026',
-    albumArt: '/images/idmg-logo-white.png',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/Mike%20Page%20-%20Hope%20Yo%20Soul_MASTERED.m4a',
+    albumId: "singles-2026",
+    albumArt: "/images/idmg-logo-white.png",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/Mike%20Page%20-%20Hope%20Yo%20Soul_MASTERED.m4a",
     isNew: true,
     hitScore: 91,
-    genre: 'Hip-Hop',
-    producer: 'The Cubist'
+    genre: "Hip-Hop",
+    producer: "The Cubist",
   },
   {
     id: 186,
@@ -914,13 +945,14 @@ export const tracks = [
     year: 2026,
     duration: "3:39",
     trackNumber: 56,
-    albumId: 'singles-2026',
-    albumArt: '/images/idmg-logo-white.png',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-prayed-4-tonight.m4a',
+    albumId: "singles-2026",
+    albumArt: "/images/idmg-logo-white.png",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-prayed-4-tonight.m4a",
     isNew: true,
     hitScore: 93,
-    genre: 'Alternative Rap',
-    producer: 'The Cubist'
+    genre: "Alternative Rap",
+    producer: "The Cubist",
   },
   {
     id: 187,
@@ -930,13 +962,14 @@ export const tracks = [
     year: 2026,
     duration: "3:07",
     trackNumber: 57,
-    albumId: 'singles-2026',
-    albumArt: '/images/idmg-logo-white.png',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-take-a-while-take-a-minute.m4a',
+    albumId: "singles-2026",
+    albumArt: "/images/idmg-logo-white.png",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-take-a-while-take-a-minute.m4a",
     isNew: true,
     hitScore: 91,
-    genre: 'Hip-Hop',
-    producer: 'The Cubist'
+    genre: "Hip-Hop",
+    producer: "The Cubist",
   },
   {
     id: 188,
@@ -946,13 +979,14 @@ export const tracks = [
     year: 2026,
     duration: "2:00",
     trackNumber: 58,
-    albumId: 'singles-2026',
-    albumArt: '/images/idmg-logo-white.png',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-terry-pettis-story.m4a',
+    albumId: "singles-2026",
+    albumArt: "/images/idmg-logo-white.png",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-terry-pettis-story.m4a",
     isNew: true,
     hitScore: 92,
-    genre: 'Hip-Hop',
-    producer: 'The Cubist'
+    genre: "Hip-Hop",
+    producer: "The Cubist",
   },
   {
     id: 189,
@@ -962,15 +996,16 @@ export const tracks = [
     year: 2026,
     duration: "3:19",
     trackNumber: 59,
-    albumId: 'singles-2026',
-    albumArt: '/images/idmg-logo-white.png',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/i-dont-wanna-mike-page.m4a',
+    albumId: "singles-2026",
+    albumArt: "/images/idmg-logo-white.png",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/i-dont-wanna-mike-page.m4a",
     isNew: true,
     isFeatured: true,
-    featuredWeek: '2026-03-02',
+    featuredWeek: "2026-03-02",
     hitScore: 93,
-    genre: 'Hip-Hop',
-    producer: 'The Cubist'
+    genre: "Hip-Hop",
+    producer: "The Cubist",
   },
   {
     id: 190,
@@ -981,15 +1016,16 @@ export const tracks = [
     year: 2026,
     duration: "4:06",
     trackNumber: 60,
-    albumId: 'singles-2026',
-    albumArt: '/images/idmg-logo-white.png',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/do-what-we-do-mike-page-ft-vincent-berry.m4a',
+    albumId: "singles-2026",
+    albumArt: "/images/idmg-logo-white.png",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/do-what-we-do-mike-page-ft-vincent-berry.m4a",
     isNew: true,
     isFeatured: true,
-    featuredWeek: '2026-03-02',
+    featuredWeek: "2026-03-02",
     hitScore: 94,
-    genre: 'Hip-Hop',
-    producer: 'The Cubist'
+    genre: "Hip-Hop",
+    producer: "The Cubist",
   },
   // ========================================
   // IDMG MIXTAPE 2026 — Executive Produced by The Cubist & Mike Page
@@ -1004,14 +1040,17 @@ export const tracks = [
     year: 2026,
     duration: "3:51",
     trackNumber: 1,
-    albumId: 'idmg-mixtape',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/idmg-mixtape/01-i-want-this-one.m4a',
-    appleMusicUrl: 'https://music.apple.com/us/album/i-want-this-one/1879905768?i=1879905771',
-    appleMusicId: '1879905771',
-    previewUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/c4/02/29/c4022919-79ac-1121-d482-9fbb5ffd9951/mzaf_12530449914750238751.plus.aac.p.m4a',
+    albumId: "idmg-mixtape",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/idmg-mixtape/01-i-want-this-one.m4a",
+    appleMusicUrl:
+      "https://music.apple.com/us/album/i-want-this-one/1879905768?i=1879905771",
+    appleMusicId: "1879905771",
+    previewUrl:
+      "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/c4/02/29/c4022919-79ac-1121-d482-9fbb5ffd9951/mzaf_12530449914750238751.plus.aac.p.m4a",
     hitScore: 94,
-    genre: 'Hip-Hop',
-    producer: 'The Cubist'
+    genre: "Hip-Hop",
+    producer: "The Cubist",
   },
   {
     id: 501,
@@ -1022,14 +1061,17 @@ export const tracks = [
     year: 2026,
     duration: "4:01",
     trackNumber: 2,
-    albumId: 'idmg-mixtape',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/idmg-mixtape/02-run-or-r-u-out.m4a',
-    appleMusicUrl: 'https://music.apple.com/us/album/r-u-n-or-r-u-out/1879905768?i=1879905776',
-    appleMusicId: '1879905776',
-    previewUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/31/60/56/316056a9-1109-3be8-f36e-7d9854618936/mzaf_9597952714128259312.plus.aac.p.m4a',
+    albumId: "idmg-mixtape",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/idmg-mixtape/02-run-or-r-u-out.m4a",
+    appleMusicUrl:
+      "https://music.apple.com/us/album/r-u-n-or-r-u-out/1879905768?i=1879905776",
+    appleMusicId: "1879905776",
+    previewUrl:
+      "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/31/60/56/316056a9-1109-3be8-f36e-7d9854618936/mzaf_9597952714128259312.plus.aac.p.m4a",
     hitScore: 93,
-    genre: 'Hip-Hop',
-    producer: 'The Cubist & Shawn Hibbler'
+    genre: "Hip-Hop",
+    producer: "The Cubist & Shawn Hibbler",
   },
   {
     id: 502,
@@ -1040,14 +1082,17 @@ export const tracks = [
     year: 2026,
     duration: "3:07",
     trackNumber: 3,
-    albumId: 'idmg-mixtape',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/idmg-mixtape/03-having-my-way.m4a',
-    appleMusicUrl: 'https://music.apple.com/us/album/having-my-way/1879905768?i=1879905777',
-    appleMusicId: '1879905777',
-    previewUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/f8/4a/2e/f84a2e38-7123-7e61-8754-b3a3603302f4/mzaf_13088965631919844256.plus.aac.p.m4a',
+    albumId: "idmg-mixtape",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/idmg-mixtape/03-having-my-way.m4a",
+    appleMusicUrl:
+      "https://music.apple.com/us/album/having-my-way/1879905768?i=1879905777",
+    appleMusicId: "1879905777",
+    previewUrl:
+      "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/f8/4a/2e/f84a2e38-7123-7e61-8754-b3a3603302f4/mzaf_13088965631919844256.plus.aac.p.m4a",
     hitScore: 92,
-    genre: 'Hip-Hop',
-    producer: 'The Cubist'
+    genre: "Hip-Hop",
+    producer: "The Cubist",
   },
   {
     id: 503,
@@ -1058,14 +1103,17 @@ export const tracks = [
     year: 2026,
     duration: "3:24",
     trackNumber: 4,
-    albumId: 'idmg-mixtape',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/idmg-mixtape/04-be-alright.m4a',
-    appleMusicUrl: 'https://music.apple.com/us/album/be-alright/1879905768?i=1879905778',
-    appleMusicId: '1879905778',
-    previewUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/67/29/3f/67293fa0-130d-f0d0-4d21-f351e4e47ad3/mzaf_349886443689265225.plus.aac.p.m4a',
+    albumId: "idmg-mixtape",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/idmg-mixtape/04-be-alright.m4a",
+    appleMusicUrl:
+      "https://music.apple.com/us/album/be-alright/1879905768?i=1879905778",
+    appleMusicId: "1879905778",
+    previewUrl:
+      "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/67/29/3f/67293fa0-130d-f0d0-4d21-f351e4e47ad3/mzaf_349886443689265225.plus.aac.p.m4a",
     hitScore: 93,
-    genre: 'R&B',
-    producer: 'The Cubist'
+    genre: "R&B",
+    producer: "The Cubist",
   },
   {
     id: 504,
@@ -1075,14 +1123,17 @@ export const tracks = [
     year: 2026,
     duration: "2:48",
     trackNumber: 5,
-    albumId: 'idmg-mixtape',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/idmg-mixtape/05-i-might.m4a',
-    appleMusicUrl: 'https://music.apple.com/us/album/i-might/1879905768?i=1879905779',
-    appleMusicId: '1879905779',
-    previewUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/af/9d/5e/af9d5e97-38c6-b0ed-8167-9d06025a4874/mzaf_12711094282345449013.plus.aac.p.m4a',
+    albumId: "idmg-mixtape",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/idmg-mixtape/05-i-might.m4a",
+    appleMusicUrl:
+      "https://music.apple.com/us/album/i-might/1879905768?i=1879905779",
+    appleMusicId: "1879905779",
+    previewUrl:
+      "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/af/9d/5e/af9d5e97-38c6-b0ed-8167-9d06025a4874/mzaf_12711094282345449013.plus.aac.p.m4a",
     hitScore: 91,
-    genre: 'Hip-Hop',
-    producer: 'The Cubist'
+    genre: "Hip-Hop",
+    producer: "The Cubist",
   },
   {
     id: 505,
@@ -1093,14 +1144,17 @@ export const tracks = [
     year: 2026,
     duration: "4:16",
     trackNumber: 6,
-    albumId: 'idmg-mixtape',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/idmg-mixtape/06-no-weapon.m4a',
-    appleMusicUrl: 'https://music.apple.com/us/album/no-weapon/1879905768?i=1879906110',
-    appleMusicId: '1879906110',
-    previewUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/c1/0a/f1/c10af17f-f0dc-987f-b9d0-391383a0d0c8/mzaf_4186957932126584411.plus.aac.p.m4a',
+    albumId: "idmg-mixtape",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/idmg-mixtape/06-no-weapon.m4a",
+    appleMusicUrl:
+      "https://music.apple.com/us/album/no-weapon/1879905768?i=1879906110",
+    appleMusicId: "1879906110",
+    previewUrl:
+      "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/c1/0a/f1/c10af17f-f0dc-987f-b9d0-391383a0d0c8/mzaf_4186957932126584411.plus.aac.p.m4a",
     hitScore: 95,
-    genre: 'Hip-Hop',
-    producer: 'The Cubist'
+    genre: "Hip-Hop",
+    producer: "The Cubist",
   },
   {
     id: 506,
@@ -1110,14 +1164,17 @@ export const tracks = [
     year: 2026,
     duration: "2:54",
     trackNumber: 7,
-    albumId: 'idmg-mixtape',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/idmg-mixtape/07-i-been-on-some-shit.m4a',
-    appleMusicUrl: 'https://music.apple.com/us/album/i-been-on-some-shit/1879905768?i=1879906112',
-    appleMusicId: '1879906112',
-    previewUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/02/86/2a/02862abc-09c3-689c-5fd9-e88f4280f179/mzaf_6423385452981587203.plus.aac.p.m4a',
+    albumId: "idmg-mixtape",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/idmg-mixtape/07-i-been-on-some-shit.m4a",
+    appleMusicUrl:
+      "https://music.apple.com/us/album/i-been-on-some-shit/1879905768?i=1879906112",
+    appleMusicId: "1879906112",
+    previewUrl:
+      "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/02/86/2a/02862abc-09c3-689c-5fd9-e88f4280f179/mzaf_6423385452981587203.plus.aac.p.m4a",
     hitScore: 93,
-    genre: 'Hip-Hop',
-    producer: 'The Cubist & Jack Thomas'
+    genre: "Hip-Hop",
+    producer: "The Cubist & Jack Thomas",
   },
   {
     id: 507,
@@ -1128,14 +1185,17 @@ export const tracks = [
     year: 2026,
     duration: "3:35",
     trackNumber: 8,
-    albumId: 'idmg-mixtape',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/idmg-mixtape/08-god-loves-us.m4a',
-    appleMusicUrl: 'https://music.apple.com/us/album/god-loves-us/1879905768?i=1879906113',
-    appleMusicId: '1879906113',
-    previewUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/75/96/b3/7596b37d-752c-6d4a-ac4f-1f3e1cd277b7/mzaf_16295922022043816950.plus.aac.p.m4a',
+    albumId: "idmg-mixtape",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/idmg-mixtape/08-god-loves-us.m4a",
+    appleMusicUrl:
+      "https://music.apple.com/us/album/god-loves-us/1879905768?i=1879906113",
+    appleMusicId: "1879906113",
+    previewUrl:
+      "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/75/96/b3/7596b37d-752c-6d4a-ac4f-1f3e1cd277b7/mzaf_16295922022043816950.plus.aac.p.m4a",
     hitScore: 92,
-    genre: 'Hip-Hop',
-    producer: 'The Cubist'
+    genre: "Hip-Hop",
+    producer: "The Cubist",
   },
   {
     id: 508,
@@ -1145,14 +1205,17 @@ export const tracks = [
     year: 2026,
     duration: "3:42",
     trackNumber: 9,
-    albumId: 'idmg-mixtape',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/idmg-mixtape/09-fila.m4a',
-    appleMusicUrl: 'https://music.apple.com/us/album/f-i-l-a/1879905768?i=1879906115',
-    appleMusicId: '1879906115',
-    previewUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/6d/b3/98/6db39846-c88d-eb26-ab02-a5ea185ff4be/mzaf_17055098721793841691.plus.aac.p.m4a',
+    albumId: "idmg-mixtape",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/idmg-mixtape/09-fila.m4a",
+    appleMusicUrl:
+      "https://music.apple.com/us/album/f-i-l-a/1879905768?i=1879906115",
+    appleMusicId: "1879906115",
+    previewUrl:
+      "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/6d/b3/98/6db39846-c88d-eb26-ab02-a5ea185ff4be/mzaf_17055098721793841691.plus.aac.p.m4a",
     hitScore: 91,
-    genre: 'Hip-Hop',
-    producer: 'The Cubist'
+    genre: "Hip-Hop",
+    producer: "The Cubist",
   },
   {
     id: 509,
@@ -1163,14 +1226,17 @@ export const tracks = [
     year: 2026,
     duration: "3:20",
     trackNumber: 10,
-    albumId: 'idmg-mixtape',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/idmg-mixtape/10-heavens-gate.m4a',
-    appleMusicUrl: 'https://music.apple.com/us/album/heavens-gate/1879905768?i=1879906116',
-    appleMusicId: '1879906116',
-    previewUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/d5/84/ab/d584abd4-0674-28f2-a1f4-20455597235a/mzaf_15995629381876940264.plus.aac.p.m4a',
+    albumId: "idmg-mixtape",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/idmg-mixtape/10-heavens-gate.m4a",
+    appleMusicUrl:
+      "https://music.apple.com/us/album/heavens-gate/1879905768?i=1879906116",
+    appleMusicId: "1879906116",
+    previewUrl:
+      "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/d5/84/ab/d584abd4-0674-28f2-a1f4-20455597235a/mzaf_15995629381876940264.plus.aac.p.m4a",
     hitScore: 92,
-    genre: 'Hip-Hop',
-    producer: 'The Cubist'
+    genre: "Hip-Hop",
+    producer: "The Cubist",
   },
   {
     id: 510,
@@ -1180,14 +1246,17 @@ export const tracks = [
     year: 2026,
     duration: "2:34",
     trackNumber: 11,
-    albumId: 'idmg-mixtape',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/idmg-mixtape/11-thats-facts.m4a',
-    appleMusicUrl: 'https://music.apple.com/us/album/thats-facts/1879905768?i=1879906117',
-    appleMusicId: '1879906117',
-    previewUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/e4/f2/2e/e4f22e96-69f7-8de9-3cb9-385a7107abdb/mzaf_1621810024773525234.plus.aac.p.m4a',
+    albumId: "idmg-mixtape",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/idmg-mixtape/11-thats-facts.m4a",
+    appleMusicUrl:
+      "https://music.apple.com/us/album/thats-facts/1879905768?i=1879906117",
+    appleMusicId: "1879906117",
+    previewUrl:
+      "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/e4/f2/2e/e4f22e96-69f7-8de9-3cb9-385a7107abdb/mzaf_1621810024773525234.plus.aac.p.m4a",
     hitScore: 91,
-    genre: 'Hip-Hop',
-    producer: 'The Cubist'
+    genre: "Hip-Hop",
+    producer: "The Cubist",
   },
   {
     id: 511,
@@ -1198,14 +1267,17 @@ export const tracks = [
     year: 2026,
     duration: "4:00",
     trackNumber: 12,
-    albumId: 'idmg-mixtape',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/idmg-mixtape/12-never-let-the-money.m4a',
-    appleMusicUrl: 'https://music.apple.com/us/album/never-let-the-money/1879905768?i=1879906118',
-    appleMusicId: '1879906118',
-    previewUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/ab/87/e7/ab87e7fc-8738-4174-215a-4d1dc55b9fb8/mzaf_16801890784320045150.plus.aac.p.m4a',
+    albumId: "idmg-mixtape",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/idmg-mixtape/12-never-let-the-money.m4a",
+    appleMusicUrl:
+      "https://music.apple.com/us/album/never-let-the-money/1879905768?i=1879906118",
+    appleMusicId: "1879906118",
+    previewUrl:
+      "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/ab/87/e7/ab87e7fc-8738-4174-215a-4d1dc55b9fb8/mzaf_16801890784320045150.plus.aac.p.m4a",
     hitScore: 94,
-    genre: 'Hip-Hop',
-    producer: 'The Cubist'
+    genre: "Hip-Hop",
+    producer: "The Cubist",
   },
   {
     id: 512,
@@ -1215,14 +1287,17 @@ export const tracks = [
     year: 2026,
     duration: "2:23",
     trackNumber: 13,
-    albumId: 'idmg-mixtape',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/idmg-mixtape/13-crash-out.m4a',
-    appleMusicUrl: 'https://music.apple.com/us/album/crash-out/1879905768?i=1879906121',
-    appleMusicId: '1879906121',
-    previewUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/44/91/86/449186d9-d9e8-ec1c-c471-30568ee344cf/mzaf_17778538176168259028.plus.aac.p.m4a',
+    albumId: "idmg-mixtape",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/idmg-mixtape/13-crash-out.m4a",
+    appleMusicUrl:
+      "https://music.apple.com/us/album/crash-out/1879905768?i=1879906121",
+    appleMusicId: "1879906121",
+    previewUrl:
+      "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/44/91/86/449186d9-d9e8-ec1c-c471-30568ee344cf/mzaf_17778538176168259028.plus.aac.p.m4a",
     hitScore: 92,
-    genre: 'Hip-Hop',
-    producer: 'The Cubist'
+    genre: "Hip-Hop",
+    producer: "The Cubist",
   },
   {
     id: 513,
@@ -1232,11 +1307,12 @@ export const tracks = [
     year: 2026,
     duration: "4:06",
     trackNumber: 14,
-    albumId: 'idmg-mixtape',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/idmg-mixtape/my-way.m4a',
+    albumId: "idmg-mixtape",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/idmg-mixtape/my-way.m4a",
     hitScore: 93,
-    genre: 'Hip-Hop',
-    producer: 'The Cubist'
+    genre: "Hip-Hop",
+    producer: "The Cubist",
   },
   {
     id: 514,
@@ -1246,11 +1322,12 @@ export const tracks = [
     year: 2026,
     duration: "2:50",
     trackNumber: 15,
-    albumId: 'idmg-mixtape',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/idmg-mixtape/get-a-little-closer.m4a',
+    albumId: "idmg-mixtape",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/idmg-mixtape/get-a-little-closer.m4a",
     hitScore: 93,
-    genre: 'Hip-Hop',
-    producer: 'The Cubist'
+    genre: "Hip-Hop",
+    producer: "The Cubist",
   },
   // ========================================
   // GRAMMY NIGHTS VOL. 1 - VB & MP (PRIVATE)
@@ -1265,14 +1342,15 @@ export const tracks = [
     year: 2026,
     duration: "3:26",
     trackNumber: 1,
-    albumId: 'grammy-nights',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/grammy-nights/01-black-forces.m4a',
+    albumId: "grammy-nights",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/grammy-nights/01-black-forces.m4a",
     isPrivate: true,
-    accessCodes: ['MP2026', 'VB2026'],
+    accessCodes: ["MP2026", "VB2026"],
     bpm: 160,
-    key: 'B Minor',
+    key: "B Minor",
     hitScore: 90,
-    producer: 'The Cubist'
+    producer: "The Cubist",
   },
   {
     id: 201,
@@ -1283,14 +1361,15 @@ export const tracks = [
     year: 2026,
     duration: "3:26",
     trackNumber: 2,
-    albumId: 'grammy-nights',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/grammy-nights/02-i-want-this-one.m4a',
+    albumId: "grammy-nights",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/grammy-nights/02-i-want-this-one.m4a",
     isPrivate: true,
-    accessCodes: ['MP2026', 'VB2026'],
+    accessCodes: ["MP2026", "VB2026"],
     bpm: 160,
-    key: 'B Minor',
+    key: "B Minor",
     hitScore: 92,
-    producer: 'The Cubist'
+    producer: "The Cubist",
   },
   {
     id: 202,
@@ -1301,11 +1380,12 @@ export const tracks = [
     year: 2026,
     duration: "3:30",
     trackNumber: 3,
-    albumId: 'grammy-nights',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/grammy-nights/03-run-or-r-u-out.m4a',
+    albumId: "grammy-nights",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/grammy-nights/03-run-or-r-u-out.m4a",
     isPrivate: true,
-    accessCodes: ['MP2026', 'VB2026'],
-    producer: 'The Cubist'
+    accessCodes: ["MP2026", "VB2026"],
+    producer: "The Cubist",
   },
   {
     id: 203,
@@ -1316,11 +1396,12 @@ export const tracks = [
     year: 2026,
     duration: "3:48",
     trackNumber: 4,
-    albumId: 'grammy-nights',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/grammy-nights/04-love-on-the-lawn.m4a',
+    albumId: "grammy-nights",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/grammy-nights/04-love-on-the-lawn.m4a",
     isPrivate: true,
-    accessCodes: ['MP2026', 'VB2026'],
-    producer: 'The Cubist'
+    accessCodes: ["MP2026", "VB2026"],
+    producer: "The Cubist",
   },
   {
     id: 204,
@@ -1331,11 +1412,12 @@ export const tracks = [
     year: 2026,
     duration: "2:44",
     trackNumber: 5,
-    albumId: 'grammy-nights',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/grammy-nights/05-family-back.m4a',
+    albumId: "grammy-nights",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/grammy-nights/05-family-back.m4a",
     isPrivate: true,
-    accessCodes: ['MP2026', 'VB2026'],
-    producer: 'The Cubist'
+    accessCodes: ["MP2026", "VB2026"],
+    producer: "The Cubist",
   },
   {
     id: 205,
@@ -1346,11 +1428,12 @@ export const tracks = [
     year: 2026,
     duration: "3:10",
     trackNumber: 6,
-    albumId: 'grammy-nights',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/grammy-nights/06-never-let-the-money.m4a',
+    albumId: "grammy-nights",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/grammy-nights/06-never-let-the-money.m4a",
     isPrivate: true,
-    accessCodes: ['MP2026', 'VB2026'],
-    producer: 'The Cubist'
+    accessCodes: ["MP2026", "VB2026"],
+    producer: "The Cubist",
   },
   {
     id: 206,
@@ -1361,11 +1444,12 @@ export const tracks = [
     year: 2026,
     duration: "3:32",
     trackNumber: 7,
-    albumId: 'grammy-nights',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/grammy-nights/07-give-me-my-wings.m4a',
+    albumId: "grammy-nights",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/grammy-nights/07-give-me-my-wings.m4a",
     isPrivate: true,
-    accessCodes: ['MP2026', 'VB2026'],
-    producer: 'Art Teacher'
+    accessCodes: ["MP2026", "VB2026"],
+    producer: "Art Teacher",
   },
   {
     id: 207,
@@ -1376,11 +1460,12 @@ export const tracks = [
     year: 2026,
     duration: "3:17",
     trackNumber: 8,
-    albumId: 'grammy-nights',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/grammy-nights/08-vvs.m4a',
+    albumId: "grammy-nights",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/grammy-nights/08-vvs.m4a",
     isPrivate: true,
-    accessCodes: ['MP2026', 'VB2026'],
-    producer: 'The Cubist'
+    accessCodes: ["MP2026", "VB2026"],
+    producer: "The Cubist",
   },
   {
     id: 208,
@@ -1391,11 +1476,12 @@ export const tracks = [
     year: 2026,
     duration: "5:24",
     trackNumber: 9,
-    albumId: 'grammy-nights',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/grammy-nights/09-no-make-believe.m4a',
+    albumId: "grammy-nights",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/grammy-nights/09-no-make-believe.m4a",
     isPrivate: true,
-    accessCodes: ['MP2026', 'VB2026'],
-    producer: 'The Cubist'
+    accessCodes: ["MP2026", "VB2026"],
+    producer: "The Cubist",
   },
   {
     id: 209,
@@ -1406,11 +1492,12 @@ export const tracks = [
     year: 2026,
     duration: "4:35",
     trackNumber: 10,
-    albumId: 'grammy-nights',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/grammy-nights/10-stay.m4a',
+    albumId: "grammy-nights",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/grammy-nights/10-stay.m4a",
     isPrivate: true,
-    accessCodes: ['MP2026', 'VB2026'],
-    producer: 'The Cubist'
+    accessCodes: ["MP2026", "VB2026"],
+    producer: "The Cubist",
   },
   {
     id: 210,
@@ -1421,11 +1508,12 @@ export const tracks = [
     year: 2026,
     duration: "3:45",
     trackNumber: 11,
-    albumId: 'grammy-nights',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/grammy-nights/11-i-need-it.m4a',
+    albumId: "grammy-nights",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/grammy-nights/11-i-need-it.m4a",
     isPrivate: true,
-    accessCodes: ['MP2026', 'VB2026'],
-    producer: 'The Cubist'
+    accessCodes: ["MP2026", "VB2026"],
+    producer: "The Cubist",
   },
   {
     id: 211,
@@ -1436,11 +1524,12 @@ export const tracks = [
     year: 2026,
     duration: "3:15",
     trackNumber: 12,
-    albumId: 'grammy-nights',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/grammy-nights/12-failed-mission.m4a',
+    albumId: "grammy-nights",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/grammy-nights/12-failed-mission.m4a",
     isPrivate: true,
-    accessCodes: ['MP2026', 'VB2026'],
-    producer: 'The Cubist'
+    accessCodes: ["MP2026", "VB2026"],
+    producer: "The Cubist",
   },
   {
     id: 212,
@@ -1451,11 +1540,12 @@ export const tracks = [
     year: 2026,
     duration: "2:52",
     trackNumber: 13,
-    albumId: 'grammy-nights',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/grammy-nights/13-overrated.m4a',
+    albumId: "grammy-nights",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/grammy-nights/13-overrated.m4a",
     isPrivate: true,
-    accessCodes: ['MP2026', 'VB2026'],
-    producer: 'Vincent Berry II'
+    accessCodes: ["MP2026", "VB2026"],
+    producer: "Vincent Berry II",
   },
   {
     id: 213,
@@ -1466,11 +1556,12 @@ export const tracks = [
     year: 2026,
     duration: "3:00",
     trackNumber: 14,
-    albumId: 'grammy-nights',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/grammy-nights/14-take-a-trip.m4a',
+    albumId: "grammy-nights",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/grammy-nights/14-take-a-trip.m4a",
     isPrivate: true,
-    accessCodes: ['MP2026', 'VB2026'],
-    producer: 'The Cubist'
+    accessCodes: ["MP2026", "VB2026"],
+    producer: "The Cubist",
   },
   {
     id: 214,
@@ -1481,11 +1572,12 @@ export const tracks = [
     year: 2026,
     duration: "3:34",
     trackNumber: 15,
-    albumId: 'grammy-nights',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/grammy-nights/15-would-you-stay.m4a',
+    albumId: "grammy-nights",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/grammy-nights/15-would-you-stay.m4a",
     isPrivate: true,
-    accessCodes: ['MP2026', 'VB2026'],
-    producer: 'The Cubist'
+    accessCodes: ["MP2026", "VB2026"],
+    producer: "The Cubist",
   },
   {
     id: 215,
@@ -1496,11 +1588,12 @@ export const tracks = [
     year: 2026,
     duration: "3:30",
     trackNumber: 16,
-    albumId: 'grammy-nights',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/grammy-nights/16-stand-alone.m4a',
+    albumId: "grammy-nights",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/grammy-nights/16-stand-alone.m4a",
     isPrivate: true,
-    accessCodes: ['MP2026', 'VB2026'],
-    producer: 'The Cubist'
+    accessCodes: ["MP2026", "VB2026"],
+    producer: "The Cubist",
   },
   {
     id: 216,
@@ -1511,11 +1604,12 @@ export const tracks = [
     year: 2026,
     duration: "3:55",
     trackNumber: 17,
-    albumId: 'grammy-nights',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/grammy-nights/17-take-care-of-me.m4a',
+    albumId: "grammy-nights",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/grammy-nights/17-take-care-of-me.m4a",
     isPrivate: true,
-    accessCodes: ['MP2026', 'VB2026'],
-    producer: 'The Cubist'
+    accessCodes: ["MP2026", "VB2026"],
+    producer: "The Cubist",
   },
   {
     id: 217,
@@ -1526,11 +1620,12 @@ export const tracks = [
     year: 2026,
     duration: "3:17",
     trackNumber: 18,
-    albumId: 'grammy-nights',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/grammy-nights/18-spend-it.m4a',
+    albumId: "grammy-nights",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/grammy-nights/18-spend-it.m4a",
     isPrivate: true,
-    accessCodes: ['MP2026', 'VB2026'],
-    producer: 'The Cubist'
+    accessCodes: ["MP2026", "VB2026"],
+    producer: "The Cubist",
   },
   {
     id: 218,
@@ -1541,11 +1636,12 @@ export const tracks = [
     year: 2026,
     duration: "3:52",
     trackNumber: 19,
-    albumId: 'grammy-nights',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/grammy-nights/19-get-you-right.m4a',
+    albumId: "grammy-nights",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/grammy-nights/19-get-you-right.m4a",
     isPrivate: true,
-    accessCodes: ['MP2026', 'VB2026'],
-    producer: 'The Cubist'
+    accessCodes: ["MP2026", "VB2026"],
+    producer: "The Cubist",
   },
   // ========================================
   // LIBRARY SINGLES (not New Releases)
@@ -1558,12 +1654,13 @@ export const tracks = [
     year: 2026,
     duration: "2:18",
     trackNumber: 1,
-    albumId: 'singles-2026',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-tom-brady.m4a',
+    albumId: "singles-2026",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-tom-brady.m4a",
     bpm: 130,
-    key: 'D Minor',
+    key: "D Minor",
     hitScore: 88,
-    producer: 'The Cubist'
+    producer: "The Cubist",
   },
   {
     id: 108,
@@ -1573,12 +1670,13 @@ export const tracks = [
     year: 2026,
     duration: "3:18",
     trackNumber: 2,
-    albumId: 'singles-2026',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-friends-on-friends.m4a',
+    albumId: "singles-2026",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-friends-on-friends.m4a",
     bpm: 125,
-    key: 'C Minor',
+    key: "C Minor",
     hitScore: 87,
-    producer: 'The Cubist'
+    producer: "The Cubist",
   },
   // ========================================
   // CINDY'S SON (Extended Album) - 2022
@@ -1590,14 +1688,15 @@ export const tracks = [
     year: 2022,
     duration: "4:21",
     trackNumber: 1,
-    albumId: 'cindys-son',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/cindys-son/mike-page-live-like-a-king-main.m4a',
+    albumId: "cindys-son",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/cindys-son/mike-page-live-like-a-king-main.m4a",
     isFeatured: true,
-    featuredWeek: '2026-01-29',
+    featuredWeek: "2026-01-29",
     bpm: 76,
-    key: 'E Minor',
+    key: "E Minor",
     hitScore: 48,
-    producer: "The Cubist"
+    producer: "The Cubist",
   },
   {
     id: 2,
@@ -1606,12 +1705,13 @@ export const tracks = [
     year: 2022,
     duration: "3:32",
     trackNumber: 2,
-    albumId: 'cindys-son',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/cindys-son/mike-page-very-special-main.m4a',
+    albumId: "cindys-son",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/cindys-son/mike-page-very-special-main.m4a",
     bpm: 99,
-    key: 'G Minor',
+    key: "G Minor",
     hitScore: 85,
-    producer: "The Cubist"
+    producer: "The Cubist",
   },
   {
     id: 3,
@@ -1621,12 +1721,13 @@ export const tracks = [
     year: 2022,
     duration: "3:55",
     trackNumber: 3,
-    albumId: 'cindys-son',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/cindys-son/mike-page-doing-me-main.m4a',
+    albumId: "cindys-son",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/cindys-son/mike-page-doing-me-main.m4a",
     bpm: 140,
-    key: 'E Minor',
+    key: "E Minor",
     hitScore: 80,
-    producer: "The Cubist"
+    producer: "The Cubist",
   },
   {
     id: 4,
@@ -1635,13 +1736,14 @@ export const tracks = [
     year: 2022,
     duration: "3:46",
     trackNumber: 4,
-    albumId: 'cindys-son',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/cindys-son/mike-page-idmg-254-ft-soldier-main.m4a',
+    albumId: "cindys-son",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/cindys-son/mike-page-idmg-254-ft-soldier-main.m4a",
     featured: "Luh Solider",
     bpm: 86,
-    key: 'A Minor',
+    key: "A Minor",
     hitScore: 80,
-    producer: "The Cubist"
+    producer: "The Cubist",
   },
   {
     id: 5,
@@ -1650,12 +1752,13 @@ export const tracks = [
     year: 2022,
     duration: "3:12",
     trackNumber: 5,
-    albumId: 'cindys-son',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/cindys-son/mike-page-5-mo-main.m4a',
+    albumId: "cindys-son",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/cindys-son/mike-page-5-mo-main.m4a",
     bpm: 133,
-    key: 'E Minor',
+    key: "E Minor",
     hitScore: 75,
-    producer: "The Cubist"
+    producer: "The Cubist",
   },
   {
     id: 6,
@@ -1664,12 +1767,13 @@ export const tracks = [
     year: 2022,
     duration: "3:28",
     trackNumber: 6,
-    albumId: 'cindys-son',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/cindys-son/mike-page-moved-south-main.m4a',
+    albumId: "cindys-son",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/cindys-son/mike-page-moved-south-main.m4a",
     bpm: 129,
-    key: 'E Minor',
+    key: "E Minor",
     hitScore: 75,
-    producer: "The Cubist"
+    producer: "The Cubist",
   },
   {
     id: 7,
@@ -1678,12 +1782,13 @@ export const tracks = [
     year: 2022,
     duration: "3:18",
     trackNumber: 7,
-    albumId: 'cindys-son',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/cindys-son/mike-page-rich-off-rags-main.m4a',
+    albumId: "cindys-son",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/cindys-son/mike-page-rich-off-rags-main.m4a",
     bpm: 112,
-    key: 'G Minor',
+    key: "G Minor",
     hitScore: 75,
-    producer: "The Cubist"
+    producer: "The Cubist",
   },
   {
     id: 8,
@@ -1692,12 +1797,13 @@ export const tracks = [
     year: 2022,
     duration: "4:14",
     trackNumber: 8,
-    albumId: 'cindys-son',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/cindys-son/mike-page-stand-up-main.m4a',
+    albumId: "cindys-son",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/cindys-son/mike-page-stand-up-main.m4a",
     bpm: 112,
-    key: 'C Major',
+    key: "C Major",
     hitScore: 75,
-    producer: "The Cubist"
+    producer: "The Cubist",
   },
   {
     id: 9,
@@ -1706,13 +1812,14 @@ export const tracks = [
     year: 2022,
     duration: "3:32",
     trackNumber: 9,
-    albumId: 'cindys-son',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/cindys-son/mike-page-vibe-main.m4a',
+    albumId: "cindys-son",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/cindys-son/mike-page-vibe-main.m4a",
     featured: "Vincent Berry",
     bpm: 117,
-    key: 'A Minor',
+    key: "A Minor",
     hitScore: 75,
-    producer: "The Cubist"
+    producer: "The Cubist",
   },
   {
     id: 10,
@@ -1721,12 +1828,13 @@ export const tracks = [
     year: 2022,
     duration: "3:01",
     trackNumber: 10,
-    albumId: 'cindys-son',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/cindys-son/mike-page-ask-yourself.m4a',
+    albumId: "cindys-son",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/cindys-son/mike-page-ask-yourself.m4a",
     bpm: 152,
-    key: 'D# Major',
+    key: "D# Major",
     hitScore: 70,
-    producer: "The Cubist"
+    producer: "The Cubist",
   },
   {
     id: 11,
@@ -1735,12 +1843,13 @@ export const tracks = [
     year: 2022,
     duration: "5:21",
     trackNumber: 11,
-    albumId: 'cindys-son',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/cindys-son/mike-page-meditation-main.m4a',
+    albumId: "cindys-son",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/cindys-son/mike-page-meditation-main.m4a",
     bpm: 129,
-    key: 'G Minor',
+    key: "G Minor",
     hitScore: 68,
-    producer: "The Cubist"
+    producer: "The Cubist",
   },
   {
     id: 12,
@@ -1749,12 +1858,13 @@ export const tracks = [
     year: 2022,
     duration: "3:38",
     trackNumber: 12,
-    albumId: 'cindys-son',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/cindys-son/mike-page-things-we-been-through-main.m4a',
+    albumId: "cindys-son",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/cindys-son/mike-page-things-we-been-through-main.m4a",
     bpm: 112,
-    key: 'B Minor',
+    key: "B Minor",
     hitScore: 65,
-    producer: "The Cubist"
+    producer: "The Cubist",
   },
   {
     id: 13,
@@ -1763,12 +1873,13 @@ export const tracks = [
     year: 2022,
     duration: "3:53",
     trackNumber: 13,
-    albumId: 'cindys-son',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/cindys-son/mike-page-stretch-u-out-main.m4a',
+    albumId: "cindys-son",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/cindys-son/mike-page-stretch-u-out-main.m4a",
     bpm: 99,
-    key: 'C# Minor',
+    key: "C# Minor",
     hitScore: 65,
-    producer: "The Cubist"
+    producer: "The Cubist",
   },
   {
     id: 14,
@@ -1777,12 +1888,13 @@ export const tracks = [
     year: 2022,
     duration: "4:58",
     trackNumber: 14,
-    albumId: 'cindys-son',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/cindys-son/mike-page-damaged-main.m4a',
+    albumId: "cindys-son",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/cindys-son/mike-page-damaged-main.m4a",
     bpm: 86,
-    key: 'C# Minor',
+    key: "C# Minor",
     hitScore: 65,
-    producer: "The Cubist"
+    producer: "The Cubist",
   },
   {
     id: 15,
@@ -1791,12 +1903,13 @@ export const tracks = [
     year: 2022,
     duration: "5:36",
     trackNumber: 15,
-    albumId: 'cindys-son',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/cindys-son/mike-page-ready-for-me-main.m4a',
+    albumId: "cindys-son",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/cindys-son/mike-page-ready-for-me-main.m4a",
     bpm: 140,
-    key: 'A# Minor',
+    key: "A# Minor",
     hitScore: 65,
-    producer: "The Cubist"
+    producer: "The Cubist",
   },
   {
     id: 16,
@@ -1805,12 +1918,13 @@ export const tracks = [
     year: 2022,
     duration: "3:29",
     trackNumber: 16,
-    albumId: 'cindys-son',
-    audioFile: '/audio/cindys-son/Mike Page - What Do We Do (Main)_MASTERED.m4a',
+    albumId: "cindys-son",
+    audioFile:
+      "/audio/cindys-son/Mike Page - What Do We Do (Main)_MASTERED.m4a",
     bpm: 129,
-    key: 'D# Minor',
+    key: "D# Minor",
     hitScore: 65,
-    producer: "The Cubist"
+    producer: "The Cubist",
   },
   {
     id: 17,
@@ -1819,12 +1933,13 @@ export const tracks = [
     year: 2022,
     duration: "5:18",
     trackNumber: 17,
-    albumId: 'cindys-son',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/cindys-son/mike-page-suppa-luv-ya-momma-main.m4a',
+    albumId: "cindys-son",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/cindys-son/mike-page-suppa-luv-ya-momma-main.m4a",
     bpm: 99,
-    key: 'B Minor',
+    key: "B Minor",
     hitScore: 65,
-    producer: "The Cubist"
+    producer: "The Cubist",
   },
   {
     id: 18,
@@ -1833,12 +1948,13 @@ export const tracks = [
     year: 2022,
     duration: "2:52",
     trackNumber: 18,
-    albumId: 'cindys-son',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/cindys-son/mike-page-aw-shit-main.m4a',
+    albumId: "cindys-son",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/cindys-son/mike-page-aw-shit-main.m4a",
     bpm: 123,
-    key: 'F# Minor',
+    key: "F# Minor",
     hitScore: 60,
-    producer: "The Cubist"
+    producer: "The Cubist",
   },
   {
     id: 19,
@@ -1849,12 +1965,13 @@ export const tracks = [
     year: 2022,
     duration: "3:13",
     trackNumber: 19,
-    albumId: 'cindys-son',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/cindys-son/mike-page-pick-it-up-bag-it-main.m4a',
+    albumId: "cindys-son",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/cindys-son/mike-page-pick-it-up-bag-it-main.m4a",
     bpm: 120,
-    key: 'E Minor',
+    key: "E Minor",
     hitScore: 60,
-    producer: "The Cubist"
+    producer: "The Cubist",
   },
   {
     id: 20,
@@ -1863,12 +1980,13 @@ export const tracks = [
     year: 2022,
     duration: "3:54",
     trackNumber: 20,
-    albumId: 'cindys-son',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/cindys-son/mike-page-up-there-main.m4a',
+    albumId: "cindys-son",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/cindys-son/mike-page-up-there-main.m4a",
     bpm: 115,
-    key: 'F# Major',
+    key: "F# Major",
     hitScore: 60,
-    producer: "The Cubist"
+    producer: "The Cubist",
   },
   {
     id: 21,
@@ -1877,12 +1995,13 @@ export const tracks = [
     year: 2022,
     duration: "2:30",
     trackNumber: 21,
-    albumId: 'cindys-son',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/cindys-son/mike-page-i-remember-that-main.m4a',
+    albumId: "cindys-son",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/cindys-son/mike-page-i-remember-that-main.m4a",
     bpm: 144,
-    key: 'E Minor',
+    key: "E Minor",
     hitScore: 55,
-    producer: "The Cubist"
+    producer: "The Cubist",
   },
   {
     id: 22,
@@ -1891,12 +2010,13 @@ export const tracks = [
     year: 2022,
     duration: "4:02",
     trackNumber: 22,
-    albumId: 'cindys-son',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/cindys-son/mike-page-til-we-all-up-main.m4a',
+    albumId: "cindys-son",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/cindys-son/mike-page-til-we-all-up-main.m4a",
     bpm: 120,
-    key: 'F# Minor',
+    key: "F# Minor",
     hitScore: 55,
-    producer: "The Cubist"
+    producer: "The Cubist",
   },
   {
     id: 23,
@@ -1905,114 +2025,954 @@ export const tracks = [
     year: 2022,
     duration: "3:02",
     trackNumber: 23,
-    albumId: 'cindys-son',
-    audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/cindys-son/mike-page-trap-main.m4a',
+    albumId: "cindys-son",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/cindys-son/mike-page-trap-main.m4a",
     bpm: 152,
-    key: 'F Major',
+    key: "F Major",
     hitScore: 55,
-    producer: "The Cubist"
+    producer: "The Cubist",
   },
   // ========================================
   // SHEZZY KNEW IT (Album) - 2014
   // ========================================
-  { id: 301, title: "Hope Ya Livin Good", album: "Shezzy Knew It", year: 2014, duration: "2:10", trackNumber: 1, albumId: 'shezzy-knew-it', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/shezzy-knew-it/01-mike-page-hope-ya-livin-good.m4a', producer: "IDMG" },
-  { id: 302, title: "Outta Here", album: "Shezzy Knew It", year: 2014, duration: "3:57", trackNumber: 2, albumId: 'shezzy-knew-it', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/shezzy-knew-it/02-outta-here.m4a', producer: "IDMG" },
-  { id: 303, title: "Ain't for Me (Young Shezzy Tribute)", album: "Shezzy Knew It", year: 2014, duration: "3:08", trackNumber: 3, albumId: 'shezzy-knew-it', audioFile: "/audio/shezzy-knew-it/03 - Ain't for Me (Young Shezzy Tribute).m4a", producer: "IDMG" },
-  { id: 304, title: "Goin' Crazy", album: "Shezzy Knew It", year: 2014, duration: "3:55", trackNumber: 4, albumId: 'shezzy-knew-it', audioFile: "/audio/shezzy-knew-it/04 - Goin' crazy.m4a", producer: "IDMG" },
-  { id: 305, title: "I Know", album: "Shezzy Knew It", year: 2014, duration: "3:57", trackNumber: 5, albumId: 'shezzy-knew-it', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/shezzy-knew-it/05-i-know-feat-king-deazel.m4a', featured: "King Deazel", producer: "IDMG" },
-  { id: 306, title: "Fast & Slow", album: "Shezzy Knew It", year: 2014, duration: "3:42", trackNumber: 6, albumId: 'shezzy-knew-it', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/shezzy-knew-it/06-fast-slow-feat-coop-deville.m4a', featured: "Coop Deville", producer: "IDMG" },
-  { id: 307, title: "Warrior", album: "Shezzy Knew It", year: 2014, duration: "4:22", trackNumber: 7, albumId: 'shezzy-knew-it', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/shezzy-knew-it/07-warroir-feat-yung-majik.m4a', featured: "Yung Majik", producer: "IDMG" },
-  { id: 308, title: "Survive", album: "Shezzy Knew It", year: 2014, duration: "3:03", trackNumber: 8, albumId: 'shezzy-knew-it', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/shezzy-knew-it/08-survive.m4a', producer: "IDMG" },
-  { id: 309, title: "We Can Work", album: "Shezzy Knew It", year: 2014, duration: "3:57", trackNumber: 9, albumId: 'shezzy-knew-it', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/shezzy-knew-it/09-we-can-work-feat-yung-majik.m4a', featured: "Yung Majik", producer: "IDMG" },
-  { id: 310, title: "Mo' Money", album: "Shezzy Knew It", year: 2014, duration: "4:17", trackNumber: 10, albumId: 'shezzy-knew-it', audioFile: "/audio/shezzy-knew-it/10 - Mo' money.m4a", producer: "IDMG" },
-  { id: 311, title: "In My Head", album: "Shezzy Knew It", year: 2014, duration: "3:54", trackNumber: 11, albumId: 'shezzy-knew-it', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/shezzy-knew-it/11-in-my-head-feat-yung-majik.m4a', featured: "Yung Majik", producer: "IDMG" },
-  { id: 312, title: "I'm the Man", album: "Shezzy Knew It", year: 2014, duration: "4:05", trackNumber: 12, albumId: 'shezzy-knew-it', audioFile: "/audio/shezzy-knew-it/12 - I'm the Man (feat. Yung Majik).m4a", featured: "Yung Majik", producer: "IDMG" },
-  { id: 313, title: "Club Clothes", album: "Shezzy Knew It", year: 2014, duration: "4:36", trackNumber: 13, albumId: 'shezzy-knew-it', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/shezzy-knew-it/13-club-clothes.m4a', producer: "IDMG" },
+  {
+    id: 301,
+    title: "Hope Ya Livin Good",
+    album: "Shezzy Knew It",
+    year: 2014,
+    duration: "2:10",
+    trackNumber: 1,
+    albumId: "shezzy-knew-it",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/shezzy-knew-it/01-mike-page-hope-ya-livin-good.m4a",
+    producer: "IDMG",
+  },
+  {
+    id: 302,
+    title: "Outta Here",
+    album: "Shezzy Knew It",
+    year: 2014,
+    duration: "3:57",
+    trackNumber: 2,
+    albumId: "shezzy-knew-it",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/shezzy-knew-it/02-outta-here.m4a",
+    producer: "IDMG",
+  },
+  {
+    id: 303,
+    title: "Ain't for Me (Young Shezzy Tribute)",
+    album: "Shezzy Knew It",
+    year: 2014,
+    duration: "3:08",
+    trackNumber: 3,
+    albumId: "shezzy-knew-it",
+    audioFile:
+      "/audio/shezzy-knew-it/03 - Ain't for Me (Young Shezzy Tribute).m4a",
+    producer: "IDMG",
+  },
+  {
+    id: 304,
+    title: "Goin' Crazy",
+    album: "Shezzy Knew It",
+    year: 2014,
+    duration: "3:55",
+    trackNumber: 4,
+    albumId: "shezzy-knew-it",
+    audioFile: "/audio/shezzy-knew-it/04 - Goin' crazy.m4a",
+    producer: "IDMG",
+  },
+  {
+    id: 305,
+    title: "I Know",
+    album: "Shezzy Knew It",
+    year: 2014,
+    duration: "3:57",
+    trackNumber: 5,
+    albumId: "shezzy-knew-it",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/shezzy-knew-it/05-i-know-feat-king-deazel.m4a",
+    featured: "King Deazel",
+    producer: "IDMG",
+  },
+  {
+    id: 306,
+    title: "Fast & Slow",
+    album: "Shezzy Knew It",
+    year: 2014,
+    duration: "3:42",
+    trackNumber: 6,
+    albumId: "shezzy-knew-it",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/shezzy-knew-it/06-fast-slow-feat-coop-deville.m4a",
+    featured: "Coop Deville",
+    producer: "IDMG",
+  },
+  {
+    id: 307,
+    title: "Warrior",
+    album: "Shezzy Knew It",
+    year: 2014,
+    duration: "4:22",
+    trackNumber: 7,
+    albumId: "shezzy-knew-it",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/shezzy-knew-it/07-warroir-feat-yung-majik.m4a",
+    featured: "Yung Majik",
+    producer: "IDMG",
+  },
+  {
+    id: 308,
+    title: "Survive",
+    album: "Shezzy Knew It",
+    year: 2014,
+    duration: "3:03",
+    trackNumber: 8,
+    albumId: "shezzy-knew-it",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/shezzy-knew-it/08-survive.m4a",
+    producer: "IDMG",
+  },
+  {
+    id: 309,
+    title: "We Can Work",
+    album: "Shezzy Knew It",
+    year: 2014,
+    duration: "3:57",
+    trackNumber: 9,
+    albumId: "shezzy-knew-it",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/shezzy-knew-it/09-we-can-work-feat-yung-majik.m4a",
+    featured: "Yung Majik",
+    producer: "IDMG",
+  },
+  {
+    id: 310,
+    title: "Mo' Money",
+    album: "Shezzy Knew It",
+    year: 2014,
+    duration: "4:17",
+    trackNumber: 10,
+    albumId: "shezzy-knew-it",
+    audioFile: "/audio/shezzy-knew-it/10 - Mo' money.m4a",
+    producer: "IDMG",
+  },
+  {
+    id: 311,
+    title: "In My Head",
+    album: "Shezzy Knew It",
+    year: 2014,
+    duration: "3:54",
+    trackNumber: 11,
+    albumId: "shezzy-knew-it",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/shezzy-knew-it/11-in-my-head-feat-yung-majik.m4a",
+    featured: "Yung Majik",
+    producer: "IDMG",
+  },
+  {
+    id: 312,
+    title: "I'm the Man",
+    album: "Shezzy Knew It",
+    year: 2014,
+    duration: "4:05",
+    trackNumber: 12,
+    albumId: "shezzy-knew-it",
+    audioFile: "/audio/shezzy-knew-it/12 - I'm the Man (feat. Yung Majik).m4a",
+    featured: "Yung Majik",
+    producer: "IDMG",
+  },
+  {
+    id: 313,
+    title: "Club Clothes",
+    album: "Shezzy Knew It",
+    year: 2014,
+    duration: "4:36",
+    trackNumber: 13,
+    albumId: "shezzy-knew-it",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/shezzy-knew-it/13-club-clothes.m4a",
+    producer: "IDMG",
+  },
   // ========================================
   // VAULT - UNNAMED TRACKS (Need Naming)
   // Play to listen, then rename
   // ========================================
-  { id: 401, title: "Thanking God", album: "Vault", year: 2024, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/01-x4-3-idmg-788-mike-page-x-ly.m4a', featured: "Lyrivelli", producer: "The Cubist" },
-  { id: 402, title: "No Weapon", album: "Vault", year: 2024, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/01-idmg-143-mike-page-x-king-deaz.m4a', featured: "King Deazel", producer: "The Cubist" },
+  {
+    id: 401,
+    title: "Thanking God",
+    album: "Vault",
+    year: 2024,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/01-x4-3-idmg-788-mike-page-x-ly.m4a",
+    featured: "Lyrivelli",
+    producer: "The Cubist",
+  },
+  {
+    id: 402,
+    title: "No Weapon",
+    album: "Vault",
+    year: 2024,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/01-idmg-143-mike-page-x-king-deaz.m4a",
+    featured: "King Deazel",
+    producer: "The Cubist",
+  },
   // ========================================
   // QUICK REELS VAULT - MATCHED FULL SONGS
   // ========================================
-  { id: 403, title: "Soon As", album: "Vault", year: 2026, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/01-mike-page-soon-as-x1-4-l.m4a', producer: "The Cubist" },
-  { id: 404, title: "Photo Shoot", album: "Vault", year: 2026, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-photo-shoot-prod-jt-goldxn-geemix1-0-l.m4a', producer: "JT GOLDXN" },
-  { id: 405, title: "Trap Get Ugly", album: "Vault", year: 2026, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-trap-x6-l.m4a', producer: "The Cubist" },
-  { id: 406, title: "Walk In Dat Parti", album: "Vault", year: 2026, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/idmg-x-st236-mike-page-ruff01-walk-in.m4a', producer: "The Cubist" },
-  { id: 407, title: "It's My Bday Bitch", album: "Vault", year: 2026, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-x-krissie-the-don-x-chevy-bday-bitch-x1-0.m4a', featured: "Krissie the Don", producer: "The Cubist" },
-  { id: 408, title: "Pick It Up, Bag It", album: "Vault", year: 2026, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-x-majik-pick-it-up-bagg-it-geemix1-0.m4a', featured: "MM Da Papi & Majik", producer: "The Cubist" },
-  { id: 409, title: "From The Town", artist: "Drewson", album: "Vault", year: 2026, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/from-the-town-feat-mike-page-u1quen3taby.m4a', featured: "Mike Page", producer: "The Cubist" },
-  { id: 410, title: "200 On The Dashboard", album: "Vault", year: 2026, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/idmg-338-deazel-page.m4a', featured: "King Deazel", producer: "The Cubist" },
-  { id: 411, title: "No Ho", album: "Vault", year: 2026, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/idmg-337-vinyl-page.m4a', featured: "Vincent Berry", producer: "The Cubist" },
-  { id: 412, title: "Broken Glass", album: "Vault", year: 2026, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/idmg-defoor-100-shawn-hibbler-mike-page-ruff01.m4a', producer: "The Cubist" },
-  { id: 413, title: "Rollin'", album: "Vault", year: 2026, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/01-mike-page-rolling.m4a', producer: "The Cubist" },
-  { id: 414, title: "Lizzo", album: "Vault", year: 2026, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/01-mike-page-lizzo.m4a', producer: "The Art Teacher" },
-  { id: 415, title: "Stand Up (RIP Jakhi)", album: "Vault", year: 2026, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/01-mike-page-stand-up-x05-m02.m4a', producer: "The Cubist" },
-  { id: 416, title: "Roulette", album: "Vault", year: 2026, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/01-mike-page-idmg483-x3-0-l.m4a', producer: "The Cubist" },
+  {
+    id: 403,
+    title: "Soon As",
+    album: "Vault",
+    year: 2026,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/01-mike-page-soon-as-x1-4-l.m4a",
+    producer: "The Cubist",
+  },
+  {
+    id: 404,
+    title: "Photo Shoot",
+    album: "Vault",
+    year: 2026,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-photo-shoot-prod-jt-goldxn-geemix1-0-l.m4a",
+    producer: "JT GOLDXN",
+  },
+  {
+    id: 405,
+    title: "Trap Get Ugly",
+    album: "Vault",
+    year: 2026,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-trap-x6-l.m4a",
+    producer: "The Cubist",
+  },
+  {
+    id: 406,
+    title: "Walk In Dat Parti",
+    album: "Vault",
+    year: 2026,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/idmg-x-st236-mike-page-ruff01-walk-in.m4a",
+    producer: "The Cubist",
+  },
+  {
+    id: 407,
+    title: "It's My Bday Bitch",
+    album: "Vault",
+    year: 2026,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-x-krissie-the-don-x-chevy-bday-bitch-x1-0.m4a",
+    featured: "Krissie the Don",
+    producer: "The Cubist",
+  },
+  {
+    id: 408,
+    title: "Pick It Up, Bag It",
+    album: "Vault",
+    year: 2026,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-x-majik-pick-it-up-bagg-it-geemix1-0.m4a",
+    featured: "MM Da Papi & Majik",
+    producer: "The Cubist",
+  },
+  {
+    id: 409,
+    title: "From The Town",
+    artist: "Drewson",
+    album: "Vault",
+    year: 2026,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/from-the-town-feat-mike-page-u1quen3taby.m4a",
+    featured: "Mike Page",
+    producer: "The Cubist",
+  },
+  {
+    id: 410,
+    title: "200 On The Dashboard",
+    album: "Vault",
+    year: 2026,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/idmg-338-deazel-page.m4a",
+    featured: "King Deazel",
+    producer: "The Cubist",
+  },
+  {
+    id: 411,
+    title: "No Ho",
+    album: "Vault",
+    year: 2026,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/idmg-337-vinyl-page.m4a",
+    featured: "Vincent Berry",
+    producer: "The Cubist",
+  },
+  {
+    id: 412,
+    title: "Broken Glass",
+    album: "Vault",
+    year: 2026,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/idmg-defoor-100-shawn-hibbler-mike-page-ruff01.m4a",
+    producer: "The Cubist",
+  },
+  {
+    id: 413,
+    title: "Rollin'",
+    album: "Vault",
+    year: 2026,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/01-mike-page-rolling.m4a",
+    producer: "The Cubist",
+  },
+  {
+    id: 414,
+    title: "Lizzo",
+    album: "Vault",
+    year: 2026,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/01-mike-page-lizzo.m4a",
+    producer: "The Art Teacher",
+  },
+  {
+    id: 415,
+    title: "Stand Up (RIP Jakhi)",
+    album: "Vault",
+    year: 2026,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/01-mike-page-stand-up-x05-m02.m4a",
+    producer: "The Cubist",
+  },
+  {
+    id: 416,
+    title: "Roulette",
+    album: "Vault",
+    year: 2026,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/01-mike-page-idmg483-x3-0-l.m4a",
+    producer: "The Cubist",
+  },
   // ========================================
   // VAULT - UNRELEASED (From Name That Song)
   // ========================================
-  { id: 417, title: "Too Far Gone 2 Long", album: "Vault", year: 2024, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/2023-06-08-impossible-dreamz-splice-124-2rough.m4a', producer: "The Cubist" },
-  { id: 418, title: "Splice Session 124-B", album: "Vault", year: 2024, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/2023-06-07-impossible-dreamz-splice-124-2rough.m4a', producer: "The Cubist" },
-  { id: 219, title: "Who Said Rap Was Dead", album: "Vault", year: 2024, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/01-mike-page-idmg482-ruff2.m4a', producer: "The Cubist" },
-  { id: 220, title: "No Weapon (Final)", album: "Vault", year: 2024, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/01-idmg-no-weapon-final1.m4a', featured: "King Deazel", producer: "The Cubist" },
-  { id: 221, title: "We Gon Do Whatever", album: "Vault", year: 2024, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/impossible-dreamz-2024-86-mike-page-x-king-deazel-1.m4a', featured: "King Deazel", producer: "The Cubist" },
-  { id: 222, title: "Find Me On Ya Heart", album: "Vault", year: 2024, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/01-impossible-dreamz-2024-21-mike.m4a', producer: "The Cubist" },
-  { id: 223, title: "BAP", album: "Vault", year: 2024, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-bap-cubist-x-artteacher-x2-1-l.m4a', producer: "The Cubist x ARTteacher" },
-  { id: 224, title: "MEG", album: "Vault", year: 2024, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/impossible-dreamz-2024-159-mike-page-king-deazel-x1-2.m4a', featured: "King Deazel", producer: "The Cubist" },
-  { id: 225, title: "You Niggaz Talk 2 Much", album: "Vault", year: 2024, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/idmg-664-mike-page-ruff01.m4a', producer: "The Cubist" },
-  { id: 226, title: "Play Ya Part", album: "Vault", year: 2024, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/idmg-mike-page-661-cubist-kso-mix3-l.m4a', producer: "The Cubist" },
-  { id: 227, title: "Lets Feast", album: "Vault", year: 2024, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/impossible-dreamz-770-cubist-page-1.m4a', producer: "The Cubist" },
-  { id: 228, title: "None of Mine", album: "Vault", year: 2024, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/impossible-dreamz-823-mike-page-ruff02.m4a', producer: "The Cubist" },
-  { id: 229, title: "Bounce Back", album: "Vault", year: 2024, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/impossible-dreamz-826-mike-page-2.m4a', producer: "The Cubist" },
-  { id: 230, title: "Remain 10 Toes", album: "Vault", year: 2024, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/impossible-dreamz-2024-103-mike-page-x1-1.m4a', producer: "The Cubist" },
-  { id: 231, title: "Sometime I", album: "Vault", year: 2024, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/impossible-dreamz-2024-113-mike-page-1.m4a', producer: "The Cubist" },
-  { id: 232, title: "Top Suite Wit The Balcony", album: "Vault", year: 2024, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/impossible-dreamz-2024-39-mike-page-x1-1.m4a', producer: "The Cubist" },
-  { id: 233, title: "Said It I Mean It", album: "Vault", year: 2024, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/impossible-dreamz-2024-56-mike-page-1.m4a', producer: "The Cubist" },
-  { id: 234, title: "Tribulations", album: "Vault", year: 2024, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/idmg-defoor-79-mike-page-ruff01.m4a', producer: "The Cubist" },
-  { id: 235, title: "Maximize My Position", album: "Vault", year: 2024, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/idmg-defoor-112-mike-page-ruff01.m4a', producer: "The Cubist" },
-  { id: 236, title: "What Happens In Vegas", album: "Vault", year: 2024, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/idmg418-mike-page-x1-2-l.m4a', producer: "The Cubist" },
-  { id: 237, title: "Win Win Win", album: "Vault", year: 2024, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-idmg-511-ruff01.m4a', producer: "The Cubist" },
-  { id: 238, title: "Be Yo Nigga Be My Homie", album: "Vault", year: 2024, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-idmg-226-x1-1-l.m4a', producer: "The Cubist" },
-  { id: 239, title: "Don't Just Crash Out", album: "Vault", year: 2024, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/idmg-kirby-214-mp-idmg-master.m4a', producer: "The Cubist" },
+  {
+    id: 417,
+    title: "Too Far Gone 2 Long",
+    album: "Vault",
+    year: 2024,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/2023-06-08-impossible-dreamz-splice-124-2rough.m4a",
+    producer: "The Cubist",
+  },
+  {
+    id: 418,
+    title: "Splice Session 124-B",
+    album: "Vault",
+    year: 2024,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/2023-06-07-impossible-dreamz-splice-124-2rough.m4a",
+    producer: "The Cubist",
+  },
+  {
+    id: 219,
+    title: "Who Said Rap Was Dead",
+    album: "Vault",
+    year: 2024,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/01-mike-page-idmg482-ruff2.m4a",
+    producer: "The Cubist",
+  },
+  {
+    id: 220,
+    title: "No Weapon (Final)",
+    album: "Vault",
+    year: 2024,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/01-idmg-no-weapon-final1.m4a",
+    featured: "King Deazel",
+    producer: "The Cubist",
+  },
+  {
+    id: 221,
+    title: "We Gon Do Whatever",
+    album: "Vault",
+    year: 2024,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/impossible-dreamz-2024-86-mike-page-x-king-deazel-1.m4a",
+    featured: "King Deazel",
+    producer: "The Cubist",
+  },
+  {
+    id: 222,
+    title: "Find Me On Ya Heart",
+    album: "Vault",
+    year: 2024,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/01-impossible-dreamz-2024-21-mike.m4a",
+    producer: "The Cubist",
+  },
+  {
+    id: 223,
+    title: "BAP",
+    album: "Vault",
+    year: 2024,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-bap-cubist-x-artteacher-x2-1-l.m4a",
+    producer: "The Cubist x ARTteacher",
+  },
+  {
+    id: 224,
+    title: "MEG",
+    album: "Vault",
+    year: 2024,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/impossible-dreamz-2024-159-mike-page-king-deazel-x1-2.m4a",
+    featured: "King Deazel",
+    producer: "The Cubist",
+  },
+  {
+    id: 225,
+    title: "You Niggaz Talk 2 Much",
+    album: "Vault",
+    year: 2024,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/idmg-664-mike-page-ruff01.m4a",
+    producer: "The Cubist",
+  },
+  {
+    id: 226,
+    title: "Play Ya Part",
+    album: "Vault",
+    year: 2024,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/idmg-mike-page-661-cubist-kso-mix3-l.m4a",
+    producer: "The Cubist",
+  },
+  {
+    id: 227,
+    title: "Lets Feast",
+    album: "Vault",
+    year: 2024,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/impossible-dreamz-770-cubist-page-1.m4a",
+    producer: "The Cubist",
+  },
+  {
+    id: 228,
+    title: "None of Mine",
+    album: "Vault",
+    year: 2024,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/impossible-dreamz-823-mike-page-ruff02.m4a",
+    producer: "The Cubist",
+  },
+  {
+    id: 229,
+    title: "Bounce Back",
+    album: "Vault",
+    year: 2024,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/impossible-dreamz-826-mike-page-2.m4a",
+    producer: "The Cubist",
+  },
+  {
+    id: 230,
+    title: "Remain 10 Toes",
+    album: "Vault",
+    year: 2024,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/impossible-dreamz-2024-103-mike-page-x1-1.m4a",
+    producer: "The Cubist",
+  },
+  {
+    id: 231,
+    title: "Sometime I",
+    album: "Vault",
+    year: 2024,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/impossible-dreamz-2024-113-mike-page-1.m4a",
+    producer: "The Cubist",
+  },
+  {
+    id: 232,
+    title: "Top Suite Wit The Balcony",
+    album: "Vault",
+    year: 2024,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/impossible-dreamz-2024-39-mike-page-x1-1.m4a",
+    producer: "The Cubist",
+  },
+  {
+    id: 233,
+    title: "Said It I Mean It",
+    album: "Vault",
+    year: 2024,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/impossible-dreamz-2024-56-mike-page-1.m4a",
+    producer: "The Cubist",
+  },
+  {
+    id: 234,
+    title: "Tribulations",
+    album: "Vault",
+    year: 2024,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/idmg-defoor-79-mike-page-ruff01.m4a",
+    producer: "The Cubist",
+  },
+  {
+    id: 235,
+    title: "Maximize My Position",
+    album: "Vault",
+    year: 2024,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/idmg-defoor-112-mike-page-ruff01.m4a",
+    producer: "The Cubist",
+  },
+  {
+    id: 236,
+    title: "What Happens In Vegas",
+    album: "Vault",
+    year: 2024,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/idmg418-mike-page-x1-2-l.m4a",
+    producer: "The Cubist",
+  },
+  {
+    id: 237,
+    title: "Win Win Win",
+    album: "Vault",
+    year: 2024,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-idmg-511-ruff01.m4a",
+    producer: "The Cubist",
+  },
+  {
+    id: 238,
+    title: "Be Yo Nigga Be My Homie",
+    album: "Vault",
+    year: 2024,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-idmg-226-x1-1-l.m4a",
+    producer: "The Cubist",
+  },
+  {
+    id: 239,
+    title: "Don't Just Crash Out",
+    album: "Vault",
+    year: 2024,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/idmg-kirby-214-mp-idmg-master.m4a",
+    producer: "The Cubist",
+  },
   // POP TRACKS
-  { id: 240, title: "Divine", album: "Vault", year: 2024, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-divine.m4a', producer: "The Cubist", genre: "Pop" },
-  { id: 241, title: "Love Me", album: "Vault", year: 2024, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-love-me.m4a', producer: "The Cubist", genre: "Pop" },
-  { id: 242, title: "Shine On Me", album: "Vault", year: 2024, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-shine-on-me.m4a', producer: "The Cubist", genre: "Pop" },
-  { id: 243, title: "In The City", album: "Vault", year: 2024, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-in-the-city.m4a', producer: "The Cubist", genre: "Pop" },
-  { id: 244, title: "How Dat Feel", album: "Vault", year: 2024, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-how-dat-feel.m4a', producer: "Mike Page", genre: "Pop", openVerse: true },
-  { id: 245, title: "Rent A Boat", album: "Vault", year: 2024, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-rent-a-boat.m4a', producer: "The Cubist", featured: "You", genre: "Pop", openVerse: true },
-  { id: 246, title: "God Put Somethin N Me", album: "Vault", year: 2024, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-god-put-somethin-n-me.m4a', producer: "The Cubist", genre: "Pop" },
-  { id: 247, title: "Real Luv", album: "Vault", year: 2024, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-real-luv.m4a', producer: "The Cubist", genre: "Pop" },
-  { id: 248, title: "Kukuhki (Thankful)", album: "Vault", year: 2024, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-kukuhki-thankful.m4a', producer: "The Cubist", genre: "Pop" },
-  { id: 249, title: "Go With Love", album: "Vault", year: 2024, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-go-with-love.m4a', producer: "The Cubist", genre: "Pop" },
-  { id: 250, title: "I Need Her", album: "Vault", year: 2024, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-i-need-her.m4a', producer: "Jack Thomas & The Cubist", genre: "Hip Hop" },
-  { id: 251, title: "Club Clothes (Remake)", album: "Vault", year: 2024, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-club-clothes-remake.m4a', producer: "The Cubist", genre: "Hip Hop" },
-  { id: 252, title: "We've Been Thru It", album: "Vault", year: 2024, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-we-been-thru-it.m4a', producer: "The Cubist", genre: "Hip Hop" },
+  {
+    id: 240,
+    title: "Divine",
+    album: "Vault",
+    year: 2024,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-divine.m4a",
+    producer: "The Cubist",
+    genre: "Pop",
+  },
+  {
+    id: 241,
+    title: "Love Me",
+    album: "Vault",
+    year: 2024,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-love-me.m4a",
+    producer: "The Cubist",
+    genre: "Pop",
+  },
+  {
+    id: 242,
+    title: "Shine On Me",
+    album: "Vault",
+    year: 2024,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-shine-on-me.m4a",
+    producer: "The Cubist",
+    genre: "Pop",
+  },
+  {
+    id: 243,
+    title: "In The City",
+    album: "Vault",
+    year: 2024,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-in-the-city.m4a",
+    producer: "The Cubist",
+    genre: "Pop",
+  },
+  {
+    id: 244,
+    title: "How Dat Feel",
+    album: "Vault",
+    year: 2024,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-how-dat-feel.m4a",
+    producer: "Mike Page",
+    genre: "Pop",
+    openVerse: true,
+  },
+  {
+    id: 245,
+    title: "Rent A Boat",
+    album: "Vault",
+    year: 2024,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-rent-a-boat.m4a",
+    producer: "The Cubist",
+    featured: "You",
+    genre: "Pop",
+    openVerse: true,
+  },
+  {
+    id: 246,
+    title: "God Put Somethin N Me",
+    album: "Vault",
+    year: 2024,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-god-put-somethin-n-me.m4a",
+    producer: "The Cubist",
+    genre: "Pop",
+  },
+  {
+    id: 247,
+    title: "Real Luv",
+    album: "Vault",
+    year: 2024,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-real-luv.m4a",
+    producer: "The Cubist",
+    genre: "Pop",
+  },
+  {
+    id: 248,
+    title: "Kukuhki (Thankful)",
+    album: "Vault",
+    year: 2024,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-kukuhki-thankful.m4a",
+    producer: "The Cubist",
+    genre: "Pop",
+  },
+  {
+    id: 249,
+    title: "Go With Love",
+    album: "Vault",
+    year: 2024,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-go-with-love.m4a",
+    producer: "The Cubist",
+    genre: "Pop",
+  },
+  {
+    id: 250,
+    title: "I Need Her",
+    album: "Vault",
+    year: 2024,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-i-need-her.m4a",
+    producer: "Jack Thomas & The Cubist",
+    genre: "Hip Hop",
+  },
+  {
+    id: 251,
+    title: "Club Clothes (Remake)",
+    album: "Vault",
+    year: 2024,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-club-clothes-remake.m4a",
+    producer: "The Cubist",
+    genre: "Hip Hop",
+  },
+  {
+    id: 252,
+    title: "We've Been Thru It",
+    album: "Vault",
+    year: 2024,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-we-been-thru-it.m4a",
+    producer: "The Cubist",
+    genre: "Hip Hop",
+  },
   // ========================================
   // VAULT - MASTER TRACKS (Need naming)
   // ========================================
-  { id: 260, title: "IDMG 478 (ft. King Deazel)", album: "Vault", year: 2024, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/01-mike-page-x-king-deazel-idmg478-ruff02.m4a', featured: "King Deazel", producer: "IDMG", needsNaming: true },
-  { id: 261, title: "Splice 124 Acapella A", album: "Vault", year: 2023, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/2023-06-07-impossible-dreamz-splice-124-2rough-acap.m4a', producer: "The Cubist", needsNaming: true },
-  { id: 262, title: "Splice 124 Acapella B", album: "Vault", year: 2023, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/2023-06-08-impossible-dreamz-splice-124-2rough-acap.m4a', producer: "The Cubist", needsNaming: true },
-  { id: 263, title: "They Know (ft. Murrille)", album: "Vault", year: 2023, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/2023-09-14-mike-page-they-know-x-murrille-169-2.m4a', featured: "Murrille", producer: "IDMG", needsNaming: true },
-  { id: 264, title: "Water", album: "Vault", year: 2024, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/art-mp-idmg-water.m4a', producer: "The Art Teacher", needsNaming: true },
-  { id: 265, title: "IDMG 259", album: "Vault", year: 2024, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/idmg-259-mike-page.m4a', producer: "IDMG", needsNaming: true },
-  { id: 266, title: "IDMG 273", album: "Vault", year: 2024, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/idmg-273.m4a', producer: "IDMG", needsNaming: true },
-  { id: 267, title: "IDMG 305 Vinyl", album: "Vault", year: 2024, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/idmg-305-vinyl.m4a', producer: "IDMG", needsNaming: true },
-  { id: 268, title: "IDMG 342", album: "Vault", year: 2024, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/idmg-342.m4a', producer: "IDMG", needsNaming: true },
-  { id: 269, title: "IDMG 394", album: "Vault", year: 2024, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/idmg-394.m4a', producer: "IDMG", needsNaming: true },
-  { id: 270, title: "IDMG 414 (ft. VB)", album: "Vault", year: 2024, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/idmg-414-vb-page.m4a', featured: "Vincent Berry", producer: "IDMG", needsNaming: true },
-  { id: 271, title: "IDMG 2024-61", album: "Vault", year: 2024, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/impossible-dreamz-2024-61-mike-page-x1-1.m4a', producer: "The Cubist", needsNaming: true },
-  { id: 272, title: "IDMG 2024-74", album: "Vault", year: 2024, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/impossible-dreamz-2024-74-mike-page-1.m4a', producer: "The Cubist", needsNaming: true },
-  { id: 273, title: "PAGE 701", album: "Vault", year: 2024, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/impossible-dreamz-page-701-5.m4a', producer: "The Cubist", needsNaming: true },
-  { id: 274, title: "Live Like A King (Master)", album: "Vault", year: 2022, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/live-like-a-king.m4a', producer: "The Cubist", needsNaming: true },
-  { id: 275, title: "No Baggage", album: "Vault", year: 2024, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/idmg-no-baggage-final1.m4a', producer: "IDMG", needsNaming: true },
-  { id: 276, title: "IDMG v107 (Gee Mix)", album: "Vault", year: 2024, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/idmg-x-gee-v107-mike-page-x1-1.m4a', producer: "IDMG", needsNaming: true },
-  { id: 277, title: "IDMG v120", album: "Vault", year: 2024, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/idmg-x-v120-mike-page-x1-0-new-bass01.m4a', producer: "IDMG", needsNaming: true },
-  { id: 278, title: "Having My Way", album: "Vault", year: 2026, albumId: 'vault', audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/vault/mike-page-having-my-way.m4a', duration: "3:07", featured: "Varro", producer: "The Cubist", bpm: 0, key: '', isFeatured: true, featuredWeek: '2026-02-09' },
+  {
+    id: 260,
+    title: "IDMG 478 (ft. King Deazel)",
+    album: "Vault",
+    year: 2024,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/01-mike-page-x-king-deazel-idmg478-ruff02.m4a",
+    featured: "King Deazel",
+    producer: "IDMG",
+    needsNaming: true,
+  },
+  {
+    id: 261,
+    title: "Splice 124 Acapella A",
+    album: "Vault",
+    year: 2023,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/2023-06-07-impossible-dreamz-splice-124-2rough-acap.m4a",
+    producer: "The Cubist",
+    needsNaming: true,
+  },
+  {
+    id: 262,
+    title: "Splice 124 Acapella B",
+    album: "Vault",
+    year: 2023,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/2023-06-08-impossible-dreamz-splice-124-2rough-acap.m4a",
+    producer: "The Cubist",
+    needsNaming: true,
+  },
+  {
+    id: 263,
+    title: "They Know (ft. Murrille)",
+    album: "Vault",
+    year: 2023,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/2023-09-14-mike-page-they-know-x-murrille-169-2.m4a",
+    featured: "Murrille",
+    producer: "IDMG",
+    needsNaming: true,
+  },
+  {
+    id: 264,
+    title: "Water",
+    album: "Vault",
+    year: 2024,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/art-mp-idmg-water.m4a",
+    producer: "The Art Teacher",
+    needsNaming: true,
+  },
+  {
+    id: 265,
+    title: "IDMG 259",
+    album: "Vault",
+    year: 2024,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/idmg-259-mike-page.m4a",
+    producer: "IDMG",
+    needsNaming: true,
+  },
+  {
+    id: 266,
+    title: "IDMG 273",
+    album: "Vault",
+    year: 2024,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/idmg-273.m4a",
+    producer: "IDMG",
+    needsNaming: true,
+  },
+  {
+    id: 267,
+    title: "IDMG 305 Vinyl",
+    album: "Vault",
+    year: 2024,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/idmg-305-vinyl.m4a",
+    producer: "IDMG",
+    needsNaming: true,
+  },
+  {
+    id: 268,
+    title: "IDMG 342",
+    album: "Vault",
+    year: 2024,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/idmg-342.m4a",
+    producer: "IDMG",
+    needsNaming: true,
+  },
+  {
+    id: 269,
+    title: "IDMG 394",
+    album: "Vault",
+    year: 2024,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/idmg-394.m4a",
+    producer: "IDMG",
+    needsNaming: true,
+  },
+  {
+    id: 270,
+    title: "IDMG 414 (ft. VB)",
+    album: "Vault",
+    year: 2024,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/idmg-414-vb-page.m4a",
+    featured: "Vincent Berry",
+    producer: "IDMG",
+    needsNaming: true,
+  },
+  {
+    id: 271,
+    title: "IDMG 2024-61",
+    album: "Vault",
+    year: 2024,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/impossible-dreamz-2024-61-mike-page-x1-1.m4a",
+    producer: "The Cubist",
+    needsNaming: true,
+  },
+  {
+    id: 272,
+    title: "IDMG 2024-74",
+    album: "Vault",
+    year: 2024,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/impossible-dreamz-2024-74-mike-page-1.m4a",
+    producer: "The Cubist",
+    needsNaming: true,
+  },
+  {
+    id: 273,
+    title: "PAGE 701",
+    album: "Vault",
+    year: 2024,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/impossible-dreamz-page-701-5.m4a",
+    producer: "The Cubist",
+    needsNaming: true,
+  },
+  {
+    id: 274,
+    title: "Live Like A King (Master)",
+    album: "Vault",
+    year: 2022,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/live-like-a-king.m4a",
+    producer: "The Cubist",
+    needsNaming: true,
+  },
+  {
+    id: 275,
+    title: "No Baggage",
+    album: "Vault",
+    year: 2024,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/idmg-no-baggage-final1.m4a",
+    producer: "IDMG",
+    needsNaming: true,
+  },
+  {
+    id: 276,
+    title: "IDMG v107 (Gee Mix)",
+    album: "Vault",
+    year: 2024,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/idmg-x-gee-v107-mike-page-x1-1.m4a",
+    producer: "IDMG",
+    needsNaming: true,
+  },
+  {
+    id: 277,
+    title: "IDMG v120",
+    album: "Vault",
+    year: 2024,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/idmg-x-v120-mike-page-x1-0-new-bass01.m4a",
+    producer: "IDMG",
+    needsNaming: true,
+  },
+  {
+    id: 278,
+    title: "Having My Way",
+    album: "Vault",
+    year: 2026,
+    albumId: "vault",
+    audioFile:
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/vault/mike-page-having-my-way.m4a",
+    duration: "3:07",
+    featured: "Varro",
+    producer: "The Cubist",
+    bpm: 0,
+    key: "",
+    isFeatured: true,
+    featuredWeek: "2026-02-09",
+  },
 ];
 
 // Featured Song of the Week
@@ -2020,14 +2980,14 @@ export const tracks = [
 // Cindy's Son cover is default for ALL Mike Page tracks
 // Shezzy Knew It and Grammy Nights keep their own covers
 const albumArtMap = {
-  'cindys-son': '/images/albums/cindys-son.jpg',
-  'shezzy-knew-it': '/images/albums/shezzy-knew-it.jpg',
-  'grammy-nights': '/images/grammy-nights-cover.png',
+  "cindys-son": "/images/albums/cindys-son.jpg",
+  "shezzy-knew-it": "/images/albums/shezzy-knew-it.jpg",
+  "grammy-nights": "/images/grammy-nights-cover.png",
 };
-const DEFAULT_ART = '/images/albums/cindys-son.jpg';
+const DEFAULT_ART = "/images/albums/cindys-son.jpg";
 
 // Apply albumArt to every track
-tracks.forEach(t => {
+tracks.forEach((t) => {
   if (!t.albumArt) {
     t.albumArt = albumArtMap[t.albumId] || DEFAULT_ART;
   }
@@ -2035,7 +2995,8 @@ tracks.forEach(t => {
 
 export const getTrackAlbumArt = (track) => {
   if (track?.albumArt) return track.albumArt;
-  if (track?.albumId && albumArtMap[track.albumId]) return albumArtMap[track.albumId];
+  if (track?.albumId && albumArtMap[track.albumId])
+    return albumArtMap[track.albumId];
   return DEFAULT_ART;
 };
 
@@ -2047,28 +3008,34 @@ export const featuredSong = {
   album: "Coming Soon",
   year: 2026,
   duration: "4:12",
-  audioFile: 'https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-one-of-a-kind.m4a',
+  audioFile:
+    "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-one-of-a-kind.m4a",
   coverGradient: "from-purple-600 via-fuchsia-600 to-rose-700",
   weekOf: "February 12, 2026",
-  description: "Mike Page and Bea (BeautifulEvenAfter) deliver a smooth, one-of-a-kind R&B record. Co-produced by Mike Page & The Cubist. Only on MyStation.",
+  description:
+    "Mike Page and Bea (BeautifulEvenAfter) deliver a smooth, one-of-a-kind R&B record. Co-produced by Mike Page & The Cubist. Only on MyStation.",
   stats: {
     bpm: 0,
     key: "",
     loudness: "-9.0 LUFS",
-    mastered: true
-  }
+    mastered: true,
+  },
 };
 
 // Get all official tracks (excludes unnamed/needsNaming tracks from public view)
-export const getOfficialTracks = () => tracks.filter(t => !t.needsNaming && !t.isPrivate);
+export const getOfficialTracks = () =>
+  tracks.filter((t) => !t.needsNaming && !t.isPrivate);
 
 // Get non-vault tracks for public catalog (Vault is exclusive)
-export const getNonVaultTracks = () => tracks.filter(t => t.albumId !== 'vault' && !t.needsNaming && !t.isPrivate);
+export const getNonVaultTracks = () =>
+  tracks.filter((t) => t.albumId !== "vault" && !t.needsNaming && !t.isPrivate);
 
 // Get private tracks (requires access code)
 export const getPrivateTracks = (accessCode) => {
   if (!accessCode) return [];
-  return tracks.filter(t => t.isPrivate && t.accessCodes && t.accessCodes.includes(accessCode));
+  return tracks.filter(
+    (t) => t.isPrivate && t.accessCodes && t.accessCodes.includes(accessCode),
+  );
 };
 
 // Get all tracks including vault (for vault page only)
@@ -2077,29 +3044,31 @@ export const getAllTracks = () => tracks;
 // Get album tracks in order
 export const getAlbumTracks = (albumId) => {
   return tracks
-    .filter(t => t.albumId === albumId)
+    .filter((t) => t.albumId === albumId)
     .sort((a, b) => (a.trackNumber || 0) - (b.trackNumber || 0));
 };
 
 // Auto-calculate album tracks
-const vaultTracks = tracks.filter(t => t.albumId === 'vault');
-const vaultTrackIds = vaultTracks.map(t => t.id);
+const vaultTracks = tracks.filter((t) => t.albumId === "vault");
+const vaultTrackIds = vaultTracks.map((t) => t.id);
 
-const cindysSonTracks = tracks.filter(t => t.albumId === 'cindys-son');
-const cindysSonTrackIds = cindysSonTracks.map(t => t.id);
+const cindysSonTracks = tracks.filter((t) => t.albumId === "cindys-son");
+const cindysSonTrackIds = cindysSonTracks.map((t) => t.id);
 
-const shezzyTracks = tracks.filter(t => t.albumId === 'shezzy-knew-it');
-const shezzyTrackIds = shezzyTracks.map(t => t.id);
+const shezzyTracks = tracks.filter((t) => t.albumId === "shezzy-knew-it");
+const shezzyTrackIds = shezzyTracks.map((t) => t.id);
 
-const grammyNightsTracks = tracks.filter(t => t.albumId === 'grammy-nights' && t.id >= 200);
-const grammyNightsTrackIds = grammyNightsTracks.map(t => t.id);
+const grammyNightsTracks = tracks.filter(
+  (t) => t.albumId === "grammy-nights" && t.id >= 200,
+);
+const grammyNightsTrackIds = grammyNightsTracks.map((t) => t.id);
 
-const idmgMixtapeTracks = tracks.filter(t => t.albumId === 'idmg-mixtape');
-const idmgMixtapeTrackIds = idmgMixtapeTracks.map(t => t.id);
+const idmgMixtapeTracks = tracks.filter((t) => t.albumId === "idmg-mixtape");
+const idmgMixtapeTrackIds = idmgMixtapeTracks.map((t) => t.id);
 
 export const albums = [
   {
-    id: 'idmg-mixtape',
+    id: "idmg-mixtape",
     title: "IDMG Mixtape",
     subtitle: "Executive Produced by The Cubist & Mike Page",
     artist: "IDMG",
@@ -2111,13 +3080,15 @@ export const albums = [
     isNew: true,
     isFeatured: true,
     trackIds: idmgMixtapeTrackIds,
-    description: "Thirteen tracks built from the ground up with no compromises. Executive Produced by The Cubist & Mike Page. Featuring Vincent Berry, King Deazel, Varro, Nyvira, Sha Berry, and KOH. Mastered by IDMG OPUS. © 2026 Impossible Dreamz Music Group.",
-    releaseDate: '2026-02-27',
-    apple: 'https://music.apple.com/us/album/idmg-mixtape/1879905768',
-    appleMusicArtwork: 'https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/7b/bc/f1/7bbcf17e-511a-4868-9e78-57ec5071ab24/artwork.jpg/600x600bb.jpg',
+    description:
+      "Thirteen tracks built from the ground up with no compromises. Executive Produced by The Cubist & Mike Page. Featuring Vincent Berry, King Deazel, Varro, Nyvira, Sha Berry, and KOH. Mastered by IDMG OPUS. © 2026 Impossible Dreamz Music Group.",
+    releaseDate: "2026-02-27",
+    apple: "https://music.apple.com/us/album/idmg-mixtape/1879905768",
+    appleMusicArtwork:
+      "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/7b/bc/f1/7bbcf17e-511a-4868-9e78-57ec5071ab24/artwork.jpg/600x600bb.jpg",
   },
   {
-    id: 'cindys-son',
+    id: "cindys-son",
     title: "Cindy's Son",
     subtitle: "Extended Album",
     artist: "Mike Page",
@@ -2130,10 +3101,11 @@ export const albums = [
     trackIds: cindysSonTrackIds,
     spotify: "https://open.spotify.com/album/3JwFt4Qb3uAUzipnMyM6G6",
     apple: "https://music.apple.com/us/artist/mike-page/1515325834",
-    description: "The extended edition of Cindy's Son - a tribute to resilience, family, and the journey from Elgin to Atlanta."
+    description:
+      "The extended edition of Cindy's Son - a tribute to resilience, family, and the journey from Elgin to Atlanta.",
   },
   {
-    id: 'shezzy-knew-it',
+    id: "shezzy-knew-it",
     title: "Shezzy Knew It",
     subtitle: "Full Album",
     artist: "Mike Page",
@@ -2144,10 +3116,11 @@ export const albums = [
     coverImage: "/images/albums/shezzy-knew-it.jpg",
     isNew: false,
     trackIds: shezzyTrackIds,
-    description: "Mike Page's 2014 debut album. 13 tracks dedicated to Young Shezzy. Distributed via TuneCore / P.A.G.E.M.U.S.I.C."
+    description:
+      "Mike Page's 2014 debut album. 13 tracks dedicated to Young Shezzy. Distributed via TuneCore / P.A.G.E.M.U.S.I.C.",
   },
   {
-    id: 'singles-2026',
+    id: "singles-2026",
     title: "Singles",
     subtitle: "2026 Releases",
     artist: "Mike Page",
@@ -2158,10 +3131,11 @@ export const albums = [
     coverImage: "/images/idmg-logo-white.png",
     isNew: true,
     trackIds: [],
-    description: "Mike Page's 2026 singles collection. New music dropping every week."
+    description:
+      "Mike Page's 2026 singles collection. New music dropping every week.",
   },
   {
-    id: 'vault',
+    id: "vault",
     title: "The Vault",
     subtitle: "Exclusive Collection",
     artist: "Mike Page",
@@ -2174,10 +3148,10 @@ export const albums = [
     isExclusive: true,
     isLocked: true,
     trackIds: vaultTrackIds,
-    description: "The Vault is currently sealed. Check back for updates."
+    description: "The Vault is currently sealed. Check back for updates.",
   },
   {
-    id: 'grammy-nights',
+    id: "grammy-nights",
     title: "Grammy Nights Vol. 1",
     subtitle: "Coming Soon",
     artist: "VB & MP",
@@ -2189,10 +3163,11 @@ export const albums = [
     isNew: true,
     isPrivate: true,
     isComingSoon: true,
-    accessCodes: ['MP2026', 'VB2026'],
+    accessCodes: ["MP2026", "VB2026"],
     trackIds: grammyNightsTrackIds,
-    description: "Grammy Nights Vol. 1: VB & Mike Page. Church&Mudd x IDMG. 19 tracks. Coming Soon."
-  }
+    description:
+      "Grammy Nights Vol. 1: VB & Mike Page. Church&Mudd x IDMG. 19 tracks. Coming Soon.",
+  },
 ];
 
 export const playlists = [];
@@ -2203,7 +3178,8 @@ export const artistInfo = {
   foundation: {
     name: "Mike Page Foundation",
     type: "501(c)(3)",
-    mission: "Supporting youth music programs, scholarships, and community events in Elgin and beyond."
+    mission:
+      "Supporting youth music programs, scholarships, and community events in Elgin and beyond.",
   },
   socials: {
     instagram: "https://instagram.com/mikepagelivin",
@@ -2211,12 +3187,12 @@ export const artistInfo = {
     spotify: "https://open.spotify.com/artist/3JwFt4Qb3uAUzipnMyM6G6",
     apple: "https://music.apple.com/us/artist/mike-page/1515325834",
     youtube: "https://youtube.com/@mikepage",
-    soundcloud: "https://soundcloud.com/ikeagee"
+    soundcloud: "https://soundcloud.com/ikeagee",
   },
   streaming: {
     spotify: "https://open.spotify.com/artist/3JwFt4Qb3uAUzipnMyM6G6",
     appleMusic: "https://music.apple.com/us/artist/mike-page/1515325834",
-    amazonMusic: "https://music.amazon.com/artists/B08F4HKQ6B"
+    amazonMusic: "https://music.amazon.com/artists/B08F4HKQ6B",
   },
-  cashApp: "$RIDE4PAGEMUSIC847"
+  cashApp: "$RIDE4PAGEMUSIC847",
 };
