@@ -47,7 +47,8 @@ export const tracks = [
     duration: "4:18",
     trackNumber: 1,
     albumId: "singles-2026",
-    audioFile: "/audio/singles/fantasy-ft-q-parker.m4a",
+    audioFile: "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-fantasy.m4a",
+
     isNew: true,
     isFeatured: true,
     featuredWeek: "2026-03-08",
@@ -686,7 +687,8 @@ export const tracks = [
     trackNumber: 39,
     albumId: "singles-2026",
     albumArt: "/images/singles/dominate.jpg",
-    audioFile: "/audio/Mike Page - dominate_MASTERED.mp3",
+    audioFile: "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-dominate.m4a",
+
     isNew: true,
     hitScore: 89,
     genre: "Hip-Hop",
@@ -702,7 +704,8 @@ export const tracks = [
     trackNumber: 40,
     albumId: "singles-2026",
     albumArt: "/images/singles/be-right-there.jpg",
-    audioFile: "/audio/Mike Page - be-right-there_MASTERED.mp3",
+    audioFile: "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-be-right-there.m4a",
+
     isNew: true,
     hitScore: 88,
     genre: "Hip-Hop",
@@ -718,7 +721,8 @@ export const tracks = [
     trackNumber: 41,
     albumId: "singles-2026",
     albumArt: "/images/singles/to-the-moon.jpg",
-    audioFile: "/audio/Mike Page - to-the-moon_MASTERED.mp3",
+    audioFile: "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-to-the-moon.m4a",
+
     isNew: true,
     hitScore: 90,
     genre: "Hip-Hop",
@@ -734,7 +738,8 @@ export const tracks = [
     trackNumber: 42,
     albumId: "singles-2026",
     albumArt: "/images/singles/im-tryin.jpg",
-    audioFile: "/audio/Mike Page - im-tryin_MASTERED.mp3",
+    audioFile: "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-im-tryin.m4a",
+
     isNew: true,
     hitScore: 89,
     genre: "Hip-Hop",
@@ -750,7 +755,8 @@ export const tracks = [
     trackNumber: 43,
     albumId: "singles-2026",
     albumArt: "/images/singles/to-the-money.jpg",
-    audioFile: "/audio/Mike Page - to-the-money_MASTERED.mp3",
+    audioFile: "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-to-the-money.m4a",
+
     isNew: true,
     hitScore: 90,
     genre: "Hip-Hop",
@@ -766,7 +772,8 @@ export const tracks = [
     trackNumber: 44,
     albumId: "singles-2026",
     albumArt: "/images/singles/hammydowns.jpg",
-    audioFile: "/audio/Mike Page - hammydowns_MASTERED.mp3",
+    audioFile: "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-hammydowns.m4a",
+
     isNew: true,
     hitScore: 88,
     genre: "Hip-Hop",
@@ -782,7 +789,8 @@ export const tracks = [
     trackNumber: 46,
     albumId: "singles-2026",
     albumArt: "/images/singles/remain-a-hunnid-proof.jpg",
-    audioFile: "/audio/Mike Page - remain-a-hunnid-proof_MASTERED.mp3",
+    audioFile: "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-remain-a-hunnid-proof.m4a",
+
     isNew: true,
     hitScore: 86,
     genre: "Hip-Hop",
@@ -798,7 +806,8 @@ export const tracks = [
     trackNumber: 47,
     albumId: "singles-2026",
     albumArt: "/images/singles/obvious.jpg",
-    audioFile: "/audio/Mike Page - obvious_MASTERED.mp3",
+    audioFile: "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-obvious.m4a",
+
     isNew: true,
     hitScore: 87,
     genre: "Hip-Hop",
@@ -814,7 +823,8 @@ export const tracks = [
     trackNumber: 48,
     albumId: "singles-2026",
     albumArt: "/images/singles/mindset.jpg",
-    audioFile: "/audio/Mike Page - mindset_MASTERED.mp3",
+    audioFile: "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-mindset.m4a",
+
     isNew: true,
     hitScore: 88,
     genre: "Hip-Hop",
@@ -830,7 +840,8 @@ export const tracks = [
     trackNumber: 49,
     albumId: "singles-2026",
     albumArt: "/images/singles/life-goes-on.jpg",
-    audioFile: "/audio/Mike Page - life-goes-on_MASTERED.mp3",
+    audioFile: "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-life-goes-on.m4a",
+
     isNew: true,
     hitScore: 87,
     genre: "Hip-Hop",
@@ -1920,7 +1931,8 @@ export const tracks = [
     trackNumber: 16,
     albumId: "cindys-son",
     audioFile:
-      "/audio/cindys-son/Mike Page - What Do We Do (Main)_MASTERED.m4a",
+      "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-what-do-we-do.m4a",
+
     bpm: 129,
     key: "D# Minor",
     hitScore: 65,
@@ -2179,7 +2191,8 @@ export const tracks = [
     duration: "4:05",
     trackNumber: 12,
     albumId: "shezzy-knew-it",
-    audioFile: "/audio/shezzy-knew-it/12 - I'm the Man (feat. Yung Majik).m4a",
+    audioFile: "https://pub-0085ac11ad5f4ef9a6a563a5d1a026e9.r2.dev/audio/singles/mike-page-im-the-man.m4a",
+
     featured: "Yung Majik",
     producer: "IDMG",
   },
